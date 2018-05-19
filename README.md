@@ -9,11 +9,19 @@ Websocket-based React dashboard made for FTC. Supports basic telemetry display, 
 2. Open your FTC app project in Android Studio.
 3. Navigate to `File > New > Import Module...` in the menu bar.
 4. Select the directory containing the module source downloaded in step 1. Then change the module name to `FtcDashboard` and click `Finish`.
-5. Right-click `FtcRobotController` in the project pane and select `Open Module Settings`. Now select the `Dependencies` tab in the dialog that pops up. Finally, click the plus icon, select `FtcDashboard`, and click OK twice.
-6. Repeat step 5 with `TeamCode` instead of `FtcRobotController`.
-7. Navigate to the main activity (`org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity`) inside of the `FtcRobotController` module.
-8. Insert the line `RobotDashboard.start()` at the end of `onCreate()` (located on line 308 in an unmodified 3.7 activity).
-9. Insert the line `RobotDashboard.stop()` at the end of `onDestroy()` (located on line 386 in an unmodified 3.7 activity).
+5. Add the following lines to the end of the top-level `build.gradle`:
+```groovy
+allprojects {
+    repositories {
+        jcenter()
+    }
+}
+```
+6. Right-click `FtcRobotController` in the project pane and select `Open Module Settings`. Now select the `Dependencies` tab in the dialog that pops up. Finally, click the plus icon, select `FtcDashboard`, and click OK twice.
+7. Repeat step 6 with `TeamCode` instead of `FtcRobotController`.
+8. Navigate to the main activity (`org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity`) inside of the `FtcRobotController` module.
+9. Insert the line `RobotDashboard.start()` at the end of `onCreate()` (located on line 308 in an unmodified 3.7 activity).
+10. Insert the line `RobotDashboard.stop()` at the end of `onDestroy()` (located on line 386 in an unmodified 3.7 activity).
 
 ## Usage
 1. Install [node](https://nodejs.org/en/download/) and [yarn](https://yarnpkg.com/en/docs/install) if not installed already.

@@ -15,6 +15,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
+import org.firstinspires.ftc.robotcore.external.Consumer;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.io.IOException;
@@ -55,7 +56,12 @@ public class RobotDashboard {
 	private RobotDashboard() {
 		sockets = new ArrayList<>();
 		configuration = new Configuration();
-		telemetry = new TelemetryPacket.Adapter(this::sendTelemetryPacket);
+		telemetry = new TelemetryPacket.Adapter(new Consumer<TelemetryPacket>() {
+			@Override
+			public void accept(TelemetryPacket telemetryPacket) {
+				sendTelemetryPacket(telemetryPacket);
+			}
+		});
 
         ClasspathScanner scanner = new ClasspathScanner(new ClassFilter() {
             @Override
