@@ -32,7 +32,7 @@ public class RobotDashboard {
 	private static RobotDashboard dashboard;
 
 	public static void start() {
-	    if (dashboard != null) {
+	    if (dashboard == null) {
             dashboard = new RobotDashboard();
         }
 	}
