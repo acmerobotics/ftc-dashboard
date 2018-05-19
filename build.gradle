@@ -1,13 +1,12 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 23
+    buildToolsVersion '25.0.3'
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 27
-        versionCode 1
-        versionName "1.0"
+        targetSdkVersion 19
     }
 
     compileOptions {
@@ -20,14 +19,17 @@ android {
     }
 }
 
-dependencies {
-    implementation(name: 'RobotCore-release', ext: 'aar')
-
-    implementation('org.nanohttpd:nanohttpd-websocket:2.3.1') {
-        exclude module: 'nanohttpd'
+repositories {
+    jcenter()
+    flatDir {
+        dirs '../libs'
     }
+}
 
-    implementation('com.android.support:support-v13:23.4.0') {
-        exclude group: 'com.android.support', module: 'support-annotations'
+dependencies {
+    compile(name: 'RobotCore-release', ext: 'aar')
+
+    compile('org.nanohttpd:nanohttpd-websocket:2.3.1') {
+        exclude module: 'nanohttpd'
     }
 }
