@@ -1,0 +1,33 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 27
+
+    defaultConfig {
+        minSdkVersion 19
+        targetSdkVersion 27
+        versionCode 1
+        versionName "1.0"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+}
+
+dependencies {
+    implementation(name: 'RobotCore-release', ext: 'aar')
+
+    implementation('org.nanohttpd:nanohttpd-websocket:2.3.1') {
+        exclude module: 'nanohttpd'
+    }
+
+    implementation('com.android.support:support-v13:23.4.0') {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    }
+}
