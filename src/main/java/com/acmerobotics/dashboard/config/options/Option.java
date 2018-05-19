@@ -31,15 +31,15 @@ public abstract class Option {
         Class<?> klass = field.getType();
         switch (OptionType.fromClass(klass)) {
             case BOOLEAN:
-                return new BooleanOption(new FieldProvider<>(field, parent));
+                return new BooleanOption(new FieldProvider<Boolean>(field, parent));
             case INT:
-                return new IntOption(new FieldProvider<>(field, parent));
+                return new IntOption(new FieldProvider<Integer>(field, parent));
             case DOUBLE:
-                return new DoubleOption(new FieldProvider<>(field, parent));
+                return new DoubleOption(new FieldProvider<Double>(field, parent));
             case STRING:
-                return new StringOption(new FieldProvider<>(field, parent));
+                return new StringOption(new FieldProvider<String>(field, parent));
             case ENUM:
-                return new EnumOption(new FieldProvider<>(field, parent));
+                return new EnumOption(new FieldProvider<Enum>(field, parent));
             case CUSTOM:
                 CustomOption option = new CustomOption();
                 for (Field nestedField : klass.getFields()) {

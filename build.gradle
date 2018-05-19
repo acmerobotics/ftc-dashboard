@@ -9,18 +9,12 @@ android {
         targetSdkVersion 19
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
     lintOptions {
         abortOnError false
     }
 }
 
 repositories {
-    jcenter()
     flatDir {
         dirs '../libs'
     }
