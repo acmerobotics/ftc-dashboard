@@ -68,5 +68,11 @@ public class RobotConstants {
 ```
 When new values are saved in the dashboard, the values of the fields are automatically updated. This reflection-based approach allows changes to occur while the OpMode is running with minimal boilerplate.
 
-## Customizing
-The dashboard is designed to be flexible and customizable. First off, the size of all the widgets/tiles are easily modifieid. The layout is based on CSS grids; to change the grid size, adjust the value of `grid-template` under `.tile-grid` in `src/index.css` and the corresponding `row`/`col` properties in `dash/src/containers/Dashboard.jsx` (read more about CSS grids [here](https://css-tricks.com/snippets/css/complete-guide-grid/)). You can also add your own widgets (React components) to `render()` in `Dashboard.jsx`. If you need additional data passed from the server, the recommended method is modifying the telemetry structure. To do this, add the necessary keys to `dash/src/reducers/telemetry.js` and they'll be available through Redux under `telemetry`. Of course, you may also extend the Redux store with additional actions (just make sure you correspondingly modify the backend; backend websocket message types correspond to Redux actions). For a good example of how this all comes together into a component, see `dash/src/containers/TelemetryView.jsx`.
+## Customization
+This project is designed to be flexible and customizable.
+
+### Layout
+First off, the size of all the widgets/tiles can be easily modified. The layout is based on CSS grids; to change the grid size, adjust the value of `grid-template` under `.tile-grid` in `dash/src/index.css` and the corresponding `row`/`col` properties in `dash/src/containers/Dashboard.jsx` (read more about CSS grids [here](https://css-tricks.com/snippets/css/complete-guide-grid/)). You can also add your own widgets (React components) to `render()` in `Dashboard.jsx`.
+
+### Additional Telemetry
+If you need additional data passed from the server, the recommended method is to modify the telemetry structure. On the server-side, this is accomplished by subclassing `TelemetryPacket` and adding the additional data as instance variables (mark any instance variables you don't want to send with `transient`). Next, on the client-side, add the new keys to `dash/src/reducers/telemetry.js` (specifically `initialState`), and they'll be available through Redux under `telemetry`. 
