@@ -26,7 +26,7 @@ allprojects {
 ## Usage
 1. Install [node](https://nodejs.org/en/download/) and [yarn](https://yarnpkg.com/en/docs/install) if not installed already.
 2. Run `yarn` in `<FTC project>/FtcDashboard/dash/` (_this only needs to be done once!_).
-3. If necessary, change the host in `dash/src/components/Dashboard.jsx` in the `connect()` method to match that of the RC device. The default is `192.168.49.1`, the address of the RC device in the WiFi direct network.
+3. If necessary, change the host in `dash/src/containers/Dashboard.jsx` in the `connect()` method to match that of the RC device. The default is `192.168.49.1`, the address of the RC device in the WiFi direct network.
 2. Run `yarn start` to start the development server.
 3. Navigate to `localhost:3000` (although the previous command will likely open it for you).
 
