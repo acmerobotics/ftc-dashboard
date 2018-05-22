@@ -20,7 +20,10 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class RobotDashboard {
     public static final String TAG = "RobotDashboard";
@@ -28,6 +31,14 @@ public class RobotDashboard {
     public static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(Message.class, new MessageDeserializer())
 			.create();
+
+    public static final Set<String> IGNORED_PACKAGES = new HashSet<>(Arrays.asList(
+            "java",
+            "android",
+            "com.sun",
+            "com.vuforia",
+            "com.google"
+    ));
 
 	private static RobotDashboard dashboard;
 
@@ -66,7 +77,12 @@ public class RobotDashboard {
         ClasspathScanner scanner = new ClasspathScanner(new ClassFilter() {
             @Override
             public boolean shouldProcessClass(String className) {
-            	return true;
+            	for (String packageName : IGNORED_PACKAGES) {
+            	    if (className.startsWith(packageName)) {
+            	        return false;
+                    }
+                }
+                return true;
             }
 
             @Override
