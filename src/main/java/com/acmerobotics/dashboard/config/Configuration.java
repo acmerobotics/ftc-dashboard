@@ -8,6 +8,9 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+/**
+ * A class that manages configuration variables (i.e., options).
+ */
 public class Configuration {
     private SortedMap<String, Option> options;
 
@@ -15,6 +18,11 @@ public class Configuration {
         options = new TreeMap<>();
     }
 
+    /**
+     * Adds fields from a class as options.
+     * @see Config
+     * @param klass
+     */
     public void addOptionsFromClass(Class<?> klass) {
         String name = klass.getSimpleName();
         if (klass.isAnnotationPresent(Config.class)) {
@@ -26,14 +34,17 @@ public class Configuration {
         addOptionsFromClass(klass, name);
     }
 
-    public void addOption(String name, Option option) {
+    private void addOption(String name, Option option) {
         options.put(name, option);
     }
 
-    public void addOptionsFromClass(Class<?> klass, String name) {
+    private void addOptionsFromClass(Class<?> klass, String name) {
         addOption(name, Option.createFromClass(klass));
     }
 
+    /**
+     * Returns the configuration and option values encoded in JSON.
+     */
     public JsonElement getJson() {
         JsonObject obj = new JsonObject();
         for (Map.Entry<String, Option> entry : options.entrySet()) {
@@ -42,6 +53,10 @@ public class Configuration {
         return obj;
     }
 
+    /**
+     * Uses the provided JSON to update the option values.
+     * @param json
+     */
     public void updateJson(JsonElement json) {
         JsonObject obj = json.getAsJsonObject();
         for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
@@ -49,6 +64,10 @@ public class Configuration {
         }
     }
 
+    /**
+     * Returns the configuration schema and option types encoded in JSON. This is *not* the same as
+     * {@link #getJson()}.
+     */
     public JsonElement getJsonSchema() {
         JsonObject obj = new JsonObject();
         for (Map.Entry<String, Option> entry : options.entrySet()) {

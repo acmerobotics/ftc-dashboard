@@ -1,5 +1,8 @@
 package com.acmerobotics.dashboard.config.options;
 
+/**
+ * Various types of options supported by the dashboard.
+ */
 public enum OptionType {
     BOOLEAN("boolean"),
     INT("int"),
@@ -14,6 +17,10 @@ public enum OptionType {
         this.stringVal = val;
     }
 
+    /**
+     * Returns the option type corresponding to the class provided.
+     * @param klass
+     */
     public static OptionType fromClass(Class<?> klass) {
         if (klass == Boolean.class || klass == boolean.class) {
             return BOOLEAN;

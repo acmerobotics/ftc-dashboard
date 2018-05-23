@@ -2,19 +2,22 @@ package com.acmerobotics.dashboard;
 
 import fi.iki.elonen.NanoWSD;
 
+/**
+ * WebSocket server that handles dashboard client connections.
+ */
 public class RobotWebSocketServer extends NanoWSD {
+    private static final int PORT = 8000;
     
     private RobotDashboard dashboard;
     
     public RobotWebSocketServer(RobotDashboard dashboard) {
-        super(8000);
+        super(PORT);
         this.dashboard = dashboard;
     }
 
     @Override
     protected WebSocket openWebSocket(IHTTPSession handshake) {
-        RobotWebSocket socket = new RobotWebSocket(handshake, dashboard);
-        return socket;
+        return new RobotWebSocket(handshake, dashboard);
     }
 
 }

@@ -6,6 +6,10 @@ import com.acmerobotics.dashboard.RobotDashboard;
 
 import java.lang.reflect.Field;
 
+/**
+ * Value provider backed by a class field.
+ * @param <T> type of the class field
+ */
 public class FieldProvider<T> implements ValueProvider<T> {
     private Field field;
     private Object parent;
@@ -15,6 +19,7 @@ public class FieldProvider<T> implements ValueProvider<T> {
         this.parent = parent;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public T get() {
         try {
