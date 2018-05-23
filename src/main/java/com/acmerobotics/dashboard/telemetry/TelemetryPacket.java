@@ -11,6 +11,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Container for telemetry information. This class can be extended to support additional, custom
+ * telemetry data.
+ */
 public class TelemetryPacket {
     private long timestamp;
     private Map<String, String> data;
@@ -23,20 +27,37 @@ public class TelemetryPacket {
         fieldOverlay = new Canvas();
     }
 
+    /**
+     * Stores a single key-value pair.
+     * @param key
+     * @param value
+     */
     public void put(String key, Object value) {
         data.put(key, value == null ? "null" : value.toString());
     }
 
+    /**
+     * Stores all entries of the provided map.
+     * @param map
+     */
     public void putAll(Map<String, Object> map) {
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             put(entry.getKey(), entry.getValue());
         }
     }
 
+    /**
+     * Adds a line to the telemetry log.
+     * @param line
+     */
     public void addLine(String line) {
         log.add(line);
     }
 
+    /**
+     * Adds the current timestamp to the packet. This is called automatically when the packet is
+     * sent (and any previous timestamp will be overwritten).
+     */
     public void addTimestamp() {
         timestamp = System.currentTimeMillis();
     }
@@ -45,6 +66,10 @@ public class TelemetryPacket {
         return fieldOverlay;
     }
 
+    /**
+     * Adapter to use dashboard telemetry like normal SDK telemetry. Note that this doesn't support
+     * all of the operations yet.
+     */
     public static class Adapter implements Telemetry {
         private TelemetryPacket currentPacket;
         private Consumer<TelemetryPacket> packetConsumer;
@@ -166,10 +191,6 @@ public class TelemetryPacket {
         @Override
         public Log log() {
             throw new UnsupportedOperationException();
-        }
-
-        public TelemetryPacket getCurrentPacket() {
-            return currentPacket;
         }
     }
 }

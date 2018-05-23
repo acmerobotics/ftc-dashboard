@@ -3,21 +3,29 @@ package com.acmerobotics.dashboard;
 import android.util.Log;
 
 import com.acmerobotics.dashboard.message.Message;
+import com.acmerobotics.dashboard.message.MessageDeserializer;
 import com.acmerobotics.dashboard.message.MessageType;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
 
-import fi.iki.elonen.NanoHTTPD.IHTTPSession;
-import fi.iki.elonen.NanoWSD.WebSocket;
-import fi.iki.elonen.NanoWSD.WebSocketFrame;
-import fi.iki.elonen.NanoWSD.WebSocketFrame.CloseCode;
+import fi.iki.elonen.NanoHTTPD;
+import fi.iki.elonen.NanoWSD;
 
-public class RobotWebSocket extends WebSocket {
+/**
+ * WebSocket connection to a dashboard client.
+ */
+public class RobotWebSocket extends NanoWSD.WebSocket {
     public static final boolean DEBUG = false;
-    
+
+    private static final Gson GSON = new GsonBuilder()
+            .registerTypeAdapter(Message.class, new MessageDeserializer())
+            .create();
+
     private RobotDashboard dashboard;
 
-    public RobotWebSocket(IHTTPSession handshakeRequest, RobotDashboard dash) {
+    RobotWebSocket(NanoHTTPD.IHTTPSession handshakeRequest, RobotDashboard dash) {
         super(handshakeRequest);
         dashboard = dash;
     }
@@ -29,14 +37,14 @@ public class RobotWebSocket extends WebSocket {
     }
 
     @Override
-    protected void onClose(CloseCode code, String reason, boolean initiatedByRemote) {
+    protected void onClose(NanoWSD.WebSocketFrame.CloseCode code, String reason, boolean initiatedByRemote) {
         if (DEBUG) Log.i(RobotDashboard.TAG, "[CLOSE]\t" + this.getHandshakeRequest().getRemoteIpAddress());
         dashboard.removeSocket(this);
     }
 
     @Override
-    protected void onMessage(WebSocketFrame message) {
-        Message msg = RobotDashboard.GSON.fromJson(message.getTextPayload(), Message.class);
+    protected void onMessage(NanoWSD.WebSocketFrame message) {
+        Message msg = GSON.fromJson(message.getTextPayload(), Message.class);
         if (msg.getType() == MessageType.PING) {
             send(new Message(MessageType.PONG));
         } else {
@@ -46,18 +54,21 @@ public class RobotWebSocket extends WebSocket {
     }
 
     @Override
-    protected void onPong(WebSocketFrame pong) {
-        
+    protected void onPong(NanoWSD.WebSocketFrame pong) {
+
     }
 
     @Override
     protected void onException(IOException exception) {
-        
+
     }
 
+    /**
+     * Sends a message to the connected client.
+     */
     public void send(Message message) {
         try {
-            String messageStr = RobotDashboard.GSON.toJson(message);
+            String messageStr = GSON.toJson(message);
             if (message.getType() != MessageType.PONG) {
                 if (DEBUG) Log.i(RobotDashboard.TAG, "[SENT]\t" + messageStr);
             }
@@ -66,5 +77,5 @@ public class RobotWebSocket extends WebSocket {
             Log.w(RobotDashboard.TAG, e);
         }
     }
-    
+
 }

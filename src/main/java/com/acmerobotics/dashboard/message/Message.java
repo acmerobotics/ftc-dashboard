@@ -1,5 +1,8 @@
 package com.acmerobotics.dashboard.message;
 
+/**
+ * Class for representing dashboard messages.
+ */
 public class Message {
     private MessageType type;
     private Object data;

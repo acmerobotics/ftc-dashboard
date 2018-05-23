@@ -4,6 +4,9 @@ import com.acmerobotics.dashboard.config.ValueProvider;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 
+/**
+ * Integer configuration option.
+ */
 public class IntOption extends Option {
     private ValueProvider<Integer> provider;
 

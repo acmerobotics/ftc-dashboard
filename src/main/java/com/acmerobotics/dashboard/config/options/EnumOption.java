@@ -7,6 +7,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
+/**
+ * Enum configuration option.
+ */
 public class EnumOption extends Option {
     private ValueProvider<Enum> provider;
 
@@ -21,7 +24,7 @@ public class EnumOption extends Option {
 
     @Override
     public void updateJson(JsonElement element) {
-        provider.set(EnumUtil.fromValue(element.getAsString(), provider.get().getClass()));
+        provider.set(EnumUtil.fromName(element.getAsString(), provider.get().getClass()));
     }
 
     @Override

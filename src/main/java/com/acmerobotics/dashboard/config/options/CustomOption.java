@@ -6,6 +6,9 @@ import com.google.gson.JsonObject;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Custom (nested) configuration option.
+ */
 public class CustomOption extends Option {
     protected Map<String, Option> options;
 

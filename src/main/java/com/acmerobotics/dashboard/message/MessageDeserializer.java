@@ -9,12 +9,15 @@ import com.google.gson.JsonParseException;
 
 import java.lang.reflect.Type;
 
+/**
+ * Custom deserializer for dashboard messages.
+ */
 public class MessageDeserializer implements JsonDeserializer<Message> {
     @Override
     public Message deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
         JsonObject messageObj = jsonElement.getAsJsonObject();
         String messageTypeString = messageObj.get("type").getAsString();
-        MessageType messageType = EnumUtil.fromValue(messageTypeString, MessageType.class);
+        MessageType messageType = EnumUtil.fromName(messageTypeString, MessageType.class);
         JsonElement data = messageObj.get("data");
         if (data == null) {
             return new Message(messageType);

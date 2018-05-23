@@ -1,17 +1,16 @@
 package com.acmerobotics.dashboard;
 
+import android.app.Activity;
+import android.os.Bundle;
 import android.util.Log;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.config.Configuration;
 import com.acmerobotics.dashboard.message.Message;
-import com.acmerobotics.dashboard.message.MessageDeserializer;
 import com.acmerobotics.dashboard.message.MessageType;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.dashboard.util.ClassFilter;
 import com.acmerobotics.dashboard.util.ClasspathScanner;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
@@ -25,14 +24,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Main class for interacting with the dashboard.
+ */
 public class RobotDashboard {
     public static final String TAG = "RobotDashboard";
 
-    public static final Gson GSON = new GsonBuilder()
-            .registerTypeAdapter(Message.class, new MessageDeserializer())
-			.create();
-
-    public static final Set<String> IGNORED_PACKAGES = new HashSet<>(Arrays.asList(
+    private static final Set<String> IGNORED_PACKAGES = new HashSet<>(Arrays.asList(
             "java",
             "android",
             "com.sun",
@@ -42,12 +40,20 @@ public class RobotDashboard {
 
 	private static RobotDashboard dashboard;
 
+    /**
+     * Starts the dashboard and a WebSocket server that listens for external connections.
+     * This method should usually be called from {@link Activity#onCreate(Bundle)}.
+     */
 	public static void start() {
 	    if (dashboard == null) {
             dashboard = new RobotDashboard();
         }
 	}
 
+    /**
+     * Stops the dashboard and the underlying WebSocket server. This method should usually be
+     * called from {@link Activity#onDestroy()}.
+     */
 	public static void stop() {
 	    if (dashboard != null) {
 	        dashboard.close();
@@ -55,6 +61,10 @@ public class RobotDashboard {
         }
     }
 
+    /**
+     * Returns the active dashboard instance. This should be called after {@link #start()}.
+     * @return active dashboard instance or null outside of its lifecycle
+     */
 	public static RobotDashboard getInstance() {
 		return dashboard;
 	}
@@ -103,15 +113,25 @@ public class RobotDashboard {
 		}
 	}
 
+    /**
+     * Sends telemetry information to all dashboard clients.
+     * @param telemetryPacket packet to send
+     */
 	public void sendTelemetryPacket(TelemetryPacket telemetryPacket) {
 		telemetryPacket.addTimestamp();
 		sendAll(new Message(MessageType.RECEIVE_TELEMETRY, telemetryPacket));
 	}
 
+    /**
+     * Sends updated configuration data to all dashboard clients.
+     */
 	public void updateConfig() {
 	    sendAll(new Message(MessageType.RECEIVE_CONFIG, getConfigJson()));
     }
 
+    /**
+     * Returns a telemetry object that proxies {@link #sendTelemetryPacket(TelemetryPacket)}.
+     */
     public Telemetry getTelemetry() {
         return telemetry;
     }
@@ -124,24 +144,24 @@ public class RobotDashboard {
 		return configuration.getJson();
 	}
 
-	public synchronized void sendAll(Message message) {
+	private synchronized void sendAll(Message message) {
 		for (RobotWebSocket ws : sockets) {
 			ws.send(message);
 		}
 	}
 
-	public synchronized void addSocket(RobotWebSocket socket) {
+	synchronized void addSocket(RobotWebSocket socket) {
 		sockets.add(socket);
 
 		socket.send(new Message(MessageType.RECEIVE_CONFIG_SCHEMA, getConfigSchemaJson()));
 		socket.send(new Message(MessageType.RECEIVE_CONFIG, getConfigJson()));
 	}
 
-	public synchronized void removeSocket(RobotWebSocket socket) {
+	synchronized void removeSocket(RobotWebSocket socket) {
 		sockets.remove(socket);
 	}
 
-	public synchronized void onMessage(RobotWebSocket socket, Message msg) {
+	synchronized void onMessage(RobotWebSocket socket, Message msg) {
         switch(msg.getType()) {
             case GET_CONFIG: {
                 socket.send(new Message(MessageType.RECEIVE_CONFIG, getConfigJson()));

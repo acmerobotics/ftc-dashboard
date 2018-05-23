@@ -4,6 +4,9 @@ import com.acmerobotics.dashboard.config.ValueProvider;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 
+/**
+ * Boolean configuration option.
+ */
 public class BooleanOption extends Option {
     private ValueProvider<Boolean> provider;
 

@@ -10,11 +10,31 @@ import java.lang.reflect.Modifier;
 
 import static com.acmerobotics.dashboard.RobotDashboard.TAG;
 
+/**
+ * Type-independent dashboard configuration option.
+ */
 public abstract class Option {
+    /**
+     * Returns a JSON-encoded, type-dependent version of the underlying option value.
+     */
     public abstract JsonElement getJson();
+
+    /**
+     * Updates the underlying option value with the provided JSON element.
+     * @param element
+     */
     public abstract void updateJson(JsonElement element);
+
+    /**
+     * Returns the JSON-encoded schema for the option type.
+     */
     public abstract JsonElement getSchemaJson();
 
+    /**
+     * Creates a nested option from the public, static, non-final fields of the provided class.
+     * @see com.acmerobotics.dashboard.config.Config
+     * @param klass
+     */
     public static Option createFromClass(Class<?> klass) {
         CustomOption customOption = new CustomOption();
         for (Field field : klass.getFields()) {
@@ -27,7 +47,7 @@ public abstract class Option {
         return customOption;
     }
 
-    public static Option createFromField(Field field, Object parent) {
+    private static Option createFromField(Field field, Object parent) {
         Class<?> klass = field.getType();
         switch (OptionType.fromClass(klass)) {
             case BOOLEAN:

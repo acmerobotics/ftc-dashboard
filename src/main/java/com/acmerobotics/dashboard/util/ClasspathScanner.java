@@ -8,12 +8,13 @@ import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import dalvik.system.DexFile;
 
+/**
+ * Classpath scanning utility designed to find annotations at runtime.
+ */
 public class ClasspathScanner {
     public static final String TAG = "ClasspathScanner";
 
@@ -30,6 +31,9 @@ public class ClasspathScanner {
         this.filter = filter;
     }
 
+    /**
+     * Scans the dex file for classes and process them.
+     */
     public void scanClasspath() {
         List<String> classNames = new ArrayList<>(Collections.list(dexFile.entries()));
 

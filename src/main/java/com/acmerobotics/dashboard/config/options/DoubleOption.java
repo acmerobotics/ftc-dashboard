@@ -4,6 +4,9 @@ import com.acmerobotics.dashboard.config.ValueProvider;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 
+/**
+ * Double configuration option.
+ */
 public class DoubleOption extends Option {
     private ValueProvider<Double> provider;
 
