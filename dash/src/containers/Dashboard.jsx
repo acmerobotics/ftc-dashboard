@@ -14,28 +14,12 @@ import TileGrid from '../components/TileGrid';
 import { connect, disconnect } from '../actions/socket';
 
 class Dashboard extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      graphing: false
-    };
-
-    this.handleGraphingChange = this.handleGraphingChange.bind(this);
-  }
-
   componentDidMount() {
     this.props.dispatch(connect('192.168.49.1', 8000));
   }
 
   componentWillUnmount() {
     this.props.dispatch(disconnect());
-  }
-
-  handleGraphingChange(graphing) {
-    this.setState({
-      graphing
-    });
   }
 
   render() {
@@ -57,8 +41,8 @@ class Dashboard extends Component {
           <Tile row="1 / span 3" col={1} hidden>
             <FieldView />
           </Tile>
-          <Tile row="1 / span 3" col={2} hidden={this.state.graphing}>
-            <GraphView onChange={this.handleGraphingChange} />
+          <Tile row="1 / span 3" col={2}>
+            <GraphView />
           </Tile>
           {/* <Tile row="2 / span 2" col={2}>
             <GraphView />

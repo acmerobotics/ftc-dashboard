@@ -24,7 +24,7 @@ class MultipleCheckbox extends React.Component {
 
   render() {
     return (
-      <table>
+      <table className="multiple-checkbox">
         <tbody>
           {
             this.props.arr

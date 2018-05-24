@@ -16,6 +16,8 @@ class GraphView extends Component {
       keys: [],
     };
 
+    this.divRef = React.createRef();
+
     this.handleClick = this.handleClick.bind(this);
     this.handleDocumentKeydown = this.handleDocumentKeydown.bind(this);
   }
@@ -28,30 +30,40 @@ class GraphView extends Component {
     document.removeEventListener('keydown', this.handleDocumentKeydown);
   }
 
+  startGraphing() {
+    this.setState({
+      graphing: true,
+    });
+
+    this.divRef.current.scrollTop = 0;
+    this.divRef.current.scrollLeft = 0;
+  }
+
+  stopGraphing() {
+    this.setState({
+      graphing: false,
+    });
+  }
+
   handleDocumentKeydown(evt) {
     if (!this.state.graphing && (evt.code === 'Enter' || evt.code === 'NumpadEnter')) {
-      this.props.onChange(true);
-      this.setState({
-        graphing: true,
-      });
+      this.startGraphing();
     } else if (this.state.graphing && evt.code === 'Escape') {
-      this.props.onChange(false);
-      this.setState({
-        graphing: false,
-      });
+      this.stopGraphing();
     }
   }
 
   handleClick() {
-    this.props.onChange(!this.state.graphing);
-    this.setState({
-      graphing: !this.state.graphing,
-    });
+    if (this.state.graphing) {
+      this.stopGraphing();
+    } else {
+      this.startGraphing();
+    }
   }
 
   render() {
     return (
-      <div>
+      <div style={{overflow: this.state.graphing ? 'hidden' : 'auto', height: '100%'}} ref={this.divRef}>
         <Heading level={2} text="Graph">
           <IconGroup>
             <Icon
@@ -87,7 +99,6 @@ class GraphView extends Component {
 GraphView.propTypes = {
   timestamp: PropTypes.number.isRequired,
   data: PropTypes.object.isRequired,
-  onChange: PropTypes.func.isRequired
 };
 
 const mapStateToProps = ({ telemetry }) => ({

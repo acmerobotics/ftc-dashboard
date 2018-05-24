@@ -30,7 +30,7 @@ class TextInput extends React.Component {
   }
 
   handleKeyDown(evt) {
-    if (evt.key === 'Enter') {
+    if (evt.code === 'Enter' || evt.code === 'NumpadEnter') {
       this.props.onEnter();
     }
   }
