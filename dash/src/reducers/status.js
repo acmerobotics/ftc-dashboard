@@ -1,9 +1,9 @@
 import { RECEIVE_ROBOT_STATUS } from '../actions/status';
 
 const initialState = {
-  statusAvailable: false,
+  available: false,
   activeOpMode: '',
-  activeOpModeStatus: '',
+  activeOpModeStatus: 'STOPPED',
 };
 
 const telemetry = (state = initialState, action) => {

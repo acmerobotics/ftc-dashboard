@@ -192,6 +192,8 @@ public class RobotDashboard implements OpModeManagerImpl.Notifications {
                 socket.send(new Message(MessageType.RECEIVE_CONFIG_OPTIONS, getConfigJson()));
                 break;
             }
+            case INIT_OPMODE:
+
             case SAVE_CONFIG_OPTIONS: {
                 configuration.updateJson((JsonElement) msg.getData());
                 updateConfig();

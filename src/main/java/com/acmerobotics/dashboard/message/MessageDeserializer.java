@@ -19,12 +19,6 @@ public class MessageDeserializer implements JsonDeserializer<Message> {
         String messageTypeString = messageObj.get("type").getAsString();
         MessageType messageType = EnumUtil.fromName(messageTypeString, MessageType.class);
         JsonElement data = messageObj.get("data");
-        if (data == null) {
-            return new Message(messageType);
-        } else if (messageType == MessageType.SAVE_CONFIG_OPTIONS) {
-            return new Message(messageType, data);
-        } else {
-            throw new RuntimeException("Illegal message: " + messageTypeString);
-        }
+        return new Message(messageType, data);
     }
 }
