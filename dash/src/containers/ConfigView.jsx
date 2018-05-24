@@ -7,7 +7,7 @@ import IconGroup from '../components/IconGroup';
 import Icon from '../components/Icon';
 import { getConfig, updateConfig, saveConfig } from '../actions/config';
 
-const ConfigView = ({ config, configSchema, onRefresh, onSave, onChange }) => (
+const ConfigView = ({ config, onRefresh, onSave, onChange }) => (
   <div>
     <Heading level={2} text="Configuration">
       <IconGroup>
@@ -18,16 +18,21 @@ const ConfigView = ({ config, configSchema, onRefresh, onSave, onChange }) => (
     <table>
       <tbody>
         {
-          Object.keys(configSchema).map((key) => (
+          Object.keys(config.schema).map((key) => (
             <CustomOption
               key={key}
               name={key}
-              value={config[key] || {}}
-              schema={configSchema[key]}
+              value={config.options[key] || {}}
+              modifiedValue={config.modifiedOptions ? config.modifiedOptions[key] : null}
+              schema={config.schema[key]}
               onChange={
-                (value) => onChange({
-                  [key]: value
-                })
+                (value) => {
+                  console.log(`onChange(): ${key}: ${JSON.stringify(value)}`);
+                  onChange({
+                    ...config.modifiedOptions,
+                    [key]: value
+                  });
+                }
               } />
           ))
         }
@@ -37,27 +42,29 @@ const ConfigView = ({ config, configSchema, onRefresh, onSave, onChange }) => (
 );
 
 ConfigView.propTypes = {
-  config: PropTypes.object.isRequired,
-  configSchema: PropTypes.object.isRequired,
+  config: PropTypes.shape({
+    options: PropTypes.object.isRequired,
+    modifiedOptions: PropTypes.object.isRequired,
+    schema: PropTypes.object.isRequired
+  }),
   onRefresh: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired
 };
 
-const mapStateToProps = ({ config, configSchema }) => ({
-  config,
-  configSchema
+const mapStateToProps = ({ config }) => ({
+  config
 });
 
 const mapDispatchToProps = (dispatch) => ({
   onRefresh: () => {
-    dispatch(getConfig());
+    dispatch(updateConfig({}));
   },
   onSave: () => {
     dispatch(saveConfig());
   },
-  onChange: (value) => {
-    dispatch(updateConfig(value));
+  onChange: (modifiedOptions) => {
+    dispatch(updateConfig(modifiedOptions));
   }
 });
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-class DoubleInput extends React.Component {
+class TextInput extends React.Component {
   constructor(props) {
     super(props);
 
@@ -21,19 +21,10 @@ class DoubleInput extends React.Component {
   }
 
   handleChange(evt) {
-    if (evt.target.value === ''
-        || /^-0?$/.test(evt.target.value)
-        || /^-?\d*\.([1-9]*0+)*$/.test(evt.target.value)) {
-      this.setState({
-        value: evt.target.value,
-        valid: false
-      });
-    } else if (/^-?\d*\.?\d*$/.test(evt.target.value)) {
-      this.setState({
-        value: evt.target.value,
-        valid: true
-      });
-      this.props.onChange(parseFloat(evt.target.value));
+    const validated = this.props.validate(evt.target.value);
+    this.setState(validated);
+    if (validated.valid) {
+      this.props.onChange(validated.value);
     }
   }
 
@@ -50,9 +41,10 @@ class DoubleInput extends React.Component {
   }
 }
 
-DoubleInput.propTypes = {
-  value: PropTypes.number.isRequired,
-  onChange: PropTypes.func.isRequired
+TextInput.propTypes = {
+  value: PropTypes.any.isRequired,
+  validate: PropTypes.func.isRequired,
+  onChange: PropTypes.func.isRequired,
 };
 
-export default DoubleInput;
+export default TextInput;
