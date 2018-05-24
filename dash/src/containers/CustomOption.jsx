@@ -24,7 +24,7 @@ class CustomOption extends React.Component {
   }
 
   render() {
-    const { name, value, schema } = this.props;
+    const { name, value, modifiedValue, schema } = this.props;
 
     const optionKeys = Object.keys(value)
       .filter((key) => key in schema)
@@ -37,9 +37,13 @@ class CustomOption extends React.Component {
     }
 
     const options = optionKeys.map((key) => {
-      const onChange = (update) => this.props.onChange({
-        [key]: update
-      });
+      const onChange = (update) => {
+        console.log(`onChange(): ${key}: ${JSON.stringify(update)}`);
+        this.props.onChange({
+          ...modifiedValue,
+          [key]: update
+        });
+      };
 
       const type = OptionType.getFromSchema(schema[key]);
 
@@ -49,6 +53,7 @@ class CustomOption extends React.Component {
             key={key}
             name={key}
             value={value[key]}
+            modifiedValue={modifiedValue ? modifiedValue[key] : null}
             schema={schema[key]}
             onChange={onChange} />
         );
@@ -59,6 +64,7 @@ class CustomOption extends React.Component {
           key={key}
           name={key}
           value={value[key]}
+          modifiedValue={modifiedValue ? modifiedValue[key] : null}
           schema={schema[key]}
           onChange={onChange} />
       );
@@ -88,8 +94,9 @@ class CustomOption extends React.Component {
 
 CustomOption.propTypes = {
   name: PropTypes.string.isRequired,
-  schema: PropTypes.any.isRequired,
-  value: PropTypes.any.isRequired,
+  schema: PropTypes.object.isRequired,
+  value: PropTypes.object.isRequired,
+  modifiedValue: PropTypes.object,
   onChange: PropTypes.func.isRequired
 };
 

@@ -60,6 +60,7 @@ public class Configuration {
     public void updateJson(JsonElement json) {
         JsonObject obj = json.getAsJsonObject();
         for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
+            System.out.println(entry);
             options.get(entry.getKey()).updateJson(entry.getValue());
         }
     }

@@ -169,6 +169,7 @@ public class RobotDashboard {
             }
             case SAVE_CONFIG: {
                 configuration.updateJson((JsonElement) msg.getData());
+                updateConfig();
                 break;
             }
             default:
