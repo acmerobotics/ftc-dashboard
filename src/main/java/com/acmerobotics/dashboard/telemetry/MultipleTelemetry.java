@@ -7,9 +7,199 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
+/**
+ * Delegate for a list of multiple telemetry objects.
+ */
 public class MultipleTelemetry implements Telemetry {
+    private List<Telemetry> telemetryList;
+    private MultipleLog log;
+
+    public MultipleTelemetry(Telemetry... telemetryList) {
+        this.telemetryList = new ArrayList<>(Arrays.asList(telemetryList));
+        this.log = new MultipleLog();
+        for (Telemetry telemetry : telemetryList) {
+            this.log.addLog(telemetry.log());
+        }
+    }
+
+    /**
+     * Adds another telemetry object.
+     * @param telemetry
+     */
+    public void addTelemetry(Telemetry telemetry) {
+        this.telemetryList.add(telemetry);
+        this.log.addLog(telemetry.log());
+    }
+
+    @Override
+    public Item addData(String s, String s1, Object... objects) {
+        List<Item> items = new ArrayList<>();
+        for (Telemetry telemetry : telemetryList) {
+            items.add(telemetry.addData(s, s1, objects));
+        }
+        return new MultipleItem(items);
+    }
+
+    @Override
+    public Item addData(String s, Object o) {
+        List<Item> items = new ArrayList<>();
+        for (Telemetry telemetry : telemetryList) {
+            items.add(telemetry.addData(s, o));
+        }
+        return new MultipleItem(items);
+    }
+
+    @Override
+    public <T> Item addData(String s, Func<T> func) {
+        List<Item> items = new ArrayList<>();
+        for (Telemetry telemetry : telemetryList) {
+            items.add(telemetry.addData(s, func));
+        }
+        return new MultipleItem(items);
+    }
+
+    @Override
+    public <T> Item addData(String s, String s1, Func<T> func) {
+        List<Item> items = new ArrayList<>();
+        for (Telemetry telemetry : telemetryList) {
+            items.add(telemetry.addData(s, s1, func));
+        }
+        return new MultipleItem(items);
+    }
+
+    @Override
+    public boolean removeItem(Item item) {
+        boolean retVal = true;
+        for (Telemetry telemetry : telemetryList) {
+            retVal = retVal && telemetry.removeItem(item);
+        }
+        return retVal;
+    }
+
+    @Override
+    public void clear() {
+        for (Telemetry telemetry : telemetryList) {
+            telemetry.clear();
+        }
+    }
+
+    @Override
+    public void clearAll() {
+        for (Telemetry telemetry : telemetryList) {
+            telemetry.clearAll();
+        }
+    }
+
+    @Override
+    public Object addAction(Runnable runnable) {
+        for (Telemetry telemetry : telemetryList) {
+            telemetry.addAction(runnable);
+        }
+        // note: this behavior is correct given the current default Telemetry implementation
+        return runnable;
+    }
+
+    @Override
+    public boolean removeAction(Object o) {
+        boolean retVal = true;
+        for (Telemetry telemetry : telemetryList) {
+            retVal = retVal && telemetry.removeAction(o);
+        }
+        return retVal;
+    }
+
+    @Override
+    public boolean update() {
+        boolean retVal = true;
+        for (Telemetry telemetry : telemetryList) {
+            retVal = retVal && telemetry.update();
+        }
+        return retVal;
+    }
+
+    @Override
+    public Line addLine() {
+        List<Line> lines = new ArrayList<>();
+        for (Telemetry telemetry : telemetryList) {
+            lines.add(telemetry.addLine());
+        }
+        return new MultipleLine(lines);
+    }
+
+    @Override
+    public Line addLine(String s) {
+        List<Line> lines = new ArrayList<>();
+        for (Telemetry telemetry : telemetryList) {
+            lines.add(telemetry.addLine(s));
+        }
+        return new MultipleLine(lines);
+    }
+
+    @Override
+    public boolean removeLine(Line line) {
+        boolean retVal = true;
+        for (Telemetry telemetry : telemetryList) {
+            retVal = retVal && telemetry.removeLine(line);
+        }
+        return retVal;
+    }
+
+    @Override
+    public boolean isAutoClear() {
+        return telemetryList.get(0).isAutoClear();
+    }
+
+    @Override
+    public void setAutoClear(boolean b) {
+        for (Telemetry telemetry : telemetryList) {
+            telemetry.setAutoClear(b);
+        }
+    }
+
+    @Override
+    public int getMsTransmissionInterval() {
+        return telemetryList.get(0).getMsTransmissionInterval();
+    }
+
+    @Override
+    public void setMsTransmissionInterval(int i) {
+        for (Telemetry telemetry : telemetryList) {
+            telemetry.setMsTransmissionInterval(i);
+        }
+    }
+
+    @Override
+    public String getItemSeparator() {
+        return telemetryList.get(0).getItemSeparator();
+    }
+
+    @Override
+    public void setItemSeparator(String s) {
+        for (Telemetry telemetry : telemetryList) {
+            telemetry.setItemSeparator(s);
+        }
+    }
+
+    @Override
+    public String getCaptionValueSeparator() {
+        return telemetryList.get(0).getCaptionValueSeparator();
+    }
+
+    @Override
+    public void setCaptionValueSeparator(String s) {
+        for (Telemetry telemetry : telemetryList) {
+            telemetry.setCaptionValueSeparator(s);
+        }
+    }
+
+    @Override
+    public Log log() {
+        return log;
+    }
+
     public class MultipleItem implements Item {
         private List<Item> items;
 
@@ -207,187 +397,5 @@ public class MultipleTelemetry implements Telemetry {
                 log.clear();
             }
         }
-    }
-
-    private List<Telemetry> telemetryList;
-    private MultipleLog log;
-
-    public MultipleTelemetry(Telemetry... telemetryList) {
-        this.telemetryList = new ArrayList<>(Arrays.asList(telemetryList));
-        this.log = new MultipleLog();
-        for (Telemetry telemetry : telemetryList) {
-            this.log.addLog(telemetry.log());
-        }
-    }
-
-    public void addTelemetry(Telemetry telemetry) {
-        this.telemetryList.add(telemetry);
-        this.log.addLog(telemetry.log());
-    }
-
-    @Override
-    public Item addData(String s, String s1, Object... objects) {
-        List<Item> items = new ArrayList<>();
-        for (Telemetry telemetry : telemetryList) {
-            items.add(telemetry.addData(s, s1, objects));
-        }
-        return new MultipleItem(items);
-    }
-
-    @Override
-    public Item addData(String s, Object o) {
-        List<Item> items = new ArrayList<>();
-        for (Telemetry telemetry : telemetryList) {
-            items.add(telemetry.addData(s, o));
-        }
-        return new MultipleItem(items);
-    }
-
-    @Override
-    public <T> Item addData(String s, Func<T> func) {
-        List<Item> items = new ArrayList<>();
-        for (Telemetry telemetry : telemetryList) {
-            items.add(telemetry.addData(s, func));
-        }
-        return new MultipleItem(items);
-    }
-
-    @Override
-    public <T> Item addData(String s, String s1, Func<T> func) {
-        List<Item> items = new ArrayList<>();
-        for (Telemetry telemetry : telemetryList) {
-            items.add(telemetry.addData(s, s1, func));
-        }
-        return new MultipleItem(items);
-    }
-
-    @Override
-    public boolean removeItem(Item item) {
-        for (Telemetry telemetry : telemetryList) {
-            telemetry.removeItem(item);
-        }
-        // TODO decide on the proper return behavior and fix this
-        return true;
-    }
-
-    @Override
-    public void clear() {
-        for (Telemetry telemetry : telemetryList) {
-            telemetry.clear();
-        }
-    }
-
-    @Override
-    public void clearAll() {
-        for (Telemetry telemetry : telemetryList) {
-            telemetry.clearAll();
-        }
-    }
-
-    @Override
-    public Object addAction(Runnable runnable) {
-        for (Telemetry telemetry : telemetryList) {
-            telemetry.addAction(runnable);
-        }
-        // TODO same here
-        return null;
-    }
-
-    @Override
-    public boolean removeAction(Object o) {
-        for (Telemetry telemetry : telemetryList) {
-            telemetry.removeAction(o);
-        }
-        // TODO
-        return true;
-    }
-
-    @Override
-    public boolean update() {
-        for (Telemetry telemetry : telemetryList) {
-            telemetry.update();
-        }
-        // TODO
-        return true;
-    }
-
-    @Override
-    public Line addLine() {
-        List<Line> lines = new ArrayList<>();
-        for (Telemetry telemetry : telemetryList) {
-            lines.add(telemetry.addLine());
-        }
-        return new MultipleLine(lines);
-    }
-
-    @Override
-    public Line addLine(String s) {
-        List<Line> lines = new ArrayList<>();
-        for (Telemetry telemetry : telemetryList) {
-            lines.add(telemetry.addLine(s));
-        }
-        return new MultipleLine(lines);
-    }
-
-    @Override
-    public boolean removeLine(Line line) {
-        for (Telemetry telemetry : telemetryList) {
-            telemetry.removeLine(line);
-        }
-        // TODO
-        return true;
-    }
-
-    @Override
-    public boolean isAutoClear() {
-        return telemetryList.get(0).isAutoClear();
-    }
-
-    @Override
-    public void setAutoClear(boolean b) {
-        for (Telemetry telemetry : telemetryList) {
-            telemetry.setAutoClear(b);
-        }
-    }
-
-    @Override
-    public int getMsTransmissionInterval() {
-        return telemetryList.get(0).getMsTransmissionInterval();
-    }
-
-    @Override
-    public void setMsTransmissionInterval(int i) {
-        for (Telemetry telemetry : telemetryList) {
-            telemetry.setMsTransmissionInterval(i);
-        }
-    }
-
-    @Override
-    public String getItemSeparator() {
-        return telemetryList.get(0).getItemSeparator();
-    }
-
-    @Override
-    public void setItemSeparator(String s) {
-        for (Telemetry telemetry : telemetryList) {
-            telemetry.setItemSeparator(s);
-        }
-    }
-
-    @Override
-    public String getCaptionValueSeparator() {
-        return telemetryList.get(0).getCaptionValueSeparator();
-    }
-
-    @Override
-    public void setCaptionValueSeparator(String s) {
-        for (Telemetry telemetry : telemetryList) {
-            telemetry.setCaptionValueSeparator(s);
-        }
-    }
-
-    @Override
-    public Log log() {
-        return log;
     }
 }
