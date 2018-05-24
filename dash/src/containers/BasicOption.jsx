@@ -15,17 +15,19 @@ class BasicOption extends React.Component {
     const newValue = modifiedValue || value;
     const modified = newValue !== value;
 
+    const onEnter = () => this.props.onSave(newValue);
+
     let input;
 
     switch (type) {
     case OptionType.INT:
-      input = <TextInput value={newValue} validate={validateInt} onChange={this.props.onChange} />;
+      input = <TextInput value={newValue} validate={validateInt} onChange={this.props.onChange} onEnter={onEnter} />;
       break;
     case OptionType.DOUBLE:
-      input = <TextInput value={newValue} validate={validateDouble} onChange={this.props.onChange} />;
+      input = <TextInput value={newValue} validate={validateDouble} onChange={this.props.onChange} onEnter={onEnter} />;
       break;
     case OptionType.STRING:
-      input = <TextInput value={newValue} validate={validateString} onChange={this.props.onChange} />;
+      input = <TextInput value={newValue} validate={validateString} onChange={this.props.onChange} onEnter={onEnter} />;
       break;
     case OptionType.BOOLEAN:
       input = <BooleanInput value={newValue} onChange={this.props.onChange} />;
@@ -39,7 +41,7 @@ class BasicOption extends React.Component {
 
     return (
       <tr>
-        <td>{name}{modified ? '*' : ''}</td>
+        <td>{modified ? '*' : ''}{name}</td>
         <td>{input}</td>
       </tr>
     );
@@ -51,7 +53,8 @@ BasicOption.propTypes = {
   value: PropTypes.any.isRequired,
   modifiedValue: PropTypes.any,
   schema: PropTypes.any.isRequired,
-  onChange: PropTypes.func.isRequired
+  onChange: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired,
 };
 
 export default BasicOption;

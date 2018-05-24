@@ -11,6 +11,7 @@ class TextInput extends React.Component {
     };
 
     this.handleChange = this.handleChange.bind(this);
+    this.handleKeyDown = this.handleKeyDown.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -28,6 +29,12 @@ class TextInput extends React.Component {
     }
   }
 
+  handleKeyDown(evt) {
+    if (evt.key === 'Enter') {
+      this.props.onEnter();
+    }
+  }
+
   render() {
     return (
       <input
@@ -36,6 +43,7 @@ class TextInput extends React.Component {
         size={15}
         value={this.state.value}
         onChange={this.handleChange}
+        onKeyDown={this.handleKeyDown}
       />
     );
   }
@@ -45,6 +53,7 @@ TextInput.propTypes = {
   value: PropTypes.any.isRequired,
   validate: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
+  onEnter: PropTypes.func.isRequired
 };
 
 export default TextInput;
