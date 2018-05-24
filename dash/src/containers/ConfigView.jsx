@@ -27,9 +27,15 @@ const ConfigView = ({ config, onRefresh, onSave, onChange }) => (
               schema={config.schema[key]}
               onChange={
                 (value) => {
-                  console.log(`onChange(): ${key}: ${JSON.stringify(value)}`);
                   onChange({
                     ...config.modifiedOptions,
+                    [key]: value
+                  });
+                }
+              } 
+              onSave={
+                (value) => {
+                  onSave({
                     [key]: value
                   });
                 }
@@ -60,8 +66,8 @@ const mapDispatchToProps = (dispatch) => ({
   onRefresh: () => {
     dispatch(updateConfigOptions({}));
   },
-  onSave: () => {
-    dispatch(saveConfigOptions());
+  onSave: (options) => {
+    dispatch(saveConfigOptions(options));
   },
   onChange: (modifiedOptions) => {
     dispatch(updateConfigOptions(modifiedOptions));

@@ -37,11 +37,16 @@ class CustomOption extends React.Component {
     }
 
     const options = optionKeys.map((key) => {
-      const onChange = (update) => {
-        console.log(`onChange(): ${key}: ${JSON.stringify(update)}`);
+      const onChange = (value) => {
         this.props.onChange({
           ...modifiedValue,
-          [key]: update
+          [key]: value
+        });
+      };
+
+      const onSave = (value) => {
+        this.props.onSave({
+          [key]: value
         });
       };
 
@@ -55,7 +60,8 @@ class CustomOption extends React.Component {
             value={value[key]}
             modifiedValue={modifiedValue ? modifiedValue[key] : null}
             schema={schema[key]}
-            onChange={onChange} />
+            onChange={onChange}
+            onSave={onSave} />
         );
       }
 
@@ -66,7 +72,8 @@ class CustomOption extends React.Component {
           value={value[key]}
           modifiedValue={modifiedValue ? modifiedValue[key] : null}
           schema={schema[key]}
-          onChange={onChange} />
+          onChange={onChange}
+          onSave={onSave} />
       );
     });
 
@@ -97,7 +104,8 @@ CustomOption.propTypes = {
   schema: PropTypes.object.isRequired,
   value: PropTypes.object.isRequired,
   modifiedValue: PropTypes.object,
-  onChange: PropTypes.func.isRequired
+  onChange: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired,
 };
 
 export default CustomOption;
