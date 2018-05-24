@@ -1,14 +1,13 @@
 import { isPlainObject, isEqual, isEmpty } from 'lodash';
 
-export const RECEIVE_CONFIG = 'RECEIVE_CONFIG';
-export const GET_CONFIG = 'GET_CONFIG';
-export const UPDATE_CONFIG = 'UPDATE_CONFIG';
-export const SAVE_CONFIG = 'SAVE_CONFIG';
+export const RECEIVE_CONFIG_OPTIONS = 'RECEIVE_CONFIG_OPTIONS';
+export const GET_CONFIG_OPTIONS = 'GET_CONFIG_OPTIONS';
+export const UPDATE_CONFIG_OPTIONS = 'UPDATE_CONFIG_OPTIONS';
+export const SAVE_CONFIG_OPTIONS = 'SAVE_CONFIG_OPTIONS';
 export const RECEIVE_CONFIG_SCHEMA = 'RECEIVE_CONFIG_SCHEMA';
-export const RECEIVE_MODIFIED_CONFIG = 'RECEIVE_MODIFIED_CONFIG';
 
-export const receiveConfig = (config) => ({
-  type: RECEIVE_CONFIG,
+export const receiveConfigOptions = (config) => ({
+  type: RECEIVE_CONFIG_OPTIONS,
   data: config
 });
 
@@ -17,12 +16,12 @@ export const receiveConfigSchema = (schema) => ({
   data: schema
 });
 
-export const getConfig = () => ({
-  type: GET_CONFIG
+export const getConfigOptions = () => ({
+  type: GET_CONFIG_OPTIONS
 });
 
-export const updateConfig = (options) => ({
-  type: RECEIVE_MODIFIED_CONFIG,
+export const updateConfigOptions = (options) => ({
+  type: UPDATE_CONFIG_OPTIONS,
   data: options
 });
 
@@ -44,16 +43,16 @@ const symmetricDifference = (a, b) => {
   }
 };
 
-export const saveConfig = (options) => (
+export const saveConfigOptions = (options) => (
   (dispatch, getState) => {
     const { modifiedOptions } = getState().config;
     const optionsToSave = options || modifiedOptions;
 
     dispatch({
-      type: SAVE_CONFIG,
+      type: SAVE_CONFIG_OPTIONS,
       data: optionsToSave
     });
 
-    dispatch(updateConfig(symmetricDifference(modifiedOptions, optionsToSave) || {}));
+    dispatch(updateConfigOptions(symmetricDifference(modifiedOptions, optionsToSave) || {}));
   }
 );

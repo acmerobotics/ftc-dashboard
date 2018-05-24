@@ -1,4 +1,4 @@
-import { RECEIVE_CONFIG, RECEIVE_CONFIG_SCHEMA, RECEIVE_MODIFIED_CONFIG } from '../actions/config';
+import { RECEIVE_CONFIG_OPTIONS, RECEIVE_CONFIG_SCHEMA, UPDATE_CONFIG_OPTIONS } from '../actions/config';
 
 const initialState = {
   schema: {},
@@ -8,7 +8,7 @@ const initialState = {
 
 const config = (state = initialState, action) => {
   switch (action.type) {
-  case RECEIVE_CONFIG:
+  case RECEIVE_CONFIG_OPTIONS:
     return {
       ...state,
       options: action.data
@@ -18,7 +18,7 @@ const config = (state = initialState, action) => {
       ...state,
       schema: action.data
     };
-  case RECEIVE_MODIFIED_CONFIG:
+  case UPDATE_CONFIG_OPTIONS:
     return {
       ...state,
       modifiedOptions: action.data

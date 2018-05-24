@@ -5,7 +5,7 @@ import CustomOption from './CustomOption';
 import Heading from '../components/Heading';
 import IconGroup from '../components/IconGroup';
 import Icon from '../components/Icon';
-import { getConfig, updateConfig, saveConfig } from '../actions/config';
+import { updateConfigOptions, saveConfigOptions } from '../actions/config';
 
 const ConfigView = ({ config, onRefresh, onSave, onChange }) => (
   <div>
@@ -58,13 +58,13 @@ const mapStateToProps = ({ config }) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   onRefresh: () => {
-    dispatch(updateConfig({}));
+    dispatch(updateConfigOptions({}));
   },
   onSave: () => {
-    dispatch(saveConfig());
+    dispatch(saveConfigOptions());
   },
   onChange: (modifiedOptions) => {
-    dispatch(updateConfig(modifiedOptions));
+    dispatch(updateConfigOptions(modifiedOptions));
   }
 });
 
