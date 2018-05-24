@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.acmerobotics.dashboard.message.Message;
 import com.acmerobotics.dashboard.message.MessageDeserializer;
-import com.acmerobotics.dashboard.message.MessageType;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -45,12 +44,8 @@ public class RobotWebSocket extends NanoWSD.WebSocket {
     @Override
     protected void onMessage(NanoWSD.WebSocketFrame message) {
         Message msg = GSON.fromJson(message.getTextPayload(), Message.class);
-        if (msg.getType() == MessageType.PING) {
-            send(new Message(MessageType.PONG));
-        } else {
-            if (DEBUG) Log.i(RobotDashboard.TAG, "[RECV]\t" + message.getTextPayload());
-            dashboard.onMessage(this, msg);
-        }
+        if (DEBUG) Log.i(RobotDashboard.TAG, "[RECV]\t" + message.getTextPayload());
+        dashboard.onMessage(this, msg);
     }
 
     @Override
@@ -69,9 +64,7 @@ public class RobotWebSocket extends NanoWSD.WebSocket {
     public void send(Message message) {
         try {
             String messageStr = GSON.toJson(message);
-            if (message.getType() != MessageType.PONG) {
-                if (DEBUG) Log.i(RobotDashboard.TAG, "[SENT]\t" + messageStr);
-            }
+            if (DEBUG) Log.i(RobotDashboard.TAG, "[SENT]\t" + messageStr);
             send(messageStr);
         } catch (IOException e) {
             Log.w(RobotDashboard.TAG, e);

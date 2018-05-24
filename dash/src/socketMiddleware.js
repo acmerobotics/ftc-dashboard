@@ -1,9 +1,6 @@
 import {
   CONNECT,
   DISCONNECT,
-  PING,
-  PONG,
-  ping,
   connect,
   receiveConnectionStatus,
   receivePingTime
@@ -12,10 +9,16 @@ import {
   GET_CONFIG_OPTIONS,
   SAVE_CONFIG_OPTIONS
 } from './actions/config';
+import { 
+  GET_ROBOT_STATUS,
+  RECEIVE_ROBOT_STATUS,
+  getRobotStatus,
+  receiveRobotStatus,  
+} from './actions/status';
 
-let socket, pingSentTime;
+let socket, statusSentTime;
 
-export const pingLoop = () => (
+export const robotStatusLoop = () => (
   (dispatch, getState) => {
     const { isConnected } = getState().socket;
 
@@ -23,12 +26,12 @@ export const pingLoop = () => (
       return;
     }
 
-    pingSentTime = Date.now();
+    statusSentTime = Date.now();
 
-    dispatch(ping());
+    dispatch(getRobotStatus());
 
     setTimeout(() => {
-      dispatch(pingLoop());
+      dispatch(robotStatusLoop());
     }, 1000);
   }
 );
@@ -46,7 +49,7 @@ const socketMiddleware = store => next => action => {
     socket.onopen = () => {
       store.dispatch(receiveConnectionStatus(true));
 
-      store.dispatch(pingLoop());
+      store.dispatch(robotStatusLoop());
     };
 
     socket.onclose = () => {
@@ -59,12 +62,13 @@ const socketMiddleware = store => next => action => {
   case DISCONNECT:
     socket.close();
     break;
-  case PONG: {
-    const pingTime = Date.now() - pingSentTime;
+  case RECEIVE_ROBOT_STATUS: {
+    const pingTime = Date.now() - statusSentTime;
     store.dispatch(receivePingTime(pingTime));
+    store.dispatch(receiveRobotStatus(action.data));
     break;
   }
-  case PING:
+  case GET_ROBOT_STATUS:
   case SAVE_CONFIG_OPTIONS:
   case GET_CONFIG_OPTIONS: {
     const { isConnected } = store.getState().socket;

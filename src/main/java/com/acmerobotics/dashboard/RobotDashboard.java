@@ -13,9 +13,12 @@ import com.acmerobotics.dashboard.util.ClassFilter;
 import com.acmerobotics.dashboard.util.ClasspathScanner;
 import com.google.gson.JsonElement;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.Consumer;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.internal.opmode.OpModeManagerImpl;
+import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,7 +30,7 @@ import java.util.Set;
 /**
  * Main class for interacting with the dashboard.
  */
-public class RobotDashboard {
+public class RobotDashboard implements OpModeManagerImpl.Notifications {
     public static final String TAG = "RobotDashboard";
 
     private static final Set<String> IGNORED_PACKAGES = new HashSet<>(Arrays.asList(
@@ -45,10 +48,10 @@ public class RobotDashboard {
      * This method should usually be called from {@link Activity#onCreate(Bundle)}.
      */
 	public static void start() {
-	    if (dashboard == null) {
+        if (dashboard == null) {
             dashboard = new RobotDashboard();
         }
-	}
+    }
 
     /**
      * Stops the dashboard and the underlying WebSocket server. This method should usually be
@@ -73,6 +76,8 @@ public class RobotDashboard {
 	private List<RobotWebSocket> sockets;
 	private RobotWebSocketServer server;
 	private Configuration configuration;
+	private OpModeManagerImpl opModeManager;
+	private RobotStatus.OpModeStatus activeOpModeStatus = RobotStatus.OpModeStatus.STOPPED;
 
 	private RobotDashboard() {
 		sockets = new ArrayList<>();
@@ -111,6 +116,14 @@ public class RobotDashboard {
 		} catch (IOException e) {
 		    Log.w(TAG, e);
 		}
+
+        Activity activity = AppUtil.getInstance().getActivity();
+		if (activity != null) {
+		    opModeManager = OpModeManagerImpl.getOpModeManagerOfActivity(activity);
+		    if (opModeManager != null) {
+                opModeManager.registerListener(this);
+		    }
+        }
 	}
 
     /**
@@ -144,6 +157,14 @@ public class RobotDashboard {
 		return configuration.getJson();
 	}
 
+	private RobotStatus getRobotStatus() {
+        if (opModeManager == null) {
+            return new RobotStatus();
+        } else {
+            return new RobotStatus(opModeManager.getActiveOpModeName(), activeOpModeStatus);
+        }
+    }
+
 	private synchronized void sendAll(Message message) {
 		for (RobotWebSocket ws : sockets) {
 			ws.send(message);
@@ -163,6 +184,10 @@ public class RobotDashboard {
 
 	synchronized void onMessage(RobotWebSocket socket, Message msg) {
         switch(msg.getType()) {
+            case GET_ROBOT_STATUS: {
+                socket.send(new Message(MessageType.RECEIVE_ROBOT_STATUS, getRobotStatus()));
+                break;
+            }
             case GET_CONFIG_OPTIONS: {
                 socket.send(new Message(MessageType.RECEIVE_CONFIG_OPTIONS, getConfigJson()));
                 break;
@@ -181,5 +206,20 @@ public class RobotDashboard {
 
 	private void close() {
 	    server.stop();
+    }
+
+    @Override
+    public void onOpModePreInit(OpMode opMode) {
+        activeOpModeStatus = RobotStatus.OpModeStatus.INIT;
+    }
+
+    @Override
+    public void onOpModePreStart(OpMode opMode) {
+        activeOpModeStatus = RobotStatus.OpModeStatus.RUNNING;
+    }
+
+    @Override
+    public void onOpModePostStop(OpMode opMode) {
+        activeOpModeStatus = RobotStatus.OpModeStatus.STOPPED;
     }
 }
