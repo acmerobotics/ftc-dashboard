@@ -126,7 +126,7 @@ public class RobotDashboard {
      * Sends updated configuration data to all dashboard clients.
      */
 	public void updateConfig() {
-	    sendAll(new Message(MessageType.RECEIVE_CONFIG, getConfigJson()));
+	    sendAll(new Message(MessageType.RECEIVE_CONFIG_OPTIONS, getConfigJson()));
     }
 
     /**
@@ -154,7 +154,7 @@ public class RobotDashboard {
 		sockets.add(socket);
 
 		socket.send(new Message(MessageType.RECEIVE_CONFIG_SCHEMA, getConfigSchemaJson()));
-		socket.send(new Message(MessageType.RECEIVE_CONFIG, getConfigJson()));
+		socket.send(new Message(MessageType.RECEIVE_CONFIG_OPTIONS, getConfigJson()));
 	}
 
 	synchronized void removeSocket(RobotWebSocket socket) {
@@ -163,11 +163,11 @@ public class RobotDashboard {
 
 	synchronized void onMessage(RobotWebSocket socket, Message msg) {
         switch(msg.getType()) {
-            case GET_CONFIG: {
-                socket.send(new Message(MessageType.RECEIVE_CONFIG, getConfigJson()));
+            case GET_CONFIG_OPTIONS: {
+                socket.send(new Message(MessageType.RECEIVE_CONFIG_OPTIONS, getConfigJson()));
                 break;
             }
-            case SAVE_CONFIG: {
+            case SAVE_CONFIG_OPTIONS: {
                 configuration.updateJson((JsonElement) msg.getData());
                 updateConfig();
                 break;
