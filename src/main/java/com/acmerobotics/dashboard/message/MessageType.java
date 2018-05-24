@@ -8,6 +8,11 @@ public enum MessageType {
     GET_ROBOT_STATUS,
     RECEIVE_ROBOT_STATUS,
 
+    /* opmode management */
+    INIT_OPMODE,
+    START_OPMODE,
+    STOP_OPMODE,
+
     /* config */
     RECEIVE_CONFIG_SCHEMA,
     GET_CONFIG_OPTIONS,

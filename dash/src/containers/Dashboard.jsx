@@ -9,6 +9,7 @@ import TelemetryView from './TelemetryView';
 import ConfigView from './ConfigView';
 import GraphView from './GraphView';
 import FieldView from './FieldView';
+import RobotStatusView from './RobotStatusView';
 import Tile from '../components/Tile';
 import TileGrid from '../components/TileGrid';
 import { connect, disconnect } from '../actions/socket';
@@ -38,15 +39,15 @@ class Dashboard extends Component {
           </Heading>
         </Header>
         <TileGrid>
-          <Tile row="1 / span 3" col={1} hidden>
+          <Tile row="1 / span 2" col={1} hidden>
             <FieldView />
+          </Tile>
+          <Tile row={3} col={1}>
+            <RobotStatusView />
           </Tile>
           <Tile row="1 / span 3" col={2}>
             <GraphView />
-          </Tile>
-          {/* <Tile row="2 / span 2" col={2}>
-            <GraphView />
-          </Tile> */}
+          </Tile>=
           <Tile row="1 / span 2" col={3}>
             <ConfigView />
           </Tile>

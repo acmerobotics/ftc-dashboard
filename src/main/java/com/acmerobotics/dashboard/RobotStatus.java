@@ -7,16 +7,16 @@ public class RobotStatus {
         STOPPED
     }
 
-    private boolean statusAvailable;
+    private boolean available;
     private String activeOpMode;
     private OpModeStatus activeOpModeStatus;
 
     public RobotStatus() {
-        this.statusAvailable = false;
+        this.available = false;
     }
 
     public RobotStatus(String activeOpMode, OpModeStatus activeOpModeStatus) {
-        this.statusAvailable = true;
+        this.available = true;
         this.activeOpMode = activeOpMode;
         this.activeOpModeStatus = activeOpModeStatus;
     }
