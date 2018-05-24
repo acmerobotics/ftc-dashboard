@@ -19,15 +19,6 @@ class GraphView extends Component {
     this.divRef = React.createRef();
 
     this.handleClick = this.handleClick.bind(this);
-    this.handleDocumentKeydown = this.handleDocumentKeydown.bind(this);
-  }
-
-  componentDidMount() {
-    document.addEventListener('keydown', this.handleDocumentKeydown);
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('keydown', this.handleDocumentKeydown);
   }
 
   startGraphing() {
@@ -43,14 +34,6 @@ class GraphView extends Component {
     this.setState({
       graphing: false,
     });
-  }
-
-  handleDocumentKeydown(evt) {
-    if (!this.state.graphing && (evt.code === 'Enter' || evt.code === 'NumpadEnter')) {
-      this.startGraphing();
-    } else if (this.state.graphing && evt.code === 'Escape') {
-      this.stopGraphing();
-    }
   }
 
   handleClick() {
