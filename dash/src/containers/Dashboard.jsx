@@ -42,16 +42,16 @@ class Dashboard extends Component {
           <Tile row={1} col={1}>
             <OpModeView />
           </Tile>
-          <Tile row="2 / span 3" col={1} hidden>
+          <Tile row="2 / span 2" col={1} hidden>
             <FieldView />
           </Tile>
-          <Tile row="1 / span 4" col={2}>
+          <Tile row="1 / span 3" col={2}>
             <GraphView />
           </Tile>=
-          <Tile row="1 / span 3" col={3}>
+          <Tile row="1 / span 2" col={3}>
             <ConfigView />
           </Tile>
-          <Tile row={4} col={3}>
+          <Tile row={3} col={3}>
             <TelemetryView />
           </Tile>
         </TileGrid>
