@@ -14,6 +14,11 @@ import {
   RECEIVE_ROBOT_STATUS,
   getRobotStatus
 } from './actions/status';
+import {
+  INIT_OP_MODE,
+  START_OP_MODE,
+  STOP_OP_MODE
+} from './actions/opmode';
 
 let socket, statusSentTime;
 
@@ -69,7 +74,10 @@ const socketMiddleware = store => next => action => {
   }
   case GET_ROBOT_STATUS:
   case SAVE_CONFIG_OPTIONS:
-  case GET_CONFIG_OPTIONS: {
+  case GET_CONFIG_OPTIONS: 
+  case INIT_OP_MODE:
+  case START_OP_MODE:
+  case STOP_OP_MODE: {
     const { isConnected } = store.getState().socket;
 
     if (isConnected) {

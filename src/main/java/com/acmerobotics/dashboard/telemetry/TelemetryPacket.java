@@ -190,7 +190,7 @@ public class TelemetryPacket {
 
         @Override
         public Log log() {
-            throw new UnsupportedOperationException();
+            return null;
         }
     }
 }

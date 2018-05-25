@@ -12,6 +12,7 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.dashboard.util.ClassFilter;
 import com.acmerobotics.dashboard.util.ClasspathScanner;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 import com.qualcomm.robotcore.eventloop.EventLoop;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -216,6 +217,19 @@ public class RobotDashboard implements OpModeManagerImpl.Notifications {
             }
             case GET_CONFIG_OPTIONS: {
                 socket.send(new Message(MessageType.RECEIVE_CONFIG_OPTIONS, getConfigJson()));
+                break;
+            }
+            case INIT_OP_MODE: {
+                String opModeName = ((JsonPrimitive) msg.getData()).getAsString();
+                opModeManager.initActiveOpMode(opModeName);
+                break;
+            }
+            case START_OP_MODE: {
+                opModeManager.startActiveOpMode();
+                break;
+            }
+            case STOP_OP_MODE: {
+                opModeManager.stopActiveOpMode();
                 break;
             }
             case SAVE_CONFIG_OPTIONS: {
