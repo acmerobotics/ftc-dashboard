@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import Heading from '../components/Heading';
 import { initOpMode, startOpMode, stopOpMode } from '../actions/opmode';
+import OpModeStatus from '../enums/OpModeStatus';
 
 const DEFAULT_OP_MODE = '$Stop$Robot$';
 
@@ -35,23 +36,37 @@ class OpModeView extends React.Component {
     });
   }
 
-  render() {
-    const { available, activeOpMode, activeOpModeStatus, opModeList, dispatch } = this.props;
+  renderInitButton() {
+    return <button onClick={() => this.props.dispatch(initOpMode(this.state.selectedOpMode))}>Init</button>;
+  }
 
-    let buttonText, buttonAction;
+  renderStartButton() {
+    return <button onClick={() => this.props.dispatch(startOpMode())}>Start</button>;
+  }
+
+  renderStopButton() {
+    return <button onClick={() => this.props.dispatch(stopOpMode())}>Stop</button>;
+  }
+
+  renderButtons() {
+    const { activeOpMode, activeOpModeStatus } = this.props;
+
     if (activeOpMode === DEFAULT_OP_MODE) {
-      buttonText = 'Init';
-      buttonAction = () => dispatch(initOpMode(this.state.selectedOpMode));
-    } else if (activeOpModeStatus === 'INIT') {
-      buttonText = '▶ Start';
-      buttonAction = () => dispatch(startOpMode());
-    } else if (activeOpModeStatus === 'RUNNING') {
-      buttonText = '■ Stop';
-      buttonAction = () => dispatch(stopOpMode());
-    } else {
-      buttonText = '';
-      buttonAction = () => {};
+      return this.renderInitButton();
+    } else if (activeOpModeStatus === OpModeStatus.INIT) {
+      return (
+        <span>
+          {this.renderStartButton()}
+          {this.renderStopButton()}
+        </span>
+      );
+    } else if (activeOpModeStatus === OpModeStatus.RUNNING) {
+      return this.renderStopButton();
     }
+  }
+
+  render() {
+    const { available, activeOpMode, opModeList } = this.props;
 
     if (!available) {
       return (
@@ -76,8 +91,9 @@ class OpModeView extends React.Component {
                   <option key={opMode}>{opMode}</option>
                 ))
           }
-        </select>&nbsp;
-        <button onClick={buttonAction}>{buttonText}</button>
+        </select>
+        &nbsp;
+        {this.renderButtons()}
       </div>
     );
   }
@@ -86,7 +102,7 @@ class OpModeView extends React.Component {
 OpModeView.propTypes = {
   available: PropTypes.bool.isRequired, 
   activeOpMode: PropTypes.string.isRequired,
-  activeOpModeStatus: PropTypes.oneOf(['INIT', 'RUNNING', 'STOPPED']),
+  activeOpModeStatus: PropTypes.oneOf(Object.keys(OpModeStatus)),
   opModeList: PropTypes.arrayOf(PropTypes.string).isRequired,
   dispatch: PropTypes.func.isRequired
 };
