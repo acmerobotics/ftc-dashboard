@@ -4,7 +4,9 @@ import PropTypes from 'prop-types';
 import Heading from '../components/Heading';
 import { initOpMode, startOpMode, stopOpMode } from '../actions/opmode';
 
-class RobotStatusView extends React.Component {
+const DEFAULT_OP_MODE = '$Stop$Robot$';
+
+class OpModeView extends React.Component {
   constructor(props) {
     super(props);
 
@@ -16,12 +18,11 @@ class RobotStatusView extends React.Component {
   }
 
   componentWillReceiveProps(newProps) {
-    console.log(newProps);
-    if (newProps !== '$Stop$Robot$') {
+    if (newProps.activeOpMode !== DEFAULT_OP_MODE) {
       this.setState({
         selectedOpMode: newProps.activeOpMode
       });
-    } else {
+    } else if (this.state.selectedOpMode === '') {
       this.setState({
         selectedOpMode: newProps.opModeList[0]
       });
@@ -38,7 +39,7 @@ class RobotStatusView extends React.Component {
     const { available, activeOpMode, activeOpModeStatus, opModeList, dispatch } = this.props;
 
     let buttonText, buttonAction;
-    if (activeOpMode === '$Stop$Robot$') {
+    if (activeOpMode === DEFAULT_OP_MODE) {
       buttonText = 'Init';
       buttonAction = () => dispatch(initOpMode(this.state.selectedOpMode));
     } else if (activeOpModeStatus === 'INIT') {
@@ -55,7 +56,7 @@ class RobotStatusView extends React.Component {
     if (!available) {
       return (
         <div>
-          <Heading level={2} text="Robot Status" />
+          <Heading level={2} text="Op Mode" />
           <p>Event loop detached</p>
         </div>
       );
@@ -63,9 +64,9 @@ class RobotStatusView extends React.Component {
 
     return (
       <div>
-        <Heading level={2} text="Robot Status" />
+        <Heading level={2} text="Op Mode" />
         <p/>
-        <select value={this.state.selectedOpMode} disabled={activeOpMode !== '$Stop$Robot$'} onChange={this.onChange}>
+        <select value={this.state.selectedOpMode} disabled={activeOpMode !== DEFAULT_OP_MODE} onChange={this.onChange}>
           {
             opModeList.length === 0 ?
               (<option>Loading...</option>) :
@@ -77,13 +78,12 @@ class RobotStatusView extends React.Component {
           }
         </select>&nbsp;
         <button onClick={buttonAction}>{buttonText}</button>
-        <p>Active Op Mode: {activeOpMode}</p>
       </div>
     );
   }
 }
 
-RobotStatusView.propTypes = {
+OpModeView.propTypes = {
   available: PropTypes.bool.isRequired, 
   activeOpMode: PropTypes.string.isRequired,
   activeOpModeStatus: PropTypes.oneOf(['INIT', 'RUNNING', 'STOPPED']),
@@ -93,4 +93,4 @@ RobotStatusView.propTypes = {
 
 const mapStateToProps = ({ status }) => status;
 
-export default connect(mapStateToProps)(RobotStatusView);
+export default connect(mapStateToProps)(OpModeView);
