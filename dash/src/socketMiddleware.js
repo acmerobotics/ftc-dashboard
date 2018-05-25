@@ -12,8 +12,7 @@ import {
 import { 
   GET_ROBOT_STATUS,
   RECEIVE_ROBOT_STATUS,
-  getRobotStatus,
-  receiveRobotStatus,  
+  getRobotStatus
 } from './actions/status';
 
 let socket, statusSentTime;
@@ -65,7 +64,7 @@ const socketMiddleware = store => next => action => {
   case RECEIVE_ROBOT_STATUS: {
     const pingTime = Date.now() - statusSentTime;
     store.dispatch(receivePingTime(pingTime));
-    store.dispatch(receiveRobotStatus(action.data));
+    next(action);
     break;
   }
   case GET_ROBOT_STATUS:

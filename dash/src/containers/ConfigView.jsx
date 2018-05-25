@@ -11,7 +11,7 @@ const ConfigView = ({ config, onRefresh, onSave, onChange }) => (
   <div>
     <Heading level={2} text="Configuration">
       <IconGroup>
-        <Icon icon="save" size="small" onClick={onSave} />
+        <Icon icon="save" size="small" onClick={() => onSave()} />
         <Icon icon="refresh" size="small" onClick={onRefresh} />
       </IconGroup>
     </Heading>

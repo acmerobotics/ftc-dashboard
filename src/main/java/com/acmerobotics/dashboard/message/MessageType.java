@@ -9,9 +9,11 @@ public enum MessageType {
     RECEIVE_ROBOT_STATUS,
 
     /* opmode management */
-    INIT_OPMODE,
-    START_OPMODE,
-    STOP_OPMODE,
+    INIT_OP_MODE,
+    START_OP_MODE,
+    STOP_OP_MODE,
+    GET_OP_MODE_LIST,
+    RECEIVE_OP_MODE_LIST,
 
     /* config */
     RECEIVE_CONFIG_SCHEMA,

@@ -1,15 +1,24 @@
-import { RECEIVE_ROBOT_STATUS } from '../actions/status';
+import { RECEIVE_ROBOT_STATUS, RECEIVE_OP_MODE_LIST } from '../actions/status';
 
 const initialState = {
   available: false,
   activeOpMode: '',
   activeOpModeStatus: 'STOPPED',
+  opModeList: [],
 };
 
 const telemetry = (state = initialState, action) => {
   switch (action.type) {
   case RECEIVE_ROBOT_STATUS:
-    return action.status;
+    return {
+      ...state,
+      ...action.data
+    };
+  case RECEIVE_OP_MODE_LIST:
+    return {
+      ...state,
+      opModeList: action.data
+    };
   default:
     return state;
   }
