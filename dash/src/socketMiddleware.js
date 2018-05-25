@@ -59,7 +59,7 @@ const socketMiddleware = store => next => action => {
     socket.onclose = () => {
       store.dispatch(receiveConnectionStatus(false));
 
-      setTimeout(() => store.dispatch(connect(action.host, action.port)), 3000);
+      setTimeout(() => store.dispatch(connect(action.host, action.port)), 500);
     };
 
     break;

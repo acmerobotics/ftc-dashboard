@@ -134,6 +134,10 @@ public class RobotDashboard implements OpModeManagerImpl.Notifications {
             opModeManager.registerListener(this);
         }
 
+        synchronized (opModeList) {
+            opModeList.clear();
+        }
+
         (new Thread() {
             @Override
             public void run() {

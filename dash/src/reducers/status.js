@@ -1,9 +1,10 @@
 import { RECEIVE_ROBOT_STATUS, RECEIVE_OP_MODE_LIST } from '../actions/status';
+import OpModeStatus from '../enums/OpModeStatus';
 
 const initialState = {
   available: false,
   activeOpMode: '',
-  activeOpModeStatus: 'STOPPED',
+  activeOpModeStatus: OpModeStatus.STOPPED,
   opModeList: [],
 };
 
