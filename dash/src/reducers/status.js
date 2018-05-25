@@ -6,6 +6,8 @@ const initialState = {
   activeOpMode: '',
   activeOpModeStatus: OpModeStatus.STOPPED,
   opModeList: [],
+  warningMessage: '',
+  errorMessage: 'Error!'
 };
 
 const telemetry = (state = initialState, action) => {

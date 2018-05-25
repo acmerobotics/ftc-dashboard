@@ -66,7 +66,7 @@ class OpModeView extends React.Component {
   }
 
   render() {
-    const { available, activeOpMode, opModeList } = this.props;
+    const { available, activeOpMode, opModeList, warningMessage, errorMessage } = this.props;
 
     if (!available) {
       return (
@@ -94,6 +94,14 @@ class OpModeView extends React.Component {
         </select>
         &nbsp;
         {this.renderButtons()}
+        {
+          errorMessage !== '' ?
+            <p className="error">{errorMessage}</p> : null
+        }
+        {
+          warningMessage !== '' ?
+            <p className="warning">{warningMessage}</p> : null
+        }
       </div>
     );
   }
@@ -104,6 +112,8 @@ OpModeView.propTypes = {
   activeOpMode: PropTypes.string.isRequired,
   activeOpModeStatus: PropTypes.oneOf(Object.keys(OpModeStatus)),
   opModeList: PropTypes.arrayOf(PropTypes.string).isRequired,
+  warningMessage: PropTypes.string.isRequired,
+  errorMessage: PropTypes.string.isRequired,
   dispatch: PropTypes.func.isRequired
 };
 

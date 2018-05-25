@@ -42,7 +42,7 @@ class Dashboard extends Component {
           <Tile row={1} col={1}>
             <OpModeView />
           </Tile>
-          <Tile row="2 / span 2" col={1} hidden>
+          <Tile row="2 / span 2" col={1}>
             <FieldView />
           </Tile>
           <Tile row="1 / span 3" col={2}>
