@@ -31,7 +31,7 @@ class FieldView extends React.Component {
 
   render() {
     return (
-      <div>
+      <div style={{overflow: 'hidden', height: '100%'}}>
         <Heading level={2} text="Field" />
         <canvas ref={(c) => { this.canvas = c; }} width="1000" height="1000" />
       </div>
