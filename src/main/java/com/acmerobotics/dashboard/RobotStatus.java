@@ -13,6 +13,8 @@ public class RobotStatus {
 
     public RobotStatus() {
         this.available = false;
+        this.activeOpMode = "None";
+        this.activeOpModeStatus = OpModeStatus.STOPPED;
     }
 
     public RobotStatus(String activeOpMode, OpModeStatus activeOpModeStatus) {

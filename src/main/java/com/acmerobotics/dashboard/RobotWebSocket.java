@@ -16,7 +16,7 @@ import fi.iki.elonen.NanoWSD;
  * WebSocket connection to a dashboard client.
  */
 public class RobotWebSocket extends NanoWSD.WebSocket {
-    public static final boolean DEBUG = false;
+    public static final boolean DEBUG = true;
 
     private static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(Message.class, new MessageDeserializer())

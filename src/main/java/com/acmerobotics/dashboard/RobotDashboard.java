@@ -12,13 +12,15 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.dashboard.util.ClassFilter;
 import com.acmerobotics.dashboard.util.ClasspathScanner;
 import com.google.gson.JsonElement;
+import com.qualcomm.robotcore.eventloop.EventLoop;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.Consumer;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeManagerImpl;
-import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
+import org.firstinspires.ftc.robotcore.internal.opmode.OpModeMeta;
+import org.firstinspires.ftc.robotcore.internal.opmode.RegisteredOpModes;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,6 +55,10 @@ public class RobotDashboard implements OpModeManagerImpl.Notifications {
         }
     }
 
+    public static void attachEventLoop(EventLoop eventLoop) {
+	    dashboard.internalAttachEventLoop(eventLoop);
+    }
+
     /**
      * Stops the dashboard and the underlying WebSocket server. This method should usually be
      * called from {@link Activity#onDestroy()}.
@@ -78,6 +84,7 @@ public class RobotDashboard implements OpModeManagerImpl.Notifications {
 	private Configuration configuration;
 	private OpModeManagerImpl opModeManager;
 	private RobotStatus.OpModeStatus activeOpModeStatus = RobotStatus.OpModeStatus.STOPPED;
+	private List<String> opModeList;
 
 	private RobotDashboard() {
 		sockets = new ArrayList<>();
@@ -117,14 +124,28 @@ public class RobotDashboard implements OpModeManagerImpl.Notifications {
 		    Log.w(TAG, e);
 		}
 
-        Activity activity = AppUtil.getInstance().getActivity();
-		if (activity != null) {
-		    opModeManager = OpModeManagerImpl.getOpModeManagerOfActivity(activity);
-		    if (opModeManager != null) {
-                opModeManager.registerListener(this);
-		    }
-        }
+		opModeList = new ArrayList<>();
 	}
+
+	private void internalAttachEventLoop(EventLoop eventLoop) {
+        opModeManager = eventLoop.getOpModeManager();
+        if (opModeManager != null) {
+            opModeManager.registerListener(this);
+        }
+
+        (new Thread() {
+            @Override
+            public void run() {
+                RegisteredOpModes.getInstance().waitOpModesRegistered();
+                synchronized (opModeList) {
+                    for (OpModeMeta opModeMeta : RegisteredOpModes.getInstance().getOpModes()) {
+                        opModeList.add(opModeMeta.name);
+                    }
+                    sendAll(new Message(MessageType.RECEIVE_OP_MODE_LIST, opModeList));
+                }
+            }
+        }).start();
+    }
 
     /**
      * Sends telemetry information to all dashboard clients.
@@ -176,6 +197,11 @@ public class RobotDashboard implements OpModeManagerImpl.Notifications {
 
 		socket.send(new Message(MessageType.RECEIVE_CONFIG_SCHEMA, getConfigSchemaJson()));
 		socket.send(new Message(MessageType.RECEIVE_CONFIG_OPTIONS, getConfigJson()));
+		synchronized (opModeList) {
+            if (opModeList.size() > 0) {
+                socket.send(new Message(MessageType.RECEIVE_OP_MODE_LIST, opModeList));
+            }
+        }
 	}
 
 	synchronized void removeSocket(RobotWebSocket socket) {
@@ -192,8 +218,6 @@ public class RobotDashboard implements OpModeManagerImpl.Notifications {
                 socket.send(new Message(MessageType.RECEIVE_CONFIG_OPTIONS, getConfigJson()));
                 break;
             }
-            case INIT_OPMODE:
-
             case SAVE_CONFIG_OPTIONS: {
                 configuration.updateJson((JsonElement) msg.getData());
                 updateConfig();
