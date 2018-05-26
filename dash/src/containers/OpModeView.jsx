@@ -96,11 +96,11 @@ class OpModeView extends React.Component {
         {this.renderButtons()}
         {
           errorMessage !== '' ?
-            <p className="error">{errorMessage}</p> : null
+            <p className="error">Error: {errorMessage}</p> : null
         }
         {
           warningMessage !== '' ?
-            <p className="warning">{warningMessage}</p> : null
+            <p className="warning">Warning: {warningMessage}</p> : null
         }
       </div>
     );
