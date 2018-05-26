@@ -6,7 +6,7 @@ Websocket-based React dashboard made for FTC. Supports basic telemetry display, 
 
 ## Basic Installation
 
-1. Clone this repo or download the `.zip` and extract it.
+1. Clone this repo or download the `.zip` archive and extract it.
 2. Open your FTC app project in Android Studio.
 3. Navigate to `File > New > Import Module...` in the menu bar.
 4. Select the directory containing the module source downloaded in step 1. Then change the module name to `FtcDashboard` and click `Finish`.
@@ -20,12 +20,14 @@ Websocket-based React dashboard made for FTC. Supports basic telemetry display, 
     }
     ```
 
-6. Right-click `FtcRobotController` in the project pane and select `Open Module Settings`. Now select the `Dependencies` tab in the dialog that pops up. Finally, click the plus icon, select `FtcDashboard`, and click OK twice.
-7. Repeat step 6 with `TeamCode` instead of `FtcRobotController`.
-8. Navigate to the main activity (`org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity`) inside of the `FtcRobotController` module.
-9. Insert the line `RobotDashboard.start();` at the end of `onCreate()`.
-10. Insert the line `RobotDashboard.stop();` at the end of `onDestroy()`.
-11. To enable op mode management, insert `RobotDashboard.attachEventLoop(eventLoop);` at the end of `requestRobotSetup()`.
+6. Add `include ':FtcDashboard'` to the end of the top-level `settings.gradle` if it isn't there already.
+7. Right-click `FtcRobotController` in the project pane and select `Open Module Settings`. Now select the `Dependencies` tab in the dialog that pops up. Finally, click the plus icon, choose `Module dependency`, select `FtcDashboard`, and click OK twice.
+8. Repeat step 7 with `TeamCode` instead of `FtcRobotController`.
+9. Navigate to the main activity (`org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity`) inside of the `FtcRobotController` module.
+10. Insert the line `RobotDashboard.start();` at the end of `onCreate()`.
+11. Insert the line `RobotDashboard.stop();` at the end of `onDestroy()`.
+12. To enable op mode management, insert `RobotDashboard.attachEventLoop(eventLoop);` at the end of `requestRobotSetup()`.
+13. Build and deploy!
 
 ## Usage
 
@@ -92,4 +94,4 @@ First off, the size of all the widgets/tiles can be easily modified. The layout 
 
 ### Additional Telemetry
 
-If you need additional data passed from the server, the recommended method is to modify the telemetry structure. On the server-side, this is accomplished by subclassing `TelemetryPacket` and adding the additional data as instance variables (mark any instance variables you don't want to send with `transient`). Next, on the client-side, add the new keys to `dash/src/reducers/telemetry.js` (specifically `initialState`), and they'll be available through Redux under `telemetry`. 
+If you need additional data passed from the server, the recommended method is to modify the telemetry structure. On the server-side, this is accomplished by subclassing `TelemetryPacket` and adding the additional data as instance variables (mark any instance variables you don't want to send with `transient`). Next, on the client-side, add the new keys to `dash/src/reducers/telemetry.js` (specifically `initialState`), and they'll be available through Redux under `telemetry`.
