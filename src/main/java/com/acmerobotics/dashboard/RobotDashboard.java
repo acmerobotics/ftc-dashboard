@@ -56,6 +56,10 @@ public class RobotDashboard implements OpModeManagerImpl.Notifications {
         }
     }
 
+    /**
+     * Attaches the event loop to the dashboard for op mode management.
+     * @param eventLoop
+     */
     public static void attachEventLoop(EventLoop eventLoop) {
 	    dashboard.internalAttachEventLoop(eventLoop);
     }
