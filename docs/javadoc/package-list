@@ -1,0 +1,7 @@
+com.acmerobotics.dashboard
+com.acmerobotics.dashboard.canvas
+com.acmerobotics.dashboard.config
+com.acmerobotics.dashboard.config.options
+com.acmerobotics.dashboard.message
+com.acmerobotics.dashboard.telemetry
+com.acmerobotics.dashboard.util
