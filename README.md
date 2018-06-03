@@ -37,7 +37,9 @@ Websocket-based React dashboard made for FTC. Supports basic telemetry display, 
 4. Run `yarn start` to start the development server.
 5. Navigate to `localhost:3000` (although the previous command will likely open it for you).
 
-## Example Snippets
+## Documentation
+
+The following snippets demonstrate the core server-side functionality of the dashboard. The complete javadoc for the project is available [here](https://acmerobotics.github.io/ftc-dashboard/javadoc/).
 
 ### Telemetry
 
