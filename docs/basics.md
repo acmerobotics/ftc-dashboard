@@ -1,0 +1,64 @@
+---
+layout: default
+---
+
+# Basics
+
+## Telemetry
+
+There are two ways to send telemetry to the dashboard. The first way is through the `telemetry` interface in normal SDK op modes. The second way is specific to the dashboard and is designed to be simpler and more flexible (it's also the preferred method).
+
+### SDK Telemetry
+
+To get a `Telemetry`-compatible instance for the dashboard, you can use `RobotDashboard.getTelemetry()`:
+
+```java
+RobotDashboard dashboard = RobotDashboard.getInstance();
+Telemetry dashboardTelemetry = dashboard.getTelemetry();
+
+dashboardTelemetry.addData("x", 3.7);
+dashboardTelemetry.update();
+```
+
+This interface should feel familiar for FTC programmers (note, however, that this doesn't implement some of the less commonly-used methods of `Telemetry`). Additionally, this method is also used in a common idiom for forwarding all normal telemetry messages to the dashboard: 
+
+```java
+telemetry = new MultipleTelemetry(telemetry, RobotDashboard.getInstance().getTelemetry());
+```
+
+This line should be placed near the top of `OpMode.init()` or `LinearOpMode.runOpMode()`.
+
+### Telemetry Packets (preferred)
+
+The second method uses `TelemetryPacket` and is completely independent from normal SDK telemetry. To see how it works, here's the equivalent of the earlier sample:
+
+```java
+RobotDashboard dashboard = RobotDashboard.getInstance();
+
+TelemetryPacket packet = new TelemetryPacket();
+packet.put("x", 3.7);
+
+dashboard.sendTelemetryPacket(packet);
+```
+
+For basic uses, the two methods are fairly similar, although this method has more advanced features. You can use a `TelemetryPacket` to send field overlay drawings:
+
+```java
+packet.fieldOverlay()
+    .setFill("blue")
+    .fillRect(-20, -20, 40, 40);
+```
+
+## Configuration Variables
+
+To declare configuration variables, add them as `static`, non-`final` fields of a class annotated with `@Config`:
+
+```java
+@Config
+public class RobotConstants {
+    public static int MAGIC_NUMBER = 32;
+    public static PIDCoefficients TURNING_PID = new PIDCoefficients();
+}
+```
+
+When new values are saved in the dashboard, the values of the fields are automatically updated. This reflection-based approach allows changes to occur while the OpMode is running with minimal boilerplate.
