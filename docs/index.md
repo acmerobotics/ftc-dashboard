@@ -13,10 +13,10 @@ layout: default
 
 # Documentation
 
-[Getting Started](gettingstarted/)
+[Getting Started](gettingstarted)
 
-[Basics](basics/)
+[Basics](basics)
 
-[Custom Widgets](customwidgets/)
+[Custom Widgets](customwidgets)
 
-[Javadoc](javadoc/)
+[Javadoc](javadoc)
