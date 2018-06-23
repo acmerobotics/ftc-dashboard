@@ -10,7 +10,7 @@ This article presumes some knowledge of [React](https://reactjs.org/) (and tange
 
 ## Writing the Component
 
-All widgets on the client-side are represented as React components. In accordance with React/Redux best practices, components are separated into Redux-dependent containers (stored in `/dash/src/containers`) and presentational components (stored in `/dash/src/components`). For more information, check out the [React/Redux docs](https://redux.js.org/basics/usage-with-react#presentational-and-container-components). 
+All widgets on the client-side are represented as React components. In accordance with React/Redux best practices, components are separated into Redux-dependent containers (stored in `/dash/src/containers`) and presentational components (stored in `/dash/src/components`). For more information, check out the [React/Redux docs](https://redux.js.org/basics/usage-with-react#presentational-and-container-components).
 
 Since widgets all depend on Redux data, we'll store the corresponding component in `/dash/src/containers/GyroView.jsx`. Let's begin with some standard imports:
 
@@ -24,6 +24,7 @@ import Heading from '../components/Heading';
 As this is a relatively simple component, we'll use the function syntax for declaring components:
 
 {% raw %}
+
 ```jsx
 const GyroView = ({ telemetry }) => {
     const svgStyle = {
@@ -36,7 +37,7 @@ const GyroView = ({ telemetry }) => {
     return (
         <div style={{ height: '100%' }}>
             <Heading level={2} text="Gyro" />
-            <div style={{ 
+            <div style={{
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
@@ -44,10 +45,10 @@ const GyroView = ({ telemetry }) => {
             }}>
             <svg style={svgStyle}>
                 <circle cx="85" cy="85" r="50" />
-                <rect style={{ 
+                <rect style={{
                     transform: `rotate(${telemetry.data.heading}deg)`,
                     transformOrigin: 'center'
-                }} x="80" y="0" width="10" height="85" fill="black" />        
+                }} x="80" y="0" width="10" height="85" fill="black" />
                 <text x="85" y="90" textAnchor="middle" fill="white">
                     {telemetry.data.heading}º
                 </text>
@@ -57,6 +58,7 @@ const GyroView = ({ telemetry }) => {
     );
 };
 ```
+
 {% endraw %}
 
 Finally, the rest of the components just declares prop types and a dependence on global telemetry:
@@ -77,4 +79,4 @@ export default connect(mapStateToProps)(GyroView);
 
 ## Using the Component
 
-To use the component, add `import GyroView from './GyroView';` to the top of `/dash/src/containers/Dashboard.jsx` and replace the desired component in `render()` (it depends on where you want it to be located; you can also add more cells to the grid). 
+To use the component, add `import GyroView from './GyroView';` to the top of `/dash/src/containers/Dashboard.jsx` and replace the desired component in `render()` (it depends on where you want it to be located; you can also add more cells to the grid).
