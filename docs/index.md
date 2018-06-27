@@ -11,6 +11,8 @@ layout: default
 * DS-like op mode controls
 * Fully-customizable field overlay
 
+![Dashboard screenshot](images/dashboard.png)
+
 # Documentation
 
 [Getting Started](gettingstarted)
