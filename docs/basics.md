@@ -58,7 +58,19 @@ To declare configuration variables, add them as `static`, non-`final` fields of 
 public class RobotConstants {
     public static int MAGIC_NUMBER = 32;
     public static PIDCoefficients TURNING_PID = new PIDCoefficients();
+    // other constants
 }
 ```
 
 When new values are saved in the dashboard, the values of the fields are automatically updated. This reflection-based approach allows changes to occur while the OpMode is running with minimal boilerplate.
+
+Here's the equivalent snippet in Kotlin:
+
+```kotlin
+@Config
+object RobotConstants {  
+    @JvmField var MAGIC_NUMBER = 32
+    @JvmField var TURNING_PID = PIDCoefficients()
+    // other constants
+}
+```
