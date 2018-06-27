@@ -6,7 +6,7 @@ layout: default
 
 ## Telemetry
 
-There are two ways to send telemetry to the dashboard. The first way is through the `telemetry` interface in normal SDK op modes. The second way is specific to the dashboard and is designed to be simpler and more flexible (it's also the preferred method). **Note** that both methods use the same underlying transmission mechanism and **are therefore mutually exclusive**.
+There are two ways to send telemetry to the dashboard. The first way is through the `telemetry` interface in normal SDK op modes. The second way is specific to the dashboard and is designed to be simpler and more flexible (it's also the preferred method). **Note** that both methods use the same underlying transmission mechanism and **are therefore mutually exclusive**. There is also no **rate limiting** so be careful with sending telemetry too frequently (20ms and slower is probably fine).
 
 ### SDK Telemetry
 
@@ -48,6 +48,8 @@ packet.fieldOverlay()
     .setFill("blue")
     .fillRect(-20, -20, 40, 40);
 ```
+
+The coordinate system used for the field overlay is fairly standard. The origin is located at the center of the field with the positive X axis pointing toward the Relic mats and the positive Y axis pointing toward the red alliance station. All units are in inches.
 
 ## Configuration Variables
 
