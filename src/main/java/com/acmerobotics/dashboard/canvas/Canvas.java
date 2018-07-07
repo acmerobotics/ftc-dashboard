@@ -50,8 +50,9 @@ public class Canvas {
         return this;
     }
 
-    public Canvas strokeSpline(double knotDistance, double xOffset, double yOffset, double headingOffset, double a, double b, double c, double d, double e) {
-        ops.add(new Spline(knotDistance, xOffset, yOffset, headingOffset, a, b, c, d, e));
+    public Canvas strokeSpline(double ax, double bx, double cx, double dx, double ex, double fx,
+                               double ay, double by, double cy, double dy, double ey, double fy) {
+        ops.add(new Spline(ax, bx, cx, dx, ex, fx, ay, by, cy, dy, ey, fy));
         return this;
     }
 
