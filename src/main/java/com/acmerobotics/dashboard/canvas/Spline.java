@@ -1,20 +1,25 @@
 package com.acmerobotics.dashboard.canvas;
 
 public class Spline extends CanvasOp {
-    private double knotDistance, xOffset, yOffset, headingOffset;
-    private double a, b, c, d, e;
+    private double ax, bx, cx, dx, ex, fx;
+    private double ay, by, cy, dy, ey, fy;
 
-    public Spline(double knotDistance, double xOffset, double yOffset, double headingOffset, double a, double b, double c, double d, double e) {
+    public Spline(double ax, double bx, double cx, double dx, double ex, double fx,
+                  double ay, double by, double cy, double dy, double ey, double fy) {
         super(Type.SPLINE);
 
-        this.knotDistance = knotDistance;
-        this.xOffset = xOffset;
-        this.yOffset = yOffset;
-        this.headingOffset = headingOffset;
-        this.a = a;
-        this.b = b;
-        this.c = c;
-        this.d = d;
-        this.e = e;
+        this.ax = ax;
+        this.bx = bx;
+        this.cx = cx;
+        this.dx = dx;
+        this.ex = ex;
+        this.fx = fx;
+
+        this.ay = ay;
+        this.by = by;
+        this.cy = cy;
+        this.dy = dy;
+        this.ey = ey;
+        this.fy = fy;
     }
 }

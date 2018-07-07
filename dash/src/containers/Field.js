@@ -125,18 +125,15 @@ export default class Field {
       }
       case 'spline': {
         this.ctx.beginPath();
-        const { knotDistance, xOffset, yOffset, headingOffset, a, b, c, d, e } = op;
-        this.ctx.moveTo(scalePoint(yOffset, 72, -72, x, width + x),
-          scalePoint(xOffset, 72, -72, y, height + y));
-        for (let i = 0; i <= 1; i += 0.0025) {
-          const sx = knotDistance * i;
-          const sy = (a*sx + b) * (sx*sx*sx*sx) + c * (sx*sx*sx)+ d * (sx*sx) + e * sx;
+        const { ax, bx, cx, dx, ex, fx, ay, by, cy, dy, ey, fy } = op;
+        this.ctx.moveTo(scalePoint(fy, 72, -72, x, width + x),
+          scalePoint(fx, 72, -72, y, height + y));
+        for (let t = 0; t <= 1; t += 0.0025) {
+          const sx = (ax*t + bx) * (t*t*t*t) + cx * (t*t*t) + dx * (t*t) + ex * t + fx;
+          const sy = (ay*t + by) * (t*t*t*t) + cy * (t*t*t) + dy * (t*t) + ey * t + fy;
 
-          const adjustedX = sx * Math.cos(headingOffset) - sy * Math.sin(headingOffset) + xOffset;
-          const adjustedY = sx * Math.sin(headingOffset) + sy * Math.cos(headingOffset) + yOffset;
-
-          this.ctx.lineTo(scalePoint(adjustedY, 72, -72, x, width + x),
-            scalePoint(adjustedX, 72, -72, y, height + y));
+          this.ctx.lineTo(scalePoint(sy, 72, -72, x, width + x),
+            scalePoint(sx, 72, -72, y, height + y));
         }
         this.ctx.stroke();
         break;
