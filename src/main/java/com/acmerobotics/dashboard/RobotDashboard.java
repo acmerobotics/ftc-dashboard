@@ -41,7 +41,8 @@ public class RobotDashboard implements OpModeManagerImpl.Notifications {
             "android",
             "com.sun",
             "com.vuforia",
-            "com.google"
+            "com.google",
+            "kotlin"
     ));
 
 	private static RobotDashboard dashboard;
