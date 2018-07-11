@@ -14,12 +14,12 @@ class TextInput extends React.Component {
     this.handleKeyDown = this.handleKeyDown.bind(this);
   }
 
-  static getDerivedStateFromProps(props) {
-    return {
-      value: props.value,
-      valid: true
-    };
-  }
+  // static getDerivedStateFromProps(props) {
+  //   return {
+  //     value: props.value,
+  //     valid: true
+  //   };
+  // }
 
   handleChange(evt) {
     const validated = this.props.validate(evt.target.value);
