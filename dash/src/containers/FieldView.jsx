@@ -16,7 +16,7 @@ class FieldView extends React.Component {
     this.renderField();
   }
 
-  UNSAFE_componentWillUpdate() {
+  componentDidUpdate() {
     this.field.setOverlay(this.props.overlay);
   }
 

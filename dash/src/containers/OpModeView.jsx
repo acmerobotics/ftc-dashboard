@@ -18,15 +18,15 @@ class OpModeView extends React.Component {
     this.onChange = this.onChange.bind(this);
   }
 
-  componentWillReceiveProps(newProps) {
-    if (newProps.activeOpMode !== DEFAULT_OP_MODE) {
-      this.setState({
-        selectedOpMode: newProps.activeOpMode
-      });
-    } else if (this.state.selectedOpMode === '') {
-      this.setState({
-        selectedOpMode: newProps.opModeList[0]
-      });
+  static getDerivedStateFromProps(props, state) {
+    if (props.activeOpMode !== DEFAULT_OP_MODE) {
+      return {
+        selectedOpMode: props.activeOpMode
+      };
+    } else if (state.selectedOpMode === '') {
+      return {
+        selectedOpMode: props.opModeList[0]
+      };
     }
   }
 

@@ -14,7 +14,7 @@ export const validateDouble = (value) => {
   } else {
     return {};
   }
-}
+};
 
 export const validateInt = (value) => {
   if (value === '-' || value === '') {
@@ -30,11 +30,11 @@ export const validateInt = (value) => {
   } else {
     return {};
   }
-}
+};
 
 export const validateString = (value) => {
   return {
     value,
     valid: true
   };
-}
+};
