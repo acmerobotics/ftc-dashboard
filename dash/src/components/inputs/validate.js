@@ -11,8 +11,6 @@ export const validateDouble = (value) => {
       value: parseFloat(value),
       valid: true
     };
-  } else {
-    return {};
   }
 };
 
@@ -27,8 +25,6 @@ export const validateInt = (value) => {
       value: parseInt(value, 10),
       valid: true
     };
-  } else {
-    return {};
   }
 };
 

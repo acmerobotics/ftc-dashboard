@@ -5,27 +5,14 @@ class TextInput extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      value: this.props.value,
-      valid: true
-    };
-
     this.handleChange = this.handleChange.bind(this);
     this.handleKeyDown = this.handleKeyDown.bind(this);
   }
 
-  // static getDerivedStateFromProps(props) {
-  //   return {
-  //     value: props.value,
-  //     valid: true
-  //   };
-  // }
-
   handleChange(evt) {
     const validated = this.props.validate(evt.target.value);
-    this.setState(validated);
-    if (validated.valid) {
-      this.props.onChange(validated.value);
+    if (validated) {
+      this.props.onChange(validated);
     }
   }
 
@@ -38,10 +25,10 @@ class TextInput extends React.Component {
   render() {
     return (
       <input
-        className={ this.state.valid ? 'valid' : 'invalid' }
+        className={ this.props.valid ? 'valid' : 'invalid' }
         type="text"
         size={15}
-        value={this.state.value}
+        value={this.props.value}
         onChange={this.handleChange}
         onKeyDown={this.handleKeyDown}
       />

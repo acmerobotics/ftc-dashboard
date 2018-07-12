@@ -1,21 +1,31 @@
 import { applyMiddleware, createStore } from 'redux';
-// import { createLogger } from 'redux-logger';
+import { createLogger } from 'redux-logger';
 import thunk from 'redux-thunk';
 import socketMiddleware from './socketMiddleware';
 import reducer from './reducers';
-// import { RECEIVE_PING_TIME } from './actions/socket';
-// import { RECEIVE_TELEMETRY } from './actions/telemetry';
+import { RECEIVE_PING_TIME } from './actions/socket';
+import { RECEIVE_TELEMETRY } from './actions/telemetry';
+import { RECEIVE_ROBOT_STATUS } from './actions/status';
 
-// const logger = createLogger({
-//   predicate: (getState, action) => (action.type !== RECEIVE_PING_TIME && action.type !== RECEIVE_TELEMETRY)
-// });
+const DEBUG = false;
 
-const configureStore = () => (
-  createStore(
+const HIDDEN_ACTIONS = [RECEIVE_PING_TIME, RECEIVE_TELEMETRY, RECEIVE_ROBOT_STATUS];
+
+const configureStore = () =>  {
+  const middlewares = [thunk, socketMiddleware];
+
+  if (DEBUG) {
+    const logger = createLogger({
+      predicate: (getState, action) => HIDDEN_ACTIONS.indexOf(action.type) === -1
+    });
+
+    middlewares.push(logger);
+  }
+
+  return createStore(
     reducer,
-    // applyMiddleware(thunk, socketMiddleware, logger)
-    applyMiddleware(thunk, socketMiddleware)
-  )
-);
+    applyMiddleware.apply(null, middlewares)
+  );
+};
 
 export default configureStore;

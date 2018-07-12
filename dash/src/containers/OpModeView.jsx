@@ -27,6 +27,8 @@ class OpModeView extends React.Component {
       return {
         selectedOpMode: props.opModeList[0]
       };
+    } else {
+      return {};
     }
   }
 

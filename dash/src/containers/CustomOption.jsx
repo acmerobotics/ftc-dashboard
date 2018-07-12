@@ -58,20 +58,28 @@ class CustomOption extends React.Component {
             key={key}
             name={key}
             value={value[key]}
-            modifiedValue={modifiedValue ? modifiedValue[key] : null}
+            modifiedValue={modifiedValue ? modifiedValue[key] : undefined}
             schema={schema[key]}
             onChange={onChange}
             onSave={onSave} />
         );
       }
 
+      const modified = typeof modifiedValue !== 'undefined' && (key in modifiedValue);
+      
+      const optionValue = modified ? modifiedValue[key].value : value[key];
+      const optionSchema = schema[key];
+
+      const valid = modified ? modifiedValue[key].valid : true;
+
       return (
         <BasicOption
           key={key}
           name={key}
-          value={value[key]}
-          modifiedValue={modifiedValue ? modifiedValue[key] : null}
-          schema={schema[key]}
+          value={optionValue}
+          modified={modified}
+          valid={valid}
+          schema={optionSchema}
           onChange={onChange}
           onSave={onSave} />
       );

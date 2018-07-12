@@ -8,32 +8,33 @@ import { validateDouble, validateInt, validateString } from '../components/input
 
 class BasicOption extends React.Component {
   render() {
-    const { name, value, modifiedValue, schema } = this.props;
+    const { name, value, modified, valid, schema, onChange, onSave } = this.props;
 
     const type = OptionType.getFromSchema(schema);
 
-    const newValue = modifiedValue || value;
-    const modified = newValue !== value;
-
-    const onEnter = () => this.props.onSave(newValue);
+    const onEnter = () => {
+      if (valid && modified) {
+        onSave(value);
+      }
+    };
 
     let input;
 
     switch (type) {
     case OptionType.INT:
-      input = <TextInput value={newValue} validate={validateInt} onChange={this.props.onChange} onEnter={onEnter} />;
+      input = <TextInput value={value} valid={valid} validate={validateInt} onChange={onChange} onEnter={onEnter} />;
       break;
     case OptionType.DOUBLE:
-      input = <TextInput value={newValue} validate={validateDouble} onChange={this.props.onChange} onEnter={onEnter} />;
+      input = <TextInput value={value} valid={valid} validate={validateDouble} onChange={onChange} onEnter={onEnter} />;
       break;
     case OptionType.STRING:
-      input = <TextInput value={newValue} validate={validateString} onChange={this.props.onChange} onEnter={onEnter} />;
+      input = <TextInput value={value} valid={valid} validate={validateString} onChange={onChange} onEnter={onEnter} />;
       break;
     case OptionType.BOOLEAN:
-      input = <BooleanInput value={newValue} onChange={this.props.onChange} />;
+      input = <BooleanInput value={value} onChange={onChange} />;
       break;
     case OptionType.ENUM:
-      input = <EnumInput value={newValue} values={schema.values} onChange={this.props.onChange} />;
+      input = <EnumInput value={value} values={schema.values} onChange={onChange} />;
       break;
     default:
       input = <p>Unknown option type: {type}</p>;
@@ -51,7 +52,8 @@ class BasicOption extends React.Component {
 BasicOption.propTypes = {
   name: PropTypes.string.isRequired,
   value: PropTypes.any.isRequired,
-  modifiedValue: PropTypes.any,
+  modified: PropTypes.bool.isRequired,
+  valid: PropTypes.bool.isRequired,
   schema: PropTypes.any.isRequired,
   onChange: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,

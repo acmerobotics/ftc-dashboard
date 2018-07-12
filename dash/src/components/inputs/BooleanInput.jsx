@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 const BooleanInput = ({ value, onChange }) => (
-  <input type="checkbox" checked={value} onChange={evt => onChange(evt.target.checked)} />
+  <input type="checkbox" checked={value} onChange={evt => onChange(evt.target.checked, true)} />
 );
 
 BooleanInput.propTypes = {
