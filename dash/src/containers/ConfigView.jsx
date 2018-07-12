@@ -23,7 +23,7 @@ const ConfigView = ({ config, onRefresh, onSave, onChange }) => (
               key={key}
               name={key}
               value={config.options[key] || {}}
-              modifiedValue={config.modifiedOptions ? config.modifiedOptions[key] : null}
+              modifiedValue={config.modifiedOptions ? config.modifiedOptions[key] : undefined}
               schema={config.schema[key]}
               onChange={
                 (value) => {

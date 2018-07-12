@@ -5,7 +5,7 @@ const EnumInput = ({ value, values, onChange }) => (
   <select
     className="valid"
     value={value}
-    onChange={evt => onChange(evt.target.value)}>
+    onChange={evt => onChange(evt.target.value, true)}>
     {
       values.map(v => (<option key={v} value={v}>{v}</option>))
     }

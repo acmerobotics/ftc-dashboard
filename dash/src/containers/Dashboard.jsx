@@ -16,7 +16,7 @@ import { connect, disconnect } from '../actions/socket';
 
 class Dashboard extends Component {
   componentDidMount() {
-    this.props.dispatch(connect('192.168.49.1', 8000));
+    this.props.dispatch(connect('192.168.1.7', 8000));
   }
 
   componentWillUnmount() {
