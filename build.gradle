@@ -1,12 +1,12 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion '25.0.3'
+    compileSdkVersion 27
+    buildToolsVersion '27.0.3'
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 19
+        targetSdkVersion 27
     }
 
     lintOptions {
@@ -21,9 +21,9 @@ repositories {
 }
 
 dependencies {
-    compile(name: 'RobotCore-release', ext: 'aar')
+    implementation(name: 'RobotCore-release', ext: 'aar')
 
-    compile('org.nanohttpd:nanohttpd-websocket:2.3.1') {
+    implementation('org.nanohttpd:nanohttpd-websocket:2.3.1') {
         exclude module: 'nanohttpd'
     }
 }
