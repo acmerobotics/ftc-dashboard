@@ -10,6 +10,9 @@ buildscript {
     }
 }
 
+plugins {
+    id "com.moowork.node" version "1.2.0"
+}
 apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
@@ -26,6 +29,20 @@ android {
     lintOptions {
         abortOnError false
     }
+
+    sourceSets {
+        main {
+            assets.srcDirs = ['../client.private']
+        }
+    }
+}
+
+node {
+    nodeModulesDir = file("${project.projectDir}/dash")
+}
+
+task yarnBuild(type: YarnTask) {
+    args = ['build']
 }
 
 repositories {
