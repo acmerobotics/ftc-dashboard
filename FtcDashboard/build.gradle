@@ -29,20 +29,15 @@ android {
     lintOptions {
         abortOnError false
     }
-
-    sourceSets {
-        main {
-            assets.srcDirs = ['../client.private']
-        }
-    }
 }
 
 node {
     nodeModulesDir = file("${project.projectDir}/dash")
 }
 
-task yarnBuild(type: YarnTask) {
-    args = ['build']
+task buildDash(type: NodeTask, dependsOn: yarn) {
+    println(file("${project.projectDir}/dash/scripts/build.js"))
+    script = file("${project.projectDir}/dash/scripts/build.js")
 }
 
 repositories {
