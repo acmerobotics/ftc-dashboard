@@ -38,6 +38,7 @@ class TextInput extends React.Component {
 
 TextInput.propTypes = {
   value: PropTypes.any.isRequired,
+  valid: PropTypes.bool.isRequired,
   validate: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
   onEnter: PropTypes.func.isRequired
