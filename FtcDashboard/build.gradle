@@ -1,12 +1,26 @@
+buildscript {
+    ext.dashboard_version = '0.1.0-SNAPSHOT'
+
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
+    }
+}
+
 apply plugin: 'com.android.library'
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.bintray'
 
 android {
-    compileSdkVersion 23
+    compileSdkVersion 27
     buildToolsVersion '25.0.3'
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 19
+        targetSdkVersion 27
     }
 
     lintOptions {
@@ -25,5 +39,80 @@ dependencies {
 
     compile('org.nanohttpd:nanohttpd-websocket:2.3.1') {
         exclude module: 'nanohttpd'
+    }
+}
+
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+
+task androidJavadocs(type: Javadoc) {
+    failOnError = false
+    source = android.sourceSets.main.java.srcDirs
+    ext.androidJar = "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
+    classpath += files(ext.androidJar)
+}
+
+task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+    classifier = 'javadoc'
+    from androidJavadocs.destinationDir
+}
+
+def pomConfig = {
+    licenses {
+        license {
+            name "The MIT License"
+            url "https://opensource.org/licenses/MIT"
+            distribution "repo"
+        }
+    }
+    developers {
+        developer {
+            id "rbrott"
+            name "Ryan Brott"
+            email "rcbrott@gmail.com"
+        }
+    }
+
+    scm {
+        url "https://github.com/acmerobotics/ftc-dashboard"
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifact bundleRelease
+            artifact androidSourcesJar
+            artifact androidJavadocsJar
+            groupId = 'com.acmerobotics.dashboard'
+            artifactId = 'dashboard'
+            version dashboard_version
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('description', 'React-based web dashboard designed for FTC')
+                root.appendNode('name', 'FTC Dashboard')
+                root.appendNode('url', 'https://github.com/acmerobotics/ftc-dashboard')
+                root.children().last() + pomConfig
+            }
+        }
+    }
+}
+
+bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_KEY')
+    pkg {
+        repo = 'maven'
+        name = 'ftc-dashboard'
+        userOrg = 'acmerobotics'
+        licenses = ['MIT']
+        vcsUrl = 'https://github.com/acmerobotics/ftc-dashboard.git'
+        version {
+            name = dashboard_version
+            released  = new Date()
+        }
+        publications = ['maven']
     }
 }
