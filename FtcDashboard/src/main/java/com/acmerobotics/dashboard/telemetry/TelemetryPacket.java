@@ -55,6 +55,10 @@ public class TelemetryPacket {
         log.add(line);
     }
 
+    public void clearLines() {
+        log.clear();
+    }
+
     /**
      * Adds the current timestamp to the packet. This is called automatically when the packet is
      * sent (and any previous timestamp will be overwritten).
@@ -72,12 +76,13 @@ public class TelemetryPacket {
      * all of the operations yet.
      */
     public static class Adapter implements Telemetry {
-        private TelemetryPacket currentPacket;
         private FtcDashboard dashboard;
+        private TelemetryPacket currentPacket;
+        private LogAdapter log;
 
         public Adapter(FtcDashboard dashboard) {
             this.dashboard = dashboard;
-            currentPacket = new TelemetryPacket();
+            clear();
         }
 
         @Override
@@ -109,6 +114,7 @@ public class TelemetryPacket {
         @Override
         public void clear() {
             currentPacket = new TelemetryPacket();
+            log = new LogAdapter(currentPacket);
         }
 
         @Override
@@ -151,7 +157,7 @@ public class TelemetryPacket {
 
         @Override
         public boolean isAutoClear() {
-            return false;
+            return true;
         }
 
         @Override
@@ -191,7 +197,50 @@ public class TelemetryPacket {
 
         @Override
         public Log log() {
-            return null;
+            return log;
+        }
+    }
+
+    private static class LogAdapter implements Telemetry.Log {
+        private TelemetryPacket telemetryPacket;
+
+        private LogAdapter(TelemetryPacket packet) {
+            telemetryPacket = packet;
+        }
+
+        @Override
+        public int getCapacity() {
+            return 0;
+        }
+
+        @Override
+        public void setCapacity(int capacity) {
+
+        }
+
+        @Override
+        public DisplayOrder getDisplayOrder() {
+            return DisplayOrder.OLDEST_FIRST;
+        }
+
+        @Override
+        public void setDisplayOrder(DisplayOrder displayOrder) {
+
+        }
+
+        @Override
+        public void add(String entry) {
+            telemetryPacket.addLine(entry);
+        }
+
+        @Override
+        public void add(String format, Object... args) {
+            telemetryPacket.addLine(String.format(format, args));
+        }
+
+        @Override
+        public void clear() {
+            telemetryPacket.clearLines();
         }
     }
 }
