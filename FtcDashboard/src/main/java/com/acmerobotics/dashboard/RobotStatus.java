@@ -2,7 +2,14 @@ package com.acmerobotics.dashboard;
 
 import com.qualcomm.robotcore.util.RobotLog;
 
+/**
+ * Container for information about the active op mode and its state.
+ */
 public class RobotStatus {
+
+    /**
+     * Status of an op mode.
+     */
     public enum OpModeStatus {
         INIT,
         RUNNING,
@@ -14,6 +21,9 @@ public class RobotStatus {
     private OpModeStatus activeOpModeStatus;
     private String warningMessage, errorMessage;
 
+    /**
+     * Creates a status object with the default values.
+     */
     public RobotStatus() {
         this.available = false;
         this.activeOpMode = "";
@@ -22,6 +32,11 @@ public class RobotStatus {
         this.errorMessage = "";
     }
 
+    /**
+     * Creates a status object from the active op mode and it status.
+     * @param activeOpMode active op mode
+     * @param activeOpModeStatus active op mode status
+     */
     public RobotStatus(String activeOpMode, OpModeStatus activeOpModeStatus) {
         this.available = true;
         this.activeOpMode = activeOpMode;

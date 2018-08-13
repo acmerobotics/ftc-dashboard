@@ -10,7 +10,7 @@ public class DashboardWebSocketServer extends NanoWSD {
     
     private FtcDashboard dashboard;
     
-    public DashboardWebSocketServer(FtcDashboard dashboard) {
+    DashboardWebSocketServer(FtcDashboard dashboard) {
         super(PORT);
         this.dashboard = dashboard;
     }

@@ -115,11 +115,12 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 	private int telemetryTransmissionInterval = 100;
 	private ScheduledExecutorService telemetryExecutorService;
 	private TelemetryPacket nextTelemetryPacket;
+	private final Object telemetryLock = new Object();
 
 	private class TelemetryUpdateRunnable implements Runnable {
         @Override
         public void run() {
-            synchronized (this) {
+            synchronized (telemetryLock) {
                 if (nextTelemetryPacket != null) {
                     sendAll(new Message(MessageType.RECEIVE_TELEMETRY, nextTelemetryPacket));
                     nextTelemetryPacket = null;
@@ -238,15 +239,24 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * Sends telemetry information to all instance clients.
      * @param telemetryPacket packet to send
      */
-	public synchronized void sendTelemetryPacket(TelemetryPacket telemetryPacket) {
+	public void sendTelemetryPacket(TelemetryPacket telemetryPacket) {
 		telemetryPacket.addTimestamp();
-		nextTelemetryPacket = telemetryPacket;
+		synchronized (telemetryLock) {
+            nextTelemetryPacket = telemetryPacket;
+        }
 	}
 
+    /**
+     * Returns the telemetry transmission interval in milliseconds.
+     */
 	public int getTelemetryTransmissionInterval() {
 	    return telemetryTransmissionInterval;
     }
 
+    /**
+     * Sets the telemetry tranmission interval.
+     * @param newTransmissionInterval transmission interval in milliseconds
+     */
     public void setTelemetryTransmissionInterval(int newTransmissionInterval) {
 	    telemetryTransmissionInterval = newTransmissionInterval;
     }

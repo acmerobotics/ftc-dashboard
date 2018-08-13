@@ -21,6 +21,10 @@ public class ClasspathScanner {
     private DexFile dexFile;
     private ClassFilter filter;
 
+    /**
+     * Creates a new class path object.
+     * @param filter class filter for handling scanned classes
+     */
     public ClasspathScanner(ClassFilter filter) {
         Context context = AppUtil.getInstance().getApplication();
         try {

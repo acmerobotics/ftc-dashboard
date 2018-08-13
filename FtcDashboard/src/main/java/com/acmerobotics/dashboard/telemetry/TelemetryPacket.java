@@ -22,6 +22,9 @@ public class TelemetryPacket {
     private List<String> log;
     private Canvas fieldOverlay;
 
+    /**
+     * Creates a new telemetry packet.
+     */
     public TelemetryPacket() {
         data = new HashMap<>();
         log = new ArrayList<>();
@@ -55,6 +58,9 @@ public class TelemetryPacket {
         log.add(line);
     }
 
+    /**
+     * Clears the telemetry log.
+     */
     public void clearLines() {
         log.clear();
     }
@@ -67,6 +73,9 @@ public class TelemetryPacket {
         timestamp = System.currentTimeMillis();
     }
 
+    /**
+     * Returns the field overlay canvas.
+     */
     public Canvas fieldOverlay() {
         return fieldOverlay;
     }
