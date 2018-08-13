@@ -1,6 +1,7 @@
 package com.acmerobotics.dashboard;
 
 import android.app.Activity;
+import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -22,6 +23,11 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeManagerImpl;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeMeta;
 import org.firstinspires.ftc.robotcore.internal.opmode.RegisteredOpModes;
+import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
+import org.firstinspires.ftc.robotcore.internal.webserver.MimeTypesUtil;
+import org.firstinspires.ftc.robotcore.internal.webserver.WebHandler;
+import org.firstinspires.ftc.robotcore.internal.webserver.WebHandlerManager;
+import org.firstinspires.ftc.robotcore.internal.webserver.WebServer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,6 +35,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import fi.iki.elonen.NanoHTTPD;
 
 /**
  * Main class for interacting with the dashboard.
@@ -55,6 +63,10 @@ public class RobotDashboard implements OpModeManagerImpl.Notifications {
         if (dashboard == null) {
             dashboard = new RobotDashboard();
         }
+    }
+
+    public static void attachWebServer(WebServer webServer) {
+	    dashboard.internalAttachWebServer(webServer);
     }
 
     /**
@@ -90,24 +102,26 @@ public class RobotDashboard implements OpModeManagerImpl.Notifications {
 	private Configuration configuration;
 	private OpModeManagerImpl opModeManager;
 	private RobotStatus.OpModeStatus activeOpModeStatus = RobotStatus.OpModeStatus.STOPPED;
-	private List<String> opModeList;
+    private AssetManager assetManager;
+    private List<String> opModeList;
+	private List<String> assetFiles;
 
 	private RobotDashboard() {
-		sockets = new ArrayList<>();
-		configuration = new Configuration();
-		telemetry = new TelemetryPacket.Adapter(new Consumer<TelemetryPacket>() {
-			@Override
-			public void accept(TelemetryPacket telemetryPacket) {
-				sendTelemetryPacket(telemetryPacket);
-			}
-		});
+        sockets = new ArrayList<>();
+        configuration = new Configuration();
+        telemetry = new TelemetryPacket.Adapter(new Consumer<TelemetryPacket>() {
+            @Override
+            public void accept(TelemetryPacket telemetryPacket) {
+                sendTelemetryPacket(telemetryPacket);
+            }
+        });
 
         ClasspathScanner scanner = new ClasspathScanner(new ClassFilter() {
             @Override
             public boolean shouldProcessClass(String className) {
-            	for (String packageName : IGNORED_PACKAGES) {
-            	    if (className.startsWith(packageName)) {
-            	        return false;
+                for (String packageName : IGNORED_PACKAGES) {
+                    if (className.startsWith(packageName)) {
+                        return false;
                     }
                 }
                 return true;
@@ -123,17 +137,62 @@ public class RobotDashboard implements OpModeManagerImpl.Notifications {
         });
         scanner.scanClasspath();
 
-		server = new RobotWebSocketServer(this);
-		try {
-			server.start();
-		} catch (IOException e) {
-		    Log.w(TAG, e);
-		}
+        server = new RobotWebSocketServer(this);
+        try {
+            server.start();
+        } catch (IOException e) {
+            Log.w(TAG, e);
+        }
 
-		opModeList = new ArrayList<>();
-	}
+        assetManager = AppUtil.getDefContext().getAssets();
 
-	private void internalAttachEventLoop(EventLoop eventLoop) {
+        opModeList = new ArrayList<>();
+
+        assetFiles = new ArrayList<>();
+        buildAssetsFileList("dash");
+    }
+
+    private WebHandler newStaticAssetHandler(final String file) {
+        return new WebHandler() {
+            @Override
+            public NanoHTTPD.Response getResponse(NanoHTTPD.IHTTPSession session) throws IOException {
+                if (session.getMethod() == NanoHTTPD.Method.GET) {
+                    String mimeType = MimeTypesUtil.determineMimeType(file);
+                    return NanoHTTPD.newChunkedResponse(NanoHTTPD.Response.Status.OK, mimeType, assetManager.open(file));
+                } else {
+                    return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "");
+                }
+            }
+        };
+    }
+
+    private boolean buildAssetsFileList(String path) {
+        try {
+            String[] list = assetManager.list(path);
+            if (list.length > 0) {
+                for (String file : list) {
+                    if (!buildAssetsFileList(path + "/" + file))
+                        return false;
+                }
+            } else {
+                assetFiles.add(path);
+            }
+        } catch (IOException e) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private void internalAttachWebServer(WebServer webServer) {
+        WebHandlerManager manager = webServer.getWebHandlerManager();
+        manager.register("/dash", newStaticAssetHandler("dash/index.html"));
+        for (final String file : assetFiles) {
+            manager.register("/" + file, newStaticAssetHandler(file));
+        }
+    }
+
+    private void internalAttachEventLoop(EventLoop eventLoop) {
         opModeManager = eventLoop.getOpModeManager();
         if (opModeManager != null) {
             opModeManager.registerListener(this);

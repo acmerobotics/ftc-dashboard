@@ -29,6 +29,12 @@ android {
     lintOptions {
         abortOnError false
     }
+
+    sourceSets {
+        main {
+            assets.srcDirs = ["${project.projectDir}/dash/build"]
+        }
+    }
 }
 
 node {
@@ -36,8 +42,11 @@ node {
 }
 
 task buildDash(type: NodeTask, dependsOn: yarn) {
-    println(file("${project.projectDir}/dash/scripts/build.js"))
     script = file("${project.projectDir}/dash/scripts/build.js")
+}
+
+android.libraryVariants.all { variant ->
+    variant.preBuild.dependsOn buildDash
 }
 
 repositories {
@@ -128,3 +137,9 @@ bintray {
         publications = ['maven']
     }
 }
+
+task cleanDash(type: Delete) {
+    delete file("${project.projectDir}/dash/build")
+}
+
+clean.dependsOn cleanDash
