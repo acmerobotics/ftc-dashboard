@@ -8,9 +8,9 @@ import fi.iki.elonen.NanoWSD;
 public class RobotWebSocketServer extends NanoWSD {
     private static final int PORT = 8000;
     
-    private RobotDashboard dashboard;
+    private FtcDashboard dashboard;
     
-    public RobotWebSocketServer(RobotDashboard dashboard) {
+    public RobotWebSocketServer(FtcDashboard dashboard) {
         super(PORT);
         this.dashboard = dashboard;
     }

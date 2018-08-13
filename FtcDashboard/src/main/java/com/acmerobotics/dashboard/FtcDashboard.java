@@ -39,10 +39,10 @@ import java.util.Set;
 import fi.iki.elonen.NanoHTTPD;
 
 /**
- * Main class for interacting with the dashboard.
+ * Main class for interacting with the instance.
  */
-public class RobotDashboard implements OpModeManagerImpl.Notifications {
-    public static final String TAG = "RobotDashboard";
+public class FtcDashboard implements OpModeManagerImpl.Notifications {
+    public static final String TAG = "FtcDashboard";
 
     private static final Set<String> IGNORED_PACKAGES = new HashSet<>(Arrays.asList(
             "java",
@@ -53,47 +53,47 @@ public class RobotDashboard implements OpModeManagerImpl.Notifications {
             "kotlin"
     ));
 
-	private static RobotDashboard dashboard;
+	private static FtcDashboard instance;
 
     /**
-     * Starts the dashboard and a WebSocket server that listens for external connections.
+     * Starts the instance and a WebSocket server that listens for external connections.
      * This method should usually be called from {@link Activity#onCreate(Bundle)}.
      */
 	public static void start() {
-        if (dashboard == null) {
-            dashboard = new RobotDashboard();
+        if (instance == null) {
+            instance = new FtcDashboard();
         }
     }
 
     public static void attachWebServer(WebServer webServer) {
-	    dashboard.internalAttachWebServer(webServer);
+	    instance.internalAttachWebServer(webServer);
     }
 
     /**
-     * Attaches the event loop to the dashboard for op mode management.
+     * Attaches the event loop to the instance for op mode management.
      * @param eventLoop
      */
     public static void attachEventLoop(EventLoop eventLoop) {
-	    dashboard.internalAttachEventLoop(eventLoop);
+	    instance.internalAttachEventLoop(eventLoop);
     }
 
     /**
-     * Stops the dashboard and the underlying WebSocket server. This method should usually be
+     * Stops the instance and the underlying WebSocket server. This method should usually be
      * called from {@link Activity#onDestroy()}.
      */
 	public static void stop() {
-	    if (dashboard != null) {
-	        dashboard.close();
-	        dashboard = null;
+	    if (instance != null) {
+	        instance.close();
+	        instance = null;
         }
     }
 
     /**
-     * Returns the active dashboard instance. This should be called after {@link #start()}.
-     * @return active dashboard instance or null outside of its lifecycle
+     * Returns the active instance instance. This should be called after {@link #start()}.
+     * @return active instance instance or null outside of its lifecycle
      */
-	public static RobotDashboard getInstance() {
-		return dashboard;
+	public static FtcDashboard getInstance() {
+		return instance;
 	}
 
 	private TelemetryPacket.Adapter telemetry;
@@ -106,7 +106,7 @@ public class RobotDashboard implements OpModeManagerImpl.Notifications {
     private List<String> opModeList;
 	private List<String> assetFiles;
 
-	private RobotDashboard() {
+	private FtcDashboard() {
         sockets = new ArrayList<>();
         configuration = new Configuration();
         telemetry = new TelemetryPacket.Adapter(new Consumer<TelemetryPacket>() {
@@ -217,7 +217,7 @@ public class RobotDashboard implements OpModeManagerImpl.Notifications {
     }
 
     /**
-     * Sends telemetry information to all dashboard clients.
+     * Sends telemetry information to all instance clients.
      * @param telemetryPacket packet to send
      */
 	public void sendTelemetryPacket(TelemetryPacket telemetryPacket) {
@@ -226,7 +226,7 @@ public class RobotDashboard implements OpModeManagerImpl.Notifications {
 	}
 
     /**
-     * Sends updated configuration data to all dashboard clients.
+     * Sends updated configuration data to all instance clients.
      */
 	public void updateConfig() {
 	    sendAll(new Message(MessageType.RECEIVE_CONFIG_OPTIONS, getConfigJson()));

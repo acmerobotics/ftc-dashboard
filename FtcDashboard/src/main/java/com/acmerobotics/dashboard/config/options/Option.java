@@ -8,7 +8,7 @@ import com.google.gson.JsonElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
-import static com.acmerobotics.dashboard.RobotDashboard.TAG;
+import static com.acmerobotics.dashboard.FtcDashboard.TAG;
 
 /**
  * Type-independent dashboard configuration option.

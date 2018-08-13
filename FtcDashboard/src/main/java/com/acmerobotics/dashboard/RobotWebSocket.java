@@ -22,29 +22,29 @@ public class RobotWebSocket extends NanoWSD.WebSocket {
             .registerTypeAdapter(Message.class, new MessageDeserializer())
             .create();
 
-    private RobotDashboard dashboard;
+    private FtcDashboard dashboard;
 
-    RobotWebSocket(NanoHTTPD.IHTTPSession handshakeRequest, RobotDashboard dash) {
+    RobotWebSocket(NanoHTTPD.IHTTPSession handshakeRequest, FtcDashboard dash) {
         super(handshakeRequest);
         dashboard = dash;
     }
 
     @Override
     protected void onOpen() {
-        if (DEBUG) Log.i(RobotDashboard.TAG, "[OPEN]\t" + this.getHandshakeRequest().getRemoteIpAddress());
+        if (DEBUG) Log.i(FtcDashboard.TAG, "[OPEN]\t" + this.getHandshakeRequest().getRemoteIpAddress());
         dashboard.addSocket(this);
     }
 
     @Override
     protected void onClose(NanoWSD.WebSocketFrame.CloseCode code, String reason, boolean initiatedByRemote) {
-        if (DEBUG) Log.i(RobotDashboard.TAG, "[CLOSE]\t" + this.getHandshakeRequest().getRemoteIpAddress());
+        if (DEBUG) Log.i(FtcDashboard.TAG, "[CLOSE]\t" + this.getHandshakeRequest().getRemoteIpAddress());
         dashboard.removeSocket(this);
     }
 
     @Override
     protected void onMessage(NanoWSD.WebSocketFrame message) {
         Message msg = GSON.fromJson(message.getTextPayload(), Message.class);
-        if (DEBUG) Log.i(RobotDashboard.TAG, "[RECV]\t" + message.getTextPayload());
+        if (DEBUG) Log.i(FtcDashboard.TAG, "[RECV]\t" + message.getTextPayload());
         dashboard.onMessage(this, msg);
     }
 
@@ -64,10 +64,10 @@ public class RobotWebSocket extends NanoWSD.WebSocket {
     public void send(Message message) {
         try {
             String messageStr = GSON.toJson(message);
-            if (DEBUG) Log.i(RobotDashboard.TAG, "[SENT]\t" + messageStr);
+            if (DEBUG) Log.i(FtcDashboard.TAG, "[SENT]\t" + messageStr);
             send(messageStr);
         } catch (IOException e) {
-            Log.w(RobotDashboard.TAG, e);
+            Log.w(FtcDashboard.TAG, e);
         }
     }
 

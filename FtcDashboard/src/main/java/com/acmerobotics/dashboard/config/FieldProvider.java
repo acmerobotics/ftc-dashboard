@@ -2,7 +2,7 @@ package com.acmerobotics.dashboard.config;
 
 import android.util.Log;
 
-import com.acmerobotics.dashboard.RobotDashboard;
+import com.acmerobotics.dashboard.FtcDashboard;
 
 import java.lang.reflect.Field;
 
@@ -25,7 +25,7 @@ public class FieldProvider<T> implements ValueProvider<T> {
         try {
             return (T) field.get(parent);
         } catch (IllegalAccessException e) {
-            Log.w(RobotDashboard.TAG, e);
+            Log.w(FtcDashboard.TAG, e);
         }
         return null;
     }
@@ -35,7 +35,7 @@ public class FieldProvider<T> implements ValueProvider<T> {
         try {
             field.set(parent, value);
         } catch (IllegalAccessException e) {
-            Log.w(RobotDashboard.TAG, e);
+            Log.w(FtcDashboard.TAG, e);
         }
     }
 }
