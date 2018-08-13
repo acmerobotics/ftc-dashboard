@@ -18,7 +18,6 @@ import com.qualcomm.robotcore.eventloop.EventLoop;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-import org.firstinspires.ftc.robotcore.external.Consumer;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeManagerImpl;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeMeta;
@@ -65,13 +64,17 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         }
     }
 
+    /**
+     * Attaches a web server for accessing the dashboard through the phone (like OBJ/Blocks).
+     * @param webServer web server
+     */
     public static void attachWebServer(WebServer webServer) {
 	    instance.internalAttachWebServer(webServer);
     }
 
     /**
      * Attaches the event loop to the instance for op mode management.
-     * @param eventLoop
+     * @param eventLoop event loop
      */
     public static void attachEventLoop(EventLoop eventLoop) {
 	    instance.internalAttachEventLoop(eventLoop);
@@ -103,18 +106,13 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 	private OpModeManagerImpl opModeManager;
 	private RobotStatus.OpModeStatus activeOpModeStatus = RobotStatus.OpModeStatus.STOPPED;
     private AssetManager assetManager;
-    private List<String> opModeList;
+    private final List<String> opModeList;
 	private List<String> assetFiles;
 
 	private FtcDashboard() {
         sockets = new ArrayList<>();
         configuration = new Configuration();
-        telemetry = new TelemetryPacket.Adapter(new Consumer<TelemetryPacket>() {
-            @Override
-            public void accept(TelemetryPacket telemetryPacket) {
-                sendTelemetryPacket(telemetryPacket);
-            }
-        });
+        telemetry = new TelemetryPacket.Adapter(this::sendTelemetryPacket);
 
         ClasspathScanner scanner = new ClasspathScanner(new ClassFilter() {
             @Override
@@ -130,7 +128,6 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             @Override
             public void processClass(Class klass) {
                 if (klass.isAnnotationPresent(Config.class) && !klass.isAnnotationPresent(Disabled.class)) {
-                    Log.i(TAG, String.format("Found config class %s", klass.getCanonicalName()));
                     configuration.addOptionsFromClass(klass);
                 }
             }
@@ -153,15 +150,12 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     private WebHandler newStaticAssetHandler(final String file) {
-        return new WebHandler() {
-            @Override
-            public NanoHTTPD.Response getResponse(NanoHTTPD.IHTTPSession session) throws IOException {
-                if (session.getMethod() == NanoHTTPD.Method.GET) {
-                    String mimeType = MimeTypesUtil.determineMimeType(file);
-                    return NanoHTTPD.newChunkedResponse(NanoHTTPD.Response.Status.OK, mimeType, assetManager.open(file));
-                } else {
-                    return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "");
-                }
+        return session -> {
+            if (session.getMethod() == NanoHTTPD.Method.GET) {
+                String mimeType = MimeTypesUtil.determineMimeType(file);
+                return NanoHTTPD.newChunkedResponse(NanoHTTPD.Response.Status.OK, mimeType, assetManager.open(file));
+            } else {
+                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "");
             }
         };
     }
@@ -169,6 +163,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private boolean buildAssetsFileList(String path) {
         try {
             String[] list = assetManager.list(path);
+            if (list == null) return false;
             if (list.length > 0) {
                 for (String file : list) {
                     if (!buildAssetsFileList(path + "/" + file))
