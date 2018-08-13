@@ -1,5 +1,6 @@
 package com.acmerobotics.dashboard.telemetry;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.canvas.Canvas;
 
 import org.firstinspires.ftc.robotcore.external.Consumer;
@@ -72,10 +73,10 @@ public class TelemetryPacket {
      */
     public static class Adapter implements Telemetry {
         private TelemetryPacket currentPacket;
-        private Consumer<TelemetryPacket> packetConsumer;
+        private FtcDashboard dashboard;
 
-        public Adapter(Consumer<TelemetryPacket> packetConsumer) {
-            this.packetConsumer = packetConsumer;
+        public Adapter(FtcDashboard dashboard) {
+            this.dashboard = dashboard;
             currentPacket = new TelemetryPacket();
         }
 
@@ -127,7 +128,7 @@ public class TelemetryPacket {
 
         @Override
         public boolean update() {
-            packetConsumer.accept(currentPacket);
+            dashboard.sendTelemetryPacket(currentPacket);
             clear();
             return true;
         }
@@ -160,12 +161,12 @@ public class TelemetryPacket {
 
         @Override
         public int getMsTransmissionInterval() {
-            return 0;
+            return dashboard.getTelemetryTransmissionInterval();
         }
 
         @Override
         public void setMsTransmissionInterval(int msTransmissionInterval) {
-
+            dashboard.setTelemetryTransmissionInterval(msTransmissionInterval);
         }
 
         @Override

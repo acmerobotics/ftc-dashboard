@@ -1,4 +1,8 @@
-import { RECEIVE_CONFIG_OPTIONS, RECEIVE_CONFIG_SCHEMA, UPDATE_CONFIG_OPTIONS } from '../actions/config';
+import { 
+  RECEIVE_CONFIG_OPTIONS, 
+  RECEIVE_CONFIG_SCHEMA, 
+  UPDATE_CONFIG_OPTIONS 
+} from '../actions/config';
 
 const initialState = {
   schema: {},

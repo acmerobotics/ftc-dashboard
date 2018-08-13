@@ -15,8 +15,8 @@ import fi.iki.elonen.NanoWSD;
 /**
  * WebSocket connection to a dashboard client.
  */
-public class RobotWebSocket extends NanoWSD.WebSocket {
-    public static final boolean DEBUG = false;
+public class DashboardWebSocket extends NanoWSD.WebSocket {
+    public static final boolean DEBUG = true;
 
     private static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(Message.class, new MessageDeserializer())
@@ -24,7 +24,7 @@ public class RobotWebSocket extends NanoWSD.WebSocket {
 
     private FtcDashboard dashboard;
 
-    RobotWebSocket(NanoHTTPD.IHTTPSession handshakeRequest, FtcDashboard dash) {
+    DashboardWebSocket(NanoHTTPD.IHTTPSession handshakeRequest, FtcDashboard dash) {
         super(handshakeRequest);
         dashboard = dash;
     }

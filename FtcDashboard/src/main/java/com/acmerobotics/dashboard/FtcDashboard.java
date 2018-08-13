@@ -34,6 +34,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import fi.iki.elonen.NanoHTTPD;
 
@@ -100,8 +103,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 	}
 
 	private TelemetryPacket.Adapter telemetry;
-	private List<RobotWebSocket> sockets;
-	private RobotWebSocketServer server;
+	private List<DashboardWebSocket> sockets;
+	private DashboardWebSocketServer server;
 	private Configuration configuration;
 	private OpModeManagerImpl opModeManager;
 	private RobotStatus.OpModeStatus activeOpModeStatus = RobotStatus.OpModeStatus.STOPPED;
@@ -109,10 +112,27 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private final List<String> opModeList;
 	private List<String> assetFiles;
 
-	private FtcDashboard() {
+	private int telemetryTransmissionInterval = 100;
+	private ScheduledExecutorService telemetryExecutorService;
+	private TelemetryPacket nextTelemetryPacket;
+
+	private class TelemetryUpdateRunnable implements Runnable {
+        @Override
+        public void run() {
+            synchronized (this) {
+                if (nextTelemetryPacket != null) {
+                    sendAll(new Message(MessageType.RECEIVE_TELEMETRY, nextTelemetryPacket));
+                    nextTelemetryPacket = null;
+                }
+            }
+            telemetryExecutorService.schedule(this, telemetryTransmissionInterval, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    private FtcDashboard() {
         sockets = new ArrayList<>();
         configuration = new Configuration();
-        telemetry = new TelemetryPacket.Adapter(this::sendTelemetryPacket);
+        telemetry = new TelemetryPacket.Adapter(this);
 
         ClasspathScanner scanner = new ClasspathScanner(new ClassFilter() {
             @Override
@@ -134,7 +154,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         });
         scanner.scanClasspath();
 
-        server = new RobotWebSocketServer(this);
+        server = new DashboardWebSocketServer(this);
         try {
             server.start();
         } catch (IOException e) {
@@ -147,6 +167,9 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
         assetFiles = new ArrayList<>();
         buildAssetsFileList("dash");
+
+        telemetryExecutorService = Executors.newSingleThreadScheduledExecutor();
+        telemetryExecutorService.schedule(new TelemetryUpdateRunnable(), 0L, TimeUnit.SECONDS);
     }
 
     private WebHandler newStaticAssetHandler(final String file) {
@@ -215,10 +238,18 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * Sends telemetry information to all instance clients.
      * @param telemetryPacket packet to send
      */
-	public void sendTelemetryPacket(TelemetryPacket telemetryPacket) {
+	public synchronized void sendTelemetryPacket(TelemetryPacket telemetryPacket) {
 		telemetryPacket.addTimestamp();
-		sendAll(new Message(MessageType.RECEIVE_TELEMETRY, telemetryPacket));
+		nextTelemetryPacket = telemetryPacket;
 	}
+
+	public int getTelemetryTransmissionInterval() {
+	    return telemetryTransmissionInterval;
+    }
+
+    public void setTelemetryTransmissionInterval(int newTransmissionInterval) {
+	    telemetryTransmissionInterval = newTransmissionInterval;
+    }
 
     /**
      * Sends updated configuration data to all instance clients.
@@ -251,12 +282,12 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
 	private synchronized void sendAll(Message message) {
-		for (RobotWebSocket ws : sockets) {
+		for (DashboardWebSocket ws : sockets) {
 			ws.send(message);
 		}
 	}
 
-	synchronized void addSocket(RobotWebSocket socket) {
+	synchronized void addSocket(DashboardWebSocket socket) {
 		sockets.add(socket);
 
 		socket.send(new Message(MessageType.RECEIVE_CONFIG_SCHEMA, getConfigSchemaJson()));
@@ -268,11 +299,11 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         }
 	}
 
-	synchronized void removeSocket(RobotWebSocket socket) {
+	synchronized void removeSocket(DashboardWebSocket socket) {
 		sockets.remove(socket);
 	}
 
-	synchronized void onMessage(RobotWebSocket socket, Message msg) {
+	synchronized void onMessage(DashboardWebSocket socket, Message msg) {
         switch(msg.getType()) {
             case GET_ROBOT_STATUS: {
                 socket.send(new Message(MessageType.RECEIVE_ROBOT_STATUS, getRobotStatus()));
@@ -308,6 +339,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
 	private void close() {
+        telemetryExecutorService.shutdownNow();
 	    server.stop();
     }
 

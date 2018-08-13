@@ -1,3 +1,5 @@
+import { receiveOpModeList } from './status';
+
 export const CONNECT = 'CONNECT';
 export const DISCONNECT = 'DISCONNECT';
 export const RECEIVE_PING_TIME = 'RECEIVE_PING_TIME';
@@ -19,7 +21,15 @@ export const receivePingTime = (pingTime) => ({
   pingTime
 });
 
-export const receiveConnectionStatus = (isConnected) => ({
-  type: RECEIVE_CONNECTION_STATUS,
-  isConnected
-});
+export const receiveConnectionStatus = (isConnected) => (
+  (dispatch) => {
+    dispatch({
+      type: RECEIVE_CONNECTION_STATUS,
+      isConnected
+    });
+
+    if (!isConnected) {
+      dispatch(receiveOpModeList([]));
+    }
+  }
+);

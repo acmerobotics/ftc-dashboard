@@ -51,9 +51,11 @@ class OpModeView extends React.Component {
   }
 
   renderButtons() {
-    const { activeOpMode, activeOpModeStatus } = this.props;
+    const { activeOpMode, activeOpModeStatus, opModeList } = this.props;
 
-    if (activeOpMode === DEFAULT_OP_MODE) {
+    if (opModeList.length == 0) {
+      return null;
+    } else if (activeOpMode === DEFAULT_OP_MODE) {
       return this.renderInitButton();
     } else if (activeOpModeStatus === OpModeStatus.INIT) {
       return (
@@ -64,6 +66,8 @@ class OpModeView extends React.Component {
       );
     } else if (activeOpModeStatus === OpModeStatus.RUNNING) {
       return this.renderStopButton();
+    } else {
+      return <p>Unknown opmode status: {activeOpModeStatus}</p>;
     }
   }
 

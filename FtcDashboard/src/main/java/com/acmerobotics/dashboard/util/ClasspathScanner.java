@@ -45,8 +45,8 @@ public class ClasspathScanner {
                     Class klass = Class.forName(className, false, classLoader);
 
                     filter.processClass(klass);
-                } catch (ClassNotFoundException e) {
-                    Log.w(TAG, e);
+                } catch (ClassNotFoundException | NoClassDefFoundError ignored) {
+
                 }
             }
         }

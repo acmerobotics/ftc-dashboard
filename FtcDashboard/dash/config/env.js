@@ -49,7 +49,8 @@ dotenvFiles.forEach(dotenvFile => {
 // Otherwise, we risk importing Node.js core modules into an app instead of Webpack shims.
 // https://github.com/facebookincubator/create-react-app/issues/1023#issuecomment-265344421
 // We also resolve them to make sure all tools using them work consistently.
-const appDirectory = fs.realpathSync(process.cwd());
+const cwd = fs.realpathSync(process.cwd());
+const appDirectory = cwd.endsWith('dash') ? cwd : cwd + '/dash';
 process.env.NODE_PATH = (process.env.NODE_PATH || '')
   .split(path.delimiter)
   .filter(folder => folder && !path.isAbsolute(folder))
@@ -61,12 +62,12 @@ process.env.NODE_PATH = (process.env.NODE_PATH || '')
 const REACT_APP = /^REACT_APP_/i;
 
 // Get the dashboard configuration parameters from ../config.json
-const dashConfig = JSON.parse(fs.readFileSync(path.resolve(appDirectory, 'dash/config.json')));
+const dashConfig = JSON.parse(fs.readFileSync(path.resolve(appDirectory, 'config.json')));
 
 function getClientEnvironment(publicUrl) {
   // Useful for determining whether we’re running in production mode.
   // Most importantly, it switches React into the correct mode.
-  dashConfig.NODE_ENV = process.env.NODE_ENV || 'development'
+  dashConfig.NODE_ENV = process.env.NODE_ENV || 'development';
   // Useful for resolving the correct path to static assets in `public`.
   // For example, <img src={process.env.PUBLIC_URL + '/img/logo.png'} />.
   // This should only be used as an escape hatch. Normally you would put

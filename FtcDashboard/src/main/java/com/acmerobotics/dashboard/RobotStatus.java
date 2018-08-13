@@ -16,7 +16,7 @@ public class RobotStatus {
 
     public RobotStatus() {
         this.available = false;
-        this.activeOpMode = "None";
+        this.activeOpMode = "";
         this.activeOpModeStatus = OpModeStatus.STOPPED;
         this.warningMessage = "";
         this.errorMessage = "";
