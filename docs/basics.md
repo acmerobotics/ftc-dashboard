@@ -10,10 +10,10 @@ There are two ways to send telemetry to the dashboard. The first way is through 
 
 ### SDK Telemetry
 
-To get a `Telemetry`-compatible instance for the dashboard, you can use `RobotDashboard.getTelemetry()`:
+To get a `Telemetry`-compatible instance for the dashboard, you can use `FtcDashboard.getTelemetry()`:
 
 ```java
-RobotDashboard dashboard = RobotDashboard.getInstance();
+FtcDashboard dashboard = FtcDashboard.getInstance();
 Telemetry dashboardTelemetry = dashboard.getTelemetry();
 
 dashboardTelemetry.addData("x", 3.7);
@@ -23,7 +23,7 @@ dashboardTelemetry.update();
 This interface should feel familiar for FTC programmers (note, however, that this doesn't implement some of the less commonly-used methods of `Telemetry`). Additionally, this method is also used in a common idiom for forwarding all normal telemetry messages to the dashboard:
 
 ```java
-telemetry = new MultipleTelemetry(telemetry, RobotDashboard.getInstance().getTelemetry());
+telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 ```
 
 This line should be placed near the top of `OpMode.init()` or `LinearOpMode.runOpMode()`.
@@ -33,7 +33,7 @@ This line should be placed near the top of `OpMode.init()` or `LinearOpMode.runO
 The second method uses `TelemetryPacket` and is completely independent from normal SDK telemetry. To see how it works, here's the equivalent of the earlier sample:
 
 ```java
-RobotDashboard dashboard = RobotDashboard.getInstance();
+FtcDashboard dashboard = FtcDashboard.getInstance();
 
 TelemetryPacket packet = new TelemetryPacket();
 packet.put("x", 3.7);
