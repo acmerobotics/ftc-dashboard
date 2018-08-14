@@ -56,7 +56,7 @@ layout: default
 
 1. Install [node](https://nodejs.org/en/download/) and [yarn](https://yarnpkg.com/en/docs/install) if not installed already.
 
-2. Run `yarn` in `<FTC project>/FtcDashboard/dash/` (_this only needs to be done once!_).
+2. Run `yarn` in `FtcDashboard/dash/` (_this only needs to be done once!_).
 
 3. If necessary, change the host in `dash/config.json`.
 
