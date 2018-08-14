@@ -174,12 +174,15 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     private WebHandler newStaticAssetHandler(final String file) {
-        return session -> {
-            if (session.getMethod() == NanoHTTPD.Method.GET) {
-                String mimeType = MimeTypesUtil.determineMimeType(file);
-                return NanoHTTPD.newChunkedResponse(NanoHTTPD.Response.Status.OK, mimeType, assetManager.open(file));
-            } else {
-                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "");
+	    return new WebHandler() {
+            @Override
+            public NanoHTTPD.Response getResponse(NanoHTTPD.IHTTPSession session) throws IOException {
+                if (session.getMethod() == NanoHTTPD.Method.GET) {
+                    String mimeType = MimeTypesUtil.determineMimeType(file);
+                    return NanoHTTPD.newChunkedResponse(NanoHTTPD.Response.Status.OK, mimeType, assetManager.open(file));
+                } else {
+                    return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "");
+                }
             }
         };
     }
