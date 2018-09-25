@@ -21,5 +21,8 @@ public enum MessageType {
     SAVE_CONFIG_OPTIONS,
 
     /* telemetry */
-    RECEIVE_TELEMETRY
+    RECEIVE_TELEMETRY,
+
+    /* camera */
+    RECEIVE_IMAGE
 }

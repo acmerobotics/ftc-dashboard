@@ -8,7 +8,7 @@ import Icon from '../components/Icon';
 import TelemetryView from './TelemetryView';
 import ConfigView from './ConfigView';
 import GraphView from './GraphView';
-import FieldView from './FieldView';
+import CameraView from './CameraView';
 import OpModeView from './OpModeView';
 import Tile from '../components/Tile';
 import TileGrid from '../components/TileGrid';
@@ -43,7 +43,7 @@ class Dashboard extends Component {
             <OpModeView />
           </Tile>
           <Tile row="2 / span 2" col={1}>
-            <FieldView />
+            <CameraView />
           </Tile>
           <Tile row="1 / span 3" col={2}>
             <GraphView />

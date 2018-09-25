@@ -2,7 +2,9 @@ package com.acmerobotics.dashboard;
 
 import android.app.Activity;
 import android.content.res.AssetManager;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 
 import com.acmerobotics.dashboard.config.Config;
@@ -28,6 +30,7 @@ import org.firstinspires.ftc.robotcore.internal.webserver.WebHandler;
 import org.firstinspires.ftc.robotcore.internal.webserver.WebHandlerManager;
 import org.firstinspires.ftc.robotcore.internal.webserver.WebServer;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -111,6 +114,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private AssetManager assetManager;
     private final List<String> opModeList;
 	private List<String> assetFiles;
+	private int imageQuality = 50;
 
 	private int telemetryTransmissionInterval = 100;
 	private ScheduledExecutorService telemetryExecutorService;
@@ -269,6 +273,32 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      */
 	public void updateConfig() {
 	    sendAll(new Message(MessageType.RECEIVE_CONFIG_OPTIONS, getConfigJson()));
+    }
+
+    /**
+     * Sends an image to the dashboard for display (MJPEG style). Note that that encoding process is
+     * synchronous.
+     * @param bitmap bitmap to send
+     */
+    public void sendImage(Bitmap bitmap) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, imageQuality, outputStream);
+        String imageStr = Base64.encodeToString(outputStream.toByteArray(), Base64.DEFAULT);
+        sendAll(new Message(MessageType.RECEIVE_IMAGE, imageStr));
+    }
+
+    /**
+     * Returns the image quality used by {@link #sendImage(Bitmap)}
+     */
+    public int getImageQuality() {
+        return imageQuality;
+    }
+
+    /**
+     * Sets the image quality used by {@link #sendImage(Bitmap)}
+     */
+    public void setImageQuality(int quality) {
+        imageQuality = quality;
     }
 
     /**

@@ -66,8 +66,10 @@ class OpModeView extends React.Component {
       );
     } else if (activeOpModeStatus === OpModeStatus.RUNNING) {
       return this.renderStopButton();
+    } else if (activeOpModeStatus === OpModeStatus.STOPPED) {
+      return null;
     } else {
-      return <p>Unknown opmode status: {activeOpModeStatus}</p>;
+      return <p>Unknown op mode status: {activeOpModeStatus}</p>;
     }
   }
 
