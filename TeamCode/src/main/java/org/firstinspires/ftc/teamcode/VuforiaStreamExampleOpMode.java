@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import android.graphics.Bitmap;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.vuforia.Image;
@@ -16,9 +17,15 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.BlockingQueue;
 
 @TeleOp
+@Config
 public class VuforiaStreamExampleOpMode extends LinearOpMode {
 
-    public static final String VUFORIA_LICENSE_KEY = "YOUR VUFORIA KEY";
+    public static final String VUFORIA_LICENSE_KEY = "YOUR KEY HERE";
+
+    // adjust these parameters to suit your needs
+    public static int MIN_LOOP_TIME = 100;
+    public static int QUALITY = 25;
+    public static double SCALE = 0.4;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -58,15 +65,20 @@ public class VuforiaStreamExampleOpMode extends LinearOpMode {
                     if (image.getFormat() == PIXEL_FORMAT.RGB565) {
                         int imageWidth = image.getWidth(), imageHeight = image.getHeight();
                         ByteBuffer byteBuffer = image.getPixels();
-                        Bitmap bitmap = Bitmap.createBitmap(imageWidth, imageHeight, Bitmap.Config.RGB_565);
-                        bitmap.copyPixelsFromBuffer(byteBuffer);
-                        dashboard.sendImage(bitmap);
+
+                        Bitmap original = Bitmap.createBitmap(imageWidth, imageHeight, Bitmap.Config.RGB_565);
+                        original.copyPixelsFromBuffer(byteBuffer);
+                        Bitmap scaled = Bitmap.createScaledBitmap(original, (int) (SCALE * imageWidth), (int) (SCALE * imageHeight), false);
+
+                        dashboard.setImageQuality(QUALITY);
+                        dashboard.sendImage(scaled);
                     }
                 }
+
                 vuforiaFrame.close();
 
                 long ms = (System.nanoTime() - start) / 1_000_000;
-                long sleepTime = 250 - ms;
+                long sleepTime = MIN_LOOP_TIME - ms;
                 if (sleepTime > 0) {
                     Thread.sleep(sleepTime);
                 }
