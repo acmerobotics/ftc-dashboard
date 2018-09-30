@@ -5,13 +5,7 @@ import Heading from '../components/Heading';
 import Header from '../components/Header';
 import IconGroup from '../components/IconGroup';
 import Icon from '../components/Icon';
-import TelemetryView from './TelemetryView';
-import ConfigView from './ConfigView';
-import GraphView from './GraphView';
-import CameraView from './CameraView';
-import OpModeView from './OpModeView';
-import Tile from '../components/Tile';
-import TileGrid from '../components/TileGrid';
+import LayoutPreset from '../enums/LayoutPreset';
 import { connect, disconnect } from '../actions/socket';
 
 class Dashboard extends Component {
@@ -38,23 +32,7 @@ class Dashboard extends Component {
             </IconGroup>
           </Heading>
         </Header>
-        <TileGrid>
-          <Tile row={1} col={1}>
-            <OpModeView />
-          </Tile>
-          <Tile row="2 / span 2" col={1}>
-            <CameraView />
-          </Tile>
-          <Tile row="1 / span 3" col={2}>
-            <GraphView />
-          </Tile>=
-          <Tile row="1 / span 2" col={3}>
-            <ConfigView />
-          </Tile>
-          <Tile row={3} col={3}>
-            <TelemetryView />
-          </Tile>
-        </TileGrid>
+        { LayoutPreset.getContent(LayoutPreset.DEFAULT) }
       </div>
     );
   }
