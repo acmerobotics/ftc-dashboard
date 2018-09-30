@@ -2,6 +2,7 @@ import { applyMiddleware, createStore } from 'redux';
 import { createLogger } from 'redux-logger';
 import thunk from 'redux-thunk';
 import socketMiddleware from './socketMiddleware';
+import storageMiddleware from './storageMiddleware';
 import reducer from './reducers';
 import { RECEIVE_PING_TIME } from './actions/socket';
 import { RECEIVE_TELEMETRY } from './actions/telemetry';
@@ -12,7 +13,7 @@ const DEBUG = false;
 const HIDDEN_ACTIONS = [RECEIVE_PING_TIME, RECEIVE_TELEMETRY, RECEIVE_ROBOT_STATUS];
 
 const configureStore = () =>  {
-  const middlewares = [thunk, socketMiddleware];
+  const middlewares = [thunk, socketMiddleware, storageMiddleware];
 
   if (DEBUG) {
     const logger = createLogger({

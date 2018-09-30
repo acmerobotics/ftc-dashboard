@@ -10,14 +10,16 @@ import FieldView from '../containers/FieldView';
 
 const LayoutPreset = {
   DEFAULT: 'DEFAULT',
-  CAMERA: 'CAMERA'
+  CAMERA: 'CAMERA',
+  GRAPH: 'GRAPH',
+  ORIGINAL: 'ORIGINAL',
 };
 
 const LAYOUT_DETAILS = {
   [LayoutPreset.DEFAULT]: {
     name: 'Default',
     content: (
-      <TileGrid>
+      <TileGrid gridTemplate="150px calc(60% - 150px) 40% / 30% 40% 30%">
         <Tile row={1} col={1}>
           <OpModeView />
         </Tile>
@@ -39,7 +41,7 @@ const LAYOUT_DETAILS = {
   [LayoutPreset.CAMERA]: {
     name: 'Camera',
     content: (
-      <TileGrid>
+      <TileGrid gridTemplate="150px calc(60% - 150px) 40% / 30% 40% 30%">
         <Tile row={1} col={1}>
           <OpModeView />
         </Tile>
@@ -53,6 +55,35 @@ const LAYOUT_DETAILS = {
           <ConfigView />
         </Tile>
         <Tile row={3} col={3}>
+          <TelemetryView />
+        </Tile>
+      </TileGrid>
+    )
+  },
+  [LayoutPreset.GRAPH]: {
+    name: 'Graph',
+    content: (
+      <TileGrid gridTemplate="100% / 50% 50%">
+        <Tile row={1} col={1}>
+          <GraphView />
+        </Tile>
+        <Tile row={1} col={2}>
+          <GraphView />
+        </Tile>
+      </TileGrid>
+    )
+  },
+  [LayoutPreset.ORIGINAL]: {
+    name: 'Original',
+    content: (
+      <TileGrid gridTemplate="60% 40% / 65% 35%">
+        <Tile row="1 / span 2" col={1}>
+          <GraphView />
+        </Tile>=
+        <Tile row={1} col={2}>
+          <ConfigView />
+        </Tile>
+        <Tile row={2} col={2}>
           <TelemetryView />
         </Tile>
       </TileGrid>
