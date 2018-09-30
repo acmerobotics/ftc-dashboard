@@ -1,5 +1,5 @@
 buildscript {
-    ext.dashboard_version = '0.1.1'
+    ext.dashboard_version = '0.2.0'
 
     repositories {
         jcenter()
@@ -152,6 +152,7 @@ publishing {
 bintray {
     user = System.getenv('BINTRAY_USER')
     key = System.getenv('BINTRAY_KEY')
+    publish = true
     pkg {
         repo = 'maven'
         name = 'ftc-dashboard'
