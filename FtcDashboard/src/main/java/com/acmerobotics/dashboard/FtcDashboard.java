@@ -219,6 +219,11 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     private void internalAttachEventLoop(EventLoop eventLoop) {
+	    // this could be called multiple times within the lifecycle of the dashboard
+        if (opModeManager != null) {
+            opModeManager.unregisterListener(this);
+        }
+
         opModeManager = eventLoop.getOpModeManager();
         if (opModeManager != null) {
             opModeManager.registerListener(this);
@@ -382,6 +387,9 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
 	private void close() {
+        if (opModeManager != null) {
+            opModeManager.unregisterListener(this);
+        }
         telemetryExecutorService.shutdownNow();
 	    server.stop();
     }
