@@ -21,4 +21,6 @@ layout: default
 
 [Custom Widgets](customwidgets)
 
+[Samples](https://github.com/acmerobotics/ftc-dashboard/tree/master/TeamCode/src/main/java/org/firstinspires/ftc/teamcode)
+
 [Javadoc](javadoc)

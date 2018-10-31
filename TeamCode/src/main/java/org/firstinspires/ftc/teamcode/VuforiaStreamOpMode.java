@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.vuforia.Image;
@@ -16,10 +17,16 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import java.nio.ByteBuffer;
 import java.util.concurrent.BlockingQueue;
 
-@TeleOp
+/*
+ * This sample demonstrates how to stream frames from Vuforia to the dashboard. Make sure to fill in
+ * your Vuforia key below and select the 'Camera' preset on top right of the dashboard. This sample
+ * also works for UVCs with slight adjustments.
+ */
+@Autonomous
 @Config
-public class VuforiaStreamExampleOpMode extends LinearOpMode {
+public class VuforiaStreamOpMode extends LinearOpMode {
 
+    // TODO: fill in
     public static final String VUFORIA_LICENSE_KEY = "YOUR KEY HERE";
 
     // adjust these parameters to suit your needs
@@ -29,6 +36,7 @@ public class VuforiaStreamExampleOpMode extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+        // gives Vuforia more time to exit before the watchdog notices
         msStuckDetectStop = 2500;
 
         FtcDashboard dashboard = FtcDashboard.getInstance();
@@ -44,6 +52,8 @@ public class VuforiaStreamExampleOpMode extends LinearOpMode {
         BlockingQueue<VuforiaLocalizer.CloseableFrame> frameQueue = vuforia.getFrameQueue();
 
         waitForStart();
+
+        if (isStopRequested()) return;
 
         while (opModeIsActive()) {
             if (!frameQueue.isEmpty()) {
