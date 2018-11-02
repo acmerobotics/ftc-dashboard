@@ -19,6 +19,7 @@ import com.google.gson.JsonPrimitive;
 import com.qualcomm.robotcore.eventloop.EventLoop;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.util.ThreadPool;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeManagerImpl;
@@ -37,6 +38,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -117,20 +119,39 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 	private int imageQuality = 50;
 
 	private int telemetryTransmissionInterval = 100;
-	private ScheduledExecutorService telemetryExecutorService;
-	private TelemetryPacket nextTelemetryPacket;
+	private ExecutorService telemetryExecutorService;
+	private volatile TelemetryPacket nextTelemetryPacket;
 	private final Object telemetryLock = new Object();
 
 	private class TelemetryUpdateRunnable implements Runnable {
         @Override
         public void run() {
-            synchronized (telemetryLock) {
-                if (nextTelemetryPacket != null) {
-                    sendAll(new Message(MessageType.RECEIVE_TELEMETRY, nextTelemetryPacket));
-                    nextTelemetryPacket = null;
+            while (!Thread.currentThread().isInterrupted()) {
+                while (nextTelemetryPacket == null) {
+                    try {
+                        Thread.sleep(1);
+                    } catch (InterruptedException e) {
+                        break;
+                    }
+                }
+                long startTime = System.currentTimeMillis();
+                synchronized (telemetryLock) {
+                    if (nextTelemetryPacket != null) {
+                        sendAll(new Message(MessageType.RECEIVE_TELEMETRY, nextTelemetryPacket));
+                        nextTelemetryPacket = null;
+                    } else {
+                        continue;
+                    }
+                }
+                long sleepTime = startTime + telemetryTransmissionInterval - System.currentTimeMillis();
+                if (sleepTime > 0) {
+                    try {
+                        Thread.sleep(sleepTime);
+                    } catch (InterruptedException e) {
+                        break;
+                    }
                 }
             }
-            telemetryExecutorService.schedule(this, telemetryTransmissionInterval, TimeUnit.MILLISECONDS);
         }
     }
 
@@ -173,8 +194,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         assetFiles = new ArrayList<>();
         buildAssetsFileList("dash");
 
-        telemetryExecutorService = Executors.newSingleThreadScheduledExecutor();
-        telemetryExecutorService.schedule(new TelemetryUpdateRunnable(), 0L, TimeUnit.SECONDS);
+        telemetryExecutorService = ThreadPool.newSingleThreadExecutor("dash telemetry");
+        telemetryExecutorService.submit(new TelemetryUpdateRunnable());
     }
 
     private WebHandler newStaticAssetHandler(final String file) {
@@ -266,7 +287,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     /**
-     * Sets the telemetry tranmission interval.
+     * Sets the telemetry transmission interval.
      * @param newTransmissionInterval transmission interval in milliseconds
      */
     public void setTelemetryTransmissionInterval(int newTransmissionInterval) {
