@@ -18,7 +18,7 @@ layout: default
     }
     ```
 
-1. Open `build.release.gradle` in `FtcRobotController`. In the `dependencies` section add `implementation 'com.acmerobotics.dashboard:dashboard:0.2.0'`.
+1. Open `build.release.gradle` in `FtcRobotController`. In the `dependencies` section add `implementation 'com.acmerobotics.dashboard:dashboard:0.2.1'`.
 
 1. Repeat the previous step for `TeamCode` (and other modules you'd like to use the dashboard in).
 
