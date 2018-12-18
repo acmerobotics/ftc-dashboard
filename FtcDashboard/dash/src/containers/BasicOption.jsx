@@ -12,7 +12,7 @@ class BasicOption extends React.Component {
 
     const type = OptionType.getFromSchema(schema);
 
-    const onEnter = () => {
+    const optionOnSave = () => {
       if (valid && modified) {
         onSave(value);
       }
@@ -22,19 +22,19 @@ class BasicOption extends React.Component {
 
     switch (type) {
     case OptionType.INT:
-      input = <TextInput value={value} valid={valid} validate={validateInt} onChange={onChange} onEnter={onEnter} />;
+      input = <TextInput value={value} valid={valid} validate={validateInt} onChange={onChange} onSave={optionOnSave} />;
       break;
     case OptionType.DOUBLE:
-      input = <TextInput value={value} valid={valid} validate={validateDouble} onChange={onChange} onEnter={onEnter} />;
+      input = <TextInput value={value} valid={valid} validate={validateDouble} onChange={onChange} onSave={optionOnSave} />;
       break;
     case OptionType.STRING:
-      input = <TextInput value={value} valid={valid} validate={validateString} onChange={onChange} onEnter={onEnter} />;
+      input = <TextInput value={value} valid={valid} validate={validateString} onChange={onChange} onSave={optionOnSave} />;
       break;
     case OptionType.BOOLEAN:
-      input = <BooleanInput value={value} onChange={onChange} />;
+      input = <BooleanInput value={value} onChange={onChange} onSave={optionOnSave} />;
       break;
     case OptionType.ENUM:
-      input = <EnumInput value={value} values={schema.values} onChange={onChange} />;
+      input = <EnumInput value={value} values={schema.values} onChange={onChange} onSave={optionOnSave} />;
       break;
     default:
       input = <p>Unknown option type: {type}</p>;
@@ -42,7 +42,13 @@ class BasicOption extends React.Component {
 
     return (
       <tr>
-        <td>{modified ? '*' : ''}{name}</td>
+        <td><span style={ modified ? {
+          userSelect: 'auto',
+          opacity: 1.0
+        } : {
+          userSelect: 'none',
+          opacity: 0.0
+        }}>*</span>{name}</td>
         <td>{input}</td>
       </tr>
     );

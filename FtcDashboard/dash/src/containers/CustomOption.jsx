@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { isEqual } from 'lodash';
 import Heading from '../components/Heading';
 import Icon from '../components/Icon';
 import BasicOption from './BasicOption';
@@ -29,12 +28,6 @@ class CustomOption extends React.Component {
     const optionKeys = Object.keys(value)
       .filter((key) => key in schema)
       .sort();
-
-    // TODO: hack to reverse sort PID coefficients
-    if (isEqual(optionKeys, ['d', 'i', 'p'])) {
-      optionKeys[0] = 'p';
-      optionKeys[2] = 'd';
-    }
 
     const options = optionKeys.map((key) => {
       const onChange = (value) => {
