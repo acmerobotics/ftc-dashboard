@@ -234,6 +234,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private void internalAttachWebServer(WebServer webServer) {
         WebHandlerManager manager = webServer.getWebHandlerManager();
         manager.register("/dash", newStaticAssetHandler("dash/index.html"));
+        manager.register("/dash/", newStaticAssetHandler("dash/index.html"));
         for (final String file : assetFiles) {
             manager.register("/" + file, newStaticAssetHandler(file));
         }
