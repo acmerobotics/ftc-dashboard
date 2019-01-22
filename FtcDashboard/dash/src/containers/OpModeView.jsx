@@ -5,7 +5,7 @@ import Heading from '../components/Heading';
 import { initOpMode, startOpMode, stopOpMode } from '../actions/opmode';
 import OpModeStatus from '../enums/OpModeStatus';
 
-const DEFAULT_OP_MODE = '$Stop$Robot$';
+const STOP_OP_MODE = '$Stop$Robot$';
 
 class OpModeView extends React.Component {
   constructor(props) {
@@ -19,13 +19,14 @@ class OpModeView extends React.Component {
   }
 
   static getDerivedStateFromProps(props, state) {
-    if (props.activeOpMode !== DEFAULT_OP_MODE) {
+    if (props.activeOpMode !== STOP_OP_MODE) {
       return {
         selectedOpMode: props.activeOpMode
       };
-    } else if (state.selectedOpMode === '') {
+    } else if (state.selectedOpMode === '' || 
+        props.opModeList.indexOf(state.selectedOpMode) === -1) {
       return {
-        selectedOpMode: props.opModeList[0]
+        selectedOpMode: props.opModeList[0] || ''
       };
     } else {
       return {};
@@ -55,7 +56,7 @@ class OpModeView extends React.Component {
 
     if (opModeList.length == 0) {
       return null;
-    } else if (activeOpMode === DEFAULT_OP_MODE) {
+    } else if (activeOpMode === STOP_OP_MODE) {
       return this.renderInitButton();
     } else if (activeOpModeStatus === OpModeStatus.INIT) {
       return (
@@ -89,7 +90,7 @@ class OpModeView extends React.Component {
       <div>
         <Heading level={2} text="Op Mode" />
         <p/>
-        <select value={this.state.selectedOpMode} disabled={activeOpMode !== DEFAULT_OP_MODE} onChange={this.onChange}>
+        <select value={this.state.selectedOpMode} disabled={activeOpMode !== STOP_OP_MODE} onChange={this.onChange}>
           {
             opModeList.length === 0 ?
               (<option>Loading...</option>) :
