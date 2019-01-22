@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -20,19 +19,17 @@ public class SineWaveOpMode extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         FtcDashboard dashboard = FtcDashboard.getInstance();
-        dashboard.setTelemetryTransmissionInterval(25);
-        telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
+        telemetry = dashboard.getTelemetry();
 
         waitForStart();
 
         if (isStopRequested()) return;
 
-        while (!isStopRequested()) {
+        while (opModeIsActive()) {
             telemetry.addData("x", AMPLITUDE * Math.sin(
                     2 * Math.PI * FREQUENCY * getRuntime() + Math.toRadians(PHASE)
             ));
             telemetry.update();
-            sleep(5);
         }
     }
 }
