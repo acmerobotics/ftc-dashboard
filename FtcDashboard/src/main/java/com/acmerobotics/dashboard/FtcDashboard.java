@@ -1,9 +1,7 @@
 package com.acmerobotics.dashboard;
 
-import android.app.Activity;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
-import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
 
@@ -39,9 +37,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import fi.iki.elonen.NanoHTTPD;
 
@@ -50,6 +45,9 @@ import fi.iki.elonen.NanoHTTPD;
  */
 public class FtcDashboard implements OpModeManagerImpl.Notifications {
     public static final String TAG = "FtcDashboard";
+
+    private static final int DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL = 50; // ms
+    private static final int DEFAULT_IMAGE_QUALITY = 50; // 0-100
 
     private static final Set<String> IGNORED_PACKAGES = new HashSet<>(Arrays.asList(
             "java",
@@ -64,7 +62,6 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     /**
      * Starts the instance and a WebSocket server that listens for external connections.
-     * This method should usually be called from {@link Activity#onCreate(Bundle)}.
      */
 	public static void start() {
         if (instance == null) {
@@ -89,8 +86,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     /**
-     * Stops the instance and the underlying WebSocket server. This method should usually be
-     * called from {@link Activity#onDestroy()}.
+     * Stops the instance and the underlying WebSocket server.
      */
 	public static void stop() {
 	    if (instance != null) {
@@ -107,6 +103,9 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 		return instance;
 	}
 
+    private int imageQuality = DEFAULT_IMAGE_QUALITY;
+    private int telemetryTransmissionInterval = DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL;
+
 	private TelemetryPacket.Adapter telemetry;
 	private List<DashboardWebSocket> sockets;
 	private DashboardWebSocketServer server;
@@ -116,9 +115,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private AssetManager assetManager;
     private final List<String> opModeList;
 	private List<String> assetFiles;
-	private int imageQuality = 50;
 
-	private int telemetryTransmissionInterval = 100;
 	private ExecutorService telemetryExecutorService;
 	private volatile TelemetryPacket nextTelemetryPacket;
 	private final Object telemetryLock = new Object();
