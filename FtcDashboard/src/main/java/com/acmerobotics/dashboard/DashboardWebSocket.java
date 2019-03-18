@@ -16,7 +16,6 @@ import fi.iki.elonen.NanoWSD;
  * WebSocket connection to a dashboard client.
  */
 public class DashboardWebSocket extends NanoWSD.WebSocket {
-    public static final boolean DEBUG = false;
 
     private static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(Message.class, new MessageDeserializer())
@@ -31,20 +30,20 @@ public class DashboardWebSocket extends NanoWSD.WebSocket {
 
     @Override
     protected void onOpen() {
-        if (DEBUG) Log.i(FtcDashboard.TAG, "[OPEN]\t" + this.getHandshakeRequest().getRemoteIpAddress());
+        if (FtcDashboard.DEBUG) Log.i(FtcDashboard.TAG, "[OPEN]\t" + this.getHandshakeRequest().getRemoteIpAddress());
         dashboard.addSocket(this);
     }
 
     @Override
     protected void onClose(NanoWSD.WebSocketFrame.CloseCode code, String reason, boolean initiatedByRemote) {
-        if (DEBUG) Log.i(FtcDashboard.TAG, "[CLOSE]\t" + this.getHandshakeRequest().getRemoteIpAddress());
+        if (FtcDashboard.DEBUG) Log.i(FtcDashboard.TAG, "[CLOSE]\t" + this.getHandshakeRequest().getRemoteIpAddress());
         dashboard.removeSocket(this);
     }
 
     @Override
     protected void onMessage(NanoWSD.WebSocketFrame message) {
         Message msg = GSON.fromJson(message.getTextPayload(), Message.class);
-        if (DEBUG) Log.i(FtcDashboard.TAG, "[RECV]\t" + message.getTextPayload());
+        if (FtcDashboard.DEBUG) Log.i(FtcDashboard.TAG, "[RECV]\t" + message.getTextPayload());
         dashboard.onMessage(this, msg);
     }
 
@@ -64,7 +63,7 @@ public class DashboardWebSocket extends NanoWSD.WebSocket {
     public void send(Message message) {
         try {
             String messageStr = GSON.toJson(message);
-            if (DEBUG) Log.i(FtcDashboard.TAG, "[SENT]\t" + messageStr);
+            if (FtcDashboard.DEBUG) Log.i(FtcDashboard.TAG, "[SENT]\t" + messageStr);
             send(messageStr);
         } catch (IOException e) {
             Log.w(FtcDashboard.TAG, e);

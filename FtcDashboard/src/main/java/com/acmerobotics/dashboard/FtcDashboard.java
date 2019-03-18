@@ -46,6 +46,8 @@ import fi.iki.elonen.NanoHTTPD;
 public class FtcDashboard implements OpModeManagerImpl.Notifications {
     public static final String TAG = "FtcDashboard";
 
+    public static final boolean DEBUG = false;
+
     private static final int DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL = 50; // ms
     private static final int DEFAULT_IMAGE_QUALITY = 50; // 0-100
 
