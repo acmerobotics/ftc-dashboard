@@ -8,12 +8,12 @@ import com.google.gson.JsonElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
-import static com.acmerobotics.dashboard.FtcDashboard.TAG;
-
 /**
  * Type-independent dashboard configuration option.
  */
 public abstract class Option {
+    private static final String TAG = "Option";
+
     /**
      * Returns a JSON-encoded, type-dependent version of the underlying option value.
      */
@@ -38,7 +38,8 @@ public abstract class Option {
     public static Option createFromClass(Class<?> klass) {
         CustomOption customOption = new CustomOption();
         for (Field field : klass.getFields()) {
-            if (!Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {
+            if (!Modifier.isStatic(field.getModifiers())
+                    || Modifier.isFinal(field.getModifiers())) {
                 continue;
             }
 
@@ -77,7 +78,8 @@ public abstract class Option {
 
                 return option;
             default:
-                throw new RuntimeException("unable to create field from class: " + klass.getSimpleName());
+                throw new RuntimeException("unable to create field from class: " +
+                        klass.getSimpleName());
         }
     }
 }

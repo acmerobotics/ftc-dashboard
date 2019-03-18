@@ -2,8 +2,6 @@ package com.acmerobotics.dashboard.config;
 
 import android.util.Log;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-
 import java.lang.reflect.Field;
 
 /**
@@ -11,6 +9,8 @@ import java.lang.reflect.Field;
  * @param <T> type of the class field
  */
 public class FieldProvider<T> implements ValueProvider<T> {
+    private static final String TAG = "FieldProvider";
+
     private Field field;
     private Object parent;
 
@@ -25,7 +25,7 @@ public class FieldProvider<T> implements ValueProvider<T> {
         try {
             return (T) field.get(parent);
         } catch (IllegalAccessException e) {
-            Log.w(FtcDashboard.TAG, e);
+            Log.w(TAG, e);
         }
         return null;
     }
@@ -35,7 +35,7 @@ public class FieldProvider<T> implements ValueProvider<T> {
         try {
             field.set(parent, value);
         } catch (IllegalAccessException e) {
-            Log.w(FtcDashboard.TAG, e);
+            Log.w(TAG, e);
         }
     }
 }

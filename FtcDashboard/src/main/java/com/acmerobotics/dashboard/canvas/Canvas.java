@@ -41,15 +41,18 @@ public class Canvas {
     }
 
     public Canvas fillRect(double x, double y, double width, double height) {
-        fillPolygon(new double[] { x, x + width, x + width, x }, new double[] { y, y, y + height, y + height });
+        fillPolygon(new double[] { x, x + width, x + width, x },
+                new double[] { y, y, y + height, y + height });
         return this;
     }
 
     public Canvas strokeRect(double x, double y, double width, double height) {
-        strokePolygon(new double[] { x, x + width, x + width, x }, new double[] { y, y, y + height, y + height });
+        strokePolygon(new double[] { x, x + width, x + width, x },
+                new double[] { y, y, y + height, y + height });
         return this;
     }
 
+    @Deprecated
     public Canvas strokeSpline(double ax, double bx, double cx, double dx, double ex, double fx,
                                double ay, double by, double cy, double dy, double ey, double fy) {
         ops.add(new Spline(ax, bx, cx, dx, ex, fx, ay, by, cy, dy, ey, fy));

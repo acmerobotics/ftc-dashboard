@@ -50,7 +50,8 @@ public class ClasspathScanner {
 
                     filter.processClass(klass);
                 } catch (ClassNotFoundException | NoClassDefFoundError ignored) {
-
+                    // the dashboard is unable to access many classes; reporting every instance
+                    // only clutters the logs
                 }
             }
         }

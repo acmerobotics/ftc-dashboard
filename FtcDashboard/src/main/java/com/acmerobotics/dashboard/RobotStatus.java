@@ -19,7 +19,8 @@ public class RobotStatus {
     private boolean available;
     private String activeOpMode;
     private OpModeStatus activeOpModeStatus;
-    private String warningMessage, errorMessage;
+    private String warningMessage;
+    private String errorMessage;
 
     /**
      * Creates a status object with the default values.

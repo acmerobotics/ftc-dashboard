@@ -34,12 +34,12 @@ public class Configuration {
         addOptionsFromClass(klass, name);
     }
 
-    private void addOption(String name, Option option) {
-        options.put(name, option);
-    }
-
     private void addOptionsFromClass(Class<?> klass, String name) {
         addOption(name, Option.createFromClass(klass));
+    }
+
+    private void addOption(String name, Option option) {
+        options.put(name, option);
     }
 
     /**

@@ -4,6 +4,8 @@
  * It is extraordinarily rare that you will ever need to edit this file.
  */
 buildscript {
+    ext.checkstyle_version = '8.18'
+
     repositories {
         google()
         jcenter()

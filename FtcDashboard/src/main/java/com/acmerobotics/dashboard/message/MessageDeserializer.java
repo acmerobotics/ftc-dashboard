@@ -14,7 +14,9 @@ import java.lang.reflect.Type;
  */
 public class MessageDeserializer implements JsonDeserializer<Message> {
     @Override
-    public Message deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+    public Message deserialize(JsonElement jsonElement, Type type,
+                               JsonDeserializationContext jsonDeserializationContext)
+            throws JsonParseException {
         JsonObject messageObj = jsonElement.getAsJsonObject();
         String messageTypeString = messageObj.get("type").getAsString();
         MessageType messageType = EnumUtil.fromName(messageTypeString, MessageType.class);

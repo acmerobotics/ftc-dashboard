@@ -44,13 +44,12 @@ import fi.iki.elonen.NanoHTTPD;
  * Main class for interacting with the instance.
  */
 public class FtcDashboard implements OpModeManagerImpl.Notifications {
-    public static final String TAG = "FtcDashboard";
-
-    public static final boolean DEBUG = false;
+    private static final String TAG = "FtcDashboard";
 
     private static final int DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL = 50; // ms
     private static final int DEFAULT_IMAGE_QUALITY = 50; // 0-100
 
+    // TODO: make this configurable?
     private static final Set<String> IGNORED_PACKAGES = new HashSet<>(Arrays.asList(
             "java",
             "android",
@@ -60,12 +59,12 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             "kotlin"
     ));
 
-	private static FtcDashboard instance;
+    private static FtcDashboard instance;
 
     /**
      * Starts the instance and a WebSocket server that listens for external connections.
      */
-	public static void start() {
+    public static void start() {
         if (instance == null) {
             instance = new FtcDashboard();
         }
@@ -76,7 +75,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * @param webServer web server
      */
     public static void attachWebServer(WebServer webServer) {
-	    instance.internalAttachWebServer(webServer);
+        instance.internalAttachWebServer(webServer);
     }
 
     /**
@@ -84,16 +83,16 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * @param eventLoop event loop
      */
     public static void attachEventLoop(EventLoop eventLoop) {
-	    instance.internalAttachEventLoop(eventLoop);
+        instance.internalAttachEventLoop(eventLoop);
     }
 
     /**
      * Stops the instance and the underlying WebSocket server.
      */
-	public static void stop() {
-	    if (instance != null) {
-	        instance.close();
-	        instance = null;
+    public static void stop() {
+        if (instance != null) {
+            instance.close();
+            instance = null;
         }
     }
 
@@ -101,28 +100,28 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * Returns the active instance instance. This should be called after {@link #start()}.
      * @return active instance instance or null outside of its lifecycle
      */
-	public static FtcDashboard getInstance() {
-		return instance;
-	}
+    public static FtcDashboard getInstance() {
+        return instance;
+    }
 
     private int imageQuality = DEFAULT_IMAGE_QUALITY;
     private int telemetryTransmissionInterval = DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL;
 
-	private TelemetryPacket.Adapter telemetry;
-	private List<DashboardWebSocket> sockets;
-	private DashboardWebSocketServer server;
-	private Configuration configuration;
-	private OpModeManagerImpl opModeManager;
-	private RobotStatus.OpModeStatus activeOpModeStatus = RobotStatus.OpModeStatus.STOPPED;
+    private TelemetryPacket.Adapter telemetry;
+    private List<DashboardWebSocket> sockets;
+    private DashboardWebSocketServer server;
+    private Configuration configuration;
+    private OpModeManagerImpl opModeManager;
+    private RobotStatus.OpModeStatus activeOpModeStatus = RobotStatus.OpModeStatus.STOPPED;
     private AssetManager assetManager;
     private final List<String> opModeList;
-	private List<String> assetFiles;
+    private List<String> assetFiles;
 
-	private ExecutorService telemetryExecutorService;
-	private volatile TelemetryPacket nextTelemetryPacket;
-	private final Object telemetryLock = new Object();
+    private ExecutorService telemetryExecutorService;
+    private volatile TelemetryPacket nextTelemetryPacket;
+    private final Object telemetryLock = new Object();
 
-	private class TelemetryUpdateRunnable implements Runnable {
+    private class TelemetryUpdateRunnable implements Runnable {
         @Override
         public void run() {
             while (!Thread.currentThread().isInterrupted()) {
@@ -142,7 +141,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                         continue;
                     }
                 }
-                long sleepTime = startTime + telemetryTransmissionInterval - System.currentTimeMillis();
+                long elapsedTime = System.currentTimeMillis() - startTime;
+                long sleepTime = telemetryTransmissionInterval - elapsedTime;
                 if (sleepTime > 0) {
                     try {
                         Thread.sleep(sleepTime);
@@ -172,7 +172,9 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
             @Override
             public void processClass(Class klass) {
-                if (klass.isAnnotationPresent(Config.class) && !klass.isAnnotationPresent(Disabled.class)) {
+                if (klass.isAnnotationPresent(Config.class)
+                        && !klass.isAnnotationPresent(Disabled.class)) {
+                    Log.i(TAG, klass.getCanonicalName());
                     configuration.addOptionsFromClass(klass);
                 }
             }
@@ -198,14 +200,17 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     private WebHandler newStaticAssetHandler(final String file) {
-	    return new WebHandler() {
+        return new WebHandler() {
             @Override
-            public NanoHTTPD.Response getResponse(NanoHTTPD.IHTTPSession session) throws IOException {
+            public NanoHTTPD.Response getResponse(NanoHTTPD.IHTTPSession session)
+                    throws IOException {
                 if (session.getMethod() == NanoHTTPD.Method.GET) {
                     String mimeType = MimeTypesUtil.determineMimeType(file);
-                    return NanoHTTPD.newChunkedResponse(NanoHTTPD.Response.Status.OK, mimeType, assetManager.open(file));
+                    return NanoHTTPD.newChunkedResponse(NanoHTTPD.Response.Status.OK,
+                            mimeType, assetManager.open(file));
                 } else {
-                    return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "");
+                    return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND,
+                            NanoHTTPD.MIME_PLAINTEXT, "");
                 }
             }
         };
@@ -214,11 +219,14 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private boolean buildAssetsFileList(String path) {
         try {
             String[] list = assetManager.list(path);
-            if (list == null) return false;
+            if (list == null) {
+                return false;
+            }
             if (list.length > 0) {
                 for (String file : list) {
-                    if (!buildAssetsFileList(path + "/" + file))
+                    if (!buildAssetsFileList(path + "/" + file)) {
                         return false;
+                    }
                 }
             } else {
                 assetFiles.add(path);
@@ -240,7 +248,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     private void internalAttachEventLoop(EventLoop eventLoop) {
-	    // this could be called multiple times within the lifecycle of the dashboard
+        // this could be called multiple times within the lifecycle of the dashboard
         if (opModeManager != null) {
             opModeManager.unregisterListener(this);
         }
@@ -272,18 +280,18 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * Sends telemetry information to all instance clients.
      * @param telemetryPacket packet to send
      */
-	public void sendTelemetryPacket(TelemetryPacket telemetryPacket) {
-		telemetryPacket.addTimestamp();
-		synchronized (telemetryLock) {
+    public void sendTelemetryPacket(TelemetryPacket telemetryPacket) {
+        telemetryPacket.addTimestamp();
+        synchronized (telemetryLock) {
             nextTelemetryPacket = telemetryPacket;
         }
-	}
+    }
 
     /**
      * Returns the telemetry transmission interval in milliseconds.
      */
-	public int getTelemetryTransmissionInterval() {
-	    return telemetryTransmissionInterval;
+    public int getTelemetryTransmissionInterval() {
+        return telemetryTransmissionInterval;
     }
 
     /**
@@ -291,14 +299,14 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * @param newTransmissionInterval transmission interval in milliseconds
      */
     public void setTelemetryTransmissionInterval(int newTransmissionInterval) {
-	    telemetryTransmissionInterval = newTransmissionInterval;
+        telemetryTransmissionInterval = newTransmissionInterval;
     }
 
     /**
      * Sends updated configuration data to all instance clients.
      */
-	public void updateConfig() {
-	    sendAll(new Message(MessageType.RECEIVE_CONFIG_OPTIONS, getConfigJson()));
+    public void updateConfig() {
+        sendAll(new Message(MessageType.RECEIVE_CONFIG_OPTIONS, getConfigJson()));
     }
 
     /**
@@ -335,14 +343,14 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     private JsonElement getConfigSchemaJson() {
-	    return configuration.getJsonSchema();
+        return configuration.getJsonSchema();
     }
 
     private JsonElement getConfigJson() {
-		return configuration.getJson();
-	}
+        return configuration.getJson();
+    }
 
-	private RobotStatus getRobotStatus() {
+    private RobotStatus getRobotStatus() {
         if (opModeManager == null) {
             return new RobotStatus();
         } else {
@@ -350,30 +358,30 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         }
     }
 
-	private synchronized void sendAll(Message message) {
-		for (DashboardWebSocket ws : sockets) {
-			ws.send(message);
-		}
-	}
+    private synchronized void sendAll(Message message) {
+        for (DashboardWebSocket ws : sockets) {
+            ws.send(message);
+        }
+    }
 
-	synchronized void addSocket(DashboardWebSocket socket) {
-		sockets.add(socket);
+    synchronized void addSocket(DashboardWebSocket socket) {
+        sockets.add(socket);
 
-		socket.send(new Message(MessageType.RECEIVE_CONFIG_SCHEMA, getConfigSchemaJson()));
-		socket.send(new Message(MessageType.RECEIVE_CONFIG_OPTIONS, getConfigJson()));
-		synchronized (opModeList) {
+        socket.send(new Message(MessageType.RECEIVE_CONFIG_SCHEMA, getConfigSchemaJson()));
+        socket.send(new Message(MessageType.RECEIVE_CONFIG_OPTIONS, getConfigJson()));
+        synchronized (opModeList) {
             if (opModeList.size() > 0) {
                 socket.send(new Message(MessageType.RECEIVE_OP_MODE_LIST, opModeList));
             }
         }
-	}
+    }
 
-	synchronized void removeSocket(DashboardWebSocket socket) {
-		sockets.remove(socket);
-	}
+    synchronized void removeSocket(DashboardWebSocket socket) {
+        sockets.remove(socket);
+    }
 
-	synchronized void onMessage(DashboardWebSocket socket, Message msg) {
-        switch(msg.getType()) {
+    synchronized void onMessage(DashboardWebSocket socket, Message msg) {
+        switch (msg.getType()) {
             case GET_ROBOT_STATUS: {
                 socket.send(new Message(MessageType.RECEIVE_ROBOT_STATUS, getRobotStatus()));
                 break;
@@ -407,12 +415,12 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         }
     }
 
-	private void close() {
+    private void close() {
         if (opModeManager != null) {
             opModeManager.unregisterListener(this);
         }
         telemetryExecutorService.shutdownNow();
-	    server.stop();
+        server.stop();
     }
 
     @Override
