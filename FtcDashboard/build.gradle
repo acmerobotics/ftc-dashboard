@@ -51,7 +51,7 @@ task buildDash(type: NodeTask, dependsOn: yarn) {
 }
 
 android.libraryVariants.all { variant ->
-    variant.preBuild.dependsOn buildDash
+    variant.mergeAssets.dependsOn buildDash
 }
 
 repositories {
