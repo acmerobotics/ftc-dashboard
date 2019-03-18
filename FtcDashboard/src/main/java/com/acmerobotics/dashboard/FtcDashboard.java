@@ -64,6 +64,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             "kotlin"
     ));
 
+    // although there is a supposed memory leak, this reference is set to null upon closing
+    @SuppressLint("StaticFieldLeak")
     private static FtcDashboard instance;
 
     /**
@@ -112,7 +114,6 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private int imageQuality = DEFAULT_IMAGE_QUALITY;
     private int telemetryTransmissionInterval = DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL;
 
-    private Activity activity;
     private TelemetryPacket.Adapter telemetry;
     private List<DashboardWebSocket> sockets;
     private DashboardWebSocketServer server;
@@ -164,7 +165,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     private FtcDashboard() {
-        activity = AppUtil.getInstance().getActivity();
+        Activity activity = AppUtil.getInstance().getActivity();
         sockets = new ArrayList<>();
         configuration = new Configuration();
         telemetry = new TelemetryPacket.Adapter(this);
@@ -245,7 +246,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     private synchronized void updateConnectionStatusTextView() {
-        activity.runOnUiThread(new Runnable() {
+        AppUtil.getInstance().runOnUiThread(new Runnable() {
             @SuppressLint("SetTextI18n")
             @Override
             public void run() {
@@ -487,7 +488,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         }
         telemetryExecutorService.shutdownNow();
         server.stop();
-        activity.runOnUiThread(new Runnable() {
+        AppUtil.getInstance().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 parentLayout.removeView(connectionStatusTextView);

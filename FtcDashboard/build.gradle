@@ -49,6 +49,9 @@ node {
 
 task buildDash(type: NodeTask, dependsOn: yarn) {
     script = file("${project.projectDir}/dash/scripts/build.js")
+    execOverrides {
+        it.standardOutput = new ByteArrayOutputStream()
+    }
 }
 
 android.libraryVariants.all { variant ->
