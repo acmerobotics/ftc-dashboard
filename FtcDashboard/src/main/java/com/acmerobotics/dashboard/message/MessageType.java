@@ -24,5 +24,8 @@ public enum MessageType {
     RECEIVE_TELEMETRY,
 
     /* camera */
-    RECEIVE_IMAGE
+    RECEIVE_IMAGE,
+
+    /* gamepad */
+    RECEIVE_GAMEPAD_STATE
 }

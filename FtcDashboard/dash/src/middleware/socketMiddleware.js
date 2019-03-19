@@ -4,21 +4,24 @@ import {
   connect,
   receiveConnectionStatus,
   receivePingTime
-} from './actions/socket';
+} from '../actions/socket';
 import {
   GET_CONFIG_OPTIONS,
   SAVE_CONFIG_OPTIONS
-} from './actions/config';
+} from '../actions/config';
 import { 
   GET_ROBOT_STATUS,
   RECEIVE_ROBOT_STATUS,
   getRobotStatus
-} from './actions/status';
+} from '../actions/status';
 import {
   INIT_OP_MODE,
   START_OP_MODE,
   STOP_OP_MODE
-} from './actions/opmode';
+} from '../actions/opmode';
+import {
+  RECEIVE_GAMEPAD_STATE
+} from '../actions/gamepad';
 
 let socket, statusSentTime;
 
@@ -72,6 +75,8 @@ const socketMiddleware = store => next => action => {
     next(action);
     break;
   }
+  // messages forwarded to the server
+  case RECEIVE_GAMEPAD_STATE:
   case GET_ROBOT_STATUS:
   case SAVE_CONFIG_OPTIONS:
   case GET_CONFIG_OPTIONS: 

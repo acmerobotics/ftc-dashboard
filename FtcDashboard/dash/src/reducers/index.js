@@ -5,6 +5,7 @@ import config from './config';
 import status from './status';
 import camera from './camera';
 import settings from './settings';
+import gamepad from './gamepad';
 
 export default combineReducers({
   telemetry,
@@ -12,5 +13,6 @@ export default combineReducers({
   config,
   status,
   camera,
-  settings
+  settings,
+  gamepad
 });

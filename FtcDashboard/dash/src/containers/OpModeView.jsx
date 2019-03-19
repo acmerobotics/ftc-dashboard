@@ -4,6 +4,8 @@ import PropTypes from 'prop-types';
 import Heading from '../components/Heading';
 import { initOpMode, startOpMode, stopOpMode } from '../actions/opmode';
 import OpModeStatus from '../enums/OpModeStatus';
+import Icon from '../components/Icon';
+import IconGroup from '../components/IconGroup';
 
 const STOP_OP_MODE = '$Stop$Robot$';
 
@@ -77,6 +79,8 @@ class OpModeView extends React.Component {
   render() {
     const { available, activeOpMode, opModeList, warningMessage, errorMessage } = this.props;
 
+    const { gamepad1Connected, gamepad2Connected } = this.props;
+
     if (!available) {
       return (
         <div>
@@ -88,9 +92,16 @@ class OpModeView extends React.Component {
 
     return (
       <div>
-        <Heading level={2} text="Op Mode" />
-        <p/>
-        <select value={this.state.selectedOpMode} disabled={activeOpMode !== STOP_OP_MODE} onChange={this.onChange}>
+        <Heading level={2} text="Op Mode">
+          <IconGroup>
+            <Icon opacity={ gamepad1Connected ? 1.0 : 0.3 } icon="gamepad" size="small" />
+            <Icon opacity={ gamepad2Connected ? 1.0 : 0.3 } icon="gamepad" size="small" />
+          </IconGroup>
+        </Heading>
+        <select style={{ marginRight: '8px' }} 
+          value={this.state.selectedOpMode} 
+          disabled={ activeOpMode !== STOP_OP_MODE || opModeList.length === 0 } 
+          onChange={this.onChange}>
           {
             opModeList.length === 0 ?
               (<option>Loading...</option>) :
@@ -101,7 +112,6 @@ class OpModeView extends React.Component {
                 ))
           }
         </select>
-        &nbsp;
         {this.renderButtons()}
         {
           errorMessage !== '' ?
@@ -123,9 +133,14 @@ OpModeView.propTypes = {
   opModeList: PropTypes.arrayOf(PropTypes.string).isRequired,
   warningMessage: PropTypes.string.isRequired,
   errorMessage: PropTypes.string.isRequired,
-  dispatch: PropTypes.func.isRequired
+  dispatch: PropTypes.func.isRequired,
+  gamepad1Connected: PropTypes.bool.isRequired,
+  gamepad2Connected: PropTypes.bool.isRequired
 };
 
-const mapStateToProps = ({ status }) => status;
+const mapStateToProps = ({ status, gamepad }) => ({
+  ...status,
+  ...gamepad
+});
 
 export default connect(mapStateToProps)(OpModeView);

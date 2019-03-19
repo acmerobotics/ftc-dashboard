@@ -40,6 +40,7 @@ input { font-size: inherit; outline: none; }
 .remove { background-image: url('assets/icons/remove.svg'); }
 .expand-less { background-image: url('assets/icons/expand_less.svg'); }
 .expand-more { background-image: url('assets/icons/expand_more.svg'); }
+.gamepad { background-image: url('assets/icons/gamepad.svg'); }
 .multiple-checkbox { overflow-y: scroll; }
 .error { font-weight: bold; color: red; }
 .warning { font-weight: bold; color: orange; }

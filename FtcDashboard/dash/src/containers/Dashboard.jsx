@@ -27,10 +27,11 @@ class Dashboard extends Component {
             <IconGroup>
               {
                 this.props.isConnected ?
-                  <p>{this.props.pingTime}ms&nbsp;&nbsp;&nbsp;&nbsp;</p>
+                  <p style={{ width: '60px', textAlign: 'right' }}>{this.props.pingTime}ms</p>
                   : null
               }
               <select 
+                style={{ margin: '0px 8px 0px 8px' }}
                 value={this.props.layoutPreset} 
                 onChange={evt => this.props.dispatch(saveLayoutPreset(evt.target.value))}>
                 {
@@ -41,7 +42,6 @@ class Dashboard extends Component {
                     ))
                 }
               </select>
-              &nbsp;&nbsp;&nbsp;
               <Icon icon={this.props.isConnected ? 'wifi' : 'no-wifi'} size="large" />
             </IconGroup>
           </Heading>

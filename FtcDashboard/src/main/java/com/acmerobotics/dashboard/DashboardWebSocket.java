@@ -3,9 +3,6 @@ package com.acmerobotics.dashboard;
 import android.util.Log;
 
 import com.acmerobotics.dashboard.message.Message;
-import com.acmerobotics.dashboard.message.MessageDeserializer;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
 
@@ -19,10 +16,6 @@ public class DashboardWebSocket extends NanoWSD.WebSocket {
     public static final String TAG = "DashboardWebSocket";
 
     private static final boolean DEBUG = false;
-
-    private static final Gson GSON = new GsonBuilder()
-            .registerTypeAdapter(Message.class, new MessageDeserializer())
-            .create();
 
     private FtcDashboard dashboard;
 
@@ -53,7 +46,7 @@ public class DashboardWebSocket extends NanoWSD.WebSocket {
     @Override
     protected void onMessage(NanoWSD.WebSocketFrame message) {
         String payload = message.getTextPayload();
-        Message msg = GSON.fromJson(payload, Message.class);
+        Message msg = dashboard.getGson().fromJson(payload, Message.class);
         if (DEBUG) {
             Log.i(TAG, "[RECV]\t" + payload);
         }
@@ -75,7 +68,7 @@ public class DashboardWebSocket extends NanoWSD.WebSocket {
      */
     public void send(Message message) {
         try {
-            String messageStr = GSON.toJson(message);
+            String messageStr = dashboard.getGson().toJson(message);
             if (DEBUG) {
                 Log.i(TAG, "[SENT]\t" + messageStr);
             }
