@@ -47,7 +47,7 @@ public class DashboardWebSocket extends NanoWSD.WebSocket {
     @Override
     protected void onMessage(NanoWSD.WebSocketFrame message) {
         String payload = message.getTextPayload();
-        Message msg = dashboard.getGson().fromJson(payload, Message.class);
+        Message msg = dashboard.fromJson(payload, Message.class);
         if (DEBUG && msg.getType() != MessageType.GET_ROBOT_STATUS) {
             Log.i(TAG, "[RECV]\t" + payload);
         }
@@ -69,7 +69,7 @@ public class DashboardWebSocket extends NanoWSD.WebSocket {
      */
     public void send(Message message) {
         try {
-            String messageStr = dashboard.getGson().toJson(message);
+            String messageStr = dashboard.toJson(message);
             if (DEBUG && message.getType() != MessageType.RECEIVE_ROBOT_STATUS &&
                     message.getType() != MessageType.RECEIVE_TELEMETRY) {
                 Log.i(TAG, "[SENT]\t" + messageStr);

@@ -14,7 +14,6 @@ public class ConstantProvider<T> implements ValueProvider<T> {
 
     @Override
     public void set(T value) {
-        // do nothing
-        // TODO: is failure appropriate?
+        throw new UnsupportedOperationException("Constants cannot be modified");
     }
 }

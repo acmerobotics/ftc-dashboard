@@ -28,6 +28,7 @@ import com.acmerobotics.dashboard.message.redux.SaveConfig;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import com.qualcomm.robotcore.eventloop.EventLoop;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.exception.RobotCoreException;
@@ -75,8 +76,6 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             "kotlin"
     ));
 
-    // although there is a supposed memory leak, this reference is set to null upon closing
-    @SuppressLint("StaticFieldLeak")
     private static FtcDashboard instance;
 
     /**
@@ -122,25 +121,23 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         return instance;
     }
 
-    private int imageQuality = DEFAULT_IMAGE_QUALITY;
-    private int telemetryTransmissionInterval = DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL;
+    private DashboardWebSocketServer server;
+    private List<DashboardWebSocket> sockets = new ArrayList<>();
 
     private TelemetryPacket.Adapter telemetry;
-    private List<DashboardWebSocket> sockets;
-    private DashboardWebSocketServer server;
-    private CustomVariable configRoot;
-
-    private AssetManager assetManager;
-    private List<String> assetFiles;
-
     private ExecutorService telemetryExecutorService;
     private volatile TelemetryPacket nextTelemetryPacket;
     private final Object telemetryLock = new Object();
+    private int telemetryTransmissionInterval = DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL;
+
+    private CustomVariable configRoot;
+
+    private int imageQuality = DEFAULT_IMAGE_QUALITY;
 
     private OpModeManagerImpl opModeManager;
     private OpMode activeOpMode;
     private RobotStatus.OpModeStatus activeOpModeStatus = RobotStatus.OpModeStatus.STOPPED;
-    private final List<String> opModeList;
+    private final List<String> opModeList = new ArrayList<>();
     private final Object opModeLock = new Object();
 
     private TextView connectionStatusTextView;
@@ -181,9 +178,21 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         }
     }
 
+    private class ListOpModesRunnable implements Runnable {
+        @Override
+        public void run() {
+            RegisteredOpModes.getInstance().waitOpModesRegistered();
+            synchronized (opModeList) {
+                for (OpModeMeta opModeMeta : RegisteredOpModes.getInstance().getOpModes()) {
+                    opModeList.add(opModeMeta.name);
+                }
+                Collections.sort(opModeList);
+                sendAll(new ReceiveOpModeList(opModeList));
+            }
+        }
+    }
+
     private FtcDashboard() {
-        Activity activity = AppUtil.getInstance().getActivity();
-        sockets = new ArrayList<>();
         telemetry = new TelemetryPacket.Adapter(this);
 
         gson = new GsonBuilder()
@@ -196,43 +205,6 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
         configRoot = ReflectionConfig.scanForClasses(IGNORED_PACKAGES);
 
-        if (activity != null) {
-            connectionStatusTextView = new TextView(activity);
-            connectionStatusTextView.setTypeface(Typeface.DEFAULT_BOLD);
-            int color = activity.getResources().getColor(R.color.dashboardColor);
-            connectionStatusTextView.setTextColor(color);
-            int horizontalMarginId = activity.getResources().getIdentifier(
-                    "activity_horizontal_margin", "dimen", activity.getPackageName());
-            int horizontalMargin = (int) activity.getResources().getDimension(horizontalMarginId);
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-            );
-            params.setMargins(horizontalMargin, 0, horizontalMargin, 0);
-            connectionStatusTextView.setLayoutParams(params);
-
-            int parentLayoutId = activity.getResources().getIdentifier(
-                    "entire_screen", "id", activity.getPackageName());
-            parentLayout = activity.findViewById(parentLayoutId);
-            int childCount = parentLayout.getChildCount();
-            int relativeLayoutId = activity.getResources().getIdentifier(
-                    "RelativeLayout", "id", activity.getPackageName());
-            int i;
-            for (i = 0; i < childCount; i++) {
-                if (parentLayout.getChildAt(i).getId() == relativeLayoutId) {
-                    break;
-                }
-            }
-            final int relativeLayoutIndex = i;
-            activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    parentLayout.addView(connectionStatusTextView, relativeLayoutIndex);
-                }
-            });
-            updateConnectionStatusTextView();
-        }
-
         server = new DashboardWebSocketServer(this);
         try {
             server.start();
@@ -240,18 +212,66 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             Log.w(TAG, e);
         }
 
-        assetManager = activity.getAssets();
-
-        opModeList = new ArrayList<>();
-
-        assetFiles = new ArrayList<>();
-        buildAssetsFileList("dash");
-
         telemetryExecutorService = ThreadPool.newSingleThreadExecutor("dash telemetry");
         telemetryExecutorService.submit(new TelemetryUpdateRunnable());
+
+        injectStatusView();
     }
 
-    private synchronized void updateConnectionStatusTextView() {
+    private void injectStatusView() {
+        Activity activity = AppUtil.getInstance().getActivity();
+
+        if (activity == null) return;
+
+        connectionStatusTextView = new TextView(activity);
+        connectionStatusTextView.setTypeface(Typeface.DEFAULT_BOLD);
+        int color = activity.getResources().getColor(R.color.dashboardColor);
+        connectionStatusTextView.setTextColor(color);
+        int horizontalMarginId = activity.getResources().getIdentifier(
+                "activity_horizontal_margin", "dimen", activity.getPackageName());
+        int horizontalMargin = (int) activity.getResources().getDimension(horizontalMarginId);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        params.setMargins(horizontalMargin, 0, horizontalMargin, 0);
+        connectionStatusTextView.setLayoutParams(params);
+
+        int parentLayoutId = activity.getResources().getIdentifier(
+                "entire_screen", "id", activity.getPackageName());
+        parentLayout = activity.findViewById(parentLayoutId);
+        int childCount = parentLayout.getChildCount();
+        int relativeLayoutId = activity.getResources().getIdentifier(
+                "RelativeLayout", "id", activity.getPackageName());
+        int i;
+        for (i = 0; i < childCount; i++) {
+            if (parentLayout.getChildAt(i).getId() == relativeLayoutId) {
+                break;
+            }
+        }
+        final int relativeLayoutIndex = i;
+        AppUtil.getInstance().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                parentLayout.addView(connectionStatusTextView, relativeLayoutIndex);
+            }
+        });
+
+        updateStatusView();
+    }
+
+    private void removeStatusView() {
+        if (parentLayout != null && connectionStatusTextView != null) {
+            AppUtil.getInstance().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    parentLayout.removeView(connectionStatusTextView);
+                }
+            });
+        }
+    }
+
+    private synchronized void updateStatusView() {
         if (connectionStatusTextView != null) {
             AppUtil.getInstance().runOnUiThread(new Runnable() {
                 @SuppressLint("SetTextI18n")
@@ -270,7 +290,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         }
     }
 
-    private WebHandler newStaticAssetHandler(final String file) {
+    private WebHandler newStaticAssetHandler(final AssetManager assetManager, final String file) {
         return new WebHandler() {
             @Override
             public NanoHTTPD.Response getResponse(NanoHTTPD.IHTTPSession session)
@@ -287,35 +307,38 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         };
     }
 
-    private boolean buildAssetsFileList(String path) {
+    private void addAssetWebHandlers(WebHandlerManager webHandlerManager,
+                                     AssetManager assetManager, String path) {
         try {
             String[] list = assetManager.list(path);
-            if (list == null) {
-                return false;
-            }
+
+            if (list == null) return;
+
             if (list.length > 0) {
                 for (String file : list) {
-                    if (!buildAssetsFileList(path + "/" + file)) {
-                        return false;
-                    }
+                    addAssetWebHandlers(webHandlerManager, assetManager, path + "/" + file);
                 }
             } else {
-                assetFiles.add(path);
+                webHandlerManager.register("/" + path,
+                        newStaticAssetHandler(assetManager, path));
             }
         } catch (IOException e) {
-            return false;
+            Log.w(TAG, e);
         }
-
-        return true;
     }
 
     private void internalAttachWebServer(WebServer webServer) {
-        WebHandlerManager manager = webServer.getWebHandlerManager();
-        manager.register("/dash", newStaticAssetHandler("dash/index.html"));
-        manager.register("/dash/", newStaticAssetHandler("dash/index.html"));
-        for (final String file : assetFiles) {
-            manager.register("/" + file, newStaticAssetHandler(file));
-        }
+        Activity activity = AppUtil.getInstance().getActivity();
+
+        if (activity == null) return;
+
+        WebHandlerManager webHandlerManager = webServer.getWebHandlerManager();
+        AssetManager assetManager = activity.getAssets();
+        webHandlerManager.register("/dash",
+                newStaticAssetHandler(assetManager, "dash/index.html"));
+        webHandlerManager.register("/dash/",
+                newStaticAssetHandler(assetManager, "dash/index.html"));
+        addAssetWebHandlers(webHandlerManager, assetManager, "dash");
     }
 
     private void internalAttachEventLoop(EventLoop eventLoop) {
@@ -333,23 +356,16 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             opModeList.clear();
         }
 
-        (new Thread() {
-            @Override
-            public void run() {
-                RegisteredOpModes.getInstance().waitOpModesRegistered();
-                synchronized (opModeList) {
-                    for (OpModeMeta opModeMeta : RegisteredOpModes.getInstance().getOpModes()) {
-                        opModeList.add(opModeMeta.name);
-                    }
-                    Collections.sort(opModeList);
-                    sendAll(new ReceiveOpModeList(opModeList));
-                }
-            }
-        }).start();
+        Thread t = new Thread(new ListOpModesRunnable());
+        t.start();
     }
 
-    public Gson getGson() {
-        return gson;
+    public <T> T fromJson(String json, Class<T> classOfT) throws JsonSyntaxException {
+        return gson.fromJson(json, classOfT);
+    }
+
+    public String toJson(Object src) {
+        return gson.toJson(src);
     }
 
     /**
@@ -361,6 +377,13 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         synchronized (telemetryLock) {
             nextTelemetryPacket = telemetryPacket;
         }
+    }
+
+    /**
+     * Returns a telemetry object that proxies {@link #sendTelemetryPacket(TelemetryPacket)}.
+     */
+    public Telemetry getTelemetry() {
+        return telemetry;
     }
 
     /**
@@ -431,13 +454,6 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         }
     }
 
-    /**
-     * Returns a telemetry object that proxies {@link #sendTelemetryPacket(TelemetryPacket)}.
-     */
-    public Telemetry getTelemetry() {
-        return telemetry;
-    }
-
     private RobotStatus getRobotStatus() {
         if (opModeManager == null) {
             return new RobotStatus();
@@ -462,13 +478,13 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             }
         }
 
-        updateConnectionStatusTextView();
+        updateStatusView();
     }
 
     synchronized void removeSocket(DashboardWebSocket socket) {
         sockets.remove(socket);
 
-        updateConnectionStatusTextView();
+        updateStatusView();
     }
 
     synchronized void onMessage(DashboardWebSocket socket, Message msg) {
@@ -505,7 +521,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 break;
             }
             default:
-                Log.w(TAG, String.format("unknown message recv'd: '%s'", msg.getType()));
+                Log.w(TAG, "Received unknown message of type " + msg.getType());
                 Log.w(TAG, msg.toString());
                 break;
         }
@@ -517,14 +533,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         }
         telemetryExecutorService.shutdownNow();
         server.stop();
-        if (parentLayout != null && connectionStatusTextView != null) {
-            AppUtil.getInstance().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    parentLayout.removeView(connectionStatusTextView);
-                }
-            });
-        }
+
+        removeStatusView();
     }
 
     @Override
