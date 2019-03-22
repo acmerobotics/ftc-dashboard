@@ -14,8 +14,6 @@ export const gamepadDisconnected = (user) => ({
 
 export const receiveGamepadState = (gamepad1, gamepad2) => ({
   type: RECEIVE_GAMEPAD_STATE,
-  data: {
-    gamepad1,
-    gamepad2
-  }
+  gamepad1,
+  gamepad2
 });

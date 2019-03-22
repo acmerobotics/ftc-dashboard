@@ -15,12 +15,12 @@ const telemetry = (state = initialState, action) => {
   case RECEIVE_ROBOT_STATUS:
     return {
       ...state,
-      ...action.data
+      ...action.status
     };
   case RECEIVE_OP_MODE_LIST:
     return {
       ...state,
-      opModeList: action.data
+      opModeList: action.opModeList
     };
   default:
     return state;

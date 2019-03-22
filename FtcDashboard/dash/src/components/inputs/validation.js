@@ -1,9 +1,11 @@
+// TODO: extract patterns into constants?
+
 export const validateDouble = (value) => {
   if (value === ''
       || /^-0?$/.test(value)
       || /^-?\d*\.([1-9]*0+)*$/.test(value)) {
     return {
-      value,
+      value: value,
       valid: false
     };
   } else if (/^-?\d*\.?\d*$/.test(value)) {
@@ -30,7 +32,7 @@ export const validateInt = (value) => {
 
 export const validateString = (value) => {
   return {
-    value,
+    value: value,
     valid: true
   };
 };

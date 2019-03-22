@@ -1,6 +1,8 @@
-package com.acmerobotics.dashboard.config;
+package com.acmerobotics.dashboard.config.reflection;
 
 import android.util.Log;
+
+import com.acmerobotics.dashboard.config.ValueProvider;
 
 import java.lang.reflect.Field;
 

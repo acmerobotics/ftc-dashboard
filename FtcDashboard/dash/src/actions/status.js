@@ -6,12 +6,12 @@ export const getRobotStatus = () => ({
   type: GET_ROBOT_STATUS
 });
 
-export const receiveRobotStatus = (data) => ({
+export const receiveRobotStatus = (status) => ({
   type: RECEIVE_ROBOT_STATUS,
-  data
+  status
 });
 
-export const receiveOpModeList = (data) => ({
+export const receiveOpModeList = (opModeList) => ({
   type: RECEIVE_OP_MODE_LIST,
-  data
+  opModeList
 });

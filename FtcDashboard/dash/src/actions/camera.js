@@ -1,6 +1,6 @@
 export const RECEIVE_IMAGE = 'RECEIVE_IMAGE';
 
-export const receiveImage = (data) => ({
+export const receiveImage = (imageString) => ({
   type: RECEIVE_IMAGE,
-  data
+  imageString
 });

@@ -12,7 +12,7 @@ const initialState = {
 const telemetry = (state = initialState, action) => {
   switch (action.type) {
   case RECEIVE_TELEMETRY:
-    return action.data;
+    return action.telemetry;
   default:
     return state;
   }

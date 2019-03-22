@@ -9,7 +9,7 @@ const telemetry = (state = initialState, action) => {
   case RECEIVE_IMAGE:
     return {
       ...state,
-      imageStr: action.data
+      imageStr: action.imageString
     };
   default:
     return state;

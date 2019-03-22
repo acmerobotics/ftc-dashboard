@@ -1,13 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import CustomOption from './CustomOption';
+import CustomVariable from './CustomVariable';
 import Heading from '../components/Heading';
 import IconGroup from '../components/IconGroup';
 import Icon from '../components/Icon';
-import { updateConfigOptions, saveConfigOptions } from '../actions/config';
+import { updateConfig, saveConfig, refreshConfig } from '../actions/config';
+import VariableType from '../enums/VariableType';
 
-const ConfigView = ({ config, onRefresh, onSave, onChange }) => (
+const ConfigView = ({ configRoot, onRefresh, onSave, onChange }) => (
   <div>
     <Heading level={2} text="Configuration">
       <IconGroup>
@@ -18,25 +19,28 @@ const ConfigView = ({ config, onRefresh, onSave, onChange }) => (
     <table>
       <tbody>
         {
-          Object.keys(config.schema).map((key) => (
-            <CustomOption
+          Object.keys(configRoot.__value || {}).map((key) => (
+            <CustomVariable
               key={key}
               name={key}
-              value={config.options[key] || {}}
-              modifiedValue={config.modifiedOptions ? config.modifiedOptions[key] : undefined}
-              schema={config.schema[key]}
+              value={configRoot.__value[key].__value || {}}
               onChange={
-                (value) => {
+                (newValue) => {
                   onChange({
-                    ...config.modifiedOptions,
-                    [key]: value
+                    __type: VariableType.CUSTOM,
+                    __value: {
+                      [key]: newValue
+                    }
                   });
                 }
               } 
               onSave={
-                (value) => {
+                (newValue) => {
                   onSave({
-                    [key]: value
+                    __type: VariableType.CUSTOM,
+                    __value: {
+                      [key]: newValue
+                    }
                   });
                 }
               } />
@@ -48,29 +52,23 @@ const ConfigView = ({ config, onRefresh, onSave, onChange }) => (
 );
 
 ConfigView.propTypes = {
-  config: PropTypes.shape({
-    options: PropTypes.object.isRequired,
-    modifiedOptions: PropTypes.object.isRequired,
-    schema: PropTypes.object.isRequired
-  }),
+  configRoot: PropTypes.object.isRequired,
   onRefresh: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired
 };
 
-const mapStateToProps = ({ config }) => ({
-  config
-});
+const mapStateToProps = ({ config }) => config;
 
 const mapDispatchToProps = (dispatch) => ({
   onRefresh: () => {
-    dispatch(updateConfigOptions({}));
+    dispatch(refreshConfig());
   },
-  onSave: (options) => {
-    dispatch(saveConfigOptions(options));
+  onSave: (configDiff) => {
+    dispatch(saveConfig(configDiff));
   },
-  onChange: (modifiedOptions) => {
-    dispatch(updateConfigOptions(modifiedOptions));
+  onChange: (configDiff) => {
+    dispatch(updateConfig(configDiff));
   }
 });
 

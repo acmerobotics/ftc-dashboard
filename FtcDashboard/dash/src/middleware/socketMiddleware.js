@@ -6,8 +6,8 @@ import {
   receivePingTime
 } from '../actions/socket';
 import {
-  GET_CONFIG_OPTIONS,
-  SAVE_CONFIG_OPTIONS
+  GET_CONFIG,
+  SAVE_CONFIG
 } from '../actions/config';
 import { 
   GET_ROBOT_STATUS,
@@ -25,7 +25,7 @@ import {
 
 let socket, statusSentTime;
 
-export const robotStatusLoop = () => (
+const robotStatusLoop = () => (
   (dispatch, getState) => {
     const { isConnected } = getState().socket;
 
@@ -78,8 +78,8 @@ const socketMiddleware = store => next => action => {
   // messages forwarded to the server
   case RECEIVE_GAMEPAD_STATE:
   case GET_ROBOT_STATUS:
-  case SAVE_CONFIG_OPTIONS:
-  case GET_CONFIG_OPTIONS: 
+  case SAVE_CONFIG:
+  case GET_CONFIG: 
   case INIT_OP_MODE:
   case START_OP_MODE:
   case STOP_OP_MODE: {
@@ -88,6 +88,8 @@ const socketMiddleware = store => next => action => {
     if (isConnected) {
       socket.send(JSON.stringify(action));
     }
+
+    next(action);
 
     break;
   }

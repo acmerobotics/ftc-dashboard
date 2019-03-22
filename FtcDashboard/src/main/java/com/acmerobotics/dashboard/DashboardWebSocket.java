@@ -3,6 +3,7 @@ package com.acmerobotics.dashboard;
 import android.util.Log;
 
 import com.acmerobotics.dashboard.message.Message;
+import com.acmerobotics.dashboard.message.MessageType;
 
 import java.io.IOException;
 
@@ -47,7 +48,7 @@ public class DashboardWebSocket extends NanoWSD.WebSocket {
     protected void onMessage(NanoWSD.WebSocketFrame message) {
         String payload = message.getTextPayload();
         Message msg = dashboard.getGson().fromJson(payload, Message.class);
-        if (DEBUG) {
+        if (DEBUG && msg.getType() != MessageType.GET_ROBOT_STATUS) {
             Log.i(TAG, "[RECV]\t" + payload);
         }
         dashboard.onMessage(this, msg);
@@ -60,7 +61,7 @@ public class DashboardWebSocket extends NanoWSD.WebSocket {
 
     @Override
     protected void onException(IOException exception) {
-        Log.w(TAG, exception);
+
     }
 
     /**
@@ -69,7 +70,8 @@ public class DashboardWebSocket extends NanoWSD.WebSocket {
     public void send(Message message) {
         try {
             String messageStr = dashboard.getGson().toJson(message);
-            if (DEBUG) {
+            if (DEBUG && message.getType() != MessageType.RECEIVE_ROBOT_STATUS &&
+                    message.getType() != MessageType.RECEIVE_TELEMETRY) {
                 Log.i(TAG, "[SENT]\t" + messageStr);
             }
             send(messageStr);

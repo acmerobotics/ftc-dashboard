@@ -2,10 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Heading from '../components/Heading';
 import Icon from '../components/Icon';
-import BasicOption from './BasicOption';
-import OptionType from '../enums/OptionType';
+import BasicVariable from './BasicVariable';
+import VariableType from '../enums/VariableType';
 
-class CustomOption extends React.Component {
+class CustomVariable extends React.Component {
   constructor(props) {
     super(props);
 
@@ -23,56 +23,50 @@ class CustomOption extends React.Component {
   }
 
   render() {
-    const { name, value, modifiedValue, schema } = this.props;
+    const { name, value } = this.props;
 
-    const optionKeys = Object.keys(value)
-      .filter((key) => key in schema)
-      .sort();
+    const options = Object.keys(value).map((key) => {
+      const child = value[key];
 
-    const options = optionKeys.map((key) => {
-      const onChange = (value) => {
+      const onChange = (newValue) => {
         this.props.onChange({
-          ...modifiedValue,
-          [key]: value
+          __type: VariableType.CUSTOM,
+          __value: {
+            [key]: newValue
+          }
         });
       };
 
-      const onSave = (value) => {
+      const onSave = (newValue) => {
         this.props.onSave({
-          [key]: value
+          __type: VariableType.CUSTOM,
+          __value: {
+            [key]: newValue
+          }
         });
       };
 
-      const type = OptionType.getFromSchema(schema[key]);
-
-      if (type === OptionType.CUSTOM) {
+      if (child.__type === VariableType.CUSTOM) {
         return (
-          <CustomOption
+          <CustomVariable
             key={key}
             name={key}
-            value={value[key]}
-            modifiedValue={modifiedValue ? modifiedValue[key] : undefined}
-            schema={schema[key]}
+            value={child.__value}
             onChange={onChange}
             onSave={onSave} />
         );
       }
 
-      const modified = typeof modifiedValue !== 'undefined' && (key in modifiedValue);
-      
-      const optionValue = modified ? modifiedValue[key].value : value[key];
-      const optionSchema = schema[key];
-
-      const valid = modified ? modifiedValue[key].valid : true;
-
       return (
-        <BasicOption
+        <BasicVariable
           key={key}
+          type={child.__type}
           name={key}
-          value={optionValue}
-          modified={modified}
-          valid={valid}
-          schema={optionSchema}
+          value={child.__newValue}
+          valid={child.__valid}
+          enumClass={child.__enumClass}
+          enumValues={child.__enumValues}
+          modified={child.__modified}
           onChange={onChange}
           onSave={onSave} />
       );
@@ -100,13 +94,11 @@ class CustomOption extends React.Component {
   }
 }
 
-CustomOption.propTypes = {
+CustomVariable.propTypes = {
   name: PropTypes.string.isRequired,
-  schema: PropTypes.object.isRequired,
   value: PropTypes.object.isRequired,
-  modifiedValue: PropTypes.object,
   onChange: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
 };
 
-export default CustomOption;
+export default CustomVariable;

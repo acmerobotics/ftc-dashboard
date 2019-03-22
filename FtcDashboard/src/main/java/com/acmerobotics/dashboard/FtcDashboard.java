@@ -5,26 +5,30 @@ import android.app.Activity;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
-import android.os.SystemClock;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.config.Configuration;
+import com.acmerobotics.dashboard.config.reflection.ReflectionConfig;
+import com.acmerobotics.dashboard.config.variable.BasicVariable;
+import com.acmerobotics.dashboard.config.variable.ConfigVariableDeserializer;
+import com.acmerobotics.dashboard.config.variable.ConfigVariableSerializer;
+import com.acmerobotics.dashboard.config.variable.CustomVariable;
 import com.acmerobotics.dashboard.message.Message;
 import com.acmerobotics.dashboard.message.MessageDeserializer;
-import com.acmerobotics.dashboard.message.MessageType;
+import com.acmerobotics.dashboard.message.redux.InitOpMode;
+import com.acmerobotics.dashboard.message.redux.ReceiveConfig;
+import com.acmerobotics.dashboard.message.redux.ReceiveGamepadState;
+import com.acmerobotics.dashboard.message.redux.ReceiveImage;
+import com.acmerobotics.dashboard.message.redux.ReceiveOpModeList;
+import com.acmerobotics.dashboard.message.redux.ReceiveRobotStatus;
+import com.acmerobotics.dashboard.message.redux.ReceiveTelemetry;
+import com.acmerobotics.dashboard.message.redux.SaveConfig;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.acmerobotics.dashboard.util.ClassFilter;
-import com.acmerobotics.dashboard.util.ClasspathScanner;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
 import com.qualcomm.robotcore.eventloop.EventLoop;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.exception.RobotCoreException;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -35,7 +39,6 @@ import org.firstinspires.ftc.robotcore.internal.opmode.OpModeManagerImpl;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeMeta;
 import org.firstinspires.ftc.robotcore.internal.opmode.RegisteredOpModes;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
-import org.firstinspires.ftc.robotcore.internal.ui.GamepadUser;
 import org.firstinspires.ftc.robotcore.internal.webserver.MimeTypesUtil;
 import org.firstinspires.ftc.robotcore.internal.webserver.WebHandler;
 import org.firstinspires.ftc.robotcore.internal.webserver.WebHandlerManager;
@@ -45,6 +48,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -124,7 +128,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private TelemetryPacket.Adapter telemetry;
     private List<DashboardWebSocket> sockets;
     private DashboardWebSocketServer server;
-    private Configuration configuration;
+    private CustomVariable configRoot;
 
     private AssetManager assetManager;
     private List<String> assetFiles;
@@ -158,7 +162,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 long startTime = System.currentTimeMillis();
                 synchronized (telemetryLock) {
                     if (nextTelemetryPacket != null) {
-                        sendAll(new Message(MessageType.RECEIVE_TELEMETRY, nextTelemetryPacket));
+                        sendAll(new ReceiveTelemetry(nextTelemetryPacket));
                         nextTelemetryPacket = null;
                     } else {
                         continue;
@@ -180,69 +184,54 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private FtcDashboard() {
         Activity activity = AppUtil.getInstance().getActivity();
         sockets = new ArrayList<>();
-        configuration = new Configuration();
         telemetry = new TelemetryPacket.Adapter(this);
 
         gson = new GsonBuilder()
                 .registerTypeAdapter(Message.class, new MessageDeserializer())
+                .registerTypeAdapter(BasicVariable.class, new ConfigVariableSerializer())
+                .registerTypeAdapter(BasicVariable.class, new ConfigVariableDeserializer())
+                .registerTypeAdapter(CustomVariable.class, new ConfigVariableSerializer())
+                .registerTypeAdapter(CustomVariable.class, new ConfigVariableDeserializer())
                 .create();
 
-        connectionStatusTextView = new TextView(activity);
-        connectionStatusTextView.setTypeface(Typeface.DEFAULT_BOLD);
-        int color = activity.getResources().getColor(R.color.dashboardColor);
-        connectionStatusTextView.setTextColor(color);
-        int horizontalMarginId = activity.getResources().getIdentifier(
-                "activity_horizontal_margin", "dimen", activity.getPackageName());
-        int horizontalMargin = (int) activity.getResources().getDimension(horizontalMarginId);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        params.setMargins(horizontalMargin, 0, horizontalMargin, 0);
-        connectionStatusTextView.setLayoutParams(params);
+        configRoot = ReflectionConfig.scanForClasses(IGNORED_PACKAGES);
 
-        int parentLayoutId = activity.getResources().getIdentifier(
-                "entire_screen", "id", activity.getPackageName());
-        parentLayout = activity.findViewById(parentLayoutId);
-        int childCount = parentLayout.getChildCount();
-        int relativeLayoutId = activity.getResources().getIdentifier(
-                "RelativeLayout", "id", activity.getPackageName());
-        int i;
-        for (i = 0; i < childCount; i++) {
-            if (parentLayout.getChildAt(i).getId() == relativeLayoutId) {
-                break;
+        if (activity != null) {
+            connectionStatusTextView = new TextView(activity);
+            connectionStatusTextView.setTypeface(Typeface.DEFAULT_BOLD);
+            int color = activity.getResources().getColor(R.color.dashboardColor);
+            connectionStatusTextView.setTextColor(color);
+            int horizontalMarginId = activity.getResources().getIdentifier(
+                    "activity_horizontal_margin", "dimen", activity.getPackageName());
+            int horizontalMargin = (int) activity.getResources().getDimension(horizontalMarginId);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            params.setMargins(horizontalMargin, 0, horizontalMargin, 0);
+            connectionStatusTextView.setLayoutParams(params);
+
+            int parentLayoutId = activity.getResources().getIdentifier(
+                    "entire_screen", "id", activity.getPackageName());
+            parentLayout = activity.findViewById(parentLayoutId);
+            int childCount = parentLayout.getChildCount();
+            int relativeLayoutId = activity.getResources().getIdentifier(
+                    "RelativeLayout", "id", activity.getPackageName());
+            int i;
+            for (i = 0; i < childCount; i++) {
+                if (parentLayout.getChildAt(i).getId() == relativeLayoutId) {
+                    break;
+                }
             }
+            final int relativeLayoutIndex = i;
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    parentLayout.addView(connectionStatusTextView, relativeLayoutIndex);
+                }
+            });
+            updateConnectionStatusTextView();
         }
-        final int relativeLayoutIndex = i;
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                parentLayout.addView(connectionStatusTextView, relativeLayoutIndex);
-            }
-        });
-        updateConnectionStatusTextView();
-
-        ClasspathScanner scanner = new ClasspathScanner(new ClassFilter() {
-            @Override
-            public boolean shouldProcessClass(String className) {
-                for (String packageName : IGNORED_PACKAGES) {
-                    if (className.startsWith(packageName)) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-
-            @Override
-            public void processClass(Class klass) {
-                if (klass.isAnnotationPresent(Config.class)
-                        && !klass.isAnnotationPresent(Disabled.class)) {
-                    Log.i(TAG, klass.getCanonicalName());
-                    configuration.addOptionsFromClass(klass);
-                }
-            }
-        });
-        scanner.scanClasspath();
 
         server = new DashboardWebSocketServer(this);
         try {
@@ -263,20 +252,22 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     private synchronized void updateConnectionStatusTextView() {
-        AppUtil.getInstance().runOnUiThread(new Runnable() {
-            @SuppressLint("SetTextI18n")
-            @Override
-            public void run() {
-                int connections = sockets.size();
-                if (connections == 0) {
-                    connectionStatusTextView.setText("Dashboard: no connections");
-                } else if (connections == 1) {
-                    connectionStatusTextView.setText("Dashboard: 1 connection");
-                } else {
-                    connectionStatusTextView.setText("Dashboard: " + connections + " connections");
+        if (connectionStatusTextView != null) {
+            AppUtil.getInstance().runOnUiThread(new Runnable() {
+                @SuppressLint("SetTextI18n")
+                @Override
+                public void run() {
+                    int connections = sockets.size();
+                    if (connections == 0) {
+                        connectionStatusTextView.setText("Dashboard: no connections");
+                    } else if (connections == 1) {
+                        connectionStatusTextView.setText("Dashboard: 1 connection");
+                    } else {
+                        connectionStatusTextView.setText("Dashboard: " + connections + " connections");
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     private WebHandler newStaticAssetHandler(final String file) {
@@ -350,7 +341,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                     for (OpModeMeta opModeMeta : RegisteredOpModes.getInstance().getOpModes()) {
                         opModeList.add(opModeMeta.name);
                     }
-                    sendAll(new Message(MessageType.RECEIVE_OP_MODE_LIST, opModeList));
+                    Collections.sort(opModeList);
+                    sendAll(new ReceiveOpModeList(opModeList));
                 }
             }
         }).start();
@@ -390,7 +382,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * Sends updated configuration data to all instance clients.
      */
     public void updateConfig() {
-        sendAll(new Message(MessageType.RECEIVE_CONFIG_OPTIONS, getConfigJson()));
+        sendAll(new ReceiveConfig(configRoot));
     }
 
     /**
@@ -402,7 +394,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, imageQuality, outputStream);
         String imageStr = Base64.encodeToString(outputStream.toByteArray(), Base64.DEFAULT);
-        sendAll(new Message(MessageType.RECEIVE_IMAGE, imageStr));
+        sendAll(new ReceiveImage(imageStr));
     }
 
     /**
@@ -419,7 +411,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         imageQuality = quality;
     }
 
-    private void updateGamepads(JsonElement jsonElement) {
+    private void updateGamepads(Gamepad gamepad1, Gamepad gamepad2) {
         synchronized (opModeLock) {
             // for now, the dashboard only overrides synthetic gamepads
             if (activeOpModeStatus == RobotStatus.OpModeStatus.STOPPED) {
@@ -430,11 +422,6 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 return;
             }
 
-            Gamepad gamepad1 = gamepadFromJson(jsonElement.getAsJsonObject().get("gamepad1"),
-                    GamepadUser.ONE);
-            Gamepad gamepad2 = gamepadFromJson(jsonElement.getAsJsonObject().get("gamepad2"),
-                    GamepadUser.TWO);
-
             try {
                 activeOpMode.gamepad1.copy(gamepad1);
                 activeOpMode.gamepad2.copy(gamepad2);
@@ -444,27 +431,11 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         }
     }
 
-    private Gamepad gamepadFromJson(JsonElement jsonElement, GamepadUser user) {
-        Gamepad gamepad = gson.fromJson(jsonElement, Gamepad.class);
-        gamepad.setUser(user);
-        gamepad.setGamepadId(Gamepad.ID_UNASSOCIATED);
-        gamepad.setTimestamp(SystemClock.uptimeMillis());
-        return gamepad;
-    }
-
     /**
      * Returns a telemetry object that proxies {@link #sendTelemetryPacket(TelemetryPacket)}.
      */
     public Telemetry getTelemetry() {
         return telemetry;
-    }
-
-    private JsonElement getConfigSchemaJson() {
-        return configuration.getJsonSchema();
-    }
-
-    private JsonElement getConfigJson() {
-        return configuration.getJson();
     }
 
     private RobotStatus getRobotStatus() {
@@ -484,11 +455,10 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     synchronized void addSocket(DashboardWebSocket socket) {
         sockets.add(socket);
 
-        socket.send(new Message(MessageType.RECEIVE_CONFIG_SCHEMA, getConfigSchemaJson()));
-        socket.send(new Message(MessageType.RECEIVE_CONFIG_OPTIONS, getConfigJson()));
+        socket.send(new ReceiveConfig(configRoot));
         synchronized (opModeList) {
             if (opModeList.size() > 0) {
-                socket.send(new Message(MessageType.RECEIVE_OP_MODE_LIST, opModeList));
+                socket.send(new ReceiveOpModeList(opModeList));
             }
         }
 
@@ -504,15 +474,15 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     synchronized void onMessage(DashboardWebSocket socket, Message msg) {
         switch (msg.getType()) {
             case GET_ROBOT_STATUS: {
-                socket.send(new Message(MessageType.RECEIVE_ROBOT_STATUS, getRobotStatus()));
+                socket.send(new ReceiveRobotStatus(getRobotStatus()));
                 break;
             }
-            case GET_CONFIG_OPTIONS: {
-                socket.send(new Message(MessageType.RECEIVE_CONFIG_OPTIONS, getConfigJson()));
+            case GET_CONFIG: {
+                socket.send(new ReceiveConfig(configRoot));
                 break;
             }
             case INIT_OP_MODE: {
-                String opModeName = ((JsonPrimitive) msg.getData()).getAsString();
+                String opModeName = ((InitOpMode) msg).getOpModeName();
                 opModeManager.initActiveOpMode(opModeName);
                 break;
             }
@@ -524,13 +494,14 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 opModeManager.stopActiveOpMode();
                 break;
             }
-            case SAVE_CONFIG_OPTIONS: {
-                configuration.updateJson((JsonElement) msg.getData());
+            case SAVE_CONFIG: {
+                configRoot.update(((SaveConfig) msg).getConfigDiff());
                 updateConfig();
                 break;
             }
             case RECEIVE_GAMEPAD_STATE: {
-                updateGamepads((JsonElement) msg.getData());
+                ReceiveGamepadState castMsg = (ReceiveGamepadState) msg;
+                updateGamepads(castMsg.getGamepad1(), castMsg.getGamepad2());
                 break;
             }
             default:
@@ -546,12 +517,14 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         }
         telemetryExecutorService.shutdownNow();
         server.stop();
-        AppUtil.getInstance().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                parentLayout.removeView(connectionStatusTextView);
-            }
-        });
+        if (parentLayout != null && connectionStatusTextView != null) {
+            AppUtil.getInstance().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    parentLayout.removeView(connectionStatusTextView);
+                }
+            });
+        }
     }
 
     @Override

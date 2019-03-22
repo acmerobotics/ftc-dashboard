@@ -1,0 +1,50 @@
+package com.acmerobotics.dashboard.config.variable;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Custom (nested) configuration variable used to represent nested objects.
+ */
+public class CustomVariable extends ConfigVariable<Object> {
+    private Map<String, ConfigVariable> variables;
+
+    public CustomVariable() {
+        this.variables = new HashMap<>();
+    }
+
+    public void putVariable(String name, ConfigVariable variable) {
+        if (ConfigVariable.isReserved(name)) {
+            throw new RuntimeException();
+        }
+        variables.put(name, variable);
+    }
+
+    public ConfigVariable<?> getVariable(String name) {
+        return variables.get(name);
+    }
+
+    @Override
+    public VariableType getType() {
+        return VariableType.CUSTOM;
+    }
+
+    @Override
+    public Object getValue() {
+        return variables;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void update(ConfigVariable<Object> newVariable) {
+        if (newVariable instanceof CustomVariable) {
+            CustomVariable newCustomVariable = (CustomVariable) newVariable;
+            for (Map.Entry<String, ConfigVariable> entry : newCustomVariable.variables.entrySet()) {
+                ConfigVariable newChildVariable = newCustomVariable.getVariable(entry.getKey());
+                getVariable(entry.getKey()).update(newChildVariable);
+            }
+        } else {
+            throw new RuntimeException();
+        }
+    }
+}

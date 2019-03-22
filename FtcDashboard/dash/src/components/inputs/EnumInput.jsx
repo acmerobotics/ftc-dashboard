@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const EnumInput = ({ value, values, onChange, onSave }) => (
+const EnumInput = ({ value, enumValues, onChange, onSave }) => (
   <span>
     <select
       className="valid"
@@ -11,7 +11,11 @@ const EnumInput = ({ value, values, onChange, onSave }) => (
         valid: true
       })}>
       {
-        values.map(v => (<option key={v} value={v}>{v}</option>))
+        enumValues.map(enumValue => (
+          <option key={enumValue} value={enumValue}>
+            {enumValue}
+          </option>
+        ))
       }
     </select>
     <button onClick={onSave}>Save</button>
@@ -20,7 +24,7 @@ const EnumInput = ({ value, values, onChange, onSave }) => (
 
 EnumInput.propTypes = {
   value: PropTypes.string.isRequired,
-  values: PropTypes.arrayOf(PropTypes.string).isRequired,
+  enumValues: PropTypes.arrayOf(PropTypes.string).isRequired,
   onChange: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired
 };
