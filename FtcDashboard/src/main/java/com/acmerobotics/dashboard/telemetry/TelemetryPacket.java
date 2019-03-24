@@ -3,14 +3,14 @@ package com.acmerobotics.dashboard.telemetry;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.canvas.Canvas;
 
-import org.firstinspires.ftc.robotcore.external.Consumer;
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * Container for telemetry information. This class can be extended to support additional, custom
@@ -18,7 +18,7 @@ import java.util.Map;
  */
 public class TelemetryPacket {
     private long timestamp;
-    private Map<String, String> data;
+    private SortedMap<String, String> data;
     private List<String> log;
     private Canvas fieldOverlay;
 
@@ -26,7 +26,7 @@ public class TelemetryPacket {
      * Creates a new telemetry packet.
      */
     public TelemetryPacket() {
-        data = new HashMap<>();
+        data = new TreeMap<>();
         log = new ArrayList<>();
         fieldOverlay = new Canvas();
     }
