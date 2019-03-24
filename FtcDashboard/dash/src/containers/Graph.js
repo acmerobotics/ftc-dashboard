@@ -1,3 +1,5 @@
+import { cloneDeep } from 'lodash';
+
 const DEFAULT_OPTIONS = {
   colors: [
     '#2979ff',
@@ -11,6 +13,7 @@ const DEFAULT_OPTIONS = {
   padding: 15,
   keySpacing: 4,
   keyLineWidth: 12,
+  gridLineWidth: 1,
   fontSize: 14,
   textColor: 'rgb(50, 50, 50)',
   gridLineColor: 'rgb(120, 120, 120)',
@@ -105,9 +108,22 @@ function map(value, fromLow, fromHigh, toLow, toHigh) {
 export default class Graph {
   constructor(canvas, options) {
     this.canvas = canvas;
+    this.canvas.style.width = `${this.canvas.width / devicePixelRatio}px`;
+    this.canvas.style.height = `${this.canvas.width / devicePixelRatio}px`;
+
     this.ctx = canvas.getContext('2d');
-    this.options = DEFAULT_OPTIONS;
+    this.options = cloneDeep(DEFAULT_OPTIONS);
     Object.assign(this.options, options || {});
+
+    // scale the dimensions
+    const o = this.options;
+    o.lineWidth = devicePixelRatio * o.lineWidth;
+    o.padding = devicePixelRatio * o.padding;
+    o.keySpacing = devicePixelRatio * o.keySpacing;
+    o.keyLineWidth = devicePixelRatio * o.keyLineWidth;
+    o.gridLineWidth = devicePixelRatio * o.gridLineWidth;
+    o.fontSize = devicePixelRatio * o.fontSize;
+
     this.clear();
   }
 
@@ -174,13 +190,14 @@ export default class Graph {
 
   render(x = 0, y = 0, width = this.canvas.width, height = this.canvas.height) {
     const o = this.options;
-    this.canvas.width = this.canvas.width;
+    this.canvas.width = this.canvas.width; // clears the canvas
+    
     this.ctx.font = `${o.fontSize}px sans-serif`;
     this.ctx.textBaseline = 'middle';
     this.ctx.textAlign = 'left';
     this.ctx.lineWidth = o.lineWidth;
-    const keyHeight = this.renderKey(x, y, width);
-    this.renderGraph(x, y + keyHeight, width, height - keyHeight);
+    const keyHeight = this.renderKey(x, y, devicePixelRatio * width);
+    this.renderGraph(x, y + keyHeight, devicePixelRatio * width, devicePixelRatio * height - keyHeight);
   }
 
   renderKey(x, y, width) {
@@ -269,7 +286,7 @@ export default class Graph {
 
   renderGridLines(x, y, width, height, numTicksX, numTicksY) {
     this.ctx.strokeStyle = this.options.gridLineColor;
-    this.ctx.lineWidth = 1;
+    this.ctx.lineWidth = this.options.gridLineWidth;
 
     const horSpacing = width / (numTicksX - 1);
     const vertSpacing = height / (numTicksY - 1);
