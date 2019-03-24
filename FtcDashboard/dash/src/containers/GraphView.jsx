@@ -6,6 +6,9 @@ import MultipleCheckbox from '../components/MultipleCheckbox';
 import GraphCanvas from './GraphCanvas';
 import IconGroup from '../components/IconGroup';
 import Icon from '../components/Icon';
+import TextInput from '../components/inputs/TextInput';
+import { validateInt } from '../components/inputs/validation';
+import { DEFAULT_OPTIONS } from './Graph';
 
 class GraphView extends Component {
   constructor(props) {
@@ -14,6 +17,10 @@ class GraphView extends Component {
     this.state = {
       graphing: false,
       keys: [],
+      windowMs: {
+        value: DEFAULT_OPTIONS.windowMs,
+        valid: true
+      }
     };
 
     this.divRef = React.createRef();
@@ -64,14 +71,44 @@ class GraphView extends Component {
                 .map(key => ({
                   caption: key,
                   value: this.props.data[key]
-                }))} />
+                }))}
+              options={{ windowMs: this.state.windowMs.valid ?
+                this.state.windowMs.value : DEFAULT_OPTIONS.windowMs }} />
             :
             (
-              <MultipleCheckbox
-                arr={Object.keys(this.props.data)
-                  .filter(key => !isNaN(parseFloat(this.props.data[key])))}
-                onChange={selected => this.setState({ keys: selected })}
-                selected={this.state.keys} />
+              <div>
+                <MultipleCheckbox
+                  arr={Object.keys(this.props.data)
+                    .filter(key => !isNaN(parseFloat(this.props.data[key])))}
+                  onChange={selected => this.setState({ keys: selected })}
+                  selected={this.state.keys} />
+                {
+                  Object.keys(this.props.data).length > 0 ?
+                    (
+                      <div style={{ marginTop: '20px' }}>
+                        <Heading level={3} text="Options"/>
+                        <table>
+                          <tr>
+                            <td>Window (ms)</td>
+                            <td>
+                              <TextInput 
+                                value={this.state.windowMs.value} 
+                                valid={this.state.windowMs.value} 
+                                validate={validateInt} 
+                                onChange={({ value, valid }) => this.setState({
+                                  windowMs: {
+                                    value,
+                                    valid
+                                  }
+                                })}/>
+                            </td>
+                          </tr>
+                        </table>
+                      </div>
+                    )
+                    : null
+                }
+              </div>
             )
         }
       </div>

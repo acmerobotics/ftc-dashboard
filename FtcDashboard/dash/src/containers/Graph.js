@@ -1,6 +1,9 @@
 import { cloneDeep } from 'lodash';
 
-const DEFAULT_OPTIONS = {
+export const DEFAULT_OPTIONS = {
+  windowMs: 5000,
+  // TODO: smoothing is a little broken
+  smoothing: 0,
   colors: [
     '#2979ff',
     '#dd2c00',
@@ -9,15 +12,13 @@ const DEFAULT_OPTIONS = {
     '#ffa000',
   ],
   lineWidth: 2,
-  durationMs: 5000,
   padding: 15,
   keySpacing: 4,
   keyLineWidth: 12,
   gridLineWidth: 1,
+  gridLineColor: 'rgb(120, 120, 120)',
   fontSize: 14,
   textColor: 'rgb(50, 50, 50)',
-  gridLineColor: 'rgb(120, 120, 120)',
-  smoothing: 0,
 };
 
 function niceNum(range, round) {
@@ -231,7 +232,7 @@ export default class Graph {
 
     // remove old points
     const now = Date.now();
-    while ((now - this.time[0]) > (o.durationMs + 250)) {
+    while ((now - this.time[0]) > (o.windowMs + 250)) {
       this.time.shift();
       for (let i = 0; i < this.datasets.length; i += 1) {
         this.datasets[i].data.shift();
@@ -321,11 +322,11 @@ export default class Graph {
       let value = d.data[0];
       this.ctx.beginPath();
       this.ctx.strokeStyle = d.color;
-      this.ctx.moveTo(x + (this.time[0] - now + o.durationMs) * width / o.durationMs,
+      this.ctx.moveTo(x + (this.time[0] - now + o.windowMs) * width / o.windowMs,
         y + map(value, axis[0], axis[1], height, 0));
       for (let j = 1; j < d.data.length; j += 1) {
         value = o.smoothing * value + (1 - o.smoothing) * d.data[j];
-        this.ctx.lineTo(x + (this.time[j] - now + o.durationMs) * width / o.durationMs,
+        this.ctx.lineTo(x + (this.time[j] - now + o.windowMs) * width / o.windowMs,
           y + map(value, axis[0], axis[1], height, 0));
       }
       this.ctx.stroke();

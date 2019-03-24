@@ -25,11 +25,6 @@ class Dashboard extends Component {
         <Header>
           <Heading text="FTC Dashboard" level={1}>
             <IconGroup>
-              {
-                this.props.isConnected ?
-                  <p style={{ width: '60px', textAlign: 'right' }}>{this.props.pingTime}ms</p>
-                  : null
-              }
               <select 
                 style={{ margin: '0px 8px 0px 8px' }}
                 value={this.props.layoutPreset} 
@@ -42,6 +37,11 @@ class Dashboard extends Component {
                     ))
                 }
               </select>
+              {
+                this.props.isConnected ?
+                  <p style={{ width: '60px', margin: '0px 8px 0px 8px', textAlign: 'right' }}>{this.props.pingTime}ms</p>
+                  : null
+              }
               <Icon icon={this.props.isConnected ? 'wifi' : 'no-wifi'} size="large" />
             </IconGroup>
           </Heading>

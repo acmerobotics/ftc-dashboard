@@ -15,7 +15,7 @@ class GraphCanvas extends React.Component {
   }
 
   componentDidMount() {
-    this.graph = new Graph(this.canvas);
+    this.graph = new Graph(this.canvas, this.props.options);
     this.renderGraph();
     document.addEventListener('keydown', this.handleDocumentKeydown);
   }
@@ -70,7 +70,8 @@ const itemPropType = PropTypes.shape({
 
 GraphCanvas.propTypes = {
   timestamp: PropTypes.number.isRequired,
-  items: PropTypes.arrayOf(itemPropType).isRequired
+  items: PropTypes.arrayOf(itemPropType).isRequired,
+  options: PropTypes.object
 };
 
 export default GraphCanvas;

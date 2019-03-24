@@ -17,7 +17,7 @@ class TextInput extends React.Component {
   }
 
   handleKeyDown(evt) {
-    if (evt.keyCode === 13) {
+    if (this.props.onSave && evt.keyCode === 13) {
       this.props.onSave();
     }
   }
@@ -41,7 +41,7 @@ TextInput.propTypes = {
   valid: PropTypes.bool.isRequired,
   validate: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
-  onSave: PropTypes.func.isRequired
+  onSave: PropTypes.func
 };
 
 export default TextInput;
