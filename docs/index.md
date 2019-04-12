@@ -10,6 +10,7 @@ layout: default
 * Real-time configuration variable tuning while op modes are running
 * DS-like op mode controls
 * Fully-customizable field overlay
+* Camera view
 
 ![Dashboard screenshot](images/dashboard.png)
 
