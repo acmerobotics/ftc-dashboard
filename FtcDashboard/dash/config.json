@@ -1,5 +1,5 @@
 {
   "DEBUG": false,
-  "HOST": "192.168.49.1",
+  "HOST": null,
   "PORT": 8000
 }
