@@ -2,6 +2,7 @@ package com.acmerobotics.dashboard.config.variable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Custom (nested) configuration variable used to represent nested objects.
@@ -20,8 +21,20 @@ public class CustomVariable extends ConfigVariable<Object> {
         variables.put(name, variable);
     }
 
+    public void removeVariable(String name) {
+        variables.remove(name);
+    }
+
     public ConfigVariable<?> getVariable(String name) {
         return variables.get(name);
+    }
+
+    public int size() {
+        return variables.size();
+    }
+
+    public Set<Map.Entry<String, ConfigVariable>> entrySet() {
+        return variables.entrySet();
     }
 
     @Override

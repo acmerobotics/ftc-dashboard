@@ -6,6 +6,15 @@ public class BasicVariable<T> extends ConfigVariable<T> {
     private VariableType type;
     private ValueProvider<T> provider;
 
+    private static <T> VariableType inferType(ValueProvider<T> provider) {
+        Class<?> providerClass = provider.get().getClass();
+        return VariableType.fromClass(providerClass);
+    }
+
+    public BasicVariable(ValueProvider<T> provider) {
+        this(inferType(provider), provider);
+    }
+
     public BasicVariable(VariableType type, ValueProvider<T> provider) {
         this.type = type;
         this.provider = provider;

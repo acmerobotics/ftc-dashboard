@@ -10,6 +10,7 @@ import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.acmerobotics.dashboard.config.ValueProvider;
 import com.acmerobotics.dashboard.config.reflection.ReflectionConfig;
 import com.acmerobotics.dashboard.config.variable.BasicVariable;
 import com.acmerobotics.dashboard.config.variable.ConfigVariableDeserializer;
@@ -35,6 +36,7 @@ import com.qualcomm.robotcore.exception.RobotCoreException;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ThreadPool;
 
+import org.firstinspires.ftc.robotcore.external.Function;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeManagerImpl;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeMeta;
@@ -122,7 +124,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     private DashboardWebSocketServer server;
-    private List<DashboardWebSocket> sockets = new ArrayList<>();
+    private final List<DashboardWebSocket> sockets = new ArrayList<>();
 
     private TelemetryPacket.Adapter telemetry;
     private ExecutorService telemetryExecutorService;
@@ -131,6 +133,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private int telemetryTransmissionInterval = DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL;
 
     private CustomVariable configRoot;
+    private final List<String[]> varsToRemove = new ArrayList<>();
+    private final Object configLock = new Object();
 
     private int imageQuality = DEFAULT_IMAGE_QUALITY;
 
@@ -271,7 +275,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         }
     }
 
-    private synchronized void updateStatusView() {
+    private void updateStatusView() {
         if (connectionStatusTextView != null) {
             AppUtil.getInstance().runOnUiThread(new Runnable() {
                 @SuppressLint("SetTextI18n")
@@ -409,6 +413,64 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     /**
+     * Returns the configuration root for on-the-fly modifications.
+     */
+    public CustomVariable getConfigRoot() {
+        return configRoot;
+    }
+
+    /**
+     * Add config variable with custom provider that is automatically removed when op mode ends.
+     * @param category top-level category
+     * @param name variable name
+     * @param provider getter/setter for the variable
+     * @param <T> variable type
+     */
+    public <T> void addConfigVariable(String category, String name, ValueProvider<T> provider) {
+        addConfigVariable(category, name, provider, true);
+    }
+
+    /**
+     * Add config variable with custom provider.
+     * @param category top-level category
+     * @param name variable name
+     * @param provider getter/setter for the variable
+     * @param autoRemove if true, the variable is removed on op mode termination
+     * @param <T> variable type
+     */
+    public <T> void addConfigVariable(String category, String name, ValueProvider<T> provider,
+                                      boolean autoRemove) {
+        CustomVariable catVar = (CustomVariable) configRoot.getVariable(category);
+        if (catVar != null) {
+            catVar.putVariable(name, new BasicVariable<>(provider));
+        } else {
+            catVar = new CustomVariable();
+            catVar.putVariable(name, new BasicVariable<>(provider));
+            configRoot.putVariable(category, catVar);
+        }
+        if (autoRemove) {
+            synchronized (configLock) {
+                varsToRemove.add(new String[] { category, name });
+            }
+        }
+        updateConfig();
+    }
+
+    /**
+     * Remove a config variable.
+     * @param category top-level category
+     * @param name variable name
+     */
+    public void removeConfigVariable(String category, String name) {
+        CustomVariable catVar = (CustomVariable) configRoot.getVariable(category);
+        catVar.removeVariable(name);
+        if (catVar.size() == 0) {
+            configRoot.removeVariable(category);
+        }
+        updateConfig();
+    }
+
+    /**
      * Sends an image to the dashboard for display (MJPEG style). Note that that encoding process is
      * synchronous.
      * @param bitmap bitmap to send
@@ -462,14 +524,18 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         }
     }
 
-    private synchronized void sendAll(Message message) {
-        for (DashboardWebSocket ws : sockets) {
-            ws.send(message);
+    private void sendAll(Message message) {
+        synchronized (sockets) {
+            for (DashboardWebSocket ws : sockets) {
+                ws.send(message);
+            }
         }
     }
 
-    synchronized void addSocket(DashboardWebSocket socket) {
-        sockets.add(socket);
+    void addSocket(DashboardWebSocket socket) {
+        synchronized (sockets) {
+            sockets.add(socket);
+        }
 
         socket.send(new ReceiveConfig(configRoot));
         synchronized (opModeList) {
@@ -481,13 +547,15 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         updateStatusView();
     }
 
-    synchronized void removeSocket(DashboardWebSocket socket) {
-        sockets.remove(socket);
+    void removeSocket(DashboardWebSocket socket) {
+        synchronized (sockets) {
+            sockets.remove(socket);
+        }
 
         updateStatusView();
     }
 
-    synchronized void onMessage(DashboardWebSocket socket, Message msg) {
+    void onMessage(DashboardWebSocket socket, Message msg) {
         switch (msg.getType()) {
             case GET_ROBOT_STATUS: {
                 socket.send(new ReceiveRobotStatus(getRobotStatus()));
@@ -559,5 +627,18 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             activeOpModeStatus = RobotStatus.OpModeStatus.STOPPED;
             activeOpMode = opMode;
         }
+        synchronized (configLock) {
+            for (String[] var : varsToRemove) {
+                String category = var[0];
+                String name = var[1];
+                CustomVariable catVar = (CustomVariable) configRoot.getVariable(category);
+                catVar.removeVariable(name);
+                if (catVar.size() == 0) {
+                    configRoot.removeVariable(category);
+                }
+            }
+            varsToRemove.clear();
+        }
+        updateConfig();
     }
 }
