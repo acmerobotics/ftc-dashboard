@@ -95,6 +95,7 @@ repositories {
 
 dependencies {
     api(name: 'RobotCore-release', ext: 'aar')
+    api(name: 'FtcCommon-release', ext: 'aar')
 
     implementation('org.nanohttpd:nanohttpd-websocket:2.3.1') {
         exclude module: 'nanohttpd'

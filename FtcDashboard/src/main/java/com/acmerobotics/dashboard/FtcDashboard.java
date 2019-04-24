@@ -30,13 +30,12 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import com.qualcomm.robotcore.eventloop.EventLoop;
+import com.qualcomm.ftccommon.FtcEventLoop;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.exception.RobotCoreException;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ThreadPool;
 
-import org.firstinspires.ftc.robotcore.external.Function;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeManagerImpl;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeMeta;
@@ -101,7 +100,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * Attaches the event loop to the instance for op mode management.
      * @param eventLoop event loop
      */
-    public static void attachEventLoop(EventLoop eventLoop) {
+    public static void attachEventLoop(FtcEventLoop eventLoop) {
         instance.internalAttachEventLoop(eventLoop);
     }
 
@@ -138,6 +137,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     private int imageQuality = DEFAULT_IMAGE_QUALITY;
 
+    private FtcEventLoop eventLoop;
     private OpModeManagerImpl opModeManager;
     private OpMode activeOpMode;
     private RobotStatus.OpModeStatus activeOpModeStatus = RobotStatus.OpModeStatus.STOPPED;
@@ -345,7 +345,9 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         addAssetWebHandlers(webHandlerManager, assetManager, "dash");
     }
 
-    private void internalAttachEventLoop(EventLoop eventLoop) {
+    private void internalAttachEventLoop(FtcEventLoop eventLoop) {
+        this.eventLoop = eventLoop;
+
         // this could be called multiple times within the lifecycle of the dashboard
         if (opModeManager != null) {
             opModeManager.unregisterListener(this);
@@ -575,7 +577,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 break;
             }
             case STOP_OP_MODE: {
-                opModeManager.stopActiveOpMode();
+                eventLoop.requestOpModeStop(opModeManager.getActiveOpMode());
                 break;
             }
             case SAVE_CONFIG: {
