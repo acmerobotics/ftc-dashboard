@@ -88,21 +88,23 @@ class GraphView extends Component {
                       <div style={{ marginTop: '20px' }}>
                         <Heading level={3} text="Options"/>
                         <table>
-                          <tr>
-                            <td>Window (ms)</td>
-                            <td>
-                              <TextInput 
-                                value={this.state.windowMs.value} 
-                                valid={this.state.windowMs.value} 
-                                validate={validateInt} 
-                                onChange={({ value, valid }) => this.setState({
-                                  windowMs: {
-                                    value,
-                                    valid
-                                  }
-                                })}/>
-                            </td>
-                          </tr>
+                          <tbody>
+                            <tr>
+                              <td>Window (ms)</td>
+                              <td>
+                                <TextInput 
+                                  value={this.state.windowMs.value} 
+                                  valid={this.state.windowMs.valid} 
+                                  validate={validateInt} 
+                                  onChange={({ value, valid }) => this.setState({
+                                    windowMs: {
+                                      value,
+                                      valid
+                                    }
+                                  })}/>
+                              </td>
+                            </tr>
+                          </tbody>
                         </table>
                       </div>
                     )
