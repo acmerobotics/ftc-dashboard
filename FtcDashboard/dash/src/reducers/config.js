@@ -47,7 +47,7 @@ const receiveConfig = (baseConfig, newConfig) => {
   }
 };
 
-const updateConfig = (baseConfig, configDiff, modified = true) => {
+const updateConfig = (baseConfig, configDiff, modified) => {
   if (baseConfig.__type == VariableType.CUSTOM) {
     const mergedConfig = {
       __type: VariableType.CUSTOM,
@@ -117,7 +117,7 @@ const config = (state = initialState, action) => {
   case UPDATE_CONFIG:
     return {
       ...state,
-      configRoot: updateConfig(state.configRoot, action.configDiff)
+      configRoot: updateConfig(state.configRoot, action.configDiff, true)
     };
   case SAVE_CONFIG:
     return {

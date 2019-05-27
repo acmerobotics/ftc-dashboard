@@ -5,14 +5,14 @@ import CustomVariable from './CustomVariable';
 import Heading from '../components/Heading';
 import IconGroup from '../components/IconGroup';
 import Icon from '../components/Icon';
-import { updateConfig, saveConfig, refreshConfig } from '../actions/config';
+import { updateConfig, saveConfig, refreshConfig, getModifiedDiff } from '../actions/config';
 import VariableType from '../enums/VariableType';
 
 const ConfigView = ({ configRoot, onRefresh, onSave, onChange }) => (
   <div>
     <Heading level={2} text="Configuration">
       <IconGroup>
-        <Icon icon="save" size="small" onClick={() => onSave()} />
+        <Icon icon="save" size="small" onClick={() => onSave(getModifiedDiff(configRoot))} />
         <Icon icon="refresh" size="small" onClick={onRefresh} />
       </IconGroup>
     </Heading>
