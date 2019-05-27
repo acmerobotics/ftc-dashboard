@@ -3,11 +3,10 @@
  * https://github.com/nicholasday/robotics-simulator
  */
 
-import { isEqual } from 'lodash';
 import {
   gamepadConnected,
   gamepadDisconnected,
-  receiveGamepadState
+  sendGamepadState
 } from '../actions/gamepad';
 import GamepadType from '../enums/GamepadType';
 
@@ -122,9 +121,6 @@ const extractGamepadState = (gamepad) => {
 let gamepad1Index = -1;
 let gamepad2Index = -1;
 
-let lastGamepad1State = {};
-let lastGamepad2State = {};
-
 const gamepadMiddleware = store => {
   function updateGamepads() {
     const gamepads = navigator.getGamepads();
@@ -183,13 +179,8 @@ const gamepadMiddleware = store => {
       } else {
         gamepad2State = REST_GAMEPAD_STATE;
       }
-  
-      if (!isEqual(gamepad1State, lastGamepad1State) || !isEqual(gamepad2State, lastGamepad2State)) {
-        store.dispatch(receiveGamepadState(gamepad1State, gamepad2State));
-  
-        lastGamepad1State = gamepad1State;
-        lastGamepad2State = gamepad2State;
-      }
+
+      store.dispatch(sendGamepadState(gamepad1State, gamepad2State));
     }
   
     requestAnimationFrame(updateGamepads);

@@ -66,6 +66,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     private static final int DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL = 50; // ms
     private static final int DEFAULT_IMAGE_QUALITY = 50; // 0-100
+    private static final int GAMEPAD_WATCHDOG_INTERVAL = 500; // ms
 
     // TODO: make this configurable?
     private static final Set<String> IGNORED_PACKAGES = new HashSet<>(Arrays.asList(
@@ -144,6 +145,9 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private final List<String> opModeList = new ArrayList<>();
     private final Object opModeLock = new Object();
 
+    private ExecutorService gamepadWatchdogExecutor;
+    private long lastGamepadTimestamp;
+
     private TextView connectionStatusTextView;
     private LinearLayout parentLayout;
 
@@ -177,6 +181,29 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                     } catch (InterruptedException e) {
                         break;
                     }
+                }
+            }
+        }
+    }
+
+    private class GamepadWatchdogRunnable implements Runnable {
+        @Override
+        public void run() {
+            while (!Thread.currentThread().isInterrupted()) {
+                long timestamp = System.currentTimeMillis();
+                try {
+                    if (lastGamepadTimestamp == 0) {
+                        Thread.sleep(GAMEPAD_WATCHDOG_INTERVAL);
+                    } else if ((timestamp - lastGamepadTimestamp) > GAMEPAD_WATCHDOG_INTERVAL) {
+                        updateGamepads(new Gamepad(), new Gamepad());
+
+                        lastGamepadTimestamp = 0;
+                    } else {
+                        Thread.sleep(GAMEPAD_WATCHDOG_INTERVAL -
+                                (timestamp - lastGamepadTimestamp));
+                    }
+                } catch (InterruptedException e) {
+                    break;
                 }
             }
         }
@@ -218,6 +245,9 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
         telemetryExecutorService = ThreadPool.newSingleThreadExecutor("dash telemetry");
         telemetryExecutorService.submit(new TelemetryUpdateRunnable());
+
+        gamepadWatchdogExecutor = ThreadPool.newSingleThreadExecutor("gamepad watchdog");
+        gamepadWatchdogExecutor.submit(new GamepadWatchdogRunnable());
 
         injectStatusView();
     }
@@ -504,6 +534,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             if (activeOpModeStatus == RobotStatus.OpModeStatus.STOPPED) {
                 return;
             }
+
             if (activeOpMode.gamepad1.getGamepadId() != Gamepad.ID_UNASSOCIATED ||
                     activeOpMode.gamepad2.getGamepadId() != Gamepad.ID_UNASSOCIATED) {
                 return;
@@ -515,6 +546,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             } catch (RobotCoreException e) {
                 Log.w(TAG, e);
             }
+            lastGamepadTimestamp = System.currentTimeMillis();
         }
     }
 
@@ -602,6 +634,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             opModeManager.unregisterListener(this);
         }
         telemetryExecutorService.shutdownNow();
+        gamepadWatchdogExecutor.shutdownNow();
         server.stop();
 
         removeStatusView();
