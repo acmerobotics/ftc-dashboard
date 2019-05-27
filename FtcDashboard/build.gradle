@@ -1,5 +1,5 @@
 buildscript {
-    ext.dashboard_version = '0.3.0-SNAPSHOT'
+    ext.dashboard_version = '0.3.0'
 
     repositories {
         jcenter()
