@@ -162,7 +162,7 @@ publishing {
                 // Iterate over the implementation dependencies (we don't want the test ones), adding a <dependency> node for each
                 configurations.implementation.allDependencies.each { dep ->
                     // Ensure dependencies such as fileTree are not included.
-                    if (dep instanceof ModuleDependency && dep.name != 'RobotCore-release') {
+                    if (dep instanceof ModuleDependency && !dep.name.endsWith("-release")) {
                         def moduleDep = (ModuleDependency) dep
                         def dependencyNode = dependenciesNode.appendNode('dependency')
                         dependencyNode.appendNode('groupId', moduleDep.group)
