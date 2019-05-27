@@ -76,3 +76,11 @@ object RobotConstants {
     // other constants
 }
 ```
+
+## OpMode Management
+
+The dashboard has a little widget for starting and stopping op modes (like the DS) for convenience and DS-less testing. There is also gamepad support; simply plug the gamepads into your computer and press Start-A/B as usual. Note: there is a sizable latency when using the gamepads so this feature is unsuitable for major teleop practice.
+
+## Camera
+
+The dashboard ships with a camera view for sending images to the dashboard from the RC. For a demo, put a valida Vuforia license in [this op mode](https://github.com/acmerobotics/ftc-dashboard/blob/master/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/VuforiaStreamOpMode.java), run it, and select the Camera layout present on the top right of the dashboard.

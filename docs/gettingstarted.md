@@ -30,6 +30,8 @@ layout: default
 
 1. Insert `FtcDashboard.attachWebServer(service.getWebServer());` at the end of `onServiceBind()`.
 
+1. Insert `FtcDashboard.populateMenu(popupMenu.getMenu());` [here](https://github.com/acmerobotics/ftc-dashboard/blob/e6c8f5799f167023cce47fdf6b0003355ad721c8/FtcRobotController/src/main/java/org/firstinspires/ftc/robotcontroller/internal/FtcRobotControllerActivity.java#L285) and `FtcDashboard.populateMenu(menu);` [here](https://github.com/acmerobotics/ftc-dashboard/blob/e6c8f5799f167023cce47fdf6b0003355ad721c8/FtcRobotController/src/main/java/org/firstinspires/ftc/robotcontroller/internal/FtcRobotControllerActivity.java#L496) (this is recommended for disabling the dashboard during competition).
+
 1. To enable op mode management, insert `FtcDashboard.attachEventLoop(eventLoop);` at the end of `requestRobotSetup()` (this is optional).
 
 1. Build and deploy!
@@ -38,11 +40,13 @@ layout: default
 
 1. Clone this repo locally.
 
-1. Append `-SNAPSHOT` to the end of `ext.dashboard_version` in `FtcDashboard/build.gradle`.
+1. Append `-SNAPSHOT` to the end of `ext.dashboard_version` in `FtcDashboard/build.gradle` (this differentiates your local build from the releases on Bintray).
 
-1. After making changes, publish them locally with `./gradlew publishToMavenLocal`.
+1. After making changes, publish them locally with `./gradlew publishToMavenLocal` (this has to be done on each computer).
 
 1. Complete the basic instructions, adjusting the version and adding `mavenLocal()` to `repositories` in addition to `jcenter()`.
+
+1. Build and deploy like normal.
 
 ## Usage
 
