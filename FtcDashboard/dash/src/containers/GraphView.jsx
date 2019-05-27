@@ -108,7 +108,7 @@ class GraphView extends Component {
                         </table>
                       </div>
                     )
-                    : null
+                    : <p>Sent telemetry items will appear here for graphing</p>
                 }
               </div>
             )
