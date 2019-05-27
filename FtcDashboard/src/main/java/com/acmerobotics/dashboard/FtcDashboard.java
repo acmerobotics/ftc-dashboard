@@ -2,11 +2,15 @@ package com.acmerobotics.dashboard;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -68,6 +72,9 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private static final int DEFAULT_IMAGE_QUALITY = 50; // 0-100
     private static final int GAMEPAD_WATCHDOG_INTERVAL = 500; // ms
 
+    private static final String PREFS_NAME = "FtcDashboard";
+    private static final String PREFS_AUTO_ENABLE_KEY = "autoEnable";
+
     // TODO: make this configurable?
     private static final Set<String> IGNORED_PACKAGES = new HashSet<>(Arrays.asList(
             "java",
@@ -94,7 +101,9 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * @param webServer web server
      */
     public static void attachWebServer(WebServer webServer) {
-        instance.internalAttachWebServer(webServer);
+        if (instance != null) {
+            instance.internalAttachWebServer(webServer);
+        }
     }
 
     /**
@@ -102,7 +111,19 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * @param eventLoop event loop
      */
     public static void attachEventLoop(FtcEventLoop eventLoop) {
-        instance.internalAttachEventLoop(eventLoop);
+        if (instance != null) {
+            instance.internalAttachEventLoop(eventLoop);
+        }
+    }
+
+    /**
+     * Populates the menu with dashboard enable/disable options.
+     * @param menu menu
+     */
+    public static void populateMenu(Menu menu) {
+        if (instance != null) {
+            instance.internalPopulateMenu(menu);
+        }
     }
 
     /**
@@ -122,6 +143,10 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     public static FtcDashboard getInstance() {
         return instance;
     }
+
+    private boolean enabled;
+    private SharedPreferences prefs;
+    private final List<MenuItem> enableMenuItems, disableMenuItems;
 
     private DashboardWebSocketServer server;
     private final List<DashboardWebSocket> sockets = new ArrayList<>();
@@ -236,6 +261,31 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
         configRoot = ReflectionConfig.scanForClasses(IGNORED_PACKAGES);
 
+        enableMenuItems = new ArrayList<>();
+        disableMenuItems = new ArrayList<>();
+
+        Activity activity = AppUtil.getInstance().getActivity();
+        prefs = activity.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        if (getAutoEnable()) {
+            enable();
+        }
+
+        injectStatusView();
+    }
+
+    private boolean getAutoEnable() {
+        return prefs.getBoolean(PREFS_AUTO_ENABLE_KEY, true);
+    }
+
+    private void setAutoEnable(boolean autoEnable) {
+        prefs.edit()
+             .putBoolean(PREFS_AUTO_ENABLE_KEY, autoEnable)
+             .apply();
+    }
+
+    private void enable() {
+        if (enabled) return;
+
         server = new DashboardWebSocketServer(this);
         try {
             server.start();
@@ -249,7 +299,25 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         gamepadWatchdogExecutor = ThreadPool.newSingleThreadExecutor("gamepad watchdog");
         gamepadWatchdogExecutor.submit(new GamepadWatchdogRunnable());
 
-        injectStatusView();
+        enabled = true;
+
+        updateStatusView();
+    }
+
+    private void disable() {
+        if (!enabled) return;
+
+        telemetryExecutorService.shutdownNow();
+        gamepadWatchdogExecutor.shutdownNow();
+        server.stop();
+
+        synchronized (sockets) {
+            sockets.clear();
+        }
+
+        enabled = false;
+
+        updateStatusView();
     }
 
     private void injectStatusView() {
@@ -311,13 +379,21 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 @SuppressLint("SetTextI18n")
                 @Override
                 public void run() {
-                    int connections = sockets.size();
-                    if (connections == 0) {
-                        connectionStatusTextView.setText("Dashboard: no connections");
-                    } else if (connections == 1) {
-                        connectionStatusTextView.setText("Dashboard: 1 connection");
-                    } else {
-                        connectionStatusTextView.setText("Dashboard: " + connections + " connections");
+                    if (!enabled) {
+                        connectionStatusTextView.setText("Dashboard: disabled");
+                        return;
+                    }
+
+                    synchronized (sockets) {
+                        int connections = sockets.size();
+                        if (connections == 0) {
+                            connectionStatusTextView.setText("Dashboard: no connections");
+                        } else if (connections == 1) {
+                            connectionStatusTextView.setText("Dashboard: 1 connection");
+                        } else {
+                            connectionStatusTextView.setText("Dashboard: " +
+                                    connections + " connections");
+                        }
                     }
                 }
             });
@@ -396,11 +472,73 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         t.start();
     }
 
-    public <T> T fromJson(String json, Class<T> classOfT) throws JsonSyntaxException {
+    private void internalPopulateMenu(Menu menu) {
+        final MenuItem enable = menu.add(Menu.NONE, Menu.NONE, 700, "Enable Dashboard");
+        MenuItem disable = menu.add(Menu.NONE, Menu.NONE, 700, "Disable Dashboard");
+
+        enable.setVisible(!enabled);
+        disable.setVisible(enabled);
+
+        synchronized (enableMenuItems) {
+            enableMenuItems.add(enable);
+        }
+
+        synchronized (disableMenuItems) {
+            disableMenuItems.add(disable);
+        }
+
+        enable.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                enable();
+
+                setAutoEnable(true);
+
+                synchronized (enableMenuItems) {
+                    for (MenuItem menuItem : enableMenuItems) {
+                        menuItem.setVisible(false);
+                    }
+                }
+
+                synchronized (disableMenuItems) {
+                    for (MenuItem menuItem : disableMenuItems) {
+                        menuItem.setVisible(true);
+                    }
+                }
+
+                return true;
+            }
+        });
+
+        disable.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                disable();
+
+                setAutoEnable(false);
+
+                synchronized (enableMenuItems) {
+                    for (MenuItem menuItem : enableMenuItems) {
+                        menuItem.setVisible(true);
+                    }
+                }
+
+                synchronized (disableMenuItems) {
+                    for (MenuItem menuItem : disableMenuItems) {
+                        menuItem.setVisible(false);
+                    }
+                }
+
+                return true;
+            }
+        });
+    }
+
+    <T> T fromJson(String json, Class<T> classOfT) throws JsonSyntaxException {
         return gson.fromJson(json, classOfT);
     }
 
-    public String toJson(Object src) {
+    String toJson(Object src) {
         return gson.toJson(src);
     }
 
@@ -503,7 +641,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     /**
-     * Sends an image to the dashboard for display (MJPEG style). Note that that encoding process is
+     * Sends an image to the dashboard for display (MJPEG style). Note that the encoding process is
      * synchronous.
      * @param bitmap bitmap to send
      */
@@ -633,9 +771,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         if (opModeManager != null) {
             opModeManager.unregisterListener(this);
         }
-        telemetryExecutorService.shutdownNow();
-        gamepadWatchdogExecutor.shutdownNow();
-        server.stop();
+        disable();
 
         removeStatusView();
     }

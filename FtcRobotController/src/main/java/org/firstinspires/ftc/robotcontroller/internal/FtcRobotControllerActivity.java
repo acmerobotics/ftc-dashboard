@@ -103,9 +103,7 @@ import org.firstinspires.ftc.ftccommon.internal.FtcRobotControllerWatchdogServic
 import org.firstinspires.ftc.ftccommon.internal.ProgramAndManageActivity;
 import org.firstinspires.ftc.robotcore.external.navigation.MotionDetection;
 import org.firstinspires.ftc.robotcore.internal.hardware.DragonboardLynxDragonboardIsPresentPin;
-import org.firstinspires.ftc.robotcore.internal.network.DeviceNameManager;
 import org.firstinspires.ftc.robotcore.internal.network.DeviceNameManagerFactory;
-import org.firstinspires.ftc.robotcore.internal.network.WifiDirectDeviceNameManager;
 import org.firstinspires.ftc.robotcore.internal.network.PreferenceRemoterRC;
 import org.firstinspires.ftc.robotcore.internal.network.StartResult;
 import org.firstinspires.ftc.robotcore.internal.network.WifiMuteEvent;
@@ -284,6 +282,7 @@ public class FtcRobotControllerActivity extends Activity
           }
         });
         popupMenu.inflate(R.menu.ftc_robot_controller);
+        FtcDashboard.populateMenu(popupMenu.getMenu());
         popupMenu.show();
       }
     });
@@ -494,6 +493,7 @@ public class FtcRobotControllerActivity extends Activity
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
     getMenuInflater().inflate(R.menu.ftc_robot_controller, menu);
+    FtcDashboard.populateMenu(menu);
     return true;
   }
 
