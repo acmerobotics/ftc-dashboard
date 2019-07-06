@@ -19,12 +19,11 @@ apply plugin: 'com.jfrog.bintray'
 apply plugin: 'checkstyle'
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion '27.0.3'
+    compileSdkVersion 28
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 27
+        targetSdkVersion 26
     }
 
     compileOptions {
@@ -55,7 +54,7 @@ task buildDash(type: NodeTask, dependsOn: yarn) {
 }
 
 android.libraryVariants.all { variant ->
-    variant.mergeAssets.dependsOn buildDash
+    variant.mergeAssetsProvider.get().dependsOn buildDash
 }
 
 // adapted from https://github.com/Genymobile/gnirehtet/blob/master/config/android-checkstyle.gradle
@@ -96,6 +95,9 @@ repositories {
 dependencies {
     api(name: 'RobotCore-release', ext: 'aar')
     api(name: 'FtcCommon-release', ext: 'aar')
+    api(name: 'RobotServer-release', ext: 'aar')
+
+    implementation 'com.android.support:support-compat:28.0.0'
 
     implementation('org.nanohttpd:nanohttpd-websocket:2.3.1') {
         exclude module: 'nanohttpd'
@@ -140,40 +142,42 @@ def pomConfig = {
     }
 }
 
-publishing {
-    publications {
-        maven(MavenPublication) {
-            artifact bundleRelease
-            artifact androidSourcesJar
-            artifact androidJavadocsJar
-            groupId = 'com.acmerobotics.dashboard'
-            artifactId = 'dashboard'
-            version dashboard_version
-            pom.withXml {
-                def root = asNode()
-                root.appendNode('description', 'React-based web dashboard designed for FTC')
-                root.appendNode('name', 'FTC Dashboard')
-                root.appendNode('url', 'https://github.com/acmerobotics/ftc-dashboard')
-                root.children().last() + pomConfig
-            }
+project.afterEvaluate {
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                artifact bundleReleaseAar
+                artifact androidSourcesJar
+                artifact androidJavadocsJar
+                groupId = 'com.acmerobotics.dashboard'
+                artifactId = 'dashboard'
+                version dashboard_version
+                pom.withXml {
+                    def root = asNode()
+                    root.appendNode('description', 'React-based web dashboard designed for FTC')
+                    root.appendNode('name', 'FTC Dashboard')
+                    root.appendNode('url', 'https://github.com/acmerobotics/ftc-dashboard')
+                    root.children().last() + pomConfig
+                }
 
-            pom.withXml {
-                def dependenciesNode = asNode().appendNode('dependencies')
-                // Iterate over the implementation dependencies (we don't want the test ones), adding a <dependency> node for each
-                configurations.implementation.allDependencies.each { dep ->
-                    // Ensure dependencies such as fileTree are not included.
-                    if (dep instanceof ModuleDependency && !dep.name.endsWith("-release")) {
-                        def moduleDep = (ModuleDependency) dep
-                        def dependencyNode = dependenciesNode.appendNode('dependency')
-                        dependencyNode.appendNode('groupId', moduleDep.group)
-                        dependencyNode.appendNode('artifactId', moduleDep.name)
-                        dependencyNode.appendNode('version', moduleDep.version)
-                        if (dep.excludeRules.size() > 0) {
-                            def exclusionsNode = dependencyNode.appendNode('exclusions')
-                            dep.excludeRules.every { excludedDep ->
-                                def exclusionNode = exclusionsNode.appendNode('exclusion')
-                                exclusionNode.appendNode('groupId', moduleDep.group)
-                                exclusionNode.appendNode('artifactId', excludedDep.module)
+                pom.withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+                    // Iterate over the implementation dependencies (we don't want the test ones), adding a <dependency> node for each
+                    configurations.implementation.allDependencies.each { dep ->
+                        // Ensure dependencies such as fileTree are not included.
+                        if (dep instanceof ModuleDependency && !dep.name.endsWith("-release")) {
+                            def moduleDep = (ModuleDependency) dep
+                            def dependencyNode = dependenciesNode.appendNode('dependency')
+                            dependencyNode.appendNode('groupId', moduleDep.group)
+                            dependencyNode.appendNode('artifactId', moduleDep.name)
+                            dependencyNode.appendNode('version', moduleDep.version)
+                            if (dep.excludeRules.size() > 0) {
+                                def exclusionsNode = dependencyNode.appendNode('exclusions')
+                                dep.excludeRules.every { excludedDep ->
+                                    def exclusionNode = exclusionsNode.appendNode('exclusion')
+                                    exclusionNode.appendNode('groupId', moduleDep.group)
+                                    exclusionNode.appendNode('artifactId', excludedDep.module)
+                                }
                             }
                         }
                     }
