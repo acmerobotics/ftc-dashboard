@@ -44,3 +44,4 @@ input { font-size: inherit; outline: none; }
 .multiple-checkbox { overflow-y: scroll; }
 .error { font-weight: bold; color: red; }
 .warning { font-weight: bold; color: orange; }
+.canvas-container { height: calc(100% - 25px); }

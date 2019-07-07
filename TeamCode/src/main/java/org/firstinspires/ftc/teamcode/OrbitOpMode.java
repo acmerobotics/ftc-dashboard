@@ -52,7 +52,7 @@ public class OrbitOpMode extends LinearOpMode {
 
             TelemetryPacket packet = new TelemetryPacket();
             packet.fieldOverlay()
-                    .setStrokeWidth(4)
+                    .setStrokeWidth(1)
                     .setStroke("goldenrod")
                     .strokeCircle(0, 0, ORBITAL_RADIUS)
                     .setFill("black")

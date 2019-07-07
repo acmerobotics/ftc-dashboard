@@ -53,7 +53,7 @@ class GraphView extends Component {
 
   render() {
     return (
-      <div style={{overflow: this.state.graphing ? 'hidden' : 'auto', height: '100%'}} ref={this.divRef}>
+      <div style={{height: '100%'}} ref={this.divRef}>
         <Heading level={2} text="Graph">
           <IconGroup>
             <Icon
@@ -64,16 +64,18 @@ class GraphView extends Component {
         </Heading>
         {
           this.state.graphing ?
-            <GraphCanvas
-              timestamp={this.props.timestamp}
-              items={Object.keys(this.props.data)
-                .filter(key => this.state.keys.indexOf(key) !== -1)
-                .map(key => ({
-                  caption: key,
-                  value: this.props.data[key]
-                }))}
-              options={{ windowMs: this.state.windowMs.valid ?
-                this.state.windowMs.value : DEFAULT_OPTIONS.windowMs }} />
+            <div className="canvas-container">
+              <GraphCanvas
+                timestamp={this.props.timestamp}
+                items={Object.keys(this.props.data)
+                  .filter(key => this.state.keys.indexOf(key) !== -1)
+                  .map(key => ({
+                    caption: key,
+                    value: this.props.data[key]
+                  }))}
+                options={{ windowMs: this.state.windowMs.valid ?
+                  this.state.windowMs.value : DEFAULT_OPTIONS.windowMs }} />
+            </div>
             :
             (
               <div>

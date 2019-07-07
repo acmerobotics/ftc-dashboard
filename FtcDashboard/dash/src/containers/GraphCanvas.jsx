@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Graph from './Graph';
+import AutoFitCanvas from '../components/AutoFitCanvas';
 
 class GraphCanvas extends React.Component {
   constructor(props) {
@@ -10,14 +11,21 @@ class GraphCanvas extends React.Component {
       paused: false,
     };
 
+    this.canvasRef = React.createRef();
+
     this.handleDocumentKeydown = this.handleDocumentKeydown.bind(this);
     this.renderGraph = this.renderGraph.bind(this);
   }
 
   componentDidMount() {
-    this.graph = new Graph(this.canvas, this.props.options);
+    this.graph = new Graph(this.canvasRef.current, this.props.options);
     this.renderGraph();
+
     document.addEventListener('keydown', this.handleDocumentKeydown);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this.handleDocumentKeydown);
   }
 
   componentDidUpdate() {
@@ -35,10 +43,6 @@ class GraphCanvas extends React.Component {
     }
   }
 
-  componentWillUnmount() {
-    document.removeEventListener('keydown', this.handleDocumentKeydown);
-  }
-
   handleDocumentKeydown(evt) {
     if (evt.code === 'Space') {
       this.setState({
@@ -50,16 +54,14 @@ class GraphCanvas extends React.Component {
   }
 
   renderGraph() {
-    if (!this.state.paused && this.canvas) {
-      this.graph.render(0, 0,
-        Math.min(this.canvas.parentElement.parentElement.clientWidth - 32, 2500),
-        Math.min(this.canvas.parentElement.parentElement.clientHeight - 64, 2500));
+    if (!this.state.paused && this.graph) {
+      this.graph.render();
       requestAnimationFrame(this.renderGraph);
     }
   }
 
   render() {
-    return <canvas ref={(c) => { this.canvas = c; }} width="2500" height="2500" />;
+    return <AutoFitCanvas ref={this.canvasRef} onResize={this.renderGraph} />;
   }
 }
 

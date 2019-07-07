@@ -1,9 +1,9 @@
 import { cloneDeep } from 'lodash';
+import './canvas';
 
+// all dimensions in this file are *CSS* pixels unless otherwise stated
 export const DEFAULT_OPTIONS = {
   windowMs: 5000,
-  // TODO: smoothing is a little broken
-  smoothing: 0,
   colors: [
     '#2979ff',
     '#dd2c00',
@@ -14,11 +14,12 @@ export const DEFAULT_OPTIONS = {
   lineWidth: 2,
   padding: 15,
   keySpacing: 4,
-  keyLineWidth: 12,
-  gridLineWidth: 1,
+  keyLineLength: 12,
+  gridLineWidth: 1, // device pixels
   gridLineColor: 'rgb(120, 120, 120)',
   fontSize: 14,
   textColor: 'rgb(50, 50, 50)',
+  maxTicks: 7
 };
 
 function niceNum(range, round) {
@@ -48,13 +49,16 @@ function niceNum(range, round) {
 }
 
 // interesting algorithm (see http://erison.blogspot.nl/2011/07/algorithm-for-optimal-scaling-on-chart.html)
-function getAxisScaling(min, max) {
-  const maxTicks = 7;
+function getAxisScaling(min, max, maxTicks) {
   const range = niceNum(max - min, false);
   const tickSpacing = niceNum(range / (maxTicks - 1), true);
   const niceMin = Math.floor(min / tickSpacing) * tickSpacing;
   const niceMax = (Math.floor(max / tickSpacing) + 1) * tickSpacing;
-  return [niceMin, niceMax, tickSpacing];
+  return {
+    min: niceMin,
+    max: niceMax,
+    spacing: tickSpacing
+  };
 }
 
 // shamelessly stolen from https://github.com/chartjs/Chart.js/blob/master/src/core/core.ticks.js
@@ -87,13 +91,13 @@ function formatTicks(tickValue, ticks) {
 function getTicks(axis) {
   // get tick array
   const ticks = [];
-  for (let i = axis[0]; i <= axis[1]; i += axis[2]) {
+  for (let i = axis.min; i <= axis.max; i += axis.spacing) {
     ticks.push(i);
   }
 
   // generate strings
   const tickStrings = [];
-  for (let i = 0; i < ticks.length; i += 1) {
+  for (let i = 0; i < ticks.length; i++) {
     const s = formatTicks(ticks[i], ticks);
     tickStrings.push(s);
   }
@@ -101,29 +105,18 @@ function getTicks(axis) {
   return tickStrings;
 }
 
-function map(value, fromLow, fromHigh, toLow, toHigh) {
-  const frac = (value - fromLow) / (fromHigh - fromLow);
-  return toLow + frac * (toHigh - toLow);
+function scale(value, fromLow, fromHigh, toLow, toHigh) {
+  const frac = (toHigh - toLow) / (fromHigh - fromLow);
+  return toLow + frac * (value - fromLow);
 }
 
 export default class Graph {
   constructor(canvas, options) {
     this.canvas = canvas;
-    this.canvas.style.width = `${this.canvas.width / devicePixelRatio}px`;
-    this.canvas.style.height = `${this.canvas.width / devicePixelRatio}px`;
-
     this.ctx = canvas.getContext('2d');
+    
     this.options = cloneDeep(DEFAULT_OPTIONS);
     Object.assign(this.options, options || {});
-
-    // scale the dimensions
-    const o = this.options;
-    o.lineWidth = devicePixelRatio * o.lineWidth;
-    o.padding = devicePixelRatio * o.padding;
-    o.keySpacing = devicePixelRatio * o.keySpacing;
-    o.keyLineWidth = devicePixelRatio * o.keyLineWidth;
-    o.gridLineWidth = devicePixelRatio * o.gridLineWidth;
-    o.fontSize = devicePixelRatio * o.fontSize;
 
     this.clear();
   }
@@ -139,7 +132,7 @@ export default class Graph {
       this.lastSimTime = Date.now() + 250;
       this.time.push(this.lastSimTime);
       let color = 0;
-      for (let i = 0; i < data.length; i += 1) {
+      for (let i = 0; i < data.length; i++) {
         if (data[i].name === 'time') {
           this.lastDataTime = data[i].value;
         } else {
@@ -148,17 +141,17 @@ export default class Graph {
             data: [data[i].value],
             color: this.options.colors[color % data.length],
           });
-          color += 1;
+          color++;
         }
       }
     } else {
-      for (let i = 0; i < data.length; i += 1) {
+      for (let i = 0; i < data.length; i++) {
         if (data[i].name === 'time') {
           this.lastSimTime += (data[i].value - this.lastDataTime);
           this.time.push(this.lastSimTime);
           this.lastDataTime = data[i].value;
         } else {
-          for (let j = 0; j < this.datasets.length; j += 1) {
+          for (let j = 0; j < this.datasets.length; j++) {
             if (data[i].name === this.datasets[j].name) {
               this.datasets[j].data.push(data[i].value);
             }
@@ -172,8 +165,8 @@ export default class Graph {
     // get y-axis scaling
     let min = Number.MAX_VALUE;
     let max = Number.MIN_VALUE;
-    for (let i = 0; i < this.datasets.length; i += 1) {
-      for (let j = 0; j < this.datasets[i].data.length; j += 1) {
+    for (let i = 0; i < this.datasets.length; i++) {
+      for (let j = 0; j < this.datasets[i].data.length; j++) {
         const val = this.datasets[i].data[j];
         if (val > max) {
           max = val;
@@ -183,44 +176,57 @@ export default class Graph {
         }
       }
     }
-    if (Math.abs(min - max) < 1e-100) {
-      return getAxisScaling(min - 1, max + 1);
+    if (Math.abs(min - max) < 1e-6) {
+      return getAxisScaling(min - 1, max + 1, this.options.maxTicks);
     }
-    return getAxisScaling(min, max);
+    return getAxisScaling(min, max, this.options.maxTicks);
   }
 
-  render(x = 0, y = 0, width = this.canvas.width, height = this.canvas.height) {
+  render() {
     const o = this.options;
+
     this.canvas.width = this.canvas.width; // clears the canvas
+  
+    // scale the canvas to facilitate the use of CSS pixels
+    this.ctx.scale(devicePixelRatio, devicePixelRatio);
     
-    this.ctx.font = `${o.fontSize}px sans-serif`;
+    this.ctx.font = `${o.fontSize}px "Roboto", sans-serif`;
     this.ctx.textBaseline = 'middle';
     this.ctx.textAlign = 'left';
-    this.ctx.lineWidth = o.lineWidth;
-    const keyHeight = this.renderKey(x, y, devicePixelRatio * width);
-    this.renderGraph(x, y + keyHeight, devicePixelRatio * width, devicePixelRatio * height - keyHeight);
+    this.ctx.lineWidth = o.lineWidth / devicePixelRatio;
+
+    const width = this.canvas.width / devicePixelRatio;
+    const height = this.canvas.height / devicePixelRatio;
+    const keyHeight = this.renderKey(0, 0, width);
+    this.renderGraph(0, keyHeight, width, height - keyHeight);
   }
 
   renderKey(x, y, width) {
     const o = this.options;
+
+    this.ctx.save();
+
     const numSets = this.datasets.length;
     const height = numSets * o.fontSize + (numSets - 1) * o.keySpacing;
-    for (let i = 0; i < numSets; i += 1) {
+    for (let i = 0; i < numSets; i++) {
       const lineY = y + i * (o.fontSize + o.keySpacing) + o.fontSize / 2;
       const name = this.datasets[i].name;
       const color = this.datasets[i].color;
-      const lineWidth = this.ctx.measureText(name).width + o.keyLineWidth + o.keySpacing;
+      const lineWidth = this.ctx.measureText(name).width + o.keyLineLength + o.keySpacing;
       const lineX = x + (width - lineWidth) / 2;
 
       this.ctx.strokeStyle = color;
       this.ctx.beginPath();
-      this.ctx.moveTo(lineX, lineY);
-      this.ctx.lineTo(lineX + o.keyLineWidth, lineY);
+      this.ctx.fineMoveTo(lineX, lineY);
+      this.ctx.fineLineTo(lineX + o.keyLineLength, lineY);
       this.ctx.stroke();
 
       this.ctx.fillStyle = o.textColor;
-      this.ctx.fillText(name, lineX + o.keyLineWidth + o.keySpacing, lineY);
+      this.ctx.fillText(name, lineX + o.keyLineLength + o.keySpacing, lineY);
     }
+
+    this.ctx.restore();
+
     return height;
   }
 
@@ -234,7 +240,7 @@ export default class Graph {
     const now = Date.now();
     while ((now - this.time[0]) > (o.windowMs + 250)) {
       this.time.shift();
-      for (let i = 0; i < this.datasets.length; i += 1) {
+      for (let i = 0; i < this.datasets.length; i++) {
         this.datasets[i].data.shift();
       }
     }
@@ -253,19 +259,23 @@ export default class Graph {
       graphWidth,
       graphHeight,
       5,
-      ticks.length);
+      ticks.length
+    );
 
     this.renderGraphLines(
       x + axisWidth + 2 * o.padding,
       y + o.padding,
       graphWidth,
       graphHeight,
-      axis);
+      axis
+    );
   }
 
   renderAxisLabels(x, y, height, ticks) {
+    this.ctx.save();
+
     let width = 0;
-    for (let i = 0; i < ticks.length; i += 1) {
+    for (let i = 0; i < ticks.length; i++) {
       const textWidth = this.ctx.measureText(ticks[i]).width;
       if (textWidth > width) {
         width = textWidth;
@@ -278,58 +288,70 @@ export default class Graph {
 
     const vertSpacing = height / (ticks.length - 1);
     x += width;
-    for (let i = 0; i < ticks.length; i += 1) {
+    for (let i = 0; i < ticks.length; i++) {
       this.ctx.fillText(ticks[i], x, y + (ticks.length - i - 1) * vertSpacing);
     }
+    
+    this.ctx.restore();
 
     return width;
   }
 
   renderGridLines(x, y, width, height, numTicksX, numTicksY) {
+    this.ctx.save();
+
     this.ctx.strokeStyle = this.options.gridLineColor;
-    this.ctx.lineWidth = this.options.gridLineWidth;
+    this.ctx.lineWidth = this.options.gridLineWidth / devicePixelRatio;
 
     const horSpacing = width / (numTicksX - 1);
     const vertSpacing = height / (numTicksY - 1);
 
-    for (let i = 0; i < numTicksX; i += 1) {
-      const lineX = x + horSpacing * i + 0.5;
+    for (let i = 0; i < numTicksX; i++) {
+      const lineX = x + horSpacing * i;
       this.ctx.beginPath();
-      this.ctx.moveTo(lineX, y);
-      this.ctx.lineTo(lineX, y + height);
+      this.ctx.fineMoveTo(lineX, y);
+      this.ctx.fineLineTo(lineX, y + height);
       this.ctx.stroke();
     }
 
-    for (let i = 0; i < numTicksY; i += 1) {
-      const lineY = y + vertSpacing * i + 0.5;
+    for (let i = 0; i < numTicksY; i++) {
+      const lineY = y + vertSpacing * i;
       this.ctx.beginPath();
-      this.ctx.moveTo(x, lineY);
-      this.ctx.lineTo(x + width, lineY);
+      this.ctx.fineMoveTo(x, lineY);
+      this.ctx.fineLineTo(x + width, lineY);
       this.ctx.stroke();
     }
+
+    this.ctx.restore();
   }
 
   renderGraphLines(x, y, width, height, axis) {
     const o = this.options;
     const now = Date.now();
-    // draw data lines
+
     this.ctx.lineWidth = o.lineWidth;
-    this.ctx.beginPath();
-    this.ctx.rect(x, y, width, height);
+
+    this.ctx.save();
+    this.ctx.translate(x, y);
+    this.ctx.rect(0, 0, width, height);
     this.ctx.clip();
-    for (let i = 0; i < this.datasets.length; i += 1) {
+
+    // draw data lines
+    // scaling is used instead of transform because of the non-uniform stretching warps the plot line
+    this.ctx.beginPath();
+    for (let i = 0; i < this.datasets.length; i++) {
       const d = this.datasets[i];
-      let value = d.data[0];
       this.ctx.beginPath();
       this.ctx.strokeStyle = d.color;
-      this.ctx.moveTo(x + (this.time[0] - now + o.windowMs) * width / o.windowMs,
-        y + map(value, axis[0], axis[1], height, 0));
-      for (let j = 1; j < d.data.length; j += 1) {
-        value = o.smoothing * value + (1 - o.smoothing) * d.data[j];
-        this.ctx.lineTo(x + (this.time[j] - now + o.windowMs) * width / o.windowMs,
-          y + map(value, axis[0], axis[1], height, 0));
+      this.ctx.fineMoveTo(scale(this.time[0] - now + o.windowMs, 0, o.windowMs, 0, width), 
+        scale(d.data[0], axis.min, axis.max, height, 0));
+      for (let j = 1; j < d.data.length; j++) {
+        this.ctx.fineLineTo(scale(this.time[j] - now + o.windowMs, 0, o.windowMs, 0, width), 
+          scale(d.data[j], axis.min, axis.max, height, 0));
       }
       this.ctx.stroke();
     }
+
+    this.ctx.restore();
   }
 }
