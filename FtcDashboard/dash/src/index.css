@@ -18,7 +18,7 @@ header { width: calc(100% - 16px); background-color: #2962ff; color: white; padd
 h1, h2, h3 { font-weight: bold; margin: 0; }
 .tile-grid { display: grid; width: 100%; height: calc(100vh - 60px); }
 .tile { border: 1px solid #EEE; padding: 16px; }
-.tile > div { height: 100%; }
+.tile > div { height: 100%; overflow: auto; }
 .heading { display: flex; justify-content: space-between; align-items: center; }
 table { margin: 0; border-collapse: collapse; text-align: left; }
 table table { margin-left: 24px; }
@@ -44,4 +44,4 @@ input { font-size: inherit; }
 .multiple-checkbox { overflow-y: scroll; }
 .error { font-weight: bold; color: red; }
 .warning { font-weight: bold; color: orange; }
-.canvas-container { height: calc(100% - 25px); }
+.canvas-container { height: calc(100% - 32px); overflow: hidden }
