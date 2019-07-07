@@ -5,8 +5,14 @@ class TextInput extends React.Component {
   constructor(props) {
     super(props);
 
+    this.inputRef = React.createRef();
+
     this.handleChange = this.handleChange.bind(this);
     this.handleKeyDown = this.handleKeyDown.bind(this);
+  }
+
+  componentDidUpdate() {
+    this.inputRef.current.setCustomValidity(this.props.valid ? '' : 'Invalid input');
   }
 
   handleChange(evt) {
@@ -25,7 +31,7 @@ class TextInput extends React.Component {
   render() {
     return (
       <input
-        className={ this.props.valid ? 'valid' : 'invalid' }
+        ref={this.inputRef}
         type="text"
         size={15}
         value={this.props.value}
