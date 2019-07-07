@@ -2,53 +2,54 @@ import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import Heading from '../components/Heading';
+import AutoFitCanvas from '../components/AutoFitCanvas';
 
 class CameraView extends React.Component {
   constructor(props) {
     super(props);
 
+    this.canvasRef = React.createRef();
+
     this.renderImage = this.renderImage.bind(this);
 
-    this.state = {
-      image: null
-    };
+    this.image = new Image();
+    this.image.onload = this.renderImage;
   }
 
   componentDidMount() {
-    this.renderImage();
+    this.ctx = this.canvasRef.current.getContext('2d');
   }
 
-  static getDerivedStateFromProps(props) {
-    const image = new Image();
-    image.src = `data:image/jpeg;base64,${props.imageStr}`;
-    return { image };
+  componentDidUpdate() {
+    this.image.src = `data:image/jpeg;base64,${this.props.imageStr}`;
   }
 
   renderImage() {
-    const { image } = this.state;
+    if (this.ctx) {
+      const canvas = this.canvasRef.current;
 
-    if (this.canvas && image.width != 0 && image.height != 0) {
-      const viewportWidth = Math.min(this.canvas.parentElement.parentElement.clientWidth - 32, 1000);
-      const viewportHeight = Math.min(this.canvas.parentElement.parentElement.clientHeight - 50, 1000);
+      canvas.width = canvas.width; // clears the canvas
 
-      const scale = Math.min(1.0, viewportWidth / image.width, viewportHeight / image.height);
-      const x = (viewportWidth - scale * image.width) / 2;
-      const y = (viewportHeight - scale * image.height) / 2;
+      const viewportWidth = canvas.width;
+      const viewportHeight = canvas.height;
 
-      this.canvas.width = this.canvas.width;
-
-      const ctx = this.canvas.getContext('2d');
-      ctx.drawImage(this.state.image, x, y, scale * image.width, scale * image.height);
+      // flip the image
+      // TODO: is there a better way to handle orientation?
+      const scale = Math.min(devicePixelRatio, viewportWidth / this.image.height, viewportHeight / this.image.width);
+      this.ctx.translate(viewportWidth / 2, viewportHeight / 2);
+      this.ctx.rotate(Math.PI / 2);
+      this.ctx.scale(scale, scale);
+      this.ctx.drawImage(this.image, -this.image.width / 2, -this.image.height / 2, this.image.width, this.image.height);
     }
-
-    requestAnimationFrame(this.renderImage);
   }
 
   render() {
     return (
-      <div style={{overflow: 'hidden', height: '100%'}}>
+      <div>
         <Heading level={2} text="Camera" />
-        <canvas ref={(c) => { this.canvas = c; }} width="1000" height="1000" />
+        <div className="canvas-container">
+          <AutoFitCanvas ref={this.canvasRef} onResize={this.renderImage} />
+        </div>
       </div>
     );
   }

@@ -23,8 +23,6 @@ class GraphView extends Component {
       }
     };
 
-    this.divRef = React.createRef();
-
     this.handleClick = this.handleClick.bind(this);
   }
 
@@ -32,9 +30,6 @@ class GraphView extends Component {
     this.setState({
       graphing: true,
     });
-
-    this.divRef.current.scrollTop = 0;
-    this.divRef.current.scrollLeft = 0;
   }
 
   stopGraphing() {
@@ -53,7 +48,7 @@ class GraphView extends Component {
 
   render() {
     return (
-      <div style={{height: '100%'}} ref={this.divRef}>
+      <div>
         <Heading level={2} text="Graph">
           <IconGroup>
             <Icon

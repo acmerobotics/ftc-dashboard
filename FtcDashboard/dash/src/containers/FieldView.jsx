@@ -32,7 +32,7 @@ class FieldView extends React.Component {
 
   render() {
     return (
-      <div style={{overflow: 'hidden', height: '100%'}}>
+      <div>
         <Heading level={2} text="Field" />
         <div className="canvas-container">
           <AutoFitCanvas ref={this.canvasRef} onResize={this.renderField} />
