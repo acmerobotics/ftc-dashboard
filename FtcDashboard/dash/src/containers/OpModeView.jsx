@@ -42,15 +42,15 @@ class OpModeView extends React.Component {
   }
 
   renderInitButton() {
-    return <button onClick={() => this.props.dispatch(initOpMode(this.state.selectedOpMode))}>Init</button>;
+    return <button style={{margin: '4px'}} onClick={() => this.props.dispatch(initOpMode(this.state.selectedOpMode))}>Init</button>;
   }
 
   renderStartButton() {
-    return <button onClick={() => this.props.dispatch(startOpMode())}>Start</button>;
+    return <button style={{margin: '4px'}} onClick={() => this.props.dispatch(startOpMode())}>Start</button>;
   }
 
   renderStopButton() {
-    return <button onClick={() => this.props.dispatch(stopOpMode())}>Stop</button>;
+    return <button style={{margin: '4px'}} onClick={() => this.props.dispatch(stopOpMode())}>Stop</button>;
   }
 
   renderButtons() {
@@ -98,7 +98,7 @@ class OpModeView extends React.Component {
             <Icon opacity={ gamepad2Connected ? 1.0 : 0.3 } icon="gamepad" size="small" />
           </IconGroup>
         </Heading>
-        <select style={{ marginRight: '8px' }} 
+        <select style={{ margin: '4px' }} 
           value={this.state.selectedOpMode} 
           disabled={ activeOpMode !== STOP_OP_MODE || opModeList.length === 0 } 
           onChange={this.onChange}>
