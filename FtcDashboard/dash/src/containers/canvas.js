@@ -7,10 +7,24 @@ function alignCoord(x, scaling) {
   return (roundX + 0.5 * Math.sign(x - roundX)) / scaling;
 }
 
+function arrToDOMMatrix(arr) {
+  return window.DOMMatrix.fromFloat64Array(Float64Array.from(arr));
+}
+
 CanvasRenderingContext2D.prototype.getScalingFactors = function() {
-  const transform = this.currentTransform || this.mozCurrentTransform;
-  const scalingX = Math.sqrt(transform[0] * transform[0] + transform[1] * transform[1]);
-  const scalingY = Math.sqrt(transform[2] * transform[2] + transform[3] * transform[3]);
+  let transform;
+  if (typeof this.getTransform === 'function') {
+    transform = this.getTransform();
+  } else if (typeof this.mozCurrentTransform !== 'undefined') {
+    transform = arrToDOMMatrix(this.mozCurrentTransform);
+  } else {
+    throw new Error('unable to find canvas transform');
+  }
+  
+  const { a, b, c, d } = transform;
+  const scalingX = Math.sqrt(a * a + c * c);
+  const scalingY = Math.sqrt(b * b + d * d);
+
   return {
     scalingX, 
     scalingY
