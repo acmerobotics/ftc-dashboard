@@ -43,6 +43,9 @@ import com.qualcomm.robotcore.util.WebHandlerManager;
 import com.qualcomm.robotcore.util.WebServer;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.function.Consumer;
+import org.firstinspires.ftc.robotcore.external.function.Continuation;
+import org.firstinspires.ftc.robotcore.external.stream.CameraStreamSource;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeManagerImpl;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeMeta;
 import org.firstinspires.ftc.robotcore.internal.opmode.RegisteredOpModes;
@@ -58,6 +61,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 
 import fi.iki.elonen.NanoHTTPD;
@@ -161,6 +165,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private final List<String[]> varsToRemove = new ArrayList<>();
     private final Object configLock = new Object();
 
+    private ExecutorService cameraStreamExecutor;
     private int imageQuality = DEFAULT_IMAGE_QUALITY;
 
     private FtcEventLoop eventLoop;
@@ -244,6 +249,57 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 }
                 Collections.sort(opModeList);
                 sendAll(new ReceiveOpModeList(opModeList));
+            }
+        }
+    }
+
+    private static String bitmapToJpegString(Bitmap bitmap, int quality) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream);
+        return Base64.encodeToString(outputStream.toByteArray(), Base64.DEFAULT);
+    }
+
+    private class CameraStreamRunnable implements Runnable {
+        private CameraStreamSource source;
+        private double maxFps;
+
+        public CameraStreamRunnable(CameraStreamSource source, double maxFps) {
+            this.source = source;
+            this.maxFps = maxFps;
+        }
+
+        @Override
+        public void run() {
+            while (!Thread.currentThread().isInterrupted()) {
+                try {
+                    long timestamp = System.currentTimeMillis();
+
+                    if (sockets.isEmpty()) {
+                        Thread.sleep(250);
+                        continue;
+                    }
+
+                    final CountDownLatch latch = new CountDownLatch(1);
+                    source.getFrameBitmap(Continuation.createTrivial(new Consumer<Bitmap>() {
+                        @Override
+                        public void accept(Bitmap value) {
+                            sendAll(new ReceiveImage(bitmapToJpegString(value, imageQuality)));
+                            latch.countDown();
+                        }
+                    }));
+
+                    latch.await();
+
+                    if (maxFps == 0) {
+                        continue;
+                    }
+
+                    long sleepTime = (long) (1000 / maxFps -
+                            (System.currentTimeMillis() - timestamp));
+                    Thread.sleep(Math.max(sleepTime, 0));
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
             }
         }
     }
@@ -642,25 +698,50 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     /**
      * Sends an image to the dashboard for display (MJPEG style). Note that the encoding process is
-     * synchronous.
+     * synchronous. Stops the active stream if running.
      * @param bitmap bitmap to send
      */
     public void sendImage(Bitmap bitmap) {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, imageQuality, outputStream);
-        String imageStr = Base64.encodeToString(outputStream.toByteArray(), Base64.DEFAULT);
-        sendAll(new ReceiveImage(imageStr));
+        if (sockets.isEmpty()) return;
+
+        stopCameraStream();
+
+        sendAll(new ReceiveImage(bitmapToJpegString(bitmap, imageQuality)));
     }
 
     /**
-     * Returns the image quality used by {@link #sendImage(Bitmap)}
+     * Sends a stream of camera frames at a regular interval.
+     * @param source camera stream source
+     * @param maxFps maximum frames per second; 0 indicates unlimited
+     */
+    public void startCameraStream(CameraStreamSource source, double maxFps) {
+        stopCameraStream();
+
+        cameraStreamExecutor = ThreadPool.newSingleThreadExecutor("camera stream");
+        cameraStreamExecutor.submit(new CameraStreamRunnable(source, maxFps));
+    }
+
+    /**
+     * Stops the camera frame stream.
+     */
+    public void stopCameraStream() {
+        if (cameraStreamExecutor != null) {
+            cameraStreamExecutor.shutdownNow();
+            cameraStreamExecutor = null;
+        }
+    }
+
+    /**
+     * Returns the image quality used by {@link #sendImage(Bitmap)} and
+     * {@link #startCameraStream(CameraStreamSource, double)}
      */
     public int getImageQuality() {
         return imageQuality;
     }
 
     /**
-     * Sets the image quality used by {@link #sendImage(Bitmap)}
+     * Sets the image quality used by {@link #sendImage(Bitmap)} and
+     * {@link #startCameraStream(CameraStreamSource, double)}
      */
     public void setImageQuality(int quality) {
         imageQuality = quality;
@@ -798,6 +879,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             activeOpModeStatus = RobotStatus.OpModeStatus.STOPPED;
             activeOpMode = opMode;
         }
+
         synchronized (configLock) {
             for (String[] var : varsToRemove) {
                 String category = var[0];
@@ -811,5 +893,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             varsToRemove.clear();
         }
         updateConfig();
+
+        stopCameraStream();
     }
 }

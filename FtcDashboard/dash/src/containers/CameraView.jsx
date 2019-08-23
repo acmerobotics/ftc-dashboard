@@ -3,6 +3,8 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import Heading from '../components/Heading';
 import AutoFitCanvas from '../components/AutoFitCanvas';
+import IconGroup from '../components/IconGroup';
+import Icon from '../components/Icon';
 
 class CameraView extends React.Component {
   constructor(props) {
@@ -14,6 +16,10 @@ class CameraView extends React.Component {
 
     this.image = new Image();
     this.image.onload = this.renderImage;
+
+    this.state = {
+      rotation: 0
+    };
   }
 
   componentDidMount() {
@@ -33,11 +39,12 @@ class CameraView extends React.Component {
       const viewportWidth = canvas.width;
       const viewportHeight = canvas.height;
 
-      // flip the image
-      // TODO: is there a better way to handle orientation?
-      const scale = Math.min(devicePixelRatio, viewportWidth / this.image.height, viewportHeight / this.image.width);
+      // rotate the image
+      const scale = Math.min(devicePixelRatio, 
+        (this.state.rotation % 2 == 0 ? viewportWidth : viewportHeight) / this.image.height, 
+        (this.state.rotation % 2 == 0 ? viewportHeight : viewportWidth) / this.image.width);
       this.ctx.translate(viewportWidth / 2, viewportHeight / 2);
-      this.ctx.rotate(Math.PI / 2);
+      this.ctx.rotate(this.state.rotation * Math.PI / 2);
       this.ctx.scale(scale, scale);
       this.ctx.drawImage(this.image, -this.image.width / 2, -this.image.height / 2, this.image.width, this.image.height);
     }
@@ -46,7 +53,11 @@ class CameraView extends React.Component {
   render() {
     return (
       <div>
-        <Heading level={2} text="Camera" />
+        <Heading level={2} text="Camera" >
+          <IconGroup>
+            <Icon onClick={() => this.setState({ rotation: (this.state.rotation + 1) % 4 })} icon="refresh" size="small" />
+          </IconGroup>
+        </Heading>
         <div className="canvas-container">
           <AutoFitCanvas ref={this.canvasRef} onResize={this.renderImage} />
         </div>
