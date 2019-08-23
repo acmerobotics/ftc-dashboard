@@ -52,9 +52,9 @@ layout: default
 
 ### Basic
 
-1. Connect to the WiFi network broadcast by the RC phone (the passphrase is located in the `Program and Manage` menu).
+1. Connect to the WiFi network broadcast by the RC (the passphrase is located in the `Program and Manage` menu).
 
-1. Navigate to `192.168.49.1:8080/dash`.
+1. Navigate to `192.168.49.1:8080/dash` with a phone RC or `192.168.43.1:8080/dash` with a Control Hub.
 
 ### Development
 
