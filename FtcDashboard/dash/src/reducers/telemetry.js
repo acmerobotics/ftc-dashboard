@@ -1,13 +1,13 @@
 import { RECEIVE_TELEMETRY } from '../actions/telemetry';
 
-const initialState = {
+const initialState = [{
   timestamp: 0,
   data: {},
   log: [],
   fieldOverlay: {
     ops: []
   }
-};
+}];
 
 const telemetry = (state = initialState, action) => {
   switch (action.type) {

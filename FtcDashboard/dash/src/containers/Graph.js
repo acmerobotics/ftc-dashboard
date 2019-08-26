@@ -124,36 +124,36 @@ export default class Graph {
   clear() {
     this.time = [];
     this.datasets = [];
-    this.lastDataTime = 0;
+    this.lastSampleTime = 0;
   }
 
-  addData(data) {
-    if (this.lastDataTime === 0) {
+  addSample(sample) {
+    if (this.lastSampleTime === 0) {
       this.lastSimTime = Date.now() + 250;
       this.time.push(this.lastSimTime);
       let color = 0;
-      for (let i = 0; i < data.length; i++) {
-        if (data[i].name === 'time') {
-          this.lastDataTime = data[i].value;
+      for (let i = 0; i < sample.length; i++) {
+        if (sample[i].name === 'time') {
+          this.lastSampleTime = sample[i].value;
         } else {
           this.datasets.push({
-            name: data[i].name,
-            data: [data[i].value],
-            color: this.options.colors[color % data.length],
+            name: sample[i].name,
+            data: [sample[i].value],
+            color: this.options.colors[color % sample.length],
           });
           color++;
         }
       }
     } else {
-      for (let i = 0; i < data.length; i++) {
-        if (data[i].name === 'time') {
-          this.lastSimTime += (data[i].value - this.lastDataTime);
+      for (let i = 0; i < sample.length; i++) {
+        if (sample[i].name === 'time') {
+          this.lastSimTime += (sample[i].value - this.lastSampleTime);
           this.time.push(this.lastSimTime);
-          this.lastDataTime = data[i].value;
+          this.lastSampleTime = sample[i].value;
         } else {
           for (let j = 0; j < this.datasets.length; j++) {
-            if (data[i].name === this.datasets[j].name) {
-              this.datasets[j].data.push(data[i].value);
+            if (sample[i].name === this.datasets[j].name) {
+              this.datasets[j].data.push(sample[i].value);
             }
           }
         }

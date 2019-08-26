@@ -1,17 +1,18 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import PropTypes from 'prop-types';
 import Heading from '../components/Heading';
+import { telemetryType } from './types';
 
 const TelemetryView = ({ telemetry }) => {
-  const telemetryLines = Object.keys(telemetry.data)
+  const latestPacket = telemetry[telemetry.length - 1];
+  const telemetryLines = Object.keys(latestPacket.data)
     .map(key => (
       <span key={key}>
-        {key}: {telemetry.data[key]}
+        {key}: {latestPacket.data[key]}
         <br />
       </span>
     ));
-  const telemetryLog = telemetry.log.map((line, i) => (
+  const telemetryLog = latestPacket.log.map((line, i) => (
     <span key={i}>{line}<br /></span>
   ));
   return (
@@ -24,11 +25,7 @@ const TelemetryView = ({ telemetry }) => {
 };
 
 TelemetryView.propTypes = {
-  telemetry: PropTypes.shape({
-    log: PropTypes.arrayOf(PropTypes.string).isRequired,
-    data: PropTypes.object.isRequired,
-    timestamp: PropTypes.number.isRequired
-  }).isRequired
+  telemetry: telemetryType.isRequired
 };
 
 const mapStateToProps = ({ telemetry }) => ({

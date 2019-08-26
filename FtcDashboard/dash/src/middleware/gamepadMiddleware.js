@@ -125,7 +125,7 @@ const gamepadMiddleware = store => {
   function updateGamepads() {
     const gamepads = navigator.getGamepads();
     if (gamepads.length === 0) {
-      requestAnimationFrame(updateGamepads);
+      setTimeout(updateGamepads, 500);
       return;
     }
   

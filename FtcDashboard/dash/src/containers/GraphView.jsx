@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Heading from '../components/Heading';
 import MultipleCheckbox from '../components/MultipleCheckbox';
@@ -9,6 +8,7 @@ import Icon from '../components/Icon';
 import TextInput from '../components/inputs/TextInput';
 import { validateInt } from '../components/inputs/validation';
 import { DEFAULT_OPTIONS } from './Graph';
+import { telemetryType } from './types';
 
 class GraphView extends Component {
   constructor(props) {
@@ -47,6 +47,24 @@ class GraphView extends Component {
   }
 
   render() {
+    const { telemetry } = this.props;
+    const latestPacket = telemetry[telemetry.length - 1];
+
+    const graphData = telemetry.map(packet => ([
+      {
+        name: 'time',
+        value: packet.timestamp
+      },
+      ...Object.keys(packet.data)
+        .filter(key => this.state.keys.includes(key))
+        .map(key => {
+          return {
+            name: key,
+            value: parseFloat(packet.data[key])
+          };
+        })
+    ]));
+
     return (
       <div>
         <Heading level={2} text="Graph">
@@ -61,13 +79,7 @@ class GraphView extends Component {
           this.state.graphing ?
             <div className="canvas-container">
               <GraphCanvas
-                timestamp={this.props.timestamp}
-                items={Object.keys(this.props.data)
-                  .filter(key => this.state.keys.indexOf(key) !== -1)
-                  .map(key => ({
-                    caption: key,
-                    value: this.props.data[key]
-                  }))}
+                data={graphData}
                 options={{ windowMs: this.state.windowMs.valid ?
                   this.state.windowMs.value : DEFAULT_OPTIONS.windowMs }} />
             </div>
@@ -75,12 +87,12 @@ class GraphView extends Component {
             (
               <div>
                 <MultipleCheckbox
-                  arr={Object.keys(this.props.data)
-                    .filter(key => !isNaN(parseFloat(this.props.data[key])))}
+                  arr={Object.keys(latestPacket.data)
+                    .filter(key => !isNaN(parseFloat(latestPacket.data[key])))}
                   onChange={selected => this.setState({ keys: selected })}
                   selected={this.state.keys} />
                 {
-                  Object.keys(this.props.data).length > 0 ?
+                  Object.keys(latestPacket.data).length > 0 ?
                     (
                       <div style={{ marginTop: '20px' }}>
                         <Heading level={3} text="Options"/>
@@ -116,13 +128,11 @@ class GraphView extends Component {
 }
 
 GraphView.propTypes = {
-  timestamp: PropTypes.number.isRequired,
-  data: PropTypes.object.isRequired,
+  telemetry: telemetryType.isRequired
 };
 
 const mapStateToProps = ({ telemetry }) => ({
-  timestamp: telemetry.timestamp,
-  data: telemetry.data
+  telemetry
 });
 
 export default connect(mapStateToProps)(GraphView);

@@ -66,11 +66,12 @@ public class TelemetryPacket {
     }
 
     /**
-     * Adds the current timestamp to the packet. This is called automatically when the packet is
-     * sent (and any previous timestamp will be overwritten).
+     * Adds and returns the current timestamp to the packet. This is called automatically when the
+     * packet is sent (and any previous timestamp will be overwritten).
      */
-    public void addTimestamp() {
+    public long addTimestamp() {
         timestamp = System.currentTimeMillis();
+        return timestamp;
     }
 
     /**

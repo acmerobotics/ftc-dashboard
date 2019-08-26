@@ -4,12 +4,14 @@ import com.acmerobotics.dashboard.message.Message;
 import com.acmerobotics.dashboard.message.MessageType;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 
-public class ReceiveTelemetry extends Message {
-    private TelemetryPacket telemetry;
+import java.util.List;
 
-    public ReceiveTelemetry(TelemetryPacket packet) {
+public class ReceiveTelemetry extends Message {
+    private List<TelemetryPacket> telemetry;
+
+    public ReceiveTelemetry(List<TelemetryPacket> packets) {
         super(MessageType.RECEIVE_TELEMETRY);
 
-        telemetry = packet;
+        telemetry = packets;
     }
 }

@@ -29,18 +29,7 @@ class GraphCanvas extends React.Component {
   }
 
   componentDidUpdate() {
-    if (this.props.items.length > 0) {
-      this.graph.addData([
-        ...this.props.items.map(({ caption, value }) => ({
-          name: caption,
-          value: parseFloat(value)
-        })),
-        {
-          name: 'time',
-          value: this.props.timestamp
-        }
-      ]);
-    }
+    this.props.data.forEach(sample => this.graph.addSample(sample));
   }
 
   handleDocumentKeydown(evt) {
@@ -65,14 +54,11 @@ class GraphCanvas extends React.Component {
   }
 }
 
-const itemPropType = PropTypes.shape({
-  caption: PropTypes.string,
-  value: PropTypes.string
-});
-
 GraphCanvas.propTypes = {
-  timestamp: PropTypes.number.isRequired,
-  items: PropTypes.arrayOf(itemPropType).isRequired,
+  data: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.shape({
+    name: PropTypes.string,
+    value: PropTypes.number
+  }))).isRequired,
   options: PropTypes.object
 };
 

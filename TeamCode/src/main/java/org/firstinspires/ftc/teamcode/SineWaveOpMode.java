@@ -16,6 +16,9 @@ public class SineWaveOpMode extends LinearOpMode {
     public static double PHASE = 90;
     public static double FREQUENCY = 0.5;
 
+    public static int TRANSMISSION_INTERVAL =
+            FtcDashboard.getInstance().getTelemetryTransmissionInterval();
+
     @Override
     public void runOpMode() throws InterruptedException {
         FtcDashboard dashboard = FtcDashboard.getInstance();
@@ -26,6 +29,8 @@ public class SineWaveOpMode extends LinearOpMode {
         if (isStopRequested()) return;
 
         while (opModeIsActive()) {
+            dashboard.setTelemetryTransmissionInterval(TRANSMISSION_INTERVAL);
+
             telemetry.addData("x", AMPLITUDE * Math.sin(
                     2 * Math.PI * FREQUENCY * getRuntime() + Math.toRadians(PHASE)
             ));

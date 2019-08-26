@@ -72,7 +72,16 @@ import fi.iki.elonen.NanoHTTPD;
 public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private static final String TAG = "FtcDashboard";
 
-    private static final int DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL = 50; // ms
+    /*
+     * Telemetry packets are dropped if they are sent faster than this interval.
+     */
+    private static final int MIN_TELEMETRY_SPACING = 10; // ms
+
+    /*
+     * Telemetry packets are batched for transmission and sent at this interval.
+     */
+    private static final int DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL = 100; // ms
+
     private static final int DEFAULT_IMAGE_QUALITY = 50; // 0-100
     private static final int GAMEPAD_WATCHDOG_INTERVAL = 500; // ms
 
@@ -157,7 +166,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     private TelemetryPacket.Adapter telemetry;
     private ExecutorService telemetryExecutorService;
-    private volatile TelemetryPacket nextTelemetryPacket;
+    private long lastPacketTimestamp;
+    private volatile List<TelemetryPacket> pendingTelemetry = new ArrayList<>();
     private final Object telemetryLock = new Object();
     private int telemetryTransmissionInterval = DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL;
 
@@ -187,22 +197,21 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         @Override
         public void run() {
             while (!Thread.currentThread().isInterrupted()) {
-                while (nextTelemetryPacket == null) {
+                while (pendingTelemetry.isEmpty()) {
                     try {
-                        Thread.sleep(1);
+                        Thread.sleep(MIN_TELEMETRY_SPACING / 2);
                     } catch (InterruptedException e) {
                         break;
                     }
                 }
                 long startTime = System.currentTimeMillis();
+                List<TelemetryPacket> telemetryToSend;
                 synchronized (telemetryLock) {
-                    if (nextTelemetryPacket != null) {
-                        sendAll(new ReceiveTelemetry(nextTelemetryPacket));
-                        nextTelemetryPacket = null;
-                    } else {
-                        continue;
-                    }
+                    telemetryToSend = new ArrayList<>(pendingTelemetry);
+                    pendingTelemetry.clear();
                 }
+                sendAll(new ReceiveTelemetry(telemetryToSend));
+
                 long elapsedTime = System.currentTimeMillis() - startTime;
                 long sleepTime = telemetryTransmissionInterval - elapsedTime;
                 if (sleepTime > 0) {
@@ -603,10 +612,17 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * @param telemetryPacket packet to send
      */
     public void sendTelemetryPacket(TelemetryPacket telemetryPacket) {
-        telemetryPacket.addTimestamp();
-        synchronized (telemetryLock) {
-            nextTelemetryPacket = telemetryPacket;
+        long timestamp = telemetryPacket.addTimestamp();
+
+        if ((timestamp - lastPacketTimestamp) < MIN_TELEMETRY_SPACING) {
+            return;
         }
+
+        synchronized (telemetryLock) {
+            pendingTelemetry.add(telemetryPacket);
+        }
+
+        lastPacketTimestamp = timestamp;
     }
 
     /**
