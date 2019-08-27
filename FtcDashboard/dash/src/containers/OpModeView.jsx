@@ -56,7 +56,7 @@ class OpModeView extends React.Component {
   renderButtons() {
     const { activeOpMode, activeOpModeStatus, opModeList } = this.props;
 
-    if (opModeList.length == 0) {
+    if (opModeList.length === 0) {
       return null;
     } else if (activeOpMode === STOP_OP_MODE) {
       return this.renderInitButton();

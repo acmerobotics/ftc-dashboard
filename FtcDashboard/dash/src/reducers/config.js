@@ -10,7 +10,7 @@ import VariableType from '../enums/VariableType';
 const receiveConfig = (baseConfig, newConfig) => {
   baseConfig = baseConfig || {};
   baseConfig.__value = baseConfig.__value || {};
-  if (newConfig.__type == VariableType.CUSTOM) {
+  if (newConfig.__type === VariableType.CUSTOM) {
     const mergedConfig = {
       __type: VariableType.CUSTOM,
       __value: {}
@@ -48,7 +48,7 @@ const receiveConfig = (baseConfig, newConfig) => {
 };
 
 const updateConfig = (baseConfig, configDiff, modified) => {
-  if (baseConfig.__type == VariableType.CUSTOM) {
+  if (baseConfig.__type === VariableType.CUSTOM) {
     const mergedConfig = {
       __type: VariableType.CUSTOM,
       __value: {}
@@ -81,7 +81,7 @@ const updateConfig = (baseConfig, configDiff, modified) => {
 };
 
 const refreshConfig = (config) => {
-  if (config.__type == VariableType.CUSTOM) {
+  if (config.__type === VariableType.CUSTOM) {
     const refreshedConfig = {
       __type: VariableType.CUSTOM,
       __value: {}

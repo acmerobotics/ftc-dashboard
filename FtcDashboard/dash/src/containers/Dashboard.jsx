@@ -11,7 +11,7 @@ import { saveLayoutPreset, getLayoutPreset } from '../actions/settings';
 
 class Dashboard extends Component {
   componentDidMount() {
-    this.props.dispatch(connect(process.env.HOST || location.hostname, process.env.PORT));
+    this.props.dispatch(connect(process.env.REACT_APP_HOST || window.location.hostname, process.env.REACT_APP_PORT));
     this.props.dispatch(getLayoutPreset());
   }
 

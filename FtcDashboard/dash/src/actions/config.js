@@ -30,7 +30,7 @@ export const refreshConfig = () => ({
 });
 
 export const getModifiedDiff = (baseConfig, root = true) => {
-  if (baseConfig.__type == VariableType.CUSTOM) {
+  if (baseConfig.__type === VariableType.CUSTOM) {
     const modifiedConfig = {
       __type: VariableType.CUSTOM,
       __value: {}

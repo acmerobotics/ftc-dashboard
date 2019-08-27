@@ -14,7 +14,7 @@ const HIDDEN_ACTIONS = [RECEIVE_PING_TIME, RECEIVE_TELEMETRY, RECEIVE_ROBOT_STAT
 const configureStore = () =>  {
   const middlewares = [thunk, gamepadMiddleware, socketMiddleware, storageMiddleware];
 
-  if (process.env.DEBUG) {
+  if (process.env.NODE_ENV === 'development') {
     const logger = createLogger({
       predicate: (getState, action) => HIDDEN_ACTIONS.indexOf(action.type) === -1
     });

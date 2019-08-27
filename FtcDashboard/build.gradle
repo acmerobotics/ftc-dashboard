@@ -34,27 +34,32 @@ android {
     lintOptions {
         abortOnError false
     }
-
-    sourceSets {
-        main {
-            assets.srcDirs = ["${project.projectDir}/dash/build"]
-        }
-    }
 }
 
 node {
+    version = '12.9.0'
+    download = true
     nodeModulesDir = file("${project.projectDir}/dash")
 }
 
-task buildDash(type: NodeTask, dependsOn: yarn) {
-    script = file("${project.projectDir}/dash/scripts/build.js")
-    execOverrides {
-        it.standardOutput = new ByteArrayOutputStream()
-    }
+yarn_build.dependsOn yarn_install
+
+task cleanDashAssets(type: Delete) {
+    delete "${android.sourceSets.getByName('main').assets.srcDirs[0]}/dash"
 }
 
+clean.dependsOn cleanDashAssets
+
+task copyDashAssets(type: Copy) {
+    from "${project.projectDir}/dash/build"
+    into "${android.sourceSets.getByName('main').assets.srcDirs[0]}/dash"
+}
+
+copyDashAssets.dependsOn cleanDashAssets
+copyDashAssets.dependsOn yarn_build
+
 android.libraryVariants.all { variant ->
-    variant.mergeAssetsProvider.get().dependsOn buildDash
+    variant.preBuildProvider.get().dependsOn copyDashAssets
 }
 
 // adapted from https://github.com/Genymobile/gnirehtet/blob/master/config/android-checkstyle.gradle
@@ -204,9 +209,3 @@ bintray {
         publications = ['maven']
     }
 }
-
-task cleanDash(type: Delete) {
-    delete file("${project.projectDir}/dash/build")
-}
-
-clean.dependsOn cleanDash
