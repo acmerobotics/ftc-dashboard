@@ -39,4 +39,6 @@ AutoFitCanvas.propTypes = {
   onResize: PropTypes.func
 };
 
-export default React.forwardRef((props, ref) => <AutoFitCanvas innerRef={ref} {...props} />);
+const ForwardedAutoFitCanvas = React.forwardRef((props, ref) => <AutoFitCanvas innerRef={ref} {...props} />);
+ForwardedAutoFitCanvas.displayName = 'AutoFitCanvas';
+export default ForwardedAutoFitCanvas;

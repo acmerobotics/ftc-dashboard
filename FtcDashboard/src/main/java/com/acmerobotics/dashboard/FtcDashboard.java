@@ -80,7 +80,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     /*
      * Telemetry packets are batched for transmission and sent at this interval.
      */
-    private static final int DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL = 50; // ms
+    private static final int DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL = 100; // ms
 
     private static final int DEFAULT_IMAGE_QUALITY = 50; // 0-100
     private static final int GAMEPAD_WATCHDOG_INTERVAL = 500; // ms

@@ -41,6 +41,7 @@ export default class Field {
   }
 
   render() {
+    // eslint-disable-next-line
     this.canvas.width = this.canvas.width; // clears the canvas
 
     // scale the canvas to facilitate the use of CSS pixels
@@ -107,7 +108,7 @@ export default class Field {
     this.ctx.translate(x + width / 2, y + height / 2);
     this.ctx.scale(width / o.fieldSize, -height / o.fieldSize);
     this.ctx.rotate(Math.PI / 2);
-  
+
     this.ctx.lineCap = 'butt';
 
     this.overlay.ops.forEach((op) => {

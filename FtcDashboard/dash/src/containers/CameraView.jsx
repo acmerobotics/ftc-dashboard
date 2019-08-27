@@ -34,6 +34,7 @@ class CameraView extends React.Component {
     if (this.ctx) {
       const canvas = this.canvasRef.current;
 
+      // eslint-disable-next-line
       canvas.width = canvas.width; // clears the canvas
 
       const viewportWidth = canvas.width;

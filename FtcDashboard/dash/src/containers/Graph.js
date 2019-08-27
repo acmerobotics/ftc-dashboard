@@ -114,7 +114,7 @@ export default class Graph {
   constructor(canvas, options) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
-    
+
     this.options = cloneDeep(DEFAULT_OPTIONS);
     Object.assign(this.options, options || {});
 
@@ -185,11 +185,12 @@ export default class Graph {
   render() {
     const o = this.options;
 
+    // eslint-disable-next-line
     this.canvas.width = this.canvas.width; // clears the canvas
-  
+
     // scale the canvas to facilitate the use of CSS pixels
     this.ctx.scale(devicePixelRatio, devicePixelRatio);
-    
+
     this.ctx.font = `${o.fontSize}px "Roboto", sans-serif`;
     this.ctx.textBaseline = 'middle';
     this.ctx.textAlign = 'left';
@@ -291,7 +292,7 @@ export default class Graph {
     for (let i = 0; i < ticks.length; i++) {
       this.ctx.fillText(ticks[i], x, y + (ticks.length - i - 1) * vertSpacing);
     }
-    
+
     this.ctx.restore();
 
     return width;
@@ -343,10 +344,10 @@ export default class Graph {
       const d = this.datasets[i];
       this.ctx.beginPath();
       this.ctx.strokeStyle = d.color;
-      this.ctx.fineMoveTo(scale(this.time[0] - now + o.windowMs, 0, o.windowMs, 0, width), 
+      this.ctx.fineMoveTo(scale(this.time[0] - now + o.windowMs, 0, o.windowMs, 0, width),
         scale(d.data[0], axis.min, axis.max, height, 0));
       for (let j = 1; j < d.data.length; j++) {
-        this.ctx.fineLineTo(scale(this.time[j] - now + o.windowMs, 0, o.windowMs, 0, width), 
+        this.ctx.fineLineTo(scale(this.time[j] - now + o.windowMs, 0, o.windowMs, 0, width),
           scale(d.data[j], axis.min, axis.max, height, 0));
       }
       this.ctx.stroke();

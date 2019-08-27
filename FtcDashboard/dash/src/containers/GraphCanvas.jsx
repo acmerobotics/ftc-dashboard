@@ -25,6 +25,10 @@ class GraphCanvas extends React.Component {
   }
 
   componentWillUnmount() {
+    if (this.requestId) {
+      cancelAnimationFrame(this.requestId);
+    }
+
     document.removeEventListener('keydown', this.handleDocumentKeydown);
   }
 
@@ -45,12 +49,12 @@ class GraphCanvas extends React.Component {
   renderGraph() {
     if (!this.state.paused && this.graph) {
       this.graph.render();
-      requestAnimationFrame(this.renderGraph);
+      this.requestId = requestAnimationFrame(this.renderGraph);
     }
   }
 
   render() {
-    return <AutoFitCanvas ref={this.canvasRef} onResize={this.renderGraph} />;
+    return <AutoFitCanvas ref={this.canvasRef} />;
   }
 }
 
