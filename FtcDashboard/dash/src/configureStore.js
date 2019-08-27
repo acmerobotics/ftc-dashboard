@@ -6,10 +6,10 @@ import socketMiddleware from './middleware/socketMiddleware';
 import storageMiddleware from './middleware/storageMiddleware';
 import reducer from './reducers';
 import { RECEIVE_PING_TIME } from './actions/socket';
-import { RECEIVE_TELEMETRY } from './actions/telemetry';
+// import { RECEIVE_TELEMETRY } from './actions/telemetry';
 import { RECEIVE_ROBOT_STATUS, GET_ROBOT_STATUS } from './actions/status';
 
-const HIDDEN_ACTIONS = [RECEIVE_PING_TIME, RECEIVE_TELEMETRY, RECEIVE_ROBOT_STATUS, GET_ROBOT_STATUS];
+const HIDDEN_ACTIONS = [RECEIVE_PING_TIME, RECEIVE_ROBOT_STATUS, GET_ROBOT_STATUS];
 
 const configureStore = () =>  {
   const middlewares = [thunk, gamepadMiddleware, socketMiddleware, storageMiddleware];

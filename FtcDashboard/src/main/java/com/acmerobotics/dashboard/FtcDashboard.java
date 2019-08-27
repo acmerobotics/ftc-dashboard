@@ -75,12 +75,12 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     /*
      * Telemetry packets are dropped if they are sent faster than this interval.
      */
-    private static final int MIN_TELEMETRY_SPACING = 10; // ms
+    private static final int MIN_TELEMETRY_PACKET_SPACING = 5; // ms
 
     /*
      * Telemetry packets are batched for transmission and sent at this interval.
      */
-    private static final int DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL = 100; // ms
+    private static final int DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL = 50; // ms
 
     private static final int DEFAULT_IMAGE_QUALITY = 50; // 0-100
     private static final int GAMEPAD_WATCHDOG_INTERVAL = 500; // ms
@@ -199,7 +199,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             while (!Thread.currentThread().isInterrupted()) {
                 while (pendingTelemetry.isEmpty()) {
                     try {
-                        Thread.sleep(MIN_TELEMETRY_SPACING / 2);
+                        Thread.sleep(MIN_TELEMETRY_PACKET_SPACING / 2);
                     } catch (InterruptedException e) {
                         break;
                     }
@@ -209,6 +209,11 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 synchronized (telemetryLock) {
                     telemetryToSend = new ArrayList<>(pendingTelemetry);
                     pendingTelemetry.clear();
+                }
+                // for now only the latest packet field overlay is used
+                // this helps save bandwidth, especially for more complex overlays
+                for (TelemetryPacket packet : telemetryToSend.subList(0, telemetryToSend.size() - 1)) {
+                    packet.fieldOverlay().clear();
                 }
                 sendAll(new ReceiveTelemetry(telemetryToSend));
 
@@ -272,7 +277,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         private CameraStreamSource source;
         private double maxFps;
 
-        public CameraStreamRunnable(CameraStreamSource source, double maxFps) {
+        private CameraStreamRunnable(CameraStreamSource source, double maxFps) {
             this.source = source;
             this.maxFps = maxFps;
         }
@@ -614,7 +619,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     public void sendTelemetryPacket(TelemetryPacket telemetryPacket) {
         long timestamp = telemetryPacket.addTimestamp();
 
-        if ((timestamp - lastPacketTimestamp) < MIN_TELEMETRY_SPACING) {
+        if ((timestamp - lastPacketTimestamp) < MIN_TELEMETRY_PACKET_SPACING) {
             return;
         }
 

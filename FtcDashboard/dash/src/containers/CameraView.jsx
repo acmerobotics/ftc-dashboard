@@ -40,9 +40,9 @@ class CameraView extends React.Component {
       const viewportHeight = canvas.height;
 
       // rotate the image
-      const scale = Math.min(devicePixelRatio, 
-        (this.state.rotation % 2 == 0 ? viewportWidth : viewportHeight) / this.image.height, 
-        (this.state.rotation % 2 == 0 ? viewportHeight : viewportWidth) / this.image.width);
+      const scale = Math.min(devicePixelRatio,
+        (this.state.rotation % 2 == 0 ? viewportHeight : viewportWidth) / this.image.height,
+        (this.state.rotation % 2 == 0 ? viewportWidth : viewportHeight) / this.image.width);
       this.ctx.translate(viewportWidth / 2, viewportHeight / 2);
       this.ctx.rotate(this.state.rotation * Math.PI / 2);
       this.ctx.scale(scale, scale);
