@@ -10,7 +10,7 @@ import FieldView from '../containers/FieldView';
 
 const LayoutPreset = {
   DEFAULT: 'DEFAULT',
-  CAMERA: 'CAMERA',
+  FIELD: 'FIELD',
   GRAPH: 'GRAPH',
   ORIGINAL: 'ORIGINAL',
 };
@@ -24,7 +24,7 @@ const LAYOUT_DETAILS = {
           <OpModeView />
         </Tile>
         <Tile row="2 / span 2" col={1}>
-          <FieldView />
+          <CameraView />
         </Tile>
         <Tile row="1 / span 3" col={2}>
           <GraphView />
@@ -38,15 +38,15 @@ const LAYOUT_DETAILS = {
       </TileGrid>
     )
   },
-  [LayoutPreset.CAMERA]: {
-    name: 'Camera',
+  [LayoutPreset.Field]: {
+    name: 'Field',
     content: (
       <TileGrid gridTemplate="150px calc(60% - 150px) 40% / 30% 40% 30%">
         <Tile row={1} col={1}>
           <OpModeView />
         </Tile>
         <Tile row="2 / span 2" col={1}>
-          <CameraView />
+          <FieldView />
         </Tile>
         <Tile row="1 / span 3" col={2}>
           <GraphView />
