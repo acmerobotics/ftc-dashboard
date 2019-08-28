@@ -38,7 +38,7 @@ const LAYOUT_DETAILS = {
       </TileGrid>
     )
   },
-  [LayoutPreset.Field]: {
+  [LayoutPreset.FIELD]: {
     name: 'Field',
     content: (
       <TileGrid gridTemplate="150px calc(60% - 150px) 40% / 30% 40% 30%">
