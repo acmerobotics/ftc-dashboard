@@ -18,7 +18,7 @@ layout: default
     }
     ```
 
-1. Open `build.release.gradle` in `FtcRobotController`. In the `dependencies` section add `implementation 'com.acmerobotics.dashboard:dashboard:0.3.2'`.
+1. Open `build.release.gradle` in `FtcRobotController`. In the `dependencies` section add `implementation 'com.acmerobotics.dashboard:dashboard:0.3.3'`.
 
 1. Repeat the previous step for `TeamCode` (and other modules you'd like to use the dashboard in).
 
@@ -60,10 +60,8 @@ layout: default
 
 1. Install [node](https://nodejs.org/en/download/) and [yarn](https://yarnpkg.com/en/docs/install) if not installed already.
 
-2. Run `yarn` in `FtcDashboard/dash/` (_this only needs to be done once!_).
+1. Run `yarn` in `FtcDashboard/dash/` (_this only needs to be done once!_).
 
-3. If necessary, change the host in `dash/config.json`.
+1. Run `yarn start` to start the development server.
 
-4. Run `yarn start` to start the development server.
-
-5. Navigate to `localhost:3000` (although the previous command will likely open it for you).
+1. Navigate to `localhost:3000` (although the previous command will likely open it for you).
