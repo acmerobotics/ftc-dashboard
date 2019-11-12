@@ -210,6 +210,12 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                     telemetryToSend = new ArrayList<>(pendingTelemetry);
                     pendingTelemetry.clear();
                 }
+
+                // justified paranoia: apparently telemetryToSend can be empty
+                if (telemetryToSend.isEmpty()) {
+                    continue;
+                }
+
                 // for now only the latest packet field overlay is used
                 // this helps save bandwidth, especially for more complex overlays
                 for (TelemetryPacket packet : telemetryToSend.subList(0, telemetryToSend.size() - 1)) {
@@ -913,7 +919,14 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             }
             varsToRemove.clear();
         }
-        updateConfig();
+
+        // this callback is sometimes called from the UI thread
+        (new Thread() {
+            @Override
+            public void run() {
+                updateConfig();
+            }
+        }).start();
 
         stopCameraStream();
     }
