@@ -188,6 +188,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private ExecutorService gamepadWatchdogExecutor;
     private long lastGamepadTimestamp;
 
+    private boolean webServerAttached;
+
     private TextView connectionStatusTextView;
     private LinearLayout parentLayout;
 
@@ -460,17 +462,21 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                         return;
                     }
 
+                    String serverStatus = webServerAttached ? "server attached" : "server detached";
+
+                    String connStatus;
                     synchronized (sockets) {
                         int connections = sockets.size();
                         if (connections == 0) {
-                            connectionStatusTextView.setText("Dashboard: no connections");
+                            connStatus = "no connections";
                         } else if (connections == 1) {
-                            connectionStatusTextView.setText("Dashboard: 1 connection");
+                            connStatus = "1 connection";
                         } else {
-                            connectionStatusTextView.setText("Dashboard: " +
-                                    connections + " connections");
+                            connStatus = connections + " connections";
                         }
                     }
+
+                    connectionStatusTextView.setText("Dashboard: " + serverStatus + ", " + connStatus);
                 }
             });
         }
@@ -514,6 +520,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     private void internalAttachWebServer(WebServer webServer) {
+        if (webServer == null) return;
+
         Activity activity = AppUtil.getInstance().getActivity();
 
         if (activity == null) return;
@@ -525,6 +533,10 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         webHandlerManager.register("/dash/",
                 newStaticAssetHandler(assetManager, "dash/index.html"));
         addAssetWebHandlers(webHandlerManager, assetManager, "dash");
+
+        webServerAttached = true;
+
+        updateStatusView();
     }
 
     private void internalAttachEventLoop(FtcEventLoop eventLoop) {
