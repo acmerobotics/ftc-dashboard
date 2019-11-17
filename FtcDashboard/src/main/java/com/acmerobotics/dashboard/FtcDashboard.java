@@ -42,6 +42,7 @@ import com.qualcomm.robotcore.util.ThreadPool;
 import com.qualcomm.robotcore.util.WebHandlerManager;
 import com.qualcomm.robotcore.util.WebServer;
 
+import org.firstinspires.ftc.ftccommon.internal.FtcRobotControllerWatchdogService;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.function.Consumer;
 import org.firstinspires.ftc.robotcore.external.function.Continuation;
@@ -143,6 +144,11 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * Stops the instance and the underlying WebSocket server.
      */
     public static void stop() {
+        if (!FtcRobotControllerWatchdogService.isLaunchActivity(AppUtil.getInstance().getRootActivity())) {
+            // prevent premature stop when the app is launched via hardware attachment
+            return;
+        }
+
         if (instance != null) {
             instance.close();
             instance = null;
