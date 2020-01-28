@@ -73,7 +73,8 @@ public class MultipleTelemetry implements Telemetry {
     public boolean removeItem(Item item) {
         boolean retVal = true;
         for (Telemetry telemetry : telemetryList) {
-            retVal = retVal && telemetry.removeItem(item);
+            boolean temp = telemetry.removeItem(item);
+            retVal = retVal && temp;
         }
         return retVal;
     }
@@ -105,7 +106,8 @@ public class MultipleTelemetry implements Telemetry {
     public boolean removeAction(Object o) {
         boolean retVal = true;
         for (Telemetry telemetry : telemetryList) {
-            retVal = retVal && telemetry.removeAction(o);
+            boolean temp = telemetry.removeAction(o);
+            retVal = retVal && temp;
         }
         return retVal;
     }
@@ -114,7 +116,8 @@ public class MultipleTelemetry implements Telemetry {
     public boolean update() {
         boolean retVal = true;
         for (Telemetry telemetry : telemetryList) {
-            retVal = retVal && telemetry.update();
+            boolean temp = telemetry.update();
+            retVal = retVal && temp;
         }
         return retVal;
     }
@@ -141,7 +144,8 @@ public class MultipleTelemetry implements Telemetry {
     public boolean removeLine(Line line) {
         boolean retVal = true;
         for (Telemetry telemetry : telemetryList) {
-            retVal = retVal && telemetry.removeLine(line);
+            boolean temp = telemetry.removeLine(line);
+            retVal = retVal && temp;
         }
         return retVal;
     }
