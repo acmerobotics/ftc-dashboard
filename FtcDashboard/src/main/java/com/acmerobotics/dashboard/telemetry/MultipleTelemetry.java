@@ -113,6 +113,20 @@ public class MultipleTelemetry implements Telemetry {
     }
 
     @Override
+    public void speak(String text) {
+        for (Telemetry telemetry : telemetryList) {
+            telemetry.speak(text);
+        }
+    }
+
+    @Override
+    public void speak(String text, String languageCode, String countryCode) {
+        for (Telemetry telemetry : telemetryList) {
+            telemetry.speak(text, languageCode, countryCode);
+        }
+    }
+
+    @Override
     public boolean update() {
         boolean retVal = true;
         for (Telemetry telemetry : telemetryList) {

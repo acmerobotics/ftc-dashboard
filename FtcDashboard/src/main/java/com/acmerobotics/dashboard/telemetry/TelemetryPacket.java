@@ -143,6 +143,16 @@ public class TelemetryPacket {
         }
 
         @Override
+        public void speak(String text) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void speak(String text, String languageCode, String countryCode) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public boolean update() {
             dashboard.sendTelemetryPacket(currentPacket);
             clear();
