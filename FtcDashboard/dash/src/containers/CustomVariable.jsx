@@ -25,7 +25,11 @@ class CustomVariable extends React.Component {
   render() {
     const { name, value } = this.props;
 
-    const options = Object.keys(value).map((key) => {
+    const sortedKeys = Object.keys(value);
+
+    sortedKeys.sort();
+
+    const options = sortedKeys.map((key) => {
       const child = value[key];
 
       const onChange = (newValue) => {
