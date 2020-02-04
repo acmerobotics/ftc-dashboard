@@ -139,7 +139,7 @@ export default class Graph {
           this.datasets.push({
             name: sample[i].name,
             data: [sample[i].value],
-            color: this.options.colors[color % sample.length],
+            color: this.options.colors[color % this.options.colors.length],
           });
           color++;
         }
