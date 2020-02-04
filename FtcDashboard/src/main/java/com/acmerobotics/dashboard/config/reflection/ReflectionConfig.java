@@ -52,7 +52,7 @@ public class ReflectionConfig {
         return configRoot;
     }
 
-    private static CustomVariable createVariableFromClass(Class<?> configClass) {
+    public static CustomVariable createVariableFromClass(Class<?> configClass) {
         CustomVariable customVariable = new CustomVariable();
 
         for (Field field : configClass.getFields()) {
@@ -66,7 +66,7 @@ public class ReflectionConfig {
         return customVariable;
     }
 
-    private static ConfigVariable createVariableFromField(Field field, Object parent) {
+    private static ConfigVariable<?> createVariableFromField(Field field, Object parent) {
         Class<?> fieldClass = field.getType();
         VariableType type = VariableType.fromClass(fieldClass);
         switch (type) {
