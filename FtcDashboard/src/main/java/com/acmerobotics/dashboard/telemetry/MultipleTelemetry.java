@@ -1,6 +1,6 @@
 package com.acmerobotics.dashboard.telemetry;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -209,6 +209,13 @@ public class MultipleTelemetry implements Telemetry {
     public void setCaptionValueSeparator(String s) {
         for (Telemetry telemetry : telemetryList) {
             telemetry.setCaptionValueSeparator(s);
+        }
+    }
+
+    @Override
+    public void setDisplayFormat(DisplayFormat displayFormat) {
+        for (Telemetry telemetry : telemetryList) {
+            telemetry.setDisplayFormat(displayFormat);
         }
     }
 

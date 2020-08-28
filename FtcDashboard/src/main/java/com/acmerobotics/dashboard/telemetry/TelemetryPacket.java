@@ -216,6 +216,11 @@ public class TelemetryPacket {
         }
 
         @Override
+        public void setDisplayFormat(DisplayFormat displayFormat) {
+
+        }
+
+        @Override
         public Log log() {
             return log;
         }
