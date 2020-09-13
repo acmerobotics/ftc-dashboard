@@ -16,7 +16,7 @@ export default Object.freeze({
   getFromGamepad: (gamepad) => {
     if (gamepad.id.search('Logitech Dual Action') !== -1) {
       return GamepadType.LOGITECH_DUAL_ACTION;
-    } else if (gamepad.id.search('Xbox 360 Wired Controller') !== -1) {
+    } else if (gamepad.id.search('Xbox 360') !== -1) {
       return GamepadType.XBOX_360;
     } else {
       return GamepadType.UNKNOWN;
