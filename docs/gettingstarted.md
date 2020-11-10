@@ -20,6 +20,13 @@ layout: default
 
 1. Open `build.release.gradle` in `FtcRobotController`. In the `dependencies` section add `implementation 'com.acmerobotics.dashboard:dashboard:0.3.10'`.
 
+Note: If you're using OpenRC or use non-Bintray SDK dependencies, add the following exclusion.
+```groovy
+implementation('com.acmerobotics.dashboard:dashboard:0.3.10') {
+    exclude group: 'org.firstinspires.ftc'
+}
+```
+
 1. Repeat the previous step for `TeamCode` (and other modules you'd like to use the dashboard in).
 
 1. Navigate to the main activity (`org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity`) inside of the `FtcRobotController` module.
@@ -30,7 +37,7 @@ layout: default
 
 1. Insert `FtcDashboard.populateMenu(popupMenu.getMenu());` [here](https://github.com/acmerobotics/ftc-dashboard/blob/e6c8f5799f167023cce47fdf6b0003355ad721c8/FtcRobotController/src/main/java/org/firstinspires/ftc/robotcontroller/internal/FtcRobotControllerActivity.java#L285) and `FtcDashboard.populateMenu(menu);` [here](https://github.com/acmerobotics/ftc-dashboard/blob/e6c8f5799f167023cce47fdf6b0003355ad721c8/FtcRobotController/src/main/java/org/firstinspires/ftc/robotcontroller/internal/FtcRobotControllerActivity.java#L496) (this is recommended for disabling the dashboard during competition).
 
-1. To serve the static pages from the built-in web server, insert `FtcDashboard.attachWebServer(service.getWebServer());` at the end of `onServiceBind()` (**note**: OpenRC Extreme Turbo removes the built-in web server, although you can serve the necessary pages locally instead).
+1. To serve the static pages from the built-in web server, insert `FtcDashboard.attachWebServer(service.getWebServer());` at the end of `onServiceBind()`.
 
 1. To enable op mode management, insert `FtcDashboard.attachEventLoop(eventLoop);` at the end of `requestRobotSetup()`.
 
