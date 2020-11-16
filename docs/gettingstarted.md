@@ -20,12 +20,12 @@ layout: default
 
 1. Open `build.release.gradle` in `FtcRobotController`. In the `dependencies` section add `implementation 'com.acmerobotics.dashboard:dashboard:0.3.10'`.
 
-Note: If you're using OpenRC or use non-Bintray SDK dependencies, add the following exclusion.
-```groovy
-implementation('com.acmerobotics.dashboard:dashboard:0.3.10') {
-    exclude group: 'org.firstinspires.ftc'
-}
-```
+    Note: If you're using OpenRC or use non-Bintray SDK dependencies, add the following exclusion.
+    ```groovy
+    implementation('com.acmerobotics.dashboard:dashboard:0.3.10') {
+        exclude group: 'org.firstinspires.ftc'
+    }
+    ```
 
 1. Repeat the previous step for `TeamCode` (and other modules you'd like to use the dashboard in).
 
