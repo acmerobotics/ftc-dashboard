@@ -6,7 +6,7 @@ import Heading from '../components/Heading.jsx';
 import Header from '../components/Header.jsx';
 import IconGroup from '../components/IconGroup.jsx';
 import Icon from '../components/Icon.jsx';
-import LayoutPreset from '../enums/LayoutPreset.jsx';
+import LayoutPreset from '../enums/LayoutPreset.tsx';
 import { connect, disconnect } from '../actions/socket.js';
 import { saveLayoutPreset, getLayoutPreset } from '../actions/settings.js';
 
