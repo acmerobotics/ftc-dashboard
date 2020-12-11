@@ -1,14 +1,16 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import Heading from '../components/Heading';
-import MultipleCheckbox from '../components/MultipleCheckbox';
-import GraphCanvas from './GraphCanvas';
-import IconGroup from '../components/IconGroup';
-import Icon from '../components/Icon';
-import TextInput from '../components/inputs/TextInput';
-import { validateInt } from '../components/inputs/validation';
-import { DEFAULT_OPTIONS } from './Graph';
-import { telemetryType } from './types';
+
+import Heading from '../components/Heading.jsx';
+import MultipleCheckbox from '../components/MultipleCheckbox.jsx';
+import GraphCanvas from './GraphCanvas.jsx';
+import IconGroup from '../components/IconGroup.jsx';
+import Icon from '../components/Icon.jsx';
+import TextInput from '../components/inputs/TextInput.jsx';
+
+import { validateInt } from '../components/inputs/validation.js';
+import { DEFAULT_OPTIONS } from './Graph.js';
+import { telemetryType } from './types.js';
 
 class GraphView extends Component {
   constructor(props) {
@@ -19,8 +21,8 @@ class GraphView extends Component {
       keys: [],
       windowMs: {
         value: DEFAULT_OPTIONS.windowMs,
-        valid: true
-      }
+        valid: true,
+      },
     };
 
     this.handleClick = this.handleClick.bind(this);
@@ -50,20 +52,20 @@ class GraphView extends Component {
     const { telemetry } = this.props;
     const latestPacket = telemetry[telemetry.length - 1];
 
-    const graphData = telemetry.map(packet => ([
+    const graphData = telemetry.map((packet) => [
       {
         name: 'time',
-        value: packet.timestamp
+        value: packet.timestamp,
       },
       ...Object.keys(packet.data)
-        .filter(key => this.state.keys.includes(key))
-        .map(key => {
+        .filter((key) => this.state.keys.includes(key))
+        .map((key) => {
           return {
             name: key,
-            value: parseFloat(packet.data[key])
+            value: parseFloat(packet.data[key]),
           };
-        })
-    ]));
+        }),
+    ]);
 
     return (
       <div>
@@ -72,67 +74,72 @@ class GraphView extends Component {
             <Icon
               icon={this.state.graphing ? 'close' : 'chart'}
               size="small"
-              onClick={this.handleClick} />
+              onClick={this.handleClick}
+            />
           </IconGroup>
         </Heading>
-        {
-          this.state.graphing ?
-            <div className="canvas-container">
-              <GraphCanvas
-                data={graphData}
-                options={{ windowMs: this.state.windowMs.valid ?
-                  this.state.windowMs.value : DEFAULT_OPTIONS.windowMs }} />
-            </div>
-            :
-            (
-              <div>
-                <MultipleCheckbox
-                  arr={Object.keys(latestPacket.data)
-                    .filter(key => !isNaN(parseFloat(latestPacket.data[key])))}
-                  onChange={selected => this.setState({ keys: selected })}
-                  selected={this.state.keys} />
-                {
-                  Object.keys(latestPacket.data).length > 0 ?
-                    (
-                      <div style={{ marginTop: '20px' }}>
-                        <Heading level={3} text="Options"/>
-                        <table>
-                          <tbody>
-                            <tr>
-                              <td>Window (ms)</td>
-                              <td>
-                                <TextInput 
-                                  value={this.state.windowMs.value} 
-                                  valid={this.state.windowMs.valid} 
-                                  validate={validateInt} 
-                                  onChange={({ value, valid }) => this.setState({
-                                    windowMs: {
-                                      value,
-                                      valid
-                                    }
-                                  })}/>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    )
-                    : <p>Sent telemetry items will appear here for graphing</p>
-                }
+        {this.state.graphing ? (
+          <div className="canvas-container">
+            <GraphCanvas
+              data={graphData}
+              options={{
+                windowMs: this.state.windowMs.valid
+                  ? this.state.windowMs.value
+                  : DEFAULT_OPTIONS.windowMs,
+              }}
+            />
+          </div>
+        ) : (
+          <div>
+            <MultipleCheckbox
+              arr={Object.keys(latestPacket.data).filter(
+                (key) => !isNaN(parseFloat(latestPacket.data[key])),
+              )}
+              onChange={(selected) => this.setState({ keys: selected })}
+              selected={this.state.keys}
+            />
+            {Object.keys(latestPacket.data).length > 0 ? (
+              <div style={{ marginTop: '20px' }}>
+                <Heading level={3} text="Options" />
+                <table>
+                  <tbody>
+                    <tr>
+                      <td>Window (ms)</td>
+                      <td>
+                        <TextInput
+                          value={this.state.windowMs.value}
+                          valid={this.state.windowMs.valid}
+                          validate={validateInt}
+                          onChange={({ value, valid }) =>
+                            this.setState({
+                              windowMs: {
+                                value,
+                                valid,
+                              },
+                            })
+                          }
+                        />
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
-            )
-        }
+            ) : (
+              <p>Sent telemetry items will appear here for graphing</p>
+            )}
+          </div>
+        )}
       </div>
     );
   }
 }
 
 GraphView.propTypes = {
-  telemetry: telemetryType.isRequired
+  telemetry: telemetryType.isRequired,
 };
 
 const mapStateToProps = ({ telemetry }) => ({
-  telemetry
+  telemetry,
 });
 
 export default connect(mapStateToProps)(GraphView);

@@ -1,16 +1,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Heading from '../components/Heading';
-import Icon from '../components/Icon';
-import BasicVariable from './BasicVariable';
-import VariableType from '../enums/VariableType';
+
+import Heading from '../components/Heading.jsx';
+import Icon from '../components/Icon.jsx';
+import BasicVariable from './BasicVariable.jsx';
+import VariableType from '../enums/VariableType.js';
 
 class CustomVariable extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      expanded: false
+      expanded: false,
     };
 
     this.toggleVisibility = this.toggleVisibility.bind(this);
@@ -18,7 +19,7 @@ class CustomVariable extends React.Component {
 
   toggleVisibility() {
     this.setState({
-      expanded: !this.state.expanded
+      expanded: !this.state.expanded,
     });
   }
 
@@ -36,8 +37,8 @@ class CustomVariable extends React.Component {
         this.props.onChange({
           __type: VariableType.CUSTOM,
           __value: {
-            [key]: newValue
-          }
+            [key]: newValue,
+          },
         });
       };
 
@@ -45,8 +46,8 @@ class CustomVariable extends React.Component {
         this.props.onSave({
           __type: VariableType.CUSTOM,
           __value: {
-            [key]: newValue
-          }
+            [key]: newValue,
+          },
         });
       };
 
@@ -57,7 +58,8 @@ class CustomVariable extends React.Component {
             name={key}
             value={child.__value}
             onChange={onChange}
-            onSave={onSave} />
+            onSave={onSave}
+          />
         );
       }
 
@@ -72,7 +74,8 @@ class CustomVariable extends React.Component {
           enumValues={child.__enumValues}
           modified={child.__modified}
           onChange={onChange}
-          onSave={onSave} />
+          onSave={onSave}
+        />
       );
     });
 
@@ -80,18 +83,18 @@ class CustomVariable extends React.Component {
       <tr>
         <td>
           <div className="option-header">
-            <Icon icon={ this.state.expanded ? 'expand-less' : 'expand-more' } size="tiny" onClick={this.toggleVisibility} />
+            <Icon
+              icon={this.state.expanded ? 'expand-less' : 'expand-more'}
+              size="tiny"
+              onClick={this.toggleVisibility}
+            />
             <Heading text={name} level={3} />
           </div>
-          {
-            this.state.expanded ?
-              (
-                <table>
-                  <tbody>{options}</tbody>
-                </table>
-              )
-              : null
-          }
+          {this.state.expanded ? (
+            <table>
+              <tbody>{options}</tbody>
+            </table>
+          ) : null}
         </td>
       </tr>
     );

@@ -1,19 +1,19 @@
-import LayoutPreset from '../enums/LayoutPreset';
-import { RECEIVE_LAYOUT_PRESET } from '../actions/settings';
+import LayoutPreset from '../enums/LayoutPreset.jsx';
+import { RECEIVE_LAYOUT_PRESET } from '../actions/settings.js';
 
 const initialState = {
-  layoutPreset: LayoutPreset.DEFAULT
+  layoutPreset: LayoutPreset.DEFAULT,
 };
 
 const telemetry = (state = initialState, action) => {
   switch (action.type) {
-  case RECEIVE_LAYOUT_PRESET:
-    return {
-      ...state,
-      layoutPreset: action.preset
-    };
-  default:
-    return state;
+    case RECEIVE_LAYOUT_PRESET:
+      return {
+        ...state,
+        layoutPreset: action.preset,
+      };
+    default:
+      return state;
   }
 };
 

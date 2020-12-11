@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash';
-import './canvas';
+import './canvas.js';
 import fieldImageName from '../assets/field.png';
 
 // this is a bit of a hack bit it'll have to do
@@ -7,9 +7,9 @@ import fieldImageName from '../assets/field.png';
 const fieldImage = new Image();
 const fieldsToRender = [];
 let fieldLoaded = false;
-fieldImage.onload = function() {
+fieldImage.onload = function () {
   fieldLoaded = true;
-  fieldsToRender.forEach(field => field.render());
+  fieldsToRender.forEach((field) => field.render());
 };
 fieldImage.src = fieldImageName;
 
@@ -20,7 +20,7 @@ const DEFAULT_OPTIONS = {
   fieldSize: 12 * 12, // inches
   splineSamples: 250,
   gridLineWidth: 1, // device pixels
-  gridLineColor: 'rgb(120, 120, 120)'
+  gridLineColor: 'rgb(120, 120, 120)',
 };
 
 export default class Field {
@@ -59,7 +59,8 @@ export default class Field {
     this.renderField(
       (width - fieldSize) / 2,
       (height - fieldSize) / 2,
-      fieldSize, fieldSize
+      fieldSize,
+      fieldSize,
     );
   }
 
@@ -113,67 +114,77 @@ export default class Field {
 
     this.overlay.ops.forEach((op) => {
       switch (op.type) {
-      case 'fill':
-        this.ctx.fillStyle = op.color;
-        break;
-      case 'stroke':
-        this.ctx.strokeStyle = op.color;
-        break;
-      case 'strokeWidth':
-        this.ctx.lineWidth = op.width;
-        break;
-      case 'circle':
-        this.ctx.beginPath();
-        this.ctx.arc(op.x, op.y, op.radius, 0, 2 * Math.PI);
+        case 'fill':
+          this.ctx.fillStyle = op.color;
+          break;
+        case 'stroke':
+          this.ctx.strokeStyle = op.color;
+          break;
+        case 'strokeWidth':
+          this.ctx.lineWidth = op.width;
+          break;
+        case 'circle':
+          this.ctx.beginPath();
+          this.ctx.arc(op.x, op.y, op.radius, 0, 2 * Math.PI);
 
-        if (op.stroke) {
+          if (op.stroke) {
+            this.ctx.stroke();
+          } else {
+            this.ctx.fill();
+          }
+          break;
+        case 'polygon': {
+          this.ctx.beginPath();
+          const { xPoints, yPoints, stroke } = op;
+          this.ctx.fineMoveTo(xPoints[0], yPoints[0]);
+          for (let i = 1; i < xPoints.length; i++) {
+            this.ctx.fineLineTo(xPoints[i], yPoints[i]);
+          }
+          this.ctx.closePath();
+
+          if (stroke) {
+            this.ctx.stroke();
+          } else {
+            this.ctx.fill();
+          }
+          break;
+        }
+        case 'polyline': {
+          this.ctx.beginPath();
+          const { xPoints, yPoints } = op;
+          this.ctx.fineMoveTo(xPoints[0], yPoints[0]);
+          for (let i = 1; i < xPoints.length; i++) {
+            this.ctx.fineLineTo(xPoints[i], yPoints[i]);
+          }
           this.ctx.stroke();
-        } else {
-          this.ctx.fill();
+          break;
         }
-        break;
-      case 'polygon': {
-        this.ctx.beginPath();
-        const { xPoints, yPoints, stroke } = op;
-        this.ctx.fineMoveTo(xPoints[0], yPoints[0]);
-        for (let i = 1; i < xPoints.length; i++) {
-          this.ctx.fineLineTo(xPoints[i], yPoints[i]);
-        }
-        this.ctx.closePath();
+        case 'spline': {
+          this.ctx.beginPath();
+          const { ax, bx, cx, dx, ex, fx, ay, by, cy, dy, ey, fy } = op;
+          this.ctx.fineMoveTo(fx, fy);
+          for (let i = 0; i <= o.splineSamples; i++) {
+            const t = i / o.splineSamples;
+            const sx =
+              (ax * t + bx) * (t * t * t * t) +
+              cx * (t * t * t) +
+              dx * (t * t) +
+              ex * t +
+              fx;
+            const sy =
+              (ay * t + by) * (t * t * t * t) +
+              cy * (t * t * t) +
+              dy * (t * t) +
+              ey * t +
+              fy;
 
-        if (stroke) {
+            this.ctx.lineTo(sx, sy);
+          }
           this.ctx.stroke();
-        } else {
-          this.ctx.fill();
+          break;
         }
-        break;
-      }
-      case 'polyline': {
-        this.ctx.beginPath();
-        const { xPoints, yPoints } = op;
-        this.ctx.fineMoveTo(xPoints[0], yPoints[0]);
-        for (let i = 1; i < xPoints.length; i++) {
-          this.ctx.fineLineTo(xPoints[i], yPoints[i]);
-        }
-        this.ctx.stroke();
-        break;
-      }
-      case 'spline': {
-        this.ctx.beginPath();
-        const { ax, bx, cx, dx, ex, fx, ay, by, cy, dy, ey, fy } = op;
-        this.ctx.fineMoveTo(fx, fy);
-        for (let i = 0; i <= o.splineSamples; i++) {
-          const t = i  / o.splineSamples;
-          const sx = (ax*t + bx) * (t*t*t*t) + cx * (t*t*t) + dx * (t*t) + ex * t + fx;
-          const sy = (ay*t + by) * (t*t*t*t) + cy * (t*t*t) + dy * (t*t) + ey * t + fy;
-
-          this.ctx.lineTo(sx, sy);
-        }
-        this.ctx.stroke();
-        break;
-      }
-      default:
-        throw new Error(`unknown operation: ${op.type}`);
+        default:
+          throw new Error(`unknown operation: ${op.type}`);
       }
     });
 

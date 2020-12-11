@@ -11,7 +11,7 @@ function arrToDOMMatrix(arr) {
   return window.DOMMatrix.fromFloat64Array(Float64Array.from(arr));
 }
 
-CanvasRenderingContext2D.prototype.getScalingFactors = function() {
+CanvasRenderingContext2D.prototype.getScalingFactors = function () {
   let transform;
   if (typeof this.getTransform === 'function') {
     transform = this.getTransform();
@@ -20,23 +20,23 @@ CanvasRenderingContext2D.prototype.getScalingFactors = function() {
   } else {
     throw new Error('unable to find canvas transform');
   }
-  
+
   const { a, b, c, d } = transform;
   const scalingX = Math.sqrt(a * a + c * c);
   const scalingY = Math.sqrt(b * b + d * d);
 
   return {
-    scalingX, 
-    scalingY
+    scalingX,
+    scalingY,
   };
 };
 
-CanvasRenderingContext2D.prototype.fineMoveTo = function(x, y) {
+CanvasRenderingContext2D.prototype.fineMoveTo = function (x, y) {
   const { scalingX, scalingY } = this.getScalingFactors();
   this.moveTo(alignCoord(x, scalingX), alignCoord(y, scalingY));
 };
 
-CanvasRenderingContext2D.prototype.fineLineTo = function(x, y) {
+CanvasRenderingContext2D.prototype.fineLineTo = function (x, y) {
   const { scalingX, scalingY } = this.getScalingFactors();
   this.lineTo(alignCoord(x, scalingX), alignCoord(y, scalingY));
 };

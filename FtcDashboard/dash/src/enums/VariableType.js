@@ -4,7 +4,7 @@ const VariableType = {
   DOUBLE: 'double',
   STRING: 'string',
   ENUM: 'enum',
-  CUSTOM: 'custom'
+  CUSTOM: 'custom',
 };
 
 export default Object.freeze(VariableType);

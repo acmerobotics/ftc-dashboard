@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Graph from './Graph';
-import AutoFitCanvas from '../components/AutoFitCanvas';
+
+import Graph from './Graph.js';
+import AutoFitCanvas from '../components/AutoFitCanvas.jsx';
 
 class GraphCanvas extends React.Component {
   constructor(props) {
@@ -33,16 +34,19 @@ class GraphCanvas extends React.Component {
   }
 
   componentDidUpdate() {
-    this.props.data.forEach(sample => this.graph.addSample(sample));
+    this.props.data.forEach((sample) => this.graph.addSample(sample));
   }
 
   handleDocumentKeydown(evt) {
     if (evt.code === 'Space') {
-      this.setState({
-        paused: !this.state.paused,
-      }, () => {
-        this.renderGraph();
-      });
+      this.setState(
+        {
+          paused: !this.state.paused,
+        },
+        () => {
+          this.renderGraph();
+        },
+      );
     }
   }
 
@@ -59,11 +63,15 @@ class GraphCanvas extends React.Component {
 }
 
 GraphCanvas.propTypes = {
-  data: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.shape({
-    name: PropTypes.string,
-    value: PropTypes.number
-  }))).isRequired,
-  options: PropTypes.object
+  data: PropTypes.arrayOf(
+    PropTypes.arrayOf(
+      PropTypes.shape({
+        name: PropTypes.string,
+        value: PropTypes.number,
+      }),
+    ),
+  ).isRequired,
+  options: PropTypes.object,
 };
 
 export default GraphCanvas;

@@ -7,21 +7,16 @@ const Tile = ({ children, row, col }) => (
     style={{
       gridRow: row,
       gridColumn: col,
-    }}>
-    { children }
+    }}
+  >
+    {children}
   </div>
 );
 
 Tile.propTypes = {
   children: PropTypes.node.isRequired,
-  row: PropTypes.oneOfType([
-    PropTypes.number,
-    PropTypes.string
-  ]).isRequired,
-  col: PropTypes.oneOfType([
-    PropTypes.number,
-    PropTypes.string
-  ]).isRequired
+  row: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+  col: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
 };
 
 export default Tile;
