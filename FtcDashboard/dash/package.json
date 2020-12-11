@@ -19,7 +19,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix"
+    "lint": "eslint 'src/**/*.{js,jsx,ts,tsx,json}' --fix"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -53,8 +53,10 @@
     }
   },
   "lint-staged": {
+    "src/**/*.{js,jsx,ts,tsx,json}": [
+      "eslint --fix"
+    ],
     "src/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
-      "eslint --fix",
       "prettier --write"
     ]
   }
