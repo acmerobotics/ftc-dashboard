@@ -100,5 +100,8 @@ export default Object.freeze({
 
   getName: (preset: LayoutPreset) => LAYOUT_DETAILS[preset].name,
 
-  getContent: (preset: LayoutPreset) => LAYOUT_DETAILS[preset].content,
+  getContent: (preset: LayoutPreset) =>
+    LAYOUT_DETAILS[preset]
+      ? LAYOUT_DETAILS[preset].content
+      : LAYOUT_DETAILS[LayoutPreset.DEFAULT].content,
 });
