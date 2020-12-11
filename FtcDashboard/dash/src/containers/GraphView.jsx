@@ -66,7 +66,7 @@ class GraphView extends Component {
     ]));
 
     return (
-      <div>
+      <div style={{ height: "100%" }}>
         <Heading level={2} text="Graph">
           <IconGroup>
             <Icon

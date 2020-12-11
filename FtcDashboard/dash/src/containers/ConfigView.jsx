@@ -14,14 +14,14 @@ const ConfigView = ({ configRoot, onRefresh, onSave, onChange }) => {
   sortedKeys.sort();
   
   return (
-    <div>
+    <div style={{ height: "calc(100% - 3em)" }}>
       <Heading level={2} text="Configuration">
         <IconGroup>
           <Icon icon="save" size="small" onClick={() => onSave(getModifiedDiff(configRoot))} />
           <Icon icon="refresh" size="small" onClick={onRefresh} />
         </IconGroup>
       </Heading>
-      <table>
+      <table style={{ height: "100%", display: "block", overflow: 'scroll' }}>
         <tbody>
           {
             sortedKeys.map((key) => (

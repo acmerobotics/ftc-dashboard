@@ -1,6 +1,7 @@
 import React from 'react';
 import TileGrid from '../components/TileGrid';
 import Tile from '../components/Tile';
+import ConfigurableLayout from '../components/ConfigurableLayout';
 import OpModeView from '../containers/OpModeView';
 import CameraView from '../containers/CameraView';
 import GraphView from '../containers/GraphView';
@@ -13,9 +14,15 @@ enum LayoutPreset {
   FIELD,
   GRAPH,
   ORIGINAL,
+  CONFIGURABLE
 };
 
-const LAYOUT_DETAILS = {
+interface Layout {
+  name: string,
+  content: JSX.Element
+}
+
+const LAYOUT_DETAILS: { [key in LayoutPreset]: Layout } = {
   [LayoutPreset.DEFAULT]: {
     name: 'Default',
     content: (
@@ -89,6 +96,12 @@ const LAYOUT_DETAILS = {
       </TileGrid>
     )
   },
+  [LayoutPreset.CONFIGURABLE]: {
+    name: 'Configurable',
+    content: (
+      <ConfigurableLayout />
+    )
+  }
 };
 
 export default Object.freeze({
