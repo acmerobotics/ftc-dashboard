@@ -1,16 +1,10 @@
 import { cloneDeep } from 'lodash';
-import './canvas';
+import './canvas.js';
 
 // all dimensions in this file are *CSS* pixels unless otherwise stated
 export const DEFAULT_OPTIONS = {
   windowMs: 5000,
-  colors: [
-    '#2979ff',
-    '#dd2c00',
-    '#4caf50',
-    '#7c4dff',
-    '#ffa000',
-  ],
+  colors: ['#2979ff', '#dd2c00', '#4caf50', '#7c4dff', '#ffa000'],
   lineWidth: 2,
   padding: 15,
   keySpacing: 4,
@@ -19,7 +13,7 @@ export const DEFAULT_OPTIONS = {
   gridLineColor: 'rgb(120, 120, 120)',
   fontSize: 14,
   textColor: 'rgb(50, 50, 50)',
-  maxTicks: 7
+  maxTicks: 7,
 };
 
 function niceNum(range, round) {
@@ -57,7 +51,7 @@ function getAxisScaling(min, max, maxTicks) {
   return {
     min: niceMin,
     max: niceMax,
-    spacing: tickSpacing
+    spacing: tickSpacing,
   };
 }
 
@@ -147,7 +141,7 @@ export default class Graph {
     } else {
       for (let i = 0; i < sample.length; i++) {
         if (sample[i].name === 'time') {
-          this.lastSimTime += (sample[i].value - this.lastSampleTime);
+          this.lastSimTime += sample[i].value - this.lastSampleTime;
           this.time.push(this.lastSimTime);
           this.lastSampleTime = sample[i].value;
         } else {
@@ -213,7 +207,8 @@ export default class Graph {
       const lineY = y + i * (o.fontSize + o.keySpacing) + o.fontSize / 2;
       const name = this.datasets[i].name;
       const color = this.datasets[i].color;
-      const lineWidth = this.ctx.measureText(name).width + o.keyLineLength + o.keySpacing;
+      const lineWidth =
+        this.ctx.measureText(name).width + o.keyLineLength + o.keySpacing;
       const lineX = x + (width - lineWidth) / 2;
 
       this.ctx.strokeStyle = color;
@@ -239,7 +234,7 @@ export default class Graph {
 
     // remove old points
     const now = Date.now();
-    while ((now - this.time[0]) > (o.windowMs + 250)) {
+    while (now - this.time[0] > o.windowMs + 250) {
       this.time.shift();
       for (let i = 0; i < this.datasets.length; i++) {
         this.datasets[i].data.shift();
@@ -250,7 +245,12 @@ export default class Graph {
 
     const axis = this.getAxis();
     const ticks = getTicks(axis);
-    const axisWidth = this.renderAxisLabels(x + o.padding, y + o.padding, graphHeight, ticks);
+    const axisWidth = this.renderAxisLabels(
+      x + o.padding,
+      y + o.padding,
+      graphHeight,
+      ticks,
+    );
 
     const graphWidth = width - axisWidth - 3 * o.padding;
 
@@ -260,7 +260,7 @@ export default class Graph {
       graphWidth,
       graphHeight,
       5,
-      ticks.length
+      ticks.length,
     );
 
     this.renderGraphLines(
@@ -268,7 +268,7 @@ export default class Graph {
       y + o.padding,
       graphWidth,
       graphHeight,
-      axis
+      axis,
     );
   }
 
@@ -344,11 +344,15 @@ export default class Graph {
       const d = this.datasets[i];
       this.ctx.beginPath();
       this.ctx.strokeStyle = d.color;
-      this.ctx.fineMoveTo(scale(this.time[0] - now + o.windowMs, 0, o.windowMs, 0, width),
-        scale(d.data[0], axis.min, axis.max, height, 0));
+      this.ctx.fineMoveTo(
+        scale(this.time[0] - now + o.windowMs, 0, o.windowMs, 0, width),
+        scale(d.data[0], axis.min, axis.max, height, 0),
+      );
       for (let j = 1; j < d.data.length; j++) {
-        this.ctx.fineLineTo(scale(this.time[j] - now + o.windowMs, 0, o.windowMs, 0, width),
-          scale(d.data[j], axis.min, axis.max, height, 0));
+        this.ctx.fineLineTo(
+          scale(this.time[j] - now + o.windowMs, 0, o.windowMs, 0, width),
+          scale(d.data[j], axis.min, axis.max, height, 0),
+        );
       }
       this.ctx.stroke();
     }

@@ -12,7 +12,9 @@ class TextInput extends React.Component {
   }
 
   componentDidUpdate() {
-    this.inputRef.current.setCustomValidity(this.props.valid ? '' : 'Invalid input');
+    this.inputRef.current.setCustomValidity(
+      this.props.valid ? '' : 'Invalid input',
+    );
   }
 
   handleChange(evt) {
@@ -47,7 +49,7 @@ TextInput.propTypes = {
   valid: PropTypes.bool.isRequired,
   validate: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
-  onSave: PropTypes.func
+  onSave: PropTypes.func,
 };
 
 export default TextInput;
