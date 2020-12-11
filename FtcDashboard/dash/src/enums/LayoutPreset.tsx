@@ -8,11 +8,11 @@ import ConfigView from '../containers/ConfigView';
 import TelemetryView from '../containers/TelemetryView';
 import FieldView from '../containers/FieldView';
 
-const LayoutPreset = {
-  DEFAULT: 'DEFAULT',
-  FIELD: 'FIELD',
-  GRAPH: 'GRAPH',
-  ORIGINAL: 'ORIGINAL',
+enum LayoutPreset {
+  DEFAULT,
+  FIELD,
+  GRAPH,
+  ORIGINAL,
 };
 
 const LAYOUT_DETAILS = {
@@ -88,13 +88,13 @@ const LAYOUT_DETAILS = {
         </Tile>
       </TileGrid>
     )
-  }
+  },
 };
 
 export default Object.freeze({
   ...LayoutPreset,
   
-  getName: (preset) => LAYOUT_DETAILS[preset].name,
+  getName: (preset: LayoutPreset) => LAYOUT_DETAILS[preset].name,
 
-  getContent: (preset) => LAYOUT_DETAILS[preset].content
+  getContent: (preset: LayoutPreset) => LAYOUT_DETAILS[preset].content
 });
