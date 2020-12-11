@@ -6,18 +6,18 @@ export const RECEIVE_GAMEPAD_STATE = 'RECEIVE_GAMEPAD_STATE';
 
 export const gamepadConnected = (user) => ({
   type: GAMEPAD_CONNECTED,
-  user
+  user,
 });
 
 export const gamepadDisconnected = (user) => ({
   type: GAMEPAD_DISCONNECTED,
-  user
+  user,
 });
 
 export const receiveGamepadState = (gamepad1, gamepad2) => ({
   type: RECEIVE_GAMEPAD_STATE,
   gamepad1,
-  gamepad2
+  gamepad2,
 });
 
 /*
@@ -30,16 +30,17 @@ const MAX_GAMEPAD_MS = 150;
 let lastGamepad1, lastGamepad2;
 let lastGamepadTimestamp;
 
-export const sendGamepadState = (gamepad1, gamepad2) => (
-  (dispatch) => {
-    const timestamp = Date.now();
-    if (!isEqual(lastGamepad1, gamepad1) || !isEqual(lastGamepad2, gamepad2) || 
-        (timestamp - lastGamepadTimestamp) < MAX_GAMEPAD_MS) {
-      dispatch(receiveGamepadState(gamepad1, gamepad2));
-      
-      lastGamepad1 = gamepad1;
-      lastGamepad2 = gamepad2;
-      lastGamepadTimestamp = timestamp;
-    }
+export const sendGamepadState = (gamepad1, gamepad2) => (dispatch) => {
+  const timestamp = Date.now();
+  if (
+    !isEqual(lastGamepad1, gamepad1) ||
+    !isEqual(lastGamepad2, gamepad2) ||
+    timestamp - lastGamepadTimestamp < MAX_GAMEPAD_MS
+  ) {
+    dispatch(receiveGamepadState(gamepad1, gamepad2));
+
+    lastGamepad1 = gamepad1;
+    lastGamepad2 = gamepad2;
+    lastGamepadTimestamp = timestamp;
   }
-);
+};

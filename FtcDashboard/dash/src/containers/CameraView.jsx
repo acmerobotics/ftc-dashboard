@@ -1,10 +1,11 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import Heading from '../components/Heading';
-import AutoFitCanvas from '../components/AutoFitCanvas';
-import IconGroup from '../components/IconGroup';
-import Icon from '../components/Icon';
+
+import Heading from '../components/Heading.jsx';
+import AutoFitCanvas from '../components/AutoFitCanvas.jsx';
+import IconGroup from '../components/IconGroup.jsx';
+import Icon from '../components/Icon.jsx';
 
 class CameraView extends React.Component {
   constructor(props) {
@@ -18,7 +19,7 @@ class CameraView extends React.Component {
     this.image.onload = this.renderImage;
 
     this.state = {
-      rotation: 0
+      rotation: 0,
     };
   }
 
@@ -41,22 +42,38 @@ class CameraView extends React.Component {
       const viewportHeight = canvas.height;
 
       // rotate the image
-      const scale = Math.min(devicePixelRatio,
-        (this.state.rotation % 2 === 0 ? viewportHeight : viewportWidth) / this.image.height,
-        (this.state.rotation % 2 === 0 ? viewportWidth : viewportHeight) / this.image.width);
+      const scale = Math.min(
+        devicePixelRatio,
+        (this.state.rotation % 2 === 0 ? viewportHeight : viewportWidth) /
+          this.image.height,
+        (this.state.rotation % 2 === 0 ? viewportWidth : viewportHeight) /
+          this.image.width,
+      );
       this.ctx.translate(viewportWidth / 2, viewportHeight / 2);
-      this.ctx.rotate(this.state.rotation * Math.PI / 2);
+      this.ctx.rotate((this.state.rotation * Math.PI) / 2);
       this.ctx.scale(scale, scale);
-      this.ctx.drawImage(this.image, -this.image.width / 2, -this.image.height / 2, this.image.width, this.image.height);
+      this.ctx.drawImage(
+        this.image,
+        -this.image.width / 2,
+        -this.image.height / 2,
+        this.image.width,
+        this.image.height,
+      );
     }
   }
 
   render() {
     return (
       <div>
-        <Heading level={2} text="Camera" >
+        <Heading level={2} text="Camera">
           <IconGroup>
-            <Icon onClick={() => this.setState({ rotation: (this.state.rotation + 1) % 4 })} icon="refresh" size="small" />
+            <Icon
+              onClick={() =>
+                this.setState({ rotation: (this.state.rotation + 1) % 4 })
+              }
+              icon="refresh"
+              size="small"
+            />
           </IconGroup>
         </Heading>
         <div className="canvas-container">
@@ -68,11 +85,11 @@ class CameraView extends React.Component {
 }
 
 CameraView.propTypes = {
-  imageStr: PropTypes.string.isRequired
+  imageStr: PropTypes.string.isRequired,
 };
 
 const mapStateToProps = ({ camera }) => ({
-  imageStr: camera.imageStr
+  imageStr: camera.imageStr,
 });
 
 export default connect(mapStateToProps)(CameraView);

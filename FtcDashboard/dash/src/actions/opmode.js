@@ -4,13 +4,13 @@ export const STOP_OP_MODE = 'STOP_OP_MODE';
 
 export const initOpMode = (opModeName) => ({
   type: INIT_OP_MODE,
-  opModeName
+  opModeName,
 });
 
 export const startOpMode = () => ({
-  type: START_OP_MODE
+  type: START_OP_MODE,
 });
 
 export const stopOpMode = () => ({
-  type: STOP_OP_MODE
+  type: STOP_OP_MODE,
 });

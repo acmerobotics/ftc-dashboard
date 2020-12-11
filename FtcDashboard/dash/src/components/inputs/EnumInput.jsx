@@ -6,17 +6,18 @@ const EnumInput = ({ value, enumValues, onChange, onSave }) => (
     <select
       className="valid"
       value={value}
-      onChange={evt => onChange({
-        value: evt.target.value, 
-        valid: true
-      })}>
-      {
-        enumValues.map(enumValue => (
-          <option key={enumValue} value={enumValue}>
-            {enumValue}
-          </option>
-        ))
+      onChange={(evt) =>
+        onChange({
+          value: evt.target.value,
+          valid: true,
+        })
       }
+    >
+      {enumValues.map((enumValue) => (
+        <option key={enumValue} value={enumValue}>
+          {enumValue}
+        </option>
+      ))}
     </select>
     <button onClick={onSave}>Save</button>
   </span>
@@ -26,7 +27,7 @@ EnumInput.propTypes = {
   value: PropTypes.string.isRequired,
   enumValues: PropTypes.arrayOf(PropTypes.string).isRequired,
   onChange: PropTypes.func.isRequired,
-  onSave: PropTypes.func.isRequired
+  onSave: PropTypes.func.isRequired,
 };
 
 export default EnumInput;

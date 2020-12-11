@@ -1,19 +1,22 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import Heading from '../components/Heading';
-import { telemetryType } from './types';
+
+import Heading from '../components/Heading.jsx';
+import { telemetryType } from './types.js';
 
 const TelemetryView = ({ telemetry }) => {
   const latestPacket = telemetry[telemetry.length - 1];
-  const telemetryLines = Object.keys(latestPacket.data)
-    .map(key => (
-      <span key={key}>
-        {key}: {latestPacket.data[key]}
-        <br />
-      </span>
-    ));
+  const telemetryLines = Object.keys(latestPacket.data).map((key) => (
+    <span key={key}>
+      {key}: {latestPacket.data[key]}
+      <br />
+    </span>
+  ));
   const telemetryLog = latestPacket.log.map((line, i) => (
-    <span key={i}>{line}<br /></span>
+    <span key={i}>
+      {line}
+      <br />
+    </span>
   ));
   return (
     <div>
@@ -25,11 +28,11 @@ const TelemetryView = ({ telemetry }) => {
 };
 
 TelemetryView.propTypes = {
-  telemetry: telemetryType.isRequired
+  telemetry: telemetryType.isRequired,
 };
 
 const mapStateToProps = ({ telemetry }) => ({
-  telemetry
+  telemetry,
 });
 
 export default connect(mapStateToProps)(TelemetryView);

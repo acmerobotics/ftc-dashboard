@@ -36,9 +36,11 @@ class AutoFitCanvas extends React.Component {
 
 AutoFitCanvas.propTypes = {
   innerRef: PropTypes.any.isRequired,
-  onResize: PropTypes.func
+  onResize: PropTypes.func,
 };
 
-const ForwardedAutoFitCanvas = React.forwardRef((props, ref) => <AutoFitCanvas innerRef={ref} {...props} />);
+const ForwardedAutoFitCanvas = React.forwardRef((props, ref) => (
+  <AutoFitCanvas innerRef={ref} {...props} />
+));
 ForwardedAutoFitCanvas.displayName = 'AutoFitCanvas';
 export default ForwardedAutoFitCanvas;

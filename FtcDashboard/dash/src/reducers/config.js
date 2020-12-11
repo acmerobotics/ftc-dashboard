@@ -1,11 +1,11 @@
 import { cloneDeep } from 'lodash';
-import { 
-  RECEIVE_CONFIG, 
+import {
+  RECEIVE_CONFIG,
   UPDATE_CONFIG,
   SAVE_CONFIG,
-  REFRESH_CONFIG
-} from '../actions/config';
-import VariableType from '../enums/VariableType';
+  REFRESH_CONFIG,
+} from '../actions/config.js';
+import VariableType from '../enums/VariableType.js';
 
 const receiveConfig = (baseConfig, newConfig) => {
   baseConfig = baseConfig || {};
@@ -13,13 +13,15 @@ const receiveConfig = (baseConfig, newConfig) => {
   if (newConfig.__type === VariableType.CUSTOM) {
     const mergedConfig = {
       __type: VariableType.CUSTOM,
-      __value: {}
+      __value: {},
     };
     // iterate over the keys in the new config
     // we treat this as the master config; it's from the server
     for (let key of Object.keys(newConfig.__value)) {
       mergedConfig.__value[key] = receiveConfig(
-        baseConfig.__value[key] || {}, newConfig.__value[key]);
+        baseConfig.__value[key] || {},
+        newConfig.__value[key],
+      );
     }
     return mergedConfig;
   } else {
@@ -31,7 +33,7 @@ const receiveConfig = (baseConfig, newConfig) => {
         __valid: baseConfig.__valid,
         __modified: true,
         __enumClass: newConfig.__enumClass,
-        __enumValues: newConfig.__enumValues
+        __enumValues: newConfig.__enumValues,
       };
     } else {
       return {
@@ -41,7 +43,7 @@ const receiveConfig = (baseConfig, newConfig) => {
         __valid: true,
         __modified: false,
         __enumClass: newConfig.__enumClass,
-        __enumValues: newConfig.__enumValues
+        __enumValues: newConfig.__enumValues,
       };
     }
   }
@@ -51,7 +53,7 @@ const updateConfig = (baseConfig, configDiff, modified) => {
   if (baseConfig.__type === VariableType.CUSTOM) {
     const mergedConfig = {
       __type: VariableType.CUSTOM,
-      __value: {}
+      __value: {},
     };
     // iterate over the base config keys; the diff
     // is only a subset of those
@@ -59,7 +61,10 @@ const updateConfig = (baseConfig, configDiff, modified) => {
       if (key in configDiff.__value) {
         // if the config diff has the key, recurse
         mergedConfig.__value[key] = updateConfig(
-          baseConfig.__value[key], configDiff.__value[key], modified);
+          baseConfig.__value[key],
+          configDiff.__value[key],
+          modified,
+        );
       } else {
         // otherwise just clone the base config
         mergedConfig.__value[key] = cloneDeep(baseConfig.__value[key]);
@@ -75,7 +80,7 @@ const updateConfig = (baseConfig, configDiff, modified) => {
       __valid: configDiff.__valid,
       __modified: modified,
       __enumClass: baseConfig.__enumClass,
-      __enumValues: baseConfig.__enumValues
+      __enumValues: baseConfig.__enumValues,
     };
   }
 };
@@ -84,7 +89,7 @@ const refreshConfig = (config) => {
   if (config.__type === VariableType.CUSTOM) {
     const refreshedConfig = {
       __type: VariableType.CUSTOM,
-      __value: {}
+      __value: {},
     };
     for (let key of Object.keys(config.__value)) {
       refreshedConfig.__value[key] = refreshConfig(config.__value[key]);
@@ -98,39 +103,39 @@ const refreshConfig = (config) => {
       __valid: true,
       __modified: false,
       __enumClass: config.__enumClass,
-      __enumValues: config.__enumValues
+      __enumValues: config.__enumValues,
     };
   }
 };
 
 const initialState = {
-  configRoot: {}
+  configRoot: {},
 };
 
 const config = (state = initialState, action) => {
   switch (action.type) {
-  case RECEIVE_CONFIG:
-    return {
-      ...state,
-      configRoot: receiveConfig(state.configRoot, action.configRoot)
-    };
-  case UPDATE_CONFIG:
-    return {
-      ...state,
-      configRoot: updateConfig(state.configRoot, action.configDiff, true)
-    };
-  case SAVE_CONFIG:
-    return {
-      ...state,
-      configRoot: updateConfig(state.configRoot, action.configDiff, false)
-    };
-  case REFRESH_CONFIG:
-    return {
-      ...state,
-      configRoot: refreshConfig(state.configRoot)
-    };
-  default:
-    return state;
+    case RECEIVE_CONFIG:
+      return {
+        ...state,
+        configRoot: receiveConfig(state.configRoot, action.configRoot),
+      };
+    case UPDATE_CONFIG:
+      return {
+        ...state,
+        configRoot: updateConfig(state.configRoot, action.configDiff, true),
+      };
+    case SAVE_CONFIG:
+      return {
+        ...state,
+        configRoot: updateConfig(state.configRoot, action.configDiff, false),
+      };
+    case REFRESH_CONFIG:
+      return {
+        ...state,
+        configRoot: refreshConfig(state.configRoot),
+      };
+    default:
+      return state;
   }
 };
 
