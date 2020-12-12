@@ -1,8 +1,8 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import Heading from '../components/Heading.jsx';
-import { telemetryType } from './types.js';
+import Heading from '../components/Heading';
+import { telemetryType } from './types';
 
 const TelemetryView = ({ telemetry }) => {
   const latestPacket = telemetry[telemetry.length - 1];

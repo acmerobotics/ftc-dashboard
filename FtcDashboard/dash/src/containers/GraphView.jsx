@@ -1,16 +1,16 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-import Heading from '../components/Heading.jsx';
-import MultipleCheckbox from '../components/MultipleCheckbox.jsx';
-import GraphCanvas from './GraphCanvas.jsx';
-import IconGroup from '../components/IconGroup.jsx';
-import Icon from '../components/Icon.jsx';
-import TextInput from '../components/inputs/TextInput.jsx';
+import Heading from '../components/Heading';
+import MultipleCheckbox from '../components/MultipleCheckbox';
+import GraphCanvas from './GraphCanvas';
+import IconGroup from '../components/IconGroup';
+import Icon from '../components/Icon';
+import TextInput from '../components/inputs/TextInput';
 
-import { validateInt } from '../components/inputs/validation.js';
-import { DEFAULT_OPTIONS } from './Graph.js';
-import { telemetryType } from './types.js';
+import { validateInt } from '../components/inputs/validation';
+import { DEFAULT_OPTIONS } from './Graph';
+import { telemetryType } from './types';
 
 class GraphView extends Component {
   constructor(props) {

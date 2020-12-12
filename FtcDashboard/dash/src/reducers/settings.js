@@ -1,5 +1,5 @@
-import LayoutPreset from '../enums/LayoutPreset.tsx';
-import { RECEIVE_LAYOUT_PRESET } from '../actions/settings.js';
+import LayoutPreset from '../enums/LayoutPreset';
+import { RECEIVE_LAYOUT_PRESET } from '../actions/settings';
 
 const initialState = {
   layoutPreset: LayoutPreset.DEFAULT,

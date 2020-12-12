@@ -2,10 +2,10 @@ import { Responsive, WidthProvider, Layout } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
-import GraphView from '../containers/GraphView.jsx';
-import FieldView from '../containers/FieldView.jsx';
-import ConfigView from '../containers/ConfigView.jsx';
-import TelemetryView from '../containers/TelemetryView.jsx';
+import GraphView from '../containers/GraphView';
+import FieldView from '../containers/FieldView';
+import ConfigView from '../containers/ConfigView';
+import TelemetryView from '../containers/TelemetryView';
 
 export default function ConfigurableLayout() {
   const ResponsiveReactGridLayout = WidthProvider(Responsive);

@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import Graph from './Graph.js';
-import AutoFitCanvas from '../components/AutoFitCanvas.jsx';
+import Graph from './Graph';
+import AutoFitCanvas from '../components/AutoFitCanvas';
 
 class GraphCanvas extends React.Component {
   constructor(props) {

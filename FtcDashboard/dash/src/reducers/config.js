@@ -4,8 +4,8 @@ import {
   UPDATE_CONFIG,
   SAVE_CONFIG,
   REFRESH_CONFIG,
-} from '../actions/config.js';
-import VariableType from '../enums/VariableType.js';
+} from '../actions/config';
+import VariableType from '../enums/VariableType';
 
 const receiveConfig = (baseConfig, newConfig) => {
   baseConfig = baseConfig || {};

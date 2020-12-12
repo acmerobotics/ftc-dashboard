@@ -1,11 +1,11 @@
 import { combineReducers } from 'redux';
-import telemetry from './telemetry.js';
-import socket from './socket.js';
-import config from './config.js';
-import status from './status.js';
-import camera from './camera.js';
-import settings from './settings.js';
-import gamepad from './gamepad.js';
+import telemetry from './telemetry';
+import socket from './socket';
+import config from './config';
+import status from './status';
+import camera from './camera';
+import settings from './settings';
+import gamepad from './gamepad';
 
 export default combineReducers({
   telemetry,
