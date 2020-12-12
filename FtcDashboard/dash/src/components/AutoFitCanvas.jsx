@@ -35,7 +35,7 @@ class AutoFitCanvas extends React.Component {
     canvas.style.width = `${canvas.width / devicePixelRatio}px`;
     canvas.style.height = `${canvas.height / devicePixelRatio}px`;
 
-    this.props?.onResize();
+    this.props.onResize?.();
   }
 
   render() {
