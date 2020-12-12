@@ -4,7 +4,7 @@ layout: default
 
 # Custom Widgets
 
-This tutorial will walk through the process of making a custom widget. Specifically, we'll try and replicate the functionality of the [FRC Dashboard Gyro Addon](https://github.com/FRCDashboard/addon-Gyro). It's really just a simple SVG graphic that rotates depending on the robot's current heading (this degree value is sent in telemetry under the key `"heading"`).
+This tutorial will walk through the process of making a custom widget. Specifically, we'll try to replicate the functionality of the [FRC Dashboard Gyro Addon](https://github.com/FRCDashboard/addon-Gyro). It's really just a simple SVG graphic that rotates depending on the robot's current heading (this degree value is sent in telemetry under the key `"heading"`).
 
 This article presumes some knowledge of [React](https://reactjs.org/) (and tangentially [Redux](https://redux.js.org/)).
 

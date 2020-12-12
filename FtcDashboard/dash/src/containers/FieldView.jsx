@@ -1,9 +1,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import Field from './Field';
-import Heading from '../components/Heading';
-import AutoFitCanvas from '../components/AutoFitCanvas';
+
+import Field from './Field.js';
+import Heading from '../components/Heading.jsx';
+import AutoFitCanvas from '../components/AutoFitCanvas.jsx';
 
 class FieldView extends React.Component {
   constructor(props) {
@@ -32,7 +33,7 @@ class FieldView extends React.Component {
 
   render() {
     return (
-      <div style={{ height: "100%" }}>
+      <div style={{ height: '100%' }}>
         <Heading level={2} text="Field" />
         <div className="canvas-container">
           <AutoFitCanvas ref={this.canvasRef} onResize={this.renderField} />
@@ -44,12 +45,12 @@ class FieldView extends React.Component {
 
 FieldView.propTypes = {
   overlay: PropTypes.shape({
-    ops: PropTypes.array.isRequired
-  }).isRequired
+    ops: PropTypes.array.isRequired,
+  }).isRequired,
 };
 
 const mapStateToProps = ({ telemetry }) => ({
-  overlay: telemetry[telemetry.length - 1].fieldOverlay
+  overlay: telemetry[telemetry.length - 1].fieldOverlay,
 });
 
 export default connect(mapStateToProps)(FieldView);

@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 const Heading = ({ children, text, level }) => (
-  <div className="heading" style={{ cursor: "grab"}}>
+  <div className="heading" style={{ cursor: 'grab' }}>
     {React.createElement(`h${level}`, null, text)}
     {children}
   </div>
@@ -11,7 +11,7 @@ const Heading = ({ children, text, level }) => (
 Heading.propTypes = {
   children: PropTypes.node,
   text: PropTypes.string.isRequired,
-  level: PropTypes.number.isRequired
+  level: PropTypes.number.isRequired,
 };
 
 export default Heading;

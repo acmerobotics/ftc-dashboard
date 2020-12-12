@@ -7,7 +7,7 @@ The gamepad mappings have been tested with the following devices:
 const GamepadType = {
   LOGITECH_DUAL_ACTION: 'LOGITECH_DUAL_ACTION',
   XBOX_360: 'XBOX_360',
-  UNKNOWN: 'UNKNOWN'
+  UNKNOWN: 'UNKNOWN',
 };
 
 export default Object.freeze({
@@ -25,15 +25,14 @@ export default Object.freeze({
 
   getJoystickDeadzone: (gamepadType) => {
     switch (gamepadType) {
-    case GamepadType.LOGITECH_DUAL_ACTION:
-      return 0.06;
-    case GamepadType.XBOX_360:
-      return 0.15;
-    default:
-      return 0.2;
+      case GamepadType.LOGITECH_DUAL_ACTION:
+        return 0.06;
+      case GamepadType.XBOX_360:
+        return 0.15;
+      default:
+        return 0.2;
     }
   },
 
-  isSupported: (gamepadType) => 
-    gamepadType !== GamepadType.UNKNOWN
+  isSupported: (gamepadType) => gamepadType !== GamepadType.UNKNOWN,
 });

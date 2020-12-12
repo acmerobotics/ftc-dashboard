@@ -5,43 +5,141 @@
   font-weight: 400;
   src: url('assets/fonts/roboto-v18-latin-regular.eot'); /* IE9 Compat Modes */
   src: local('Roboto'), local('Roboto-Regular'),
-       url('assets/fonts/roboto-v18-latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-       url('assets/fonts/roboto-v18-latin-regular.woff2') format('woff2'), /* Super Modern Browsers */
-       url('assets/fonts/roboto-v18-latin-regular.woff') format('woff'), /* Modern Browsers */
-       url('assets/fonts/roboto-v18-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
-       url('assets/fonts/roboto-v18-latin-regular.svg#Roboto') format('svg'); /* Legacy iOS */
+    url('assets/fonts/roboto-v18-latin-regular.eot?#iefix')
+      format('embedded-opentype'),
+    /* IE6-IE8 */ url('assets/fonts/roboto-v18-latin-regular.woff2')
+      format('woff2'),
+    /* Super Modern Browsers */
+      url('assets/fonts/roboto-v18-latin-regular.woff') format('woff'),
+    /* Modern Browsers */ url('assets/fonts/roboto-v18-latin-regular.ttf')
+      format('truetype'),
+    /* Safari, Android, iOS */
+      url('assets/fonts/roboto-v18-latin-regular.svg#Roboto') format('svg'); /* Legacy iOS */
 }
 
-html { overflow: hidden; }
-body { font-family: "Roboto", sans-serif; margin: 0; padding: 0; font-size: 14px; }
-header { width: calc(100% - 16px); background-color: #2962ff; color: white; padding: 8px; height: 44px; }
-h1, h2, h3 { font-weight: bold; margin: 0; }
-.tile-grid { display: grid; width: 100%; height: calc(100vh - 60px); }
-.tile { border: 1px solid #EEE; padding: 16px; }
-.tile > div { height: 100%; overflow: auto; }
-.heading { display: flex; justify-content: space-between; align-items: center; }
-table { margin: 0; border-collapse: collapse; text-align: left; }
-table table { margin-left: 24px; }
-td { padding: 4px; }
-input { font-size: inherit; }
-.option-header { display: flex; }
-.icon-group { display: flex; align-items: center; order: 10; }
-.icon { background-repeat: round; margin: 4px; }
-.icon.tiny { width: 16px; height: 16px; }
-.icon.small { width: 24px; height: 24px; }
-.icon.large { width: 36px; height: 36px; }
-.save { background-image: url('assets/icons/save.svg'); }
-.wifi { background-image: url('assets/icons/wifi.svg'); }
-.no-wifi { background-image: url('assets/icons/wifi_off.svg'); }
-.chart { background-image: url('assets/icons/chart.svg'); }
-.close { background-image: url('assets/icons/close.svg'); }
-.refresh { background-image: url('assets/icons/refresh.svg'); }
-.add { background-image: url('assets/icons/add.svg'); }
-.remove { background-image: url('assets/icons/remove.svg'); }
-.expand-less { background-image: url('assets/icons/expand_less.svg'); }
-.expand-more { background-image: url('assets/icons/expand_more.svg'); }
-.gamepad { background-image: url('assets/icons/gamepad.svg'); }
-.multiple-checkbox { overflow-y: scroll; }
-.error { font-weight: bold; color: red; }
-.warning { font-weight: bold; color: orange; }
-.canvas-container { height: calc(100% - 32px); overflow: hidden }
+html {
+  overflow: hidden;
+}
+body {
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+}
+header {
+  width: calc(100% - 16px);
+  background-color: #2962ff;
+  color: white;
+  padding: 8px;
+  height: 44px;
+}
+h1,
+h2,
+h3 {
+  font-weight: bold;
+  margin: 0;
+}
+.tile-grid {
+  display: grid;
+  width: 100%;
+  height: calc(100vh - 60px);
+}
+.tile {
+  border: 1px solid #eee;
+  padding: 16px;
+}
+.tile > div {
+  height: 100%;
+  overflow: auto;
+}
+.heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+table {
+  margin: 0;
+  border-collapse: collapse;
+  text-align: left;
+}
+table table {
+  margin-left: 24px;
+}
+td {
+  padding: 4px;
+}
+input {
+  font-size: inherit;
+}
+.option-header {
+  display: flex;
+}
+.icon-group {
+  display: flex;
+  align-items: center;
+  order: 10;
+}
+.icon {
+  background-repeat: round;
+  margin: 4px;
+}
+.icon.tiny {
+  width: 16px;
+  height: 16px;
+}
+.icon.small {
+  width: 24px;
+  height: 24px;
+}
+.icon.large {
+  width: 36px;
+  height: 36px;
+}
+.save {
+  background-image: url('assets/icons/save.svg');
+}
+.wifi {
+  background-image: url('assets/icons/wifi.svg');
+}
+.no-wifi {
+  background-image: url('assets/icons/wifi_off.svg');
+}
+.chart {
+  background-image: url('assets/icons/chart.svg');
+}
+.close {
+  background-image: url('assets/icons/close.svg');
+}
+.refresh {
+  background-image: url('assets/icons/refresh.svg');
+}
+.add {
+  background-image: url('assets/icons/add.svg');
+}
+.remove {
+  background-image: url('assets/icons/remove.svg');
+}
+.expand-less {
+  background-image: url('assets/icons/expand_less.svg');
+}
+.expand-more {
+  background-image: url('assets/icons/expand_more.svg');
+}
+.gamepad {
+  background-image: url('assets/icons/gamepad.svg');
+}
+.multiple-checkbox {
+  overflow-y: scroll;
+}
+.error {
+  font-weight: bold;
+  color: red;
+}
+.warning {
+  font-weight: bold;
+  color: orange;
+}
+.canvas-container {
+  height: calc(100% - 32px);
+  overflow: hidden;
+}

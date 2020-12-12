@@ -1,25 +1,27 @@
 import React from 'react';
-import TileGrid from '../components/TileGrid';
-import Tile from '../components/Tile';
-import ConfigurableLayout from '../components/ConfigurableLayout';
-import OpModeView from '../containers/OpModeView';
-import CameraView from '../containers/CameraView';
-import GraphView from '../containers/GraphView';
-import ConfigView from '../containers/ConfigView';
-import TelemetryView from '../containers/TelemetryView';
-import FieldView from '../containers/FieldView';
+
+import TileGrid from '../components/TileGrid.jsx';
+import Tile from '../components/Tile.jsx';
+import ConfigurableLayout from '../components/ConfigurableLayout.jsx';
+
+import OpModeView from '../containers/OpModeView.jsx';
+import CameraView from '../containers/CameraView.jsx';
+import GraphView from '../containers/GraphView.jsx';
+import ConfigView from '../containers/ConfigView.jsx';
+import TelemetryView from '../containers/TelemetryView.jsx';
+import FieldView from '../containers/FieldView.jsx';
 
 enum LayoutPreset {
   DEFAULT,
   FIELD,
   GRAPH,
   ORIGINAL,
-  CONFIGURABLE
-};
+  CONFIGURABLE,
+}
 
 interface Layout {
-  name: string,
-  content: JSX.Element
+  name: string;
+  content: JSX.Element;
 }
 
 const LAYOUT_DETAILS: { [key in LayoutPreset]: Layout } = {
@@ -35,7 +37,8 @@ const LAYOUT_DETAILS: { [key in LayoutPreset]: Layout } = {
         </Tile>
         <Tile row="1 / span 3" col={2}>
           <GraphView />
-        </Tile>=
+        </Tile>
+        =
         <Tile row="1 / span 2" col={3}>
           <ConfigView />
         </Tile>
@@ -43,7 +46,7 @@ const LAYOUT_DETAILS: { [key in LayoutPreset]: Layout } = {
           <TelemetryView />
         </Tile>
       </TileGrid>
-    )
+    ),
   },
   [LayoutPreset.FIELD]: {
     name: 'Field',
@@ -57,7 +60,8 @@ const LAYOUT_DETAILS: { [key in LayoutPreset]: Layout } = {
         </Tile>
         <Tile row="1 / span 3" col={2}>
           <GraphView />
-        </Tile>=
+        </Tile>
+        =
         <Tile row="1 / span 2" col={3}>
           <ConfigView />
         </Tile>
@@ -65,7 +69,7 @@ const LAYOUT_DETAILS: { [key in LayoutPreset]: Layout } = {
           <TelemetryView />
         </Tile>
       </TileGrid>
-    )
+    ),
   },
   [LayoutPreset.GRAPH]: {
     name: 'Graph',
@@ -78,7 +82,7 @@ const LAYOUT_DETAILS: { [key in LayoutPreset]: Layout } = {
           <GraphView />
         </Tile>
       </TileGrid>
-    )
+    ),
   },
   [LayoutPreset.ORIGINAL]: {
     name: 'Original',
@@ -86,7 +90,8 @@ const LAYOUT_DETAILS: { [key in LayoutPreset]: Layout } = {
       <TileGrid gridTemplate="60% 40% / 65% 35%">
         <Tile row="1 / span 2" col={1}>
           <GraphView />
-        </Tile>=
+        </Tile>
+        =
         <Tile row={1} col={2}>
           <ConfigView />
         </Tile>
@@ -94,20 +99,20 @@ const LAYOUT_DETAILS: { [key in LayoutPreset]: Layout } = {
           <TelemetryView />
         </Tile>
       </TileGrid>
-    )
+    ),
   },
   [LayoutPreset.CONFIGURABLE]: {
     name: 'Configurable',
-    content: (
-      <ConfigurableLayout />
-    )
-  }
+    content: <ConfigurableLayout />,
+  },
 };
 
 export default Object.freeze({
   ...LayoutPreset,
-  
+
   getName: (preset: LayoutPreset) => LAYOUT_DETAILS[preset].name,
 
-  getContent: (preset: LayoutPreset) => LAYOUT_DETAILS[preset].content
+  getContent: (preset: LayoutPreset) =>
+    LAYOUT_DETAILS[preset]?.content ??
+    LAYOUT_DETAILS[LayoutPreset.DEFAULT].content,
 });

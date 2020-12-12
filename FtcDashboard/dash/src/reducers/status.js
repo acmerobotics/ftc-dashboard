@@ -1,5 +1,8 @@
-import { RECEIVE_ROBOT_STATUS, RECEIVE_OP_MODE_LIST } from '../actions/status';
-import OpModeStatus from '../enums/OpModeStatus';
+import {
+  RECEIVE_ROBOT_STATUS,
+  RECEIVE_OP_MODE_LIST,
+} from '../actions/status.js';
+import OpModeStatus from '../enums/OpModeStatus.js';
 
 const initialState = {
   available: false,
@@ -7,23 +10,23 @@ const initialState = {
   activeOpModeStatus: OpModeStatus.STOPPED,
   opModeList: [],
   warningMessage: '',
-  errorMessage: ''
+  errorMessage: '',
 };
 
 const telemetry = (state = initialState, action) => {
   switch (action.type) {
-  case RECEIVE_ROBOT_STATUS:
-    return {
-      ...state,
-      ...action.status
-    };
-  case RECEIVE_OP_MODE_LIST:
-    return {
-      ...state,
-      opModeList: action.opModeList
-    };
-  default:
-    return state;
+    case RECEIVE_ROBOT_STATUS:
+      return {
+        ...state,
+        ...action.status,
+      };
+    case RECEIVE_OP_MODE_LIST:
+      return {
+        ...state,
+        opModeList: action.opModeList,
+      };
+    default:
+      return state;
   }
 };
 

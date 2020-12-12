@@ -1,4 +1,4 @@
-import VariableType from '../enums/VariableType';
+import VariableType from '../enums/VariableType.js';
 
 export const RECEIVE_CONFIG = 'RECEIVE_CONFIG';
 export const GET_CONFIG = 'GET_CONFIG';
@@ -8,32 +8,32 @@ export const REFRESH_CONFIG = 'REFRESH_CONFIG';
 
 export const receiveConfig = (config) => ({
   type: RECEIVE_CONFIG,
-  config
+  config,
 });
 
 export const getConfig = () => ({
-  type: GET_CONFIG
+  type: GET_CONFIG,
 });
 
 export const updateConfig = (configDiff) => ({
   type: UPDATE_CONFIG,
-  configDiff
+  configDiff,
 });
 
 export const saveConfig = (configDiff) => ({
   type: SAVE_CONFIG,
-  configDiff
+  configDiff,
 });
 
 export const refreshConfig = () => ({
-  type: REFRESH_CONFIG
+  type: REFRESH_CONFIG,
 });
 
 export const getModifiedDiff = (baseConfig, root = true) => {
   if (baseConfig.__type === VariableType.CUSTOM) {
     const modifiedConfig = {
       __type: VariableType.CUSTOM,
-      __value: {}
+      __value: {},
     };
     for (let key of Object.keys(baseConfig.__value)) {
       const subConfig = getModifiedDiff(baseConfig.__value[key], false);
@@ -49,7 +49,7 @@ export const getModifiedDiff = (baseConfig, root = true) => {
       __type: baseConfig.__type,
       __value: baseConfig.__newValue,
       __valid: true,
-      __enumClass: baseConfig.__enumClass
+      __enumClass: baseConfig.__enumClass,
     };
   }
 };
