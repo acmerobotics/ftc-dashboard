@@ -72,7 +72,7 @@ class GraphView extends Component {
     ]);
 
     return (
-      <div style={{ height: '100%' }}>
+      <div style={{ height: '100%', padding: '1em' }}>
         <div className="heading">
           <h2
             className={

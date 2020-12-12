@@ -22,7 +22,7 @@ const TelemetryView = ({ telemetry, layoutPreset }) => {
   ));
 
   return (
-    <div>
+    <div style={{ padding: '1em' }}>
       <h2
         className={
           layoutPreset == LayoutPreset.CONFIGURABLE ? 'grab-handle' : ''

@@ -35,7 +35,7 @@ class FieldView extends React.Component {
 
   render() {
     return (
-      <div style={{ height: '100%' }}>
+      <div style={{ height: '100%', padding: '1em' }}>
         <h2
           className={
             this.props.layoutPreset == LayoutPreset.CONFIGURABLE
@@ -45,9 +45,7 @@ class FieldView extends React.Component {
         >
           Field
         </h2>
-        <div className="canvas-container">
-          <AutoFitCanvas ref={this.canvasRef} onResize={this.renderField} />
-        </div>
+        <AutoFitCanvas ref={this.canvasRef} onResize={this.renderField} />
       </div>
     );
   }

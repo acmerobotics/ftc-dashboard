@@ -26,7 +26,7 @@ const ConfigView = ({
   sortedKeys.sort();
 
   return (
-    <div style={{ height: 'calc(100% - 3em)' }}>
+    <div style={{ height: 'calc(100% - 3em)', padding: '1em' }}>
       <div className="heading">
         <h2
           className={
