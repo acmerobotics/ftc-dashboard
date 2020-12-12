@@ -31,7 +31,7 @@ export default function ConfigurableLayout() {
       cols={colBreakpoints}
       layouts={{ lg: defaultLayout }}
       resizeHandles={['se']}
-      draggableHandle=".heading"
+      draggableHandle=".grab-handle"
       verticalCompact={false}
     >
       <div key="a">

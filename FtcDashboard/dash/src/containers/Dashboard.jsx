@@ -74,7 +74,11 @@ class Dashboard extends Component {
 Dashboard.propTypes = {
   isConnected: PropTypes.bool.isRequired,
   pingTime: PropTypes.number.isRequired,
-  layoutPreset: PropTypes.oneOf(Object.keys(LayoutPreset)).isRequired,
+
+  // This should be
+  // PropTypes.oneOf(Object.keys(LayoutPreset)).isRequired
+  // but for some reason it breaks
+  layoutPreset: PropTypes.any.isRequired,
   dispatch: PropTypes.func.isRequired,
 };
 

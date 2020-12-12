@@ -2,9 +2,9 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 import CustomVariable from './CustomVariable';
-import Heading from '../components/Heading';
 import IconGroup from '../components/IconGroup';
 import Icon from '../components/Icon';
+
 import {
   updateConfig,
   saveConfig,
@@ -12,15 +12,30 @@ import {
   getModifiedDiff,
 } from '../actions/config';
 import VariableType from '../enums/VariableType';
+import LayoutPreset from '../enums/LayoutPreset';
 
-const ConfigView = ({ configRoot, onRefresh, onSave, onChange }) => {
+const ConfigView = ({
+  configRoot,
+  onRefresh,
+  onSave,
+  onChange,
+  layoutPreset,
+}) => {
   const sortedKeys = Object.keys(configRoot.__value || {});
 
   sortedKeys.sort();
 
   return (
     <div style={{ height: 'calc(100% - 3em)' }}>
-      <Heading level={2} text="Configuration">
+      <div className="heading">
+        <h2
+          className={
+            layoutPreset == LayoutPreset.CONFIGURABLE ? 'grab-handle' : ''
+          }
+          style={{ width: '100%' }}
+        >
+          Configuration
+        </h2>
         <IconGroup>
           <Icon
             icon="save"
@@ -29,7 +44,7 @@ const ConfigView = ({ configRoot, onRefresh, onSave, onChange }) => {
           />
           <Icon icon="refresh" size="small" onClick={onRefresh} />
         </IconGroup>
-      </Heading>
+      </div>
       <table style={{ height: '100%', display: 'block', overflow: 'scroll' }}>
         <tbody>
           {sortedKeys.map((key) => (
@@ -66,9 +81,16 @@ ConfigView.propTypes = {
   onRefresh: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
+  // This should be
+  // PropTypes.oneOf(Object.keys(LayoutPreset)).isRequired
+  // but for some reason it breaks
+  layoutPreset: PropTypes.any,
 };
 
-const mapStateToProps = ({ config }) => config;
+const mapStateToProps = ({ config, settings }) => ({
+  configRoot: config,
+  layoutPreset: settings.layoutPreset,
+});
 
 const mapDispatchToProps = (dispatch) => ({
   onRefresh: () => {

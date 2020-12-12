@@ -1,10 +1,11 @@
 import React from 'react';
-import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 
 import Field from './Field';
-import Heading from '../components/Heading';
 import AutoFitCanvas from '../components/AutoFitCanvas';
+
+import LayoutPreset from '../enums/LayoutPreset';
 
 class FieldView extends React.Component {
   constructor(props) {
@@ -13,6 +14,7 @@ class FieldView extends React.Component {
     this.canvasRef = React.createRef();
 
     this.renderField = this.renderField.bind(this);
+    this.layoutPreset = LayoutPreset.DEFAULT;
   }
 
   componentDidMount() {
@@ -34,7 +36,15 @@ class FieldView extends React.Component {
   render() {
     return (
       <div style={{ height: '100%' }}>
-        <Heading level={2} text="Field" />
+        <h2
+          className={
+            this.props.layoutPreset == LayoutPreset.CONFIGURABLE
+              ? 'grab-handle'
+              : ''
+          }
+        >
+          Field
+        </h2>
         <div className="canvas-container">
           <AutoFitCanvas ref={this.canvasRef} onResize={this.renderField} />
         </div>
@@ -47,10 +57,15 @@ FieldView.propTypes = {
   overlay: PropTypes.shape({
     ops: PropTypes.array.isRequired,
   }).isRequired,
+  // This should be
+  // PropTypes.oneOf(Object.keys(LayoutPreset)).isRequired
+  // but for some reason it breaks
+  layoutPreset: PropTypes.any,
 };
 
-const mapStateToProps = ({ telemetry }) => ({
+const mapStateToProps = ({ telemetry, settings }) => ({
   overlay: telemetry[telemetry.length - 1].fieldOverlay,
+  layoutPreset: settings.layoutPreset,
 });
 
 export default connect(mapStateToProps)(FieldView);

@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 const Heading = ({ children, text, level }) => (
-  <div className="heading" style={{ cursor: 'grab' }}>
+  <div className="heading">
     {React.createElement(`h${level}`, null, text)}
     {children}
   </div>

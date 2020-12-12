@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 import Heading from '../components/Heading';
@@ -8,6 +9,7 @@ import IconGroup from '../components/IconGroup';
 import Icon from '../components/Icon';
 import TextInput from '../components/inputs/TextInput';
 
+import LayoutPreset from '../enums/LayoutPreset';
 import { validateInt } from '../components/inputs/validation';
 import { DEFAULT_OPTIONS } from './Graph';
 import { telemetryType } from './types';
@@ -26,6 +28,8 @@ class GraphView extends Component {
     };
 
     this.handleClick = this.handleClick.bind(this);
+
+    this.layoutPreset = LayoutPreset.DEFAULT;
   }
 
   startGraphing() {
@@ -69,7 +73,17 @@ class GraphView extends Component {
 
     return (
       <div style={{ height: '100%' }}>
-        <Heading level={2} text="Graph">
+        <div className="heading">
+          <h2
+            className={
+              this.props.layoutPreset == LayoutPreset.CONFIGURABLE
+                ? 'grab-handle'
+                : ''
+            }
+            style={{ width: '100%' }}
+          >
+            Graph
+          </h2>
           <IconGroup>
             <Icon
               icon={this.state.graphing ? 'close' : 'chart'}
@@ -77,7 +91,7 @@ class GraphView extends Component {
               onClick={this.handleClick}
             />
           </IconGroup>
-        </Heading>
+        </div>
         {this.state.graphing ? (
           <div className="canvas-container">
             <GraphCanvas
@@ -136,10 +150,15 @@ class GraphView extends Component {
 
 GraphView.propTypes = {
   telemetry: telemetryType.isRequired,
+  // This should be
+  // PropTypes.oneOf(Object.keys(LayoutPreset)).isRequired
+  // but for some reason it breaks
+  layoutPreset: PropTypes.any,
 };
 
-const mapStateToProps = ({ telemetry }) => ({
+const mapStateToProps = ({ telemetry, settings }) => ({
   telemetry,
+  layoutPreset: settings.layoutPreset,
 });
 
 export default connect(mapStateToProps)(GraphView);
