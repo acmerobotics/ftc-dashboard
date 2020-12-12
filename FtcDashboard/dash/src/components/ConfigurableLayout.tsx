@@ -64,7 +64,7 @@ export default function ConfigurableLayout() {
       className="layout"
       cols={colBreakpoints}
       layouts={{
-        lg: defaultGrid.map((x) => Object.assign(x.layout, { i: x.id })),
+        lg: defaultGrid.map((x) => ({ i: x.id, ...x.layout })),
       }}
       resizeHandles={['ne', 'nw', 'se', 'sw']}
       draggableHandle=".grab-handle"
