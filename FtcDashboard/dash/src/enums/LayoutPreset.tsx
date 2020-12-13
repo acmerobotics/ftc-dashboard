@@ -1,20 +1,20 @@
 import React from 'react';
 
-import TileGrid from '../components/TileGrid.jsx';
-import Tile from '../components/Tile.jsx';
-import OpModeView from '../containers/OpModeView.jsx';
-import CameraView from '../containers/CameraView.jsx';
-import GraphView from '../containers/GraphView.jsx';
-import ConfigView from '../containers/ConfigView.jsx';
-import TelemetryView from '../containers/TelemetryView.jsx';
-import FieldView from '../containers/FieldView.jsx';
+import TileGrid from '../components/TileGrid';
+import Tile from '../components/Tile';
+import OpModeView from '../containers/OpModeView';
+import CameraView from '../containers/CameraView';
+import GraphView from '../containers/GraphView';
+import ConfigView from '../containers/ConfigView';
+import TelemetryView from '../containers/TelemetryView';
+import FieldView from '../containers/FieldView';
 
-const LayoutPreset = {
-  DEFAULT: 'DEFAULT',
-  FIELD: 'FIELD',
-  GRAPH: 'GRAPH',
-  ORIGINAL: 'ORIGINAL',
-};
+enum LayoutPreset {
+  DEFAULT = 'DEFAULT',
+  FIELD = 'FIELD',
+  GRAPH = 'GRAPH',
+  ORIGINAL = 'ORIGINAL',
+}
 
 const LAYOUT_DETAILS = {
   [LayoutPreset.DEFAULT]: {
@@ -98,7 +98,9 @@ const LAYOUT_DETAILS = {
 export default Object.freeze({
   ...LayoutPreset,
 
-  getName: (preset) => LAYOUT_DETAILS[preset].name,
+  getName: (preset: LayoutPreset) => LAYOUT_DETAILS[preset].name,
 
-  getContent: (preset) => LAYOUT_DETAILS[preset].content,
+  getContent: (preset: LayoutPreset) =>
+    LAYOUT_DETAILS[preset]?.content ??
+    LAYOUT_DETAILS[LayoutPreset.DEFAULT].content,
 });

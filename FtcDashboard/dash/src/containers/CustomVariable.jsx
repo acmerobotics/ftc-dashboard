@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import Heading from '../components/Heading.jsx';
-import Icon from '../components/Icon.jsx';
-import BasicVariable from './BasicVariable.jsx';
-import VariableType from '../enums/VariableType.js';
+import Heading from '../components/Heading';
+import Icon from '../components/Icon';
+import BasicVariable from './BasicVariable';
+import VariableType from '../enums/VariableType';
 
 class CustomVariable extends React.Component {
   constructor(props) {

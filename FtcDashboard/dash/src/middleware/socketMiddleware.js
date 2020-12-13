@@ -4,19 +4,15 @@ import {
   connect,
   receiveConnectionStatus,
   receivePingTime,
-} from '../actions/socket.js';
-import { GET_CONFIG, SAVE_CONFIG } from '../actions/config.js';
+} from '../actions/socket';
+import { GET_CONFIG, SAVE_CONFIG } from '../actions/config';
 import {
   GET_ROBOT_STATUS,
   RECEIVE_ROBOT_STATUS,
   getRobotStatus,
-} from '../actions/status.js';
-import {
-  INIT_OP_MODE,
-  START_OP_MODE,
-  STOP_OP_MODE,
-} from '../actions/opmode.js';
-import { RECEIVE_GAMEPAD_STATE } from '../actions/gamepad.js';
+} from '../actions/status';
+import { INIT_OP_MODE, START_OP_MODE, STOP_OP_MODE } from '../actions/opmode';
+import { RECEIVE_GAMEPAD_STATE } from '../actions/gamepad';
 
 let socket, statusSentTime;
 

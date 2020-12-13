@@ -2,8 +2,8 @@ import {
   GET_LAYOUT_PRESET,
   SAVE_LAYOUT_PRESET,
   receiveLayoutPreset,
-} from '../actions/settings.js';
-import LayoutPreset from '../enums/LayoutPreset.jsx';
+} from '../actions/settings';
+import LayoutPreset from '../enums/LayoutPreset';
 
 const LAYOUT_PRESET_KEY = 'layoutPreset';
 

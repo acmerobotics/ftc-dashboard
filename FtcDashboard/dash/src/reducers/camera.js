@@ -1,4 +1,4 @@
-import { RECEIVE_IMAGE } from '../actions/camera.js';
+import { RECEIVE_IMAGE } from '../actions/camera';
 
 const initialState = {
   imageStr: '',

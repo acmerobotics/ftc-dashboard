@@ -1,4 +1,4 @@
-import { receiveOpModeList } from './status.js';
+import { receiveOpModeList } from './status';
 
 export const CONNECT = 'CONNECT';
 export const DISCONNECT = 'DISCONNECT';
