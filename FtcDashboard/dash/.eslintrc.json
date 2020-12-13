@@ -27,12 +27,14 @@
   "rules": {
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
+    "react/react-in-jsx-scope": "off",
     "react/jsx-filename-extension": [
       1,
       {
         "extensions": [".tsx", ".jsx"]
       }
     ],
+    "react/jsx-one-expression-per-line": "off",
     "import/prefer-default-export": "off",
     "import/extensions": [
       "error",
@@ -44,7 +46,6 @@
     ],
     "prettier/prettier": "error",
     "@typescript-eslint/explicit-module-boundary-types": "off",
-    "react/jsx-one-expression-per-line": "off",
     "no-use-before-define": "off"
   },
   "settings": {
