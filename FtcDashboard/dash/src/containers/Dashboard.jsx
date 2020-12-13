@@ -2,13 +2,14 @@ import React, { Component } from 'react';
 import { connect as reduxConnect } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import Heading from '../components/Heading.jsx';
-import Header from '../components/Header.jsx';
-import IconGroup from '../components/IconGroup.jsx';
-import Icon from '../components/Icon.jsx';
-import LayoutPreset from '../enums/LayoutPreset.tsx';
-import { connect, disconnect } from '../actions/socket.js';
-import { saveLayoutPreset, getLayoutPreset } from '../actions/settings.js';
+import Heading from '../components/Heading';
+import Header from '../components/Header';
+import IconGroup from '../components/IconGroup';
+import Icon from '../components/Icon';
+
+import LayoutPreset from '../enums/LayoutPreset';
+import { connect, disconnect } from '../actions/socket';
+import { saveLayoutPreset, getLayoutPreset } from '../actions/settings';
 
 class Dashboard extends Component {
   componentDidMount() {

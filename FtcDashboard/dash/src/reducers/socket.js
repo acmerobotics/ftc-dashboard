@@ -1,7 +1,7 @@
 import {
   RECEIVE_PING_TIME,
   RECEIVE_CONNECTION_STATUS,
-} from '../actions/socket.js';
+} from '../actions/socket';
 
 const initialState = {
   isConnected: false,

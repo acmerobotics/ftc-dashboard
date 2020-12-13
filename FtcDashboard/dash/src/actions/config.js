@@ -1,4 +1,4 @@
-import VariableType from '../enums/VariableType.js';
+import VariableType from '../enums/VariableType';
 
 export const RECEIVE_CONFIG = 'RECEIVE_CONFIG';
 export const GET_CONFIG = 'GET_CONFIG';

@@ -1,15 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import BooleanInput from '../components/inputs/BooleanInput.jsx';
-import EnumInput from '../components/inputs/EnumInput.jsx';
-import TextInput from '../components/inputs/TextInput.jsx';
-import VariableType from '../enums/VariableType.js';
+import BooleanInput from '../components/inputs/BooleanInput';
+import EnumInput from '../components/inputs/EnumInput';
+import TextInput from '../components/inputs/TextInput';
+import VariableType from '../enums/VariableType';
 import {
   validateDouble,
   validateInt,
   validateString,
-} from '../components/inputs/validation.js';
+} from '../components/inputs/validation';
 
 class BasicVariable extends React.Component {
   render() {

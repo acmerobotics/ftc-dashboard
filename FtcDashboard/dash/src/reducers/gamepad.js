@@ -1,4 +1,4 @@
-import { GAMEPAD_CONNECTED, GAMEPAD_DISCONNECTED } from '../actions/gamepad.js';
+import { GAMEPAD_CONNECTED, GAMEPAD_DISCONNECTED } from '../actions/gamepad';
 
 const initialState = {
   gamepad1Connected: false,

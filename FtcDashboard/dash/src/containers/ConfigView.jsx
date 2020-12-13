@@ -1,18 +1,17 @@
-import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
-import CustomVariable from './CustomVariable.jsx';
-import Heading from '../components/Heading.jsx';
-import IconGroup from '../components/IconGroup.jsx';
-import Icon from '../components/Icon.jsx';
+import CustomVariable from './CustomVariable';
+import Heading from '../components/Heading';
+import IconGroup from '../components/IconGroup';
+import Icon from '../components/Icon';
 import {
   updateConfig,
   saveConfig,
   refreshConfig,
   getModifiedDiff,
-} from '../actions/config.js';
-import VariableType from '../enums/VariableType.js';
+} from '../actions/config';
+import VariableType from '../enums/VariableType';
 
 const ConfigView = ({ configRoot, onRefresh, onSave, onChange }) => {
   const sortedKeys = Object.keys(configRoot.__value || {});

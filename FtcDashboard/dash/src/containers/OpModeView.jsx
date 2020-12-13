@@ -2,11 +2,11 @@ import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import { initOpMode, startOpMode, stopOpMode } from '../actions/opmode.js';
-import OpModeStatus from '../enums/OpModeStatus.js';
-import Heading from '../components/Heading.jsx';
-import Icon from '../components/Icon.jsx';
-import IconGroup from '../components/IconGroup.jsx';
+import { initOpMode, startOpMode, stopOpMode } from '../actions/opmode';
+import OpModeStatus from '../enums/OpModeStatus';
+import Heading from '../components/Heading';
+import Icon from '../components/Icon';
+import IconGroup from '../components/IconGroup';
 
 const STOP_OP_MODE = '$Stop$Robot$';
 

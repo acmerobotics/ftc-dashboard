@@ -2,10 +2,10 @@ import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import Heading from '../components/Heading.jsx';
-import AutoFitCanvas from '../components/AutoFitCanvas.jsx';
-import IconGroup from '../components/IconGroup.jsx';
-import Icon from '../components/Icon.jsx';
+import Heading from '../components/Heading';
+import AutoFitCanvas from '../components/AutoFitCanvas';
+import IconGroup from '../components/IconGroup';
+import Icon from '../components/Icon';
 
 class CameraView extends React.Component {
   constructor(props) {
