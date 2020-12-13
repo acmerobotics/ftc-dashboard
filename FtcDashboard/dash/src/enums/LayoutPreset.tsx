@@ -10,10 +10,10 @@ import TelemetryView from '../containers/TelemetryView.jsx';
 import FieldView from '../containers/FieldView.jsx';
 
 enum LayoutPreset {
-  DEFAULT,
-  FIELD,
-  GRAPH,
-  ORIGINAL,
+  DEFAULT = 'DEFAULT',
+  FIELD = 'FIELD',
+  GRAPH = 'GRAPH',
+  ORIGINAL = 'ORIGINAL',
 }
 
 const LAYOUT_DETAILS = {
