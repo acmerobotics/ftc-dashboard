@@ -46,7 +46,11 @@ class FieldView extends React.Component {
         >
           Field
         </h2>
-        <AutoFitCanvas ref={this.canvasRef} onResize={this.renderField} />
+        <AutoFitCanvas
+          ref={this.canvasRef}
+          onResize={this.renderField}
+          containerHeight="calc(100% - 3em)"
+        />
       </div>
     );
   }

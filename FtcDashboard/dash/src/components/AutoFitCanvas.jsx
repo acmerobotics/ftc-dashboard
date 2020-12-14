@@ -40,16 +40,24 @@ class AutoFitCanvas extends React.Component {
 
   render() {
     return (
-      <div style={{ width: '100%', height: '100%' }} ref={this.containerRef}>
+      <div
+        style={{ width: '100%', height: this.props.containerHeight }}
+        ref={this.containerRef}
+      >
         <canvas ref={this.props.innerRef} />
       </div>
     );
   }
 }
 
+AutoFitCanvas.defaultProps = {
+  containerHeight: '100%',
+};
+
 AutoFitCanvas.propTypes = {
   innerRef: PropTypes.any.isRequired,
   onResize: PropTypes.func,
+  containerHeight: PropTypes.string,
 };
 
 const ForwardedAutoFitCanvas = React.forwardRef((props, ref) => (
