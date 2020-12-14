@@ -17,6 +17,12 @@
       url('assets/fonts/roboto-v18-latin-regular.svg#Roboto') format('svg'); /* Legacy iOS */
 }
 
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+
 html {
   overflow: hidden;
 }
@@ -31,7 +37,7 @@ header {
   background-color: #2962ff;
   color: white;
   padding: 8px;
-  height: 3em;
+  height: 4.29em;
 }
 h1,
 h2,
