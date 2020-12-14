@@ -90,7 +90,7 @@ export default function ConfigurableLayout() {
     {
       id: uuidv4(),
       view: SupportedViews.CONFIG_VIEW,
-      layout: { x: 4, y: 0, w: 2, h: 10 },
+      layout: { x: 4, y: 0, w: 2, h: 11 },
     },
     {
       id: uuidv4(),
@@ -148,7 +148,7 @@ export default function ConfigurableLayout() {
   return (
     <div
       style={{
-        height: 'calc(100vh - 3em)',
+        height: 'calc(100vh - 4.29em)',
         overflowY: 'scroll',
         paddingBottom: '1em',
       }}
