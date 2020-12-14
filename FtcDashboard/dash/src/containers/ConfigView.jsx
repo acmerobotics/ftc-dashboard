@@ -26,13 +26,19 @@ const ConfigView = ({
   sortedKeys.sort();
 
   return (
-    <div style={{ height: 'calc(100% - 3em)', padding: '1em' }}>
+    <div
+      style={{
+        height: 'calc(100% - 3em)',
+        padding: '1em',
+        paddingTop: '0.5em',
+      }}
+    >
       <div className="heading">
         <h2
           className={
             layoutPreset == LayoutPreset.CONFIGURABLE ? 'grab-handle' : ''
           }
-          style={{ width: '100%' }}
+          style={{ width: '100%', padding: '0.5em 0' }}
         >
           Configuration
         </h2>

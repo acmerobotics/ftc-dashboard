@@ -60,24 +60,33 @@ export default function ConfigurableLayout() {
   const [gridItems] = useState(defaultGrid);
 
   return (
-    <ResponsiveReactGridLayout
-      className="layout"
-      cols={colBreakpoints}
-      layouts={{
-        lg: defaultGrid.map((x) => ({ i: x.id, ...x.layout })),
+    <div
+      style={{
+        height: 'calc(100vh - 3em)',
+        overflowY: 'scroll',
+        paddingBottom: '1em',
       }}
-      resizeHandles={['ne', 'nw', 'se', 'sw']}
-      draggableHandle=".grab-handle"
-      compactType={null}
     >
-      {gridItems.map((item) => (
-        <div key={item.id}>
-          {ViewMap[item.view]}
-          {/* {React.cloneElement(ViewMap[item.view], {
-            configurableGridId: item.id,
-          })} */}
-        </div>
-      ))}
-    </ResponsiveReactGridLayout>
+      <ResponsiveReactGridLayout
+        className="layout"
+        cols={colBreakpoints}
+        layouts={{
+          lg: defaultGrid.map((x) => ({ i: x.id, ...x.layout })),
+        }}
+        resizeHandles={['ne', 'nw', 'se', 'sw']}
+        draggableHandle=".grab-handle"
+        compactType={null}
+      >
+        {gridItems.map((item) => (
+          <div key={item.id}>
+            {ViewMap[item.view]}
+            {/* {React.cloneElement(ViewMap[item.view], {
+              configurableGridId: item.id,
+              'data-grid': { i: item.id, ...item.layout },
+            })} */}
+          </div>
+        ))}
+      </ResponsiveReactGridLayout>
+    </div>
   );
 }

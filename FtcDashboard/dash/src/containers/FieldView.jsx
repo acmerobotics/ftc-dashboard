@@ -35,13 +35,14 @@ class FieldView extends React.Component {
 
   render() {
     return (
-      <div style={{ height: '100%', padding: '1em' }}>
+      <div style={{ height: '100%', padding: '1em', paddingTop: '0.5em' }}>
         <h2
           className={
             this.props.layoutPreset == LayoutPreset.CONFIGURABLE
               ? 'grab-handle'
               : ''
           }
+          style={{ width: '100%', padding: '0.5em 0' }}
         >
           Field
         </h2>

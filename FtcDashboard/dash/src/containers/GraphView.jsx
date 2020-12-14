@@ -72,7 +72,7 @@ class GraphView extends Component {
     ]);
 
     return (
-      <div style={{ height: '100%', padding: '1em' }}>
+      <div style={{ height: '100%', padding: '1em', paddingTop: '0.5em' }}>
         <div className="heading">
           <h2
             className={
@@ -80,7 +80,7 @@ class GraphView extends Component {
                 ? 'grab-handle'
                 : ''
             }
-            style={{ width: '100%' }}
+            style={{ width: '100%', padding: '0.5em 0' }}
           >
             Graph
           </h2>
