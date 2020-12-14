@@ -1,4 +1,4 @@
-import React, { ReactElement, useState } from 'react';
+import React, { ReactElement, useState, useEffect, useRef } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
@@ -23,13 +23,32 @@ const ViewMap: { [key in SupportedViews]: ReactElement } = {
   [SupportedViews.TELEMETRY_VIEW]: <TelemetryView />,
 };
 
+const HeightBreakpoints = {
+  MEDIUM: 730,
+  TALL: 1300,
+};
+
+/**
+ * !!!NOTE!!!!
+ * YOU CANNOT CHANGE STATE IN THIS COMPONENT
+ *
+ * Changing the values in any useState hook will cause ResponsiveReactGridLayout
+ * to re-mount. ResponsiveReactGridLayout does not like to be constantly re-mounted
+ * I turned off the initial resize animation so that wasn't a problem
+ * But then modifying any state that was connected to it would end up breaking it
+ * because the component was no longer mounted
+ *
+ * Not sure how to go about fixing this problem
+ */
 export default function ConfigurableLayout() {
   const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const colBreakpoints = {
-    lg: 3,
-    md: 3,
-    sm: 2,
+    lg: 6,
+    md: 6,
+    sm: 3,
     xs: 1,
     xxs: 1,
   };
@@ -38,26 +57,93 @@ export default function ConfigurableLayout() {
     {
       id: uuidv4(),
       view: SupportedViews.FIELD_VIEW,
-      layout: { x: 0, y: 0, w: 1, h: 6 },
+      layout: { x: 0, y: 0, w: 2, h: 9 },
     },
     {
       id: uuidv4(),
       view: SupportedViews.GRAPH_VIEW,
-      layout: { x: 1, y: 0, w: 1, h: 6 },
+      layout: { x: 2, y: 0, w: 2, h: 9 },
     },
     {
       id: uuidv4(),
       view: SupportedViews.CONFIG_VIEW,
-      layout: { x: 2, y: 0, w: 1, h: 6 },
+      layout: { x: 4, y: 0, w: 2, h: 7 },
     },
     {
       id: uuidv4(),
       view: SupportedViews.TELEMETRY_VIEW,
-      layout: { x: 2, y: 6, w: 1, h: 2 },
+      layout: { x: 4, y: 7, w: 2, h: 2 },
     },
   ];
 
-  const [gridItems] = useState(defaultGrid);
+  const defaultGridMedium = [
+    {
+      id: uuidv4(),
+      view: SupportedViews.FIELD_VIEW,
+      layout: { x: 0, y: 0, w: 2, h: 13 },
+    },
+    {
+      id: uuidv4(),
+      view: SupportedViews.GRAPH_VIEW,
+      layout: { x: 2, y: 0, w: 2, h: 13 },
+    },
+    {
+      id: uuidv4(),
+      view: SupportedViews.CONFIG_VIEW,
+      layout: { x: 4, y: 0, w: 2, h: 10 },
+    },
+    {
+      id: uuidv4(),
+      view: SupportedViews.TELEMETRY_VIEW,
+      layout: { x: 4, y: 11, w: 2, h: 2 },
+    },
+  ];
+
+  const defaultGridTall = [
+    {
+      id: uuidv4(),
+      view: SupportedViews.FIELD_VIEW,
+      layout: { x: 0, y: 0, w: 2, h: 18 },
+    },
+    {
+      id: uuidv4(),
+      view: SupportedViews.GRAPH_VIEW,
+      layout: { x: 2, y: 0, w: 2, h: 18 },
+    },
+    {
+      id: uuidv4(),
+      view: SupportedViews.CONFIG_VIEW,
+      layout: { x: 4, y: 0, w: 2, h: 14 },
+    },
+    {
+      id: uuidv4(),
+      view: SupportedViews.TELEMETRY_VIEW,
+      layout: { x: 4, y: 11, w: 2, h: 4 },
+    },
+  ];
+
+  const [gridItems, setGridItems] = useState(defaultGrid);
+
+  useEffect(() => {
+    // This assumes that containerRef isn't null on render
+    // This works completely fine now as containerRef is set
+    // However, I don't know if this works with concurrent mode
+    // This project doesn't use concurrent mode since it's in beta
+    // Check back here if concurrent mode is ever enabled
+
+    const height = containerRef.current?.clientHeight;
+
+    if (height) {
+      if (height > HeightBreakpoints.TALL) {
+        setGridItems(defaultGridTall);
+      } else if (height > HeightBreakpoints.MEDIUM) {
+        setGridItems(defaultGridMedium);
+      } else {
+        setGridItems(defaultGrid);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div
@@ -66,24 +152,19 @@ export default function ConfigurableLayout() {
         overflowY: 'scroll',
         paddingBottom: '1em',
       }}
+      ref={containerRef}
     >
       <ResponsiveReactGridLayout
         className="layout"
         cols={colBreakpoints}
-        layouts={{
-          lg: defaultGrid.map((x) => ({ i: x.id, ...x.layout })),
-        }}
         resizeHandles={['ne', 'nw', 'se', 'sw']}
         draggableHandle=".grab-handle"
         compactType={null}
+        rowHeight={60}
       >
         {gridItems.map((item) => (
-          <div key={item.id}>
+          <div key={item.id} data-grid={{ i: item.id, ...item.layout }}>
             {ViewMap[item.view]}
-            {/* {React.cloneElement(ViewMap[item.view], {
-              configurableGridId: item.id,
-              'data-grid': { i: item.id, ...item.layout },
-            })} */}
           </div>
         ))}
       </ResponsiveReactGridLayout>
