@@ -25,33 +25,21 @@ const ViewMap: { [key in SupportedViews]: ReactElement } = {
 
 const HeightBreakpoints = {
   MEDIUM: 730,
-  TALL: 1300,
+  TALL: 1200,
 };
 
-/**
- * !!!NOTE!!!!
- * YOU CANNOT CHANGE STATE IN THIS COMPONENT
- *
- * Changing the values in any useState hook will cause ResponsiveReactGridLayout
- * to re-mount. ResponsiveReactGridLayout does not like to be constantly re-mounted
- * I turned off the initial resize animation so that wasn't a problem
- * But then modifying any state that was connected to it would end up breaking it
- * because the component was no longer mounted
- *
- * Not sure how to go about fixing this problem
- */
+const ColBreakpoints = {
+  lg: 6,
+  md: 6,
+  sm: 3,
+  xs: 1,
+  xxs: 1,
+};
+
 export default function ConfigurableLayout() {
   const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const colBreakpoints = {
-    lg: 6,
-    md: 6,
-    sm: 3,
-    xs: 1,
-    xxs: 1,
-  };
 
   const defaultGrid = [
     {
@@ -156,7 +144,7 @@ export default function ConfigurableLayout() {
     >
       <ResponsiveReactGridLayout
         className="layout"
-        cols={colBreakpoints}
+        cols={ColBreakpoints}
         resizeHandles={['ne', 'nw', 'se', 'sw']}
         draggableHandle=".grab-handle"
         compactType={null}
