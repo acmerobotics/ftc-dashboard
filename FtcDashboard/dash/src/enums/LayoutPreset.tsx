@@ -12,11 +12,11 @@ import TelemetryView from '../containers/TelemetryView';
 import FieldView from '../containers/FieldView';
 
 enum LayoutPreset {
-  DEFAULT,
-  FIELD,
-  GRAPH,
-  ORIGINAL,
-  CONFIGURABLE,
+  DEFAULT = 'DEFAULT',
+  FIELD = 'FIELD',
+  GRAPH = 'GRAPH',
+  ORIGINAL = 'ORIGINAL',
+  CONFIGURABLE = 'CONFIGURABLE',
 }
 
 interface Layout {
