@@ -38,6 +38,7 @@ header {
   color: white;
   padding: 8px;
   height: 4.29em;
+  border-bottom: 0.5em solid #ff2a2a;
 }
 h1,
 h2,
