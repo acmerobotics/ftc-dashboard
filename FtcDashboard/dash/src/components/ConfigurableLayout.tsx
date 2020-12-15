@@ -1,15 +1,18 @@
 import React, { ReactElement, useState, useEffect, useRef } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
-import 'react-grid-layout/css/styles.css';
-import 'react-resizable/css/styles.css';
 import { v4 as uuidv4 } from 'uuid';
 
-import GraphView from '../../containers/GraphView';
-import FieldView from '../../containers/FieldView';
-import ConfigView from '../../containers/ConfigView';
-import TelemetryView from '../../containers/TelemetryView';
+import 'react-grid-layout/css/styles.css';
+import 'react-resizable/css/styles.css';
+import styled from 'styled-components';
 
-import Fab from './Fab';
+import GraphView from '../containers/GraphView';
+import FieldView from '../containers/FieldView';
+import ConfigView from '../containers/ConfigView';
+import TelemetryView from '../containers/TelemetryView';
+
+import RadialFab from './RadialFab/RadialFab';
+import RadialFabChild from './RadialFab/RadialFabChild';
 
 enum SupportedViews {
   FIELD_VIEW,
@@ -37,6 +40,15 @@ const ColBreakpoints = {
   xs: 1,
   xxs: 1,
 };
+
+const Container = styled.div`
+  position: relative;
+
+  height: calc(100vh - 4.29em);
+
+  overflow-y: scroll;
+  padding-bottom: 1em;
+`;
 
 export default function ConfigurableLayout() {
   const ResponsiveReactGridLayout = WidthProvider(Responsive);
@@ -136,15 +148,7 @@ export default function ConfigurableLayout() {
   }, []);
 
   return (
-    <div
-      style={{
-        height: 'calc(100vh - 4.29em)',
-        overflowY: 'scroll',
-        paddingBottom: '1em',
-        position: 'relative',
-      }}
-      ref={containerRef}
-    >
+    <Container ref={containerRef}>
       <ResponsiveReactGridLayout
         className="layout"
         cols={ColBreakpoints}
@@ -159,7 +163,11 @@ export default function ConfigurableLayout() {
           </div>
         ))}
       </ResponsiveReactGridLayout>
-      <Fab />
-    </div>
+      <RadialFab bottom="2em" right="3.5em">
+        <RadialFabChild />
+        <RadialFabChild />
+        <RadialFabChild />
+      </RadialFab>
+    </Container>
   );
 }
