@@ -14,6 +14,11 @@ import TelemetryView from '../containers/TelemetryView';
 import RadialFab from './RadialFab/RadialFab';
 import RadialFabChild from './RadialFab/RadialFabChild';
 
+import AddSVG from '../assets/icons/add.svg';
+import DeleteSVG from '../assets/icons/delete.svg';
+import LockSVG from '../assets/icons/lock.svg';
+import LockOpenSVG from '../assets/icons/lock_open.svg';
+
 enum SupportedViews {
   FIELD_VIEW,
   GRAPH_VIEW,
@@ -163,10 +168,36 @@ export default function ConfigurableLayout() {
           </div>
         ))}
       </ResponsiveReactGridLayout>
-      <RadialFab bottom="2em" right="3.5em">
-        <RadialFabChild />
-        <RadialFabChild />
-        <RadialFabChild />
+      <RadialFab width="4em" height="4em" bottom="2em" right="3.5em">
+        <RadialFabChild
+          bgColor="#16A34A"
+          borderColor="#15803D"
+          angle={(-80 * Math.PI) / 180}
+          openMargin="5em"
+          iconSize="1.8em"
+          icon={AddSVG}
+          fineAdjustIconX="2%"
+          fineAdjustIconY="2%"
+        />
+        <RadialFabChild
+          bgColor="#4B5563"
+          borderColor="#374151"
+          angle={(-135 * Math.PI) / 180}
+          openMargin="5em"
+          icon={LockSVG}
+          fineAdjustIconX="-2%"
+          fineAdjustIconY="-3%"
+          clickEvent={() => console.log('Test')}
+        />
+        <RadialFabChild
+          bgColor="#F59E0B"
+          borderColor="#D97706"
+          angle={(170 * Math.PI) / 180}
+          openMargin="5em"
+          icon={DeleteSVG}
+          fineAdjustIconX="-2%"
+          fineAdjustIconY="-2%"
+        />
       </RadialFab>
     </Container>
   );

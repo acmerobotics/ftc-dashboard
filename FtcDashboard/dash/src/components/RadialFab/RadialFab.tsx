@@ -1,4 +1,9 @@
-import { FunctionComponent, ReactNode } from 'react';
+import React, {
+  FunctionComponent,
+  ReactNode,
+  ReactElement,
+  useState,
+} from 'react';
 import styled from 'styled-components';
 
 import CreateSVG from '../../assets/icons/create.svg';
@@ -12,22 +17,39 @@ interface RadialFabProps {
   children?: ReactNode;
 }
 
-const FloatingButton = styled.button<RadialFabProps>`
+const FixedContainer = styled.div<RadialFabProps>`
   position: fixed;
   bottom: ${({ bottom }) => bottom};
   right: ${({ right }) => right};
+`;
 
+const FloatingButton = styled.button<RadialFabProps>`
   width: ${({ width }) => width};
   height: ${({ height }) => height};
 
   border-radius: 50%;
 
-  background: #ff2a2a;
+  padding: 0;
+
+  border: none;
+  outline: none;
+`;
+
+const SvgContainer = styled.div<RadialFabProps>`
+  background: blue;
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  border-radius: 50%;
+  background: #f43f5e;
   box-shadow: 0 2px 2px 0 rgba(244, 67, 54, 0.14),
     0 3px 1px -2px rgba(244, 67, 54, 0.2), 0 1px 5px 0 rgba(244, 67, 54, 0.12);
 
-  border: 1px solid #c31111;
-  outline: none;
+  border: 1px solid #e11d48;
 
   transition: 300ms ease;
 
@@ -39,17 +61,26 @@ const FloatingButton = styled.button<RadialFabProps>`
 
 const CreateSVGIcon = styled.img`
   width: 1.95em;
-  transform: translate(0.1em, 0.1em); // Just adjusts for visual weighting
 `;
 
 const RadialFab: FunctionComponent<RadialFabProps> = (
   props: RadialFabProps,
-) => (
-  <FloatingButton onClick={() => console.log('test')} {...props}>
-    <CreateSVGIcon src={CreateSVG} />
-    {props.children}
-  </FloatingButton>
-);
+) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <FixedContainer {...props}>
+      <FloatingButton onClick={() => setIsOpen(!isOpen)} {...props}>
+        <SvgContainer {...props}>
+          <CreateSVGIcon src={CreateSVG} />
+        </SvgContainer>
+      </FloatingButton>
+      {React.Children.map(props.children, (e) =>
+        React.cloneElement(e as ReactElement, { isOpen }),
+      )}
+    </FixedContainer>
+  );
+};
 
 RadialFab.defaultProps = {
   width: '4em',
