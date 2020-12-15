@@ -34,11 +34,11 @@ body {
 }
 header {
   width: calc(100% - 16px);
-  background-color: #2962ff;
+  background-color: #2563eb;
   color: white;
   padding: 8px;
   height: 4.29em;
-  border-bottom: 0.5em solid #ff2a2a;
+  border-bottom: 0.5em solid #f43f5e;
 }
 h1,
 h2,
