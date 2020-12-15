@@ -4,10 +4,12 @@ import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import { v4 as uuidv4 } from 'uuid';
 
-import GraphView from '../containers/GraphView';
-import FieldView from '../containers/FieldView';
-import ConfigView from '../containers/ConfigView';
-import TelemetryView from '../containers/TelemetryView';
+import GraphView from '../../containers/GraphView';
+import FieldView from '../../containers/FieldView';
+import ConfigView from '../../containers/ConfigView';
+import TelemetryView from '../../containers/TelemetryView';
+
+import Fab from './Fab';
 
 enum SupportedViews {
   FIELD_VIEW,
@@ -139,6 +141,7 @@ export default function ConfigurableLayout() {
         height: 'calc(100vh - 4.29em)',
         overflowY: 'scroll',
         paddingBottom: '1em',
+        position: 'relative',
       }}
       ref={containerRef}
     >
@@ -156,6 +159,7 @@ export default function ConfigurableLayout() {
           </div>
         ))}
       </ResponsiveReactGridLayout>
+      <Fab />
     </div>
   );
 }
