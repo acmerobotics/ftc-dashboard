@@ -1,5 +1,5 @@
 import React, { ReactElement, useState, useEffect, useRef } from 'react';
-import { Responsive, WidthProvider } from 'react-grid-layout';
+import { Responsive, WidthProvider, Layout, Layouts } from 'react-grid-layout';
 import { v4 as uuidv4 } from 'uuid';
 
 import 'react-grid-layout/css/styles.css';
@@ -59,22 +59,22 @@ const defaultGrid = [
   {
     id: uuidv4(),
     view: SupportedViews.FIELD_VIEW,
-    layout: { x: 0, y: 0, w: 2, h: 9, static: false },
+    layout: { x: 0, y: 0, w: 2, h: 9, isDraggable: true, isResizable: true },
   },
   {
     id: uuidv4(),
     view: SupportedViews.GRAPH_VIEW,
-    layout: { x: 2, y: 0, w: 2, h: 9, static: false },
+    layout: { x: 2, y: 0, w: 2, h: 9, isDraggable: true, isResizable: true },
   },
   {
     id: uuidv4(),
     view: SupportedViews.CONFIG_VIEW,
-    layout: { x: 4, y: 0, w: 2, h: 7, static: false },
+    layout: { x: 4, y: 0, w: 2, h: 7, isDraggable: true, isResizable: true },
   },
   {
     id: uuidv4(),
     view: SupportedViews.TELEMETRY_VIEW,
-    layout: { x: 4, y: 7, w: 2, h: 2, static: false },
+    layout: { x: 4, y: 7, w: 2, h: 2, isDraggable: true, isResizable: true },
   },
 ];
 
@@ -82,22 +82,22 @@ const defaultGridMedium = [
   {
     id: uuidv4(),
     view: SupportedViews.FIELD_VIEW,
-    layout: { x: 0, y: 0, w: 2, h: 13, static: false },
+    layout: { x: 0, y: 0, w: 2, h: 13, isDraggable: true, isResizable: true },
   },
   {
     id: uuidv4(),
     view: SupportedViews.GRAPH_VIEW,
-    layout: { x: 2, y: 0, w: 2, h: 13, static: false },
+    layout: { x: 2, y: 0, w: 2, h: 13, isDraggable: true, isResizable: true },
   },
   {
     id: uuidv4(),
     view: SupportedViews.CONFIG_VIEW,
-    layout: { x: 4, y: 0, w: 2, h: 11, static: false },
+    layout: { x: 4, y: 0, w: 2, h: 11, isDraggable: true, isResizable: true },
   },
   {
     id: uuidv4(),
     view: SupportedViews.TELEMETRY_VIEW,
-    layout: { x: 4, y: 11, w: 2, h: 2, static: false },
+    layout: { x: 4, y: 11, w: 2, h: 2, isDraggable: true, isResizable: true },
   },
 ];
 
@@ -105,22 +105,22 @@ const defaultGridTall = [
   {
     id: uuidv4(),
     view: SupportedViews.FIELD_VIEW,
-    layout: { x: 0, y: 0, w: 2, h: 18, static: false },
+    layout: { x: 0, y: 0, w: 2, h: 18, isDraggable: true, isResizable: true },
   },
   {
     id: uuidv4(),
     view: SupportedViews.GRAPH_VIEW,
-    layout: { x: 2, y: 0, w: 2, h: 18, static: false },
+    layout: { x: 2, y: 0, w: 2, h: 18, isDraggable: true, isResizable: true },
   },
   {
     id: uuidv4(),
     view: SupportedViews.CONFIG_VIEW,
-    layout: { x: 4, y: 0, w: 2, h: 14, static: false },
+    layout: { x: 4, y: 0, w: 2, h: 14, isDraggable: true, isResizable: true },
   },
   {
     id: uuidv4(),
     view: SupportedViews.TELEMETRY_VIEW,
-    layout: { x: 4, y: 11, w: 2, h: 4, static: false },
+    layout: { x: 4, y: 11, w: 2, h: 4, isDraggable: true, isResizable: true },
   },
 ];
 
@@ -153,24 +153,18 @@ export default function ConfigurableLayout() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const toggleLayoutLocked = (toState: boolean) => {
-    if (toState) {
-      setGridItems(
-        gridItems.map((i) => {
-          i.layout = { ...i.layout, static: true };
-          return i;
-        }),
-      );
-    } else {
-      setGridItems(
-        gridItems.map((i) => {
-          i.layout = { ...i.layout, static: false };
-          return i;
-        }),
-      );
-    }
-
-    setIsLayoutLocked(toState);
+  const toggleLayoutLocked = () => {
+    setIsLayoutLocked(!isLayoutLocked);
+    setGridItems(
+      gridItems.map((i) => {
+        i.layout = {
+          ...i.layout,
+          isResizable: !i.layout.isResizable,
+          isDraggable: !i.layout.isDraggable,
+        };
+        return i;
+      }),
+    );
   };
 
   const addItem = () => {
@@ -191,6 +185,28 @@ export default function ConfigurableLayout() {
     // ]);
   };
 
+  const onLayoutChange = (layout: Layout[], layouts: Layouts) => {
+    setGridItems(
+      gridItems.map((e) => {
+        const newLayoutValue = layout.find((i) => i.i == e.id);
+        if (newLayoutValue != null) {
+          const newLayout = {
+            x: newLayoutValue.x,
+            y: newLayoutValue.y,
+            w: newLayoutValue.w,
+            h: newLayoutValue.h,
+            isDraggable: newLayoutValue.isDraggable ?? true,
+            isResizable: newLayoutValue.isResizable ?? true,
+          };
+
+          e = { ...e, layout: newLayout };
+        }
+
+        return e;
+      }),
+    );
+  };
+
   return (
     <Container ref={containerRef}>
       <ResponsiveReactGridLayout
@@ -203,6 +219,7 @@ export default function ConfigurableLayout() {
         layouts={{
           lg: gridItems.map((item) => ({ i: item.id, ...item.layout })),
         }}
+        onLayoutChange={onLayoutChange}
       >
         {gridItems.map((item) => (
           <div key={item.id}>{ViewMap[item.view]}</div>
@@ -228,7 +245,7 @@ export default function ConfigurableLayout() {
           icon={isLayoutLocked ? LockSVG : LockOpenSVG}
           fineAdjustIconX="-2%"
           fineAdjustIconY="-3%"
-          clickEvent={() => toggleLayoutLocked(!isLayoutLocked)}
+          clickEvent={toggleLayoutLocked}
         />
         <RadialFabChild
           bgColor="#F59E0B"
