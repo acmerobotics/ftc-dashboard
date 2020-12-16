@@ -58,14 +58,7 @@ const Container = styled.div`
 `;
 
 const DeleteModeChild = styled.div`
-  /* background: #fbbf2466; */
-  background: repeating-linear-gradient(
-    -55deg,
-    #fcd34d66,
-    #fcd34d66 0.6em,
-    #fbbf249e 0.65em,
-    #fbbf249e 1.3em
-  );
+  background: #fbbf2466;
 
   position: absolute;
   top: 0;
@@ -79,39 +72,22 @@ const DeleteModeChild = styled.div`
 `;
 
 const DeleteModeButton = styled.button`
-  background: linear-gradient(0deg, #f59e0b, #fbbf24);
+  background: url(${DeleteXSVG});
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 3.5em;
 
-  width: 4em;
-  height: 4em;
+  filter: invert(0.9);
+  mix-blend-mode: overlay;
+
+  width: 6em;
+  height: 6em;
 
   outline: none;
-  border: none;
+  border: 3px solid #fff;
   border-radius: 50%;
 
   padding: 0.3em;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
-
-  transition: box-shadow 200ms ease;
-
-  &:hover {
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  }
-`;
-
-const DeleteModeIcon = styled.div`
-  width: 90%;
-  height: 90%;
-
-  background: url(${CloseSVG}), linear-gradient(0deg, #fbbf24, #f59e0b);
-  background-repeat: no-repeat;
-  background-position: center;
-
-  border-radius: 50%;
 `;
 
 const defaultGrid = [
@@ -294,9 +270,7 @@ export default function ConfigurableLayout() {
                   onClick={() => {
                     removeItem(item.id);
                   }}
-                >
-                  <DeleteModeIcon />
-                </DeleteModeButton>
+                />
               </DeleteModeChild>
             ) : null}
           </div>
