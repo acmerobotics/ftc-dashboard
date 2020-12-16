@@ -16,8 +16,10 @@ import RadialFabChild from './RadialFab/RadialFabChild';
 
 import AddSVG from '../assets/icons/add.svg';
 import DeleteSVG from '../assets/icons/delete.svg';
+import DeleteXSVG from '../assets/icons/delete_x.svg';
 import LockSVG from '../assets/icons/lock.svg';
 import LockOpenSVG from '../assets/icons/lock_open.svg';
+import CloseSVG from '../assets/icons/close.svg';
 
 enum SupportedViews {
   FIELD_VIEW,
@@ -53,6 +55,63 @@ const Container = styled.div`
 
   overflow-y: scroll;
   padding-bottom: 1em;
+`;
+
+const DeleteModeChild = styled.div`
+  /* background: #fbbf2466; */
+  background: repeating-linear-gradient(
+    -55deg,
+    #fcd34d66,
+    #fcd34d66 0.6em,
+    #fbbf249e 0.65em,
+    #fbbf249e 1.3em
+  );
+
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const DeleteModeButton = styled.button`
+  background: linear-gradient(0deg, #f59e0b, #fbbf24);
+
+  width: 4em;
+  height: 4em;
+
+  outline: none;
+  border: none;
+  border-radius: 50%;
+
+  padding: 0.3em;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+
+  transition: box-shadow 200ms ease;
+
+  &:hover {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  }
+`;
+
+const DeleteModeIcon = styled.div`
+  width: 90%;
+  height: 90%;
+
+  background: url(${CloseSVG}), linear-gradient(0deg, #fbbf24, #f59e0b);
+  background-repeat: no-repeat;
+  background-position: center;
+
+  border-radius: 50%;
 `;
 
 const defaultGrid = [
@@ -131,6 +190,7 @@ export default function ConfigurableLayout() {
 
   const [gridItems, setGridItems] = useState(defaultGrid);
   const [isLayoutLocked, setIsLayoutLocked] = useState(false);
+  const [isInDeleteMode, setIsInDeleteMode] = useState(false);
 
   useEffect(() => {
     // This assumes that containerRef isn't null on render
@@ -185,6 +245,10 @@ export default function ConfigurableLayout() {
     // ]);
   };
 
+  const removeItem = (id: string) => {
+    setGridItems(gridItems.filter((e) => e.id != id));
+  };
+
   const onLayoutChange = (layout: Layout[], layouts: Layouts) => {
     setGridItems(
       gridItems.map((e) => {
@@ -222,7 +286,20 @@ export default function ConfigurableLayout() {
         onLayoutChange={onLayoutChange}
       >
         {gridItems.map((item) => (
-          <div key={item.id}>{ViewMap[item.view]}</div>
+          <div key={item.id}>
+            {ViewMap[item.view]}
+            {isInDeleteMode ? (
+              <DeleteModeChild>
+                <DeleteModeButton
+                  onClick={() => {
+                    removeItem(item.id);
+                  }}
+                >
+                  <DeleteModeIcon />
+                </DeleteModeButton>
+              </DeleteModeChild>
+            ) : null}
+          </div>
         ))}
       </ResponsiveReactGridLayout>
       <RadialFab width="4em" height="4em" bottom="2em" right="3.5em">
@@ -252,9 +329,10 @@ export default function ConfigurableLayout() {
           borderColor="#D97706"
           angle={(170 * Math.PI) / 180}
           openMargin="5em"
-          icon={DeleteSVG}
+          icon={isInDeleteMode ? DeleteXSVG : DeleteSVG}
           fineAdjustIconX="-2%"
           fineAdjustIconY="-2%"
+          clickEvent={() => setIsInDeleteMode(!isInDeleteMode)}
         />
       </RadialFab>
     </Container>
