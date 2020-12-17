@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import Heading from '../components/Heading';
 import Icon from '../components/Icon';
 import BasicVariable from './BasicVariable';
 import VariableType from '../enums/VariableType';
@@ -88,7 +87,9 @@ class CustomVariable extends React.Component {
               size="tiny"
               onClick={this.toggleVisibility}
             />
-            <Heading text={name} level={3} />
+            <div className="flex justify-between items-center">
+              <h3>{name}</h3>
+            </div>
           </div>
           {this.state.expanded ? (
             <table>

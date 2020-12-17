@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 import { connect as reduxConnect } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import Heading from '../components/Heading';
-import Header from '../components/Header';
 import IconGroup from '../components/IconGroup';
 import Icon from '../components/Icon';
 
@@ -29,10 +27,12 @@ class Dashboard extends Component {
   render() {
     return (
       <div>
-        <Header>
-          <Heading text="FTC Dashboard" level={1}>
+        <header className="bg-blue-600 border-b-6 border-red-500 px-3 py-1 text-white">
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl">FTC Dashboard</h1>
             <IconGroup>
               <select
+                className="text-black text-sm"
                 style={{ margin: '0px 8px 0px 8px' }}
                 value={this.props.layoutPreset}
                 onChange={(evt) =>
@@ -63,8 +63,8 @@ class Dashboard extends Component {
                 size="large"
               />
             </IconGroup>
-          </Heading>
-        </Header>
+          </div>
+        </header>
         {LayoutPreset.getContent(this.props.layoutPreset)}
       </div>
     );

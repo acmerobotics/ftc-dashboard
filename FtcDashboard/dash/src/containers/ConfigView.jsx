@@ -33,12 +33,11 @@ const ConfigView = ({
         paddingTop: '0.5em',
       }}
     >
-      <div className="heading">
+      <div className="flex justify-between items-center">
         <h2
-          className={
+          className={`${
             layoutPreset == LayoutPreset.CONFIGURABLE ? 'grab-handle' : ''
-          }
-          style={{ width: '100%', padding: '0.5em 0' }}
+          } text-xl w-full py-2 font-bold`}
         >
           Configuration
         </h2>

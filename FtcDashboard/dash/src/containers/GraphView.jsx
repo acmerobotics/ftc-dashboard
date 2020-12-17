@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
-import Heading from '../components/Heading';
 import MultipleCheckbox from '../components/MultipleCheckbox';
 import GraphCanvas from './GraphCanvas';
 import IconGroup from '../components/IconGroup';
@@ -73,14 +72,13 @@ class GraphView extends Component {
 
     return (
       <div style={{ height: '100%', padding: '1em', paddingTop: '0.5em' }}>
-        <div className="heading">
+        <div className="flex justify-between items-center">
           <h2
-            className={
+            className={`${
               this.props.layoutPreset == LayoutPreset.CONFIGURABLE
                 ? 'grab-handle'
                 : ''
-            }
-            style={{ width: '100%', padding: '0.5em 0' }}
+            } text-xl w-full py-2 font-bold`}
           >
             Graph
           </h2>
@@ -114,7 +112,9 @@ class GraphView extends Component {
             />
             {Object.keys(latestPacket.data).length > 0 ? (
               <div style={{ marginTop: '20px' }}>
-                <Heading level={3} text="Options" />
+                <div className="flex justify-between items-center">
+                  <h3>Options</h3>
+                </div>
                 <table>
                   <tbody>
                     <tr>

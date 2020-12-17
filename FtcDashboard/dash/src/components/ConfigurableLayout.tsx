@@ -45,7 +45,7 @@ const ColBreakpoints = {
 const Container = styled.div`
   position: relative;
 
-  height: calc(100vh - 4.29em);
+  height: calc(100vh - 58px);
 
   overflow-y: scroll;
   padding-bottom: 1em;

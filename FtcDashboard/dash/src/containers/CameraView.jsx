@@ -2,7 +2,6 @@ import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import Heading from '../components/Heading';
 import AutoFitCanvas from '../components/AutoFitCanvas';
 import IconGroup from '../components/IconGroup';
 import Icon from '../components/Icon';
@@ -65,7 +64,8 @@ class CameraView extends React.Component {
   render() {
     return (
       <div>
-        <Heading level={2} text="Camera">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-bold">Camera</h2>
           <IconGroup>
             <Icon
               onClick={() =>
@@ -75,7 +75,7 @@ class CameraView extends React.Component {
               size="small"
             />
           </IconGroup>
-        </Heading>
+        </div>
         <div className="canvas-container">
           <AutoFitCanvas ref={this.canvasRef} onResize={this.renderImage} />
         </div>

@@ -23,7 +23,10 @@ const FixedContainer = styled.div<RadialFabProps>`
   right: ${({ right }) => right};
 `;
 
-const FloatingButton = styled.button<RadialFabProps>`
+const FloatingButton = styled.button.attrs({
+  className:
+    'focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50',
+})<RadialFabProps>`
   width: ${({ width }) => width};
   height: ${({ height }) => height};
 

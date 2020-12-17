@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 
 import { initOpMode, startOpMode, stopOpMode } from '../actions/opmode';
 import OpModeStatus from '../enums/OpModeStatus';
-import Heading from '../components/Heading';
 import Icon from '../components/Icon';
 import IconGroup from '../components/IconGroup';
 
@@ -116,7 +115,8 @@ class OpModeView extends React.Component {
     if (!available) {
       return (
         <div>
-          <Heading level={2} text="Op Mode" />
+          <div className="flex justify-between items-center" />
+          <h2 className="text-xl font-bold">Op Mode</h2>
           <p>Event loop detached</p>
         </div>
       );
@@ -124,7 +124,8 @@ class OpModeView extends React.Component {
 
     return (
       <div>
-        <Heading level={2} text="Op Mode">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-bold">Op Mode</h2>
           <IconGroup>
             <Icon
               opacity={gamepad1Connected ? 1.0 : 0.3}
@@ -137,7 +138,7 @@ class OpModeView extends React.Component {
               size="small"
             />
           </IconGroup>
-        </Heading>
+        </div>
         <select
           style={{ margin: '4px' }}
           value={this.state.selectedOpMode}

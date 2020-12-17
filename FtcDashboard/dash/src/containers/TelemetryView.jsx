@@ -24,10 +24,9 @@ const TelemetryView = ({ telemetry, layoutPreset }) => {
   return (
     <div style={{ padding: '1em', paddingTop: '0.5em' }}>
       <h2
-        className={
+        className={`${
           layoutPreset == LayoutPreset.CONFIGURABLE ? 'grab-handle' : ''
-        }
-        style={{ width: '100%', padding: '0.5em 0' }}
+        } text-xl w-full py-2 font-bold`}
       >
         Telemetry
       </h2>

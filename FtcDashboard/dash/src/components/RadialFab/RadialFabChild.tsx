@@ -22,7 +22,9 @@ interface RadialFabChildProps {
   clickEvent?: (e: React.MouseEvent) => void;
 }
 
-const ButtonContainer = styled.button<RadialFabChildProps>`
+const ButtonContainer = styled.button.attrs({
+  className: 'focus:outline-none',
+})<RadialFabChildProps>`
   position: absolute;
   top: 50%;
   left: 50%;
@@ -86,7 +88,7 @@ const ButtonContainer = styled.button<RadialFabChildProps>`
   width: ${({ width }) => width};
   height: ${({ height }) => height};
 
-  outline: none;
+  outline: none !important;
 
   display: flex;
   justify-content: center;
