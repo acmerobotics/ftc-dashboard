@@ -19,7 +19,6 @@ import DeleteSVG from '../assets/icons/delete.svg';
 import DeleteXSVG from '../assets/icons/delete_x.svg';
 import LockSVG from '../assets/icons/lock.svg';
 import LockOpenSVG from '../assets/icons/lock_open.svg';
-import CloseSVG from '../assets/icons/close.svg';
 
 enum SupportedViews {
   FIELD_VIEW,
@@ -43,9 +42,9 @@ const HeightBreakpoints = {
 const ColBreakpoints = {
   lg: 6,
   md: 6,
-  sm: 3,
-  xs: 1,
-  xxs: 1,
+  sm: 6,
+  xs: 6,
+  xxs: 6,
 };
 
 const Container = styled.div`
@@ -299,8 +298,8 @@ export default function ConfigurableLayout() {
           clickEvent={toggleLayoutLocked}
         />
         <RadialFabChild
-          bgColor="#F59E0B"
-          borderColor="#D97706"
+          bgColor={`${isInDeleteMode ? '#F97316' : '#F59E0B'}`}
+          borderColor={`${isInDeleteMode ? '#EA580C' : '#D97706'}`}
           angle={(170 * Math.PI) / 180}
           openMargin="5em"
           icon={isInDeleteMode ? DeleteXSVG : DeleteSVG}
