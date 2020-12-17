@@ -20,18 +20,13 @@ import DeleteXSVG from '../assets/icons/delete_x.svg';
 import LockSVG from '../assets/icons/lock.svg';
 import LockOpenSVG from '../assets/icons/lock_open.svg';
 
-enum SupportedViews {
-  FIELD_VIEW,
-  GRAPH_VIEW,
-  CONFIG_VIEW,
-  TELEMETRY_VIEW,
-}
+import { ConfigurableView } from '../enums/ConfigurableView';
 
-const ViewMap: { [key in SupportedViews]: ReactElement } = {
-  [SupportedViews.FIELD_VIEW]: <FieldView />,
-  [SupportedViews.GRAPH_VIEW]: <GraphView />,
-  [SupportedViews.CONFIG_VIEW]: <ConfigView />,
-  [SupportedViews.TELEMETRY_VIEW]: <TelemetryView />,
+const ViewMap: { [key in ConfigurableView]: ReactElement } = {
+  [ConfigurableView.FIELD_VIEW]: <FieldView />,
+  [ConfigurableView.GRAPH_VIEW]: <GraphView />,
+  [ConfigurableView.CONFIG_VIEW]: <ConfigView />,
+  [ConfigurableView.TELEMETRY_VIEW]: <TelemetryView />,
 };
 
 const HeightBreakpoints = {
@@ -92,22 +87,22 @@ const DeleteModeButton = styled.button`
 const defaultGrid = [
   {
     id: uuidv4(),
-    view: SupportedViews.FIELD_VIEW,
+    view: ConfigurableView.FIELD_VIEW,
     layout: { x: 0, y: 0, w: 2, h: 9, isDraggable: true, isResizable: true },
   },
   {
     id: uuidv4(),
-    view: SupportedViews.GRAPH_VIEW,
+    view: ConfigurableView.GRAPH_VIEW,
     layout: { x: 2, y: 0, w: 2, h: 9, isDraggable: true, isResizable: true },
   },
   {
     id: uuidv4(),
-    view: SupportedViews.CONFIG_VIEW,
+    view: ConfigurableView.CONFIG_VIEW,
     layout: { x: 4, y: 0, w: 2, h: 7, isDraggable: true, isResizable: true },
   },
   {
     id: uuidv4(),
-    view: SupportedViews.TELEMETRY_VIEW,
+    view: ConfigurableView.TELEMETRY_VIEW,
     layout: { x: 4, y: 7, w: 2, h: 2, isDraggable: true, isResizable: true },
   },
 ];
@@ -115,22 +110,22 @@ const defaultGrid = [
 const defaultGridMedium = [
   {
     id: uuidv4(),
-    view: SupportedViews.FIELD_VIEW,
+    view: ConfigurableView.FIELD_VIEW,
     layout: { x: 0, y: 0, w: 2, h: 13, isDraggable: true, isResizable: true },
   },
   {
     id: uuidv4(),
-    view: SupportedViews.GRAPH_VIEW,
+    view: ConfigurableView.GRAPH_VIEW,
     layout: { x: 2, y: 0, w: 2, h: 13, isDraggable: true, isResizable: true },
   },
   {
     id: uuidv4(),
-    view: SupportedViews.CONFIG_VIEW,
+    view: ConfigurableView.CONFIG_VIEW,
     layout: { x: 4, y: 0, w: 2, h: 11, isDraggable: true, isResizable: true },
   },
   {
     id: uuidv4(),
-    view: SupportedViews.TELEMETRY_VIEW,
+    view: ConfigurableView.TELEMETRY_VIEW,
     layout: { x: 4, y: 11, w: 2, h: 2, isDraggable: true, isResizable: true },
   },
 ];
@@ -138,22 +133,22 @@ const defaultGridMedium = [
 const defaultGridTall = [
   {
     id: uuidv4(),
-    view: SupportedViews.FIELD_VIEW,
+    view: ConfigurableView.FIELD_VIEW,
     layout: { x: 0, y: 0, w: 2, h: 18, isDraggable: true, isResizable: true },
   },
   {
     id: uuidv4(),
-    view: SupportedViews.GRAPH_VIEW,
+    view: ConfigurableView.GRAPH_VIEW,
     layout: { x: 2, y: 0, w: 2, h: 18, isDraggable: true, isResizable: true },
   },
   {
     id: uuidv4(),
-    view: SupportedViews.CONFIG_VIEW,
+    view: ConfigurableView.CONFIG_VIEW,
     layout: { x: 4, y: 0, w: 2, h: 14, isDraggable: true, isResizable: true },
   },
   {
     id: uuidv4(),
-    view: SupportedViews.TELEMETRY_VIEW,
+    view: ConfigurableView.TELEMETRY_VIEW,
     layout: { x: 4, y: 11, w: 2, h: 4, isDraggable: true, isResizable: true },
   },
 ];
