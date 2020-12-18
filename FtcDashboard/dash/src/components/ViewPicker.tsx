@@ -33,6 +33,11 @@ const CardContainer = styled.div.attrs({
 
 const listContent = [
   {
+    title: 'OpMode View',
+    description: 'View allowing one to control the running opmode.',
+    view: ConfigurableView.OPMODE_VIEW,
+  },
+  {
     title: 'Field View',
     description:
       'View containing an FTC field. Supports canvas drawing operations.',

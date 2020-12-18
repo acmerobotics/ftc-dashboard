@@ -12,6 +12,7 @@ import FieldView from '../containers/FieldView';
 import ConfigView from '../containers/ConfigView';
 import TelemetryView from '../containers/TelemetryView';
 import CameraView from '../containers/CameraView';
+import OpModeView from '../containers/OpModeView';
 
 import RadialFab from './RadialFab/RadialFab';
 import RadialFabChild from './RadialFab/RadialFabChild';
@@ -32,6 +33,7 @@ const ViewMap: { [key in ConfigurableView]: ReactElement } = {
   [ConfigurableView.CONFIG_VIEW]: <ConfigView />,
   [ConfigurableView.TELEMETRY_VIEW]: <TelemetryView />,
   [ConfigurableView.CAMERA_VIEW]: <CameraView />,
+  [ConfigurableView.OPMODE_VIEW]: <OpModeView />,
 };
 
 const HeightBreakpoints = {

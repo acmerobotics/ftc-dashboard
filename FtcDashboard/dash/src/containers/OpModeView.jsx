@@ -114,9 +114,15 @@ class OpModeView extends React.Component {
 
     if (!available) {
       return (
-        <div>
+        <div className="px-4 py-2">
           <div className="flex justify-between items-center" />
-          <h2 className="text-xl font-bold">Op Mode</h2>
+          <h2
+            className={`${
+              this.props.isDraggable ? 'grab-handle' : ''
+            } text-xl w-full py-2 font-bold`}
+          >
+            Op Mode
+          </h2>
           <p>Event loop detached</p>
         </div>
       );
@@ -175,6 +181,7 @@ OpModeView.propTypes = {
   dispatch: PropTypes.func.isRequired,
   gamepad1Connected: PropTypes.bool.isRequired,
   gamepad2Connected: PropTypes.bool.isRequired,
+  isDraggable: PropTypes.bool,
 };
 
 const mapStateToProps = ({ status, gamepad }) => ({
