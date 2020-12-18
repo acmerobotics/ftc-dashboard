@@ -186,6 +186,7 @@ export default function ConfigurableLayout() {
       // This project doesn't use concurrent mode since it's in beta
       // Check back here if concurrent mode is ever enabled
       const height = containerRef.current?.clientHeight;
+
       if (height) {
         if (height > HeightBreakpoints.TALL) {
           setGridItems(defaultGridTall);
@@ -198,8 +199,6 @@ export default function ConfigurableLayout() {
         setGridItems(defaultGrid);
       }
     }
-
-    // setGridItems(initialLayoutValue);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -282,6 +281,18 @@ export default function ConfigurableLayout() {
 
   return (
     <Container ref={containerRef}>
+      {gridItems.length == 0 ? (
+        <div className="text-center mt-16">
+          <h3 className="text-2xl">Your custom layout is empty!</h3>
+          <p className="text-gray-600 mt-3">
+            Press the floating pencil icon near the bottom left
+            <br />
+            and then click the green plus button to create your own layouts!
+          </p>
+        </div>
+      ) : (
+        ''
+      )}
       <ResponsiveReactGridLayout
         className="layout"
         cols={ColBreakpoints}
