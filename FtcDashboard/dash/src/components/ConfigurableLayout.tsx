@@ -6,10 +6,12 @@ import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import styled from 'styled-components';
 
+import { ConfigurableView } from '../enums/ConfigurableView';
 import GraphView from '../containers/GraphView';
 import FieldView from '../containers/FieldView';
 import ConfigView from '../containers/ConfigView';
 import TelemetryView from '../containers/TelemetryView';
+import CameraView from '../containers/CameraView';
 
 import RadialFab from './RadialFab/RadialFab';
 import RadialFabChild from './RadialFab/RadialFabChild';
@@ -27,6 +29,7 @@ const ViewMap: { [key in ConfigurableView]: ReactElement } = {
   [ConfigurableView.GRAPH_VIEW]: <GraphView />,
   [ConfigurableView.CONFIG_VIEW]: <ConfigView />,
   [ConfigurableView.TELEMETRY_VIEW]: <TelemetryView />,
+  [ConfigurableView.CAMERA_VIEW]: <CameraView />,
 };
 
 const HeightBreakpoints = {
