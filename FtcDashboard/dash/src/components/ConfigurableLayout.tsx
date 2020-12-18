@@ -158,6 +158,8 @@ const defaultGridTall = [
   },
 ];
 
+const LOCAL_STORAGE_LAYOUT_KEY = 'configurableStorageLayout';
+
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
 export default function ConfigurableLayout() {
@@ -171,25 +173,43 @@ export default function ConfigurableLayout() {
   const [isShowingViewPicker, setIsShowingViewPicker] = useState(false);
 
   useEffect(() => {
-    // This assumes that containerRef isn't null on render
-    // This works completely fine now as containerRef is set
-    // However, I don't know if this works with concurrent mode
-    // This project doesn't use concurrent mode since it's in beta
-    // Check back here if concurrent mode is ever enabled
+    const initialLayoutStorageValue = window.localStorage.getItem(
+      LOCAL_STORAGE_LAYOUT_KEY,
+    );
 
-    const height = containerRef.current?.clientHeight;
-
-    if (height) {
-      if (height > HeightBreakpoints.TALL) {
-        setGridItems(defaultGridTall);
-      } else if (height > HeightBreakpoints.MEDIUM) {
-        setGridItems(defaultGridMedium);
+    if (initialLayoutStorageValue !== null) {
+      setGridItems(JSON.parse(initialLayoutStorageValue));
+    } else {
+      // This assumes that containerRef isn't null on render
+      // This works completely fine now as containerRef is set
+      // However, I don't know if this works with concurrent mode
+      // This project doesn't use concurrent mode since it's in beta
+      // Check back here if concurrent mode is ever enabled
+      const height = containerRef.current?.clientHeight;
+      if (height) {
+        if (height > HeightBreakpoints.TALL) {
+          setGridItems(defaultGridTall);
+        } else if (height > HeightBreakpoints.MEDIUM) {
+          setGridItems(defaultGridMedium);
+        } else {
+          setGridItems(defaultGrid);
+        }
       } else {
         setGridItems(defaultGrid);
       }
     }
+
+    // setGridItems(initialLayoutValue);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(
+      LOCAL_STORAGE_LAYOUT_KEY,
+      JSON.stringify(gridItems),
+    );
+  }, [gridItems]);
 
   const toggleLayoutLocked = () => {
     setIsLayoutLocked(!isLayoutLocked);
