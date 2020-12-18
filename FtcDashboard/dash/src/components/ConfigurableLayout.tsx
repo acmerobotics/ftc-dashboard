@@ -16,13 +16,14 @@ import CameraView from '../containers/CameraView';
 import RadialFab from './RadialFab/RadialFab';
 import RadialFabChild from './RadialFab/RadialFabChild';
 
-import AddSVG from '../assets/icons/add.svg';
-import DeleteSVG from '../assets/icons/delete.svg';
-import DeleteXSVG from '../assets/icons/delete_x.svg';
-import LockSVG from '../assets/icons/lock.svg';
-import LockOpenSVG from '../assets/icons/lock_open.svg';
+import { ReactComponent as AddSVG } from '../assets/icons/add.svg';
+import { ReactComponent as DeleteSVG } from '../assets/icons/delete.svg';
+import DeleteXSVGURL, {
+  ReactComponent as DeleteXSVG,
+} from '../assets/icons/delete_x.svg';
+import { ReactComponent as LockSVG } from '../assets/icons/lock.svg';
 
-import { ConfigurableView } from '../enums/ConfigurableView';
+import { ReactComponent as LockOpenSVG } from '../assets/icons/lock_open.svg';
 
 const ViewMap: { [key in ConfigurableView]: ReactElement } = {
   [ConfigurableView.FIELD_VIEW]: <FieldView />,
@@ -69,7 +70,7 @@ const DeleteModeChild = styled.div`
 `;
 
 const DeleteModeButton = styled.button`
-  background: url(${DeleteXSVG});
+  background: url(${DeleteXSVGURL});
   background-repeat: no-repeat;
   background-position: center;
   background-size: 3.5em;
@@ -275,36 +276,38 @@ export default function ConfigurableLayout() {
       </ResponsiveReactGridLayout>
       <RadialFab width="4em" height="4em" bottom="2em" right="3.5em">
         <RadialFabChild
-          bgColor="#16A34A"
-          borderColor="#15803D"
+          bgColor="#22C55E"
+          borderColor="#16A34A"
           angle={(-80 * Math.PI) / 180}
           openMargin="5em"
-          iconSize="1.8em"
-          icon={AddSVG}
           fineAdjustIconX="2%"
           fineAdjustIconY="2%"
           clickEvent={addItem}
-        />
+        >
+          <AddSVG className="text-white" />
+        </RadialFabChild>
         <RadialFabChild
           bgColor={`${isLayoutLocked ? `#4B5563` : `#4F46E5`}`}
           borderColor={`${isLayoutLocked ? `#374151` : `#4338CA`}`}
           angle={(-135 * Math.PI) / 180}
           openMargin="5em"
-          icon={isLayoutLocked ? LockSVG : LockOpenSVG}
           fineAdjustIconX="-2%"
           fineAdjustIconY="-3%"
           clickEvent={toggleLayoutLocked}
-        />
+        >
+          {isLayoutLocked ? <LockSVG /> : <LockOpenSVG />}
+        </RadialFabChild>
         <RadialFabChild
           bgColor={`${isInDeleteMode ? '#F97316' : '#F59E0B'}`}
           borderColor={`${isInDeleteMode ? '#EA580C' : '#D97706'}`}
           angle={(170 * Math.PI) / 180}
           openMargin="5em"
-          icon={isInDeleteMode ? DeleteXSVG : DeleteSVG}
           fineAdjustIconX="-2%"
           fineAdjustIconY="-2%"
           clickEvent={() => setIsInDeleteMode(!isInDeleteMode)}
-        />
+        >
+          {isInDeleteMode ? <DeleteXSVG /> : <DeleteSVG />}
+        </RadialFabChild>
       </RadialFab>
     </Container>
   );

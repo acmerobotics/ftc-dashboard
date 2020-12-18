@@ -36,6 +36,8 @@ const FloatingButton = styled.button.attrs({
 
   border: none;
   outline: none;
+
+  transition: 300ms ease;
 `;
 
 const SvgContainer = styled.div<RadialFabProps>`

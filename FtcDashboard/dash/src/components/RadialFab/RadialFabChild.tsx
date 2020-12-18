@@ -1,15 +1,12 @@
-import { FunctionComponent, MouseEvent } from 'react';
+import { ReactNode, FunctionComponent } from 'react';
 import styled from 'styled-components';
 
 interface RadialFabChildProps {
-  icon?: string;
   bgColor: string;
   borderColor: string;
 
   width?: string;
   height?: string;
-
-  iconSize?: string;
 
   fineAdjustIconX?: string;
   fineAdjustIconY?: string;
@@ -20,6 +17,8 @@ interface RadialFabChildProps {
   isOpen?: boolean;
 
   clickEvent?: (e: React.MouseEvent) => void;
+
+  children?: ReactNode;
 }
 
 const ButtonContainer = styled.button.attrs({
@@ -138,10 +137,7 @@ const ButtonContainer = styled.button.attrs({
   }
 `;
 
-const SVGIcon = styled.img<RadialFabChildProps>`
-  width: ${({ iconSize }) => iconSize};
-  height: ${({ iconSize }) => iconSize};
-
+const SVGIcon = styled.div<RadialFabChildProps>`
   transition: transform 300ms ease;
 
   transform: ${({ fineAdjustIconX, fineAdjustIconY, isOpen }) =>
@@ -155,18 +151,15 @@ const RadialFabChild: FunctionComponent<RadialFabChildProps> = (
 ) => {
   return (
     <ButtonContainer {...props} onClick={props.clickEvent}>
-      <SVGIcon src={props.icon} {...props}></SVGIcon>
+      <SVGIcon {...props}>{props.children}</SVGIcon>
     </ButtonContainer>
   );
 };
 
 RadialFabChild.defaultProps = {
-  icon: '',
-
   width: '3.1em',
   height: '3.1em',
 
-  iconSize: '1.4em',
   fineAdjustIconX: '0',
   fineAdjustIconY: '0',
 
