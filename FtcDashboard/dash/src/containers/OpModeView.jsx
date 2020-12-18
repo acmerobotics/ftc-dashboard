@@ -114,7 +114,7 @@ class OpModeView extends React.Component {
 
     if (!available) {
       return (
-        <div className="px-4 py-2">
+        <div className="h-full px-4 py-2 bg-white bg-opacity-75">
           <div className="flex justify-between items-center" />
           <h2
             className={`${
@@ -129,7 +129,7 @@ class OpModeView extends React.Component {
     }
 
     return (
-      <div>
+      <div className="h-full px-4 py-2 bg-white bg-opacity-75">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-bold">Op Mode</h2>
           <IconGroup>

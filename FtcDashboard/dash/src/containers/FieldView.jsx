@@ -32,7 +32,7 @@ class FieldView extends React.Component {
 
   render() {
     return (
-      <div className="h-full px-4 py-2">
+      <div className="h-full px-4 py-2 bg-white bg-opacity-75">
         <h2
           className={`${
             this.props.isDraggable ? 'grab-handle' : ''

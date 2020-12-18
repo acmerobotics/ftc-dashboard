@@ -56,6 +56,10 @@ const Container = styled.div`
 
   overflow-y: scroll;
   padding-bottom: 1em;
+
+  background: #fff;
+  background-image: radial-gradient(#d2d2d2 5%, transparent 0);
+  background-size: 35px 35px;
 `;
 
 const DeleteModeChild = styled.div`
@@ -299,7 +303,7 @@ export default function ConfigurableLayout() {
   return (
     <Container ref={containerRef}>
       {gridItems.length == 0 ? (
-        <div className="text-center mt-16">
+        <div className="text-center mt-16 bg-white p-12">
           <h3 className="text-2xl">Your custom layout is empty!</h3>
           <p className="text-gray-600 mt-3">
             Press the floating pencil icon near the bottom left

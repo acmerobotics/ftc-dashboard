@@ -25,7 +25,10 @@ const ConfigView = ({
   sortedKeys.sort();
 
   return (
-    <div style={{ height: 'calc(100% - 3em)' }} className="px-4 py-2">
+    <div
+      style={{ height: 'calc(100% - 3em)' }}
+      className="px-4 py-2 bg-white bg-opacity-75"
+    >
       <div className="flex justify-between items-center">
         <h2
           className={`${
