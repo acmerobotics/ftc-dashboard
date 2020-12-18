@@ -15,6 +15,7 @@ import CameraView from '../containers/CameraView';
 
 import RadialFab from './RadialFab/RadialFab';
 import RadialFabChild from './RadialFab/RadialFabChild';
+import ViewPicker from './ViewPicker';
 
 import { ReactComponent as AddSVG } from '../assets/icons/add.svg';
 import { ReactComponent as DeleteSVG } from '../assets/icons/delete.svg';
@@ -163,8 +164,11 @@ export default function ConfigurableLayout() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [gridItems, setGridItems] = useState(defaultGrid);
+
+  const [isFabOpen, setIsFabOpen] = useState(false);
   const [isLayoutLocked, setIsLayoutLocked] = useState(false);
   const [isInDeleteMode, setIsInDeleteMode] = useState(false);
+  const [isShowingViewPicker, setIsShowingViewPicker] = useState(false);
 
   useEffect(() => {
     // This assumes that containerRef isn't null on render
@@ -201,22 +205,33 @@ export default function ConfigurableLayout() {
     );
   };
 
-  const addItem = () => {
-    // setGridItems([
-    //   ...gridItems,
-    //   {
-    //     id: uuidv4(),
-    //     view: SupportedViews.TELEMETRY_VIEW,
-    //     layout: {
-    //       x: 4,
-    //       y: 11,
-    //       w: 2,
-    //       h: 4,
-    //       isDraggable: true,
-    //       isResizable: true,
-    //     },
-    //   },
-    // ]);
+  const addItem = (item: ConfigurableView) => {
+    // TODO: Implement smart insertion algorithm
+    // It just adds the item on a new grid row right now.
+    // const newItemWidth = 2;
+    // const newItemHeight = 4;
+
+    // let newItemX = 0;
+    // let newItemY = 0;
+
+    // const gridMaxX = Math.max(...gridItems.map((e) => e.layout.x + e.layout.w));
+    const gridMaxY = Math.max(...gridItems.map((e) => e.layout.y + e.layout.h));
+
+    setGridItems([
+      ...gridItems,
+      {
+        id: uuidv4(),
+        view: item,
+        layout: {
+          x: 0,
+          y: gridMaxY + 1,
+          w: 2,
+          h: 4,
+          isDraggable: true,
+          isResizable: true,
+        },
+      },
+    ]);
   };
 
   const removeItem = (id: string) => {
@@ -274,7 +289,17 @@ export default function ConfigurableLayout() {
           </div>
         ))}
       </ResponsiveReactGridLayout>
-      <RadialFab width="4em" height="4em" bottom="2em" right="3.5em">
+      <RadialFab
+        width="4em"
+        height="4em"
+        bottom="2em"
+        right="3.5em"
+        isOpen={isFabOpen}
+        clickEvent={() => {
+          if (isFabOpen) setIsShowingViewPicker(false);
+          setIsFabOpen(!isFabOpen);
+        }}
+      >
         <RadialFabChild
           bgColor="#22C55E"
           borderColor="#16A34A"
@@ -282,7 +307,7 @@ export default function ConfigurableLayout() {
           openMargin="5em"
           fineAdjustIconX="2%"
           fineAdjustIconY="2%"
-          clickEvent={addItem}
+          clickEvent={() => setIsShowingViewPicker(!isShowingViewPicker)}
         >
           <AddSVG className="text-white" />
         </RadialFabChild>
@@ -309,6 +334,12 @@ export default function ConfigurableLayout() {
           {isInDeleteMode ? <DeleteXSVG /> : <DeleteSVG />}
         </RadialFabChild>
       </RadialFab>
+      <ViewPicker
+        isOpen={isShowingViewPicker}
+        bottom="11em"
+        right="1.5em"
+        clickEvent={addItem}
+      />
     </Container>
   );
 }

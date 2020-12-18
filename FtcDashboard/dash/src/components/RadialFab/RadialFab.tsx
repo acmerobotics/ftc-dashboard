@@ -1,20 +1,19 @@
-import React, {
-  FunctionComponent,
-  ReactNode,
-  ReactElement,
-  useState,
-} from 'react';
+import React, { FunctionComponent, ReactNode, ReactElement } from 'react';
 import styled from 'styled-components';
 
 import CreateSVG from '../../assets/icons/create.svg';
 
 interface RadialFabProps {
+  isOpen: boolean;
+
   width?: string;
   height?: string;
 
   bottom?: string;
   right?: string;
   children?: ReactNode;
+
+  clickEvent: () => void;
 }
 
 const FixedContainer = styled.div<RadialFabProps>`
@@ -71,17 +70,15 @@ const CreateSVGIcon = styled.img`
 const RadialFab: FunctionComponent<RadialFabProps> = (
   props: RadialFabProps,
 ) => {
-  const [isOpen, setIsOpen] = useState(false);
-
   return (
     <FixedContainer {...props}>
-      <FloatingButton onClick={() => setIsOpen(!isOpen)} {...props}>
+      <FloatingButton {...props} onClick={props.clickEvent}>
         <SvgContainer {...props}>
           <CreateSVGIcon src={CreateSVG} />
         </SvgContainer>
       </FloatingButton>
       {React.Children.map(props.children, (e) =>
-        React.cloneElement(e as ReactElement, { isOpen }),
+        React.cloneElement(e as ReactElement, { isOpen: props.isOpen }),
       )}
     </FixedContainer>
   );
