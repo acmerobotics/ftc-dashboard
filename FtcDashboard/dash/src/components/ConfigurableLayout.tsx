@@ -70,7 +70,9 @@ const DeleteModeChild = styled.div`
   align-items: center;
 `;
 
-const DeleteModeButton = styled.button`
+const DeleteModeButton = styled.button.attrs({
+  className: 'focus:outline-none focus:ring',
+})`
   background: url(${DeleteXSVGURL});
   background-repeat: no-repeat;
   background-position: center;
@@ -234,7 +236,8 @@ export default function ConfigurableLayout() {
     // let newItemY = 0;
 
     // const gridMaxX = Math.max(...gridItems.map((e) => e.layout.x + e.layout.w));
-    const gridMaxY = Math.max(...gridItems.map((e) => e.layout.y + e.layout.h));
+    let gridMaxY = Math.max(...gridItems.map((e) => e.layout.y + e.layout.h));
+    gridMaxY = isFinite(gridMaxY) ? gridMaxY : 0;
 
     setGridItems([
       ...gridItems,
@@ -243,7 +246,7 @@ export default function ConfigurableLayout() {
         view: item,
         layout: {
           x: 0,
-          y: gridMaxY + 1,
+          y: gridMaxY,
           w: 2,
           h: 4,
           isDraggable: true,
