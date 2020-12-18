@@ -35,7 +35,7 @@ const FloatingButton = styled.button.attrs({
   padding: 0;
 
   border: none;
-  outline: none;
+  outline: none !important;
 
   transition: 300ms ease;
 `;
