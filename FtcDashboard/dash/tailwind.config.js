@@ -18,8 +18,8 @@ module.exports = {
   variants: {
     extend: {
       boxShadow: ['disabled'],
-      textColor: ['disabled']
+      textColor: ['disabled'],
     },
   },
-  plugins: [],
+  plugins: [require('@tailwindcss/forms')],
 };
