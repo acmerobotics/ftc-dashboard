@@ -46,7 +46,7 @@ class OpModeView extends React.Component {
   renderInitButton() {
     return (
       <button
-        style={{ margin: '4px' }}
+        className="ml-3 bg-blue-200 rounded-md py-1 px-4 border border-blue-300 shadow-md"
         onClick={() =>
           this.props.dispatch(initOpMode(this.state.selectedOpMode))
         }
@@ -59,7 +59,7 @@ class OpModeView extends React.Component {
   renderStartButton() {
     return (
       <button
-        style={{ margin: '4px' }}
+        className="ml-3 bg-green-200 rounded-md py-1 px-2 border border-green-300 shadow-md"
         onClick={() => this.props.dispatch(startOpMode())}
       >
         Start
@@ -70,7 +70,7 @@ class OpModeView extends React.Component {
   renderStopButton() {
     return (
       <button
-        style={{ margin: '4px' }}
+        className="ml-3 bg-red-200 rounded-md py-1 px-2 border border-red-300 shadow-md"
         onClick={() => this.props.dispatch(stopOpMode())}
       >
         Stop
@@ -131,7 +131,13 @@ class OpModeView extends React.Component {
     return (
       <div className="h-full px-4 py-2 bg-white bg-opacity-75">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold">Op Mode</h2>
+          <h2
+            className={`${
+              this.props.isDraggable ? 'grab-handle' : ''
+            } text-xl w-full py-2 font-bold`}
+          >
+            Op Mode
+          </h2>
           <IconGroup>
             <Icon
               opacity={gamepad1Connected ? 1.0 : 0.3}
@@ -146,7 +152,7 @@ class OpModeView extends React.Component {
           </IconGroup>
         </div>
         <select
-          style={{ margin: '4px' }}
+          className="bg-gray-200 rounded py-2 px-2 border border-gray-300 m-1 shadow-md disabled:shadow-none disabled:text-gray-600 transition"
           value={this.state.selectedOpMode}
           disabled={activeOpMode !== STOP_OP_MODE || opModeList.length === 0}
           onChange={this.onChange}

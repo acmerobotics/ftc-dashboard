@@ -16,7 +16,10 @@ module.exports = {
     },
   },
   variants: {
-    extend: {},
+    extend: {
+      boxShadow: ['disabled'],
+      textColor: ['disabled']
+    },
   },
   plugins: [],
 };
