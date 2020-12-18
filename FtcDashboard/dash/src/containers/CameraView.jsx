@@ -65,7 +65,13 @@ class CameraView extends React.Component {
     return (
       <div className="px-4 py-2">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold">Camera</h2>
+          <h2
+            className={`${
+              this.props.isDraggable ? 'grab-handle' : ''
+            } text-xl w-full py-2 font-bold`}
+          >
+            Camera
+          </h2>
           <IconGroup>
             <Icon
               onClick={() =>
@@ -86,6 +92,7 @@ class CameraView extends React.Component {
 
 CameraView.propTypes = {
   imageStr: PropTypes.string.isRequired,
+  isDraggable: PropTypes.bool,
 };
 
 const mapStateToProps = ({ camera }) => ({

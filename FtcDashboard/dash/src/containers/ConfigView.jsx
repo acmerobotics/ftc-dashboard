@@ -12,14 +12,13 @@ import {
   getModifiedDiff,
 } from '../actions/config';
 import VariableType from '../enums/VariableType';
-import LayoutPreset from '../enums/LayoutPreset';
 
 const ConfigView = ({
   configRoot,
   onRefresh,
   onSave,
   onChange,
-  layoutPreset,
+  isDraggable,
 }) => {
   const sortedKeys = Object.keys(configRoot.__value || {});
 
@@ -30,7 +29,7 @@ const ConfigView = ({
       <div className="flex justify-between items-center">
         <h2
           className={`${
-            layoutPreset == LayoutPreset.CONFIGURABLE ? 'grab-handle' : ''
+            isDraggable ? 'grab-handle' : ''
           } text-xl w-full py-2 font-bold`}
         >
           Configuration
@@ -80,16 +79,10 @@ ConfigView.propTypes = {
   onRefresh: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
-  // This should be
-  // PropTypes.oneOf(Object.keys(LayoutPreset)).isRequired
-  // but for some reason it breaks
-  layoutPreset: PropTypes.any,
+  isDraggable: PropTypes.bool,
 };
 
-const mapStateToProps = ({ config, settings }) => ({
-  configRoot: config,
-  layoutPreset: settings.layoutPreset,
-});
+const mapStateToProps = ({ config }) => config;
 
 const mapDispatchToProps = (dispatch) => ({
   onRefresh: () => {

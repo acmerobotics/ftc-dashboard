@@ -310,7 +310,9 @@ export default function ConfigurableLayout() {
       >
         {gridItems.map((item) => (
           <div key={item.id}>
-            {ViewMap[item.view]}
+            {React.cloneElement(ViewMap[item.view], {
+              isDraggable: !isLayoutLocked,
+            })}
             {isInDeleteMode ? (
               <DeleteModeChild>
                 <DeleteModeButton

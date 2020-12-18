@@ -8,7 +8,6 @@ import IconGroup from '../components/IconGroup';
 import Icon from '../components/Icon';
 import TextInput from '../components/inputs/TextInput';
 
-import LayoutPreset from '../enums/LayoutPreset';
 import { validateInt } from '../components/inputs/validation';
 import { DEFAULT_OPTIONS } from './Graph';
 import { telemetryType } from './types';
@@ -27,8 +26,6 @@ class GraphView extends Component {
     };
 
     this.handleClick = this.handleClick.bind(this);
-
-    this.layoutPreset = LayoutPreset.DEFAULT;
   }
 
   startGraphing() {
@@ -75,9 +72,7 @@ class GraphView extends Component {
         <div className="flex justify-between items-center">
           <h2
             className={`${
-              this.props.layoutPreset == LayoutPreset.CONFIGURABLE
-                ? 'grab-handle'
-                : ''
+              this.props.isDraggable ? 'grab-handle' : ''
             } text-xl w-full py-2 font-bold`}
           >
             Graph
@@ -150,15 +145,9 @@ class GraphView extends Component {
 
 GraphView.propTypes = {
   telemetry: telemetryType.isRequired,
-  // This should be
-  // PropTypes.oneOf(Object.keys(LayoutPreset)).isRequired
-  // but for some reason it breaks
-  layoutPreset: PropTypes.any,
+  isDraggable: PropTypes.bool,
 };
 
-const mapStateToProps = ({ telemetry, settings }) => ({
-  telemetry,
-  layoutPreset: settings.layoutPreset,
-});
+const mapStateToProps = ({ telemetry }) => ({ telemetry });
 
 export default connect(mapStateToProps)(GraphView);
