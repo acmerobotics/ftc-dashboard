@@ -114,7 +114,7 @@ class OpModeView extends React.Component {
 
     if (!available) {
       return (
-        <div className="h-full px-4 py-2 bg-white bg-opacity-75">
+        <div className="h-full px-4 py-2 bg-white bg-opacity-75 rounded overflow-hidden shadow-md">
           <div className="flex justify-between items-center" />
           <h2
             className={`${
@@ -129,7 +129,7 @@ class OpModeView extends React.Component {
     }
 
     return (
-      <div className="h-full px-4 py-2 bg-white bg-opacity-75">
+      <div className="h-full px-4 py-2 bg-white bg-opacity-75 rounded overflow-hidden shadow-md">
         <div className="flex justify-between items-center">
           <h2
             className={`${

@@ -21,7 +21,7 @@ const TelemetryView = ({ telemetry, isDraggable }) => {
   ));
 
   return (
-    <div className="h-full px-4 py-2 bg-white bg-opacity-75">
+    <div className="h-full px-4 py-2 bg-white bg-opacity-75 rounded overflow-hidden shadow-md">
       <h2
         className={`${
           isDraggable ? 'grab-handle' : ''

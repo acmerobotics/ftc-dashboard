@@ -63,7 +63,7 @@ class CameraView extends React.Component {
 
   render() {
     return (
-      <div className="px-4 py-2 bg-white bg-opacity-75">
+      <div className="px-4 py-2 bg-white bg-opacity-75 rounded overflow-hidden shadow-md">
         <div className="flex justify-between items-center">
           <h2
             className={`${

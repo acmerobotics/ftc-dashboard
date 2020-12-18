@@ -57,7 +57,7 @@ const Container = styled.div`
   overflow-y: scroll;
   padding-bottom: 1em;
 
-  background: #fff;
+  background: #f1f5f9;
   background-image: radial-gradient(#d2d2d2 5%, transparent 0);
   background-size: 35px 35px;
 `;
