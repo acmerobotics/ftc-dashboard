@@ -12,7 +12,7 @@ module.exports = {
       },
       borderWidth: {
         6: '6px',
-      }
+      },
     },
   },
   variants: {

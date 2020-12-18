@@ -35,7 +35,7 @@ class FieldView extends React.Component {
 
   render() {
     return (
-      <div style={{ height: '100%', padding: '1em', paddingTop: '0.5em' }}>
+      <div className="h-full px-4 py-2">
         <h2
           className={`${
             this.props.layoutPreset == LayoutPreset.CONFIGURABLE

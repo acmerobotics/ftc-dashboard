@@ -71,7 +71,7 @@ class GraphView extends Component {
     ]);
 
     return (
-      <div style={{ height: '100%', padding: '1em', paddingTop: '0.5em' }}>
+      <div className="h-full px-4 py-2">
         <div className="flex justify-between items-center">
           <h2
             className={`${
