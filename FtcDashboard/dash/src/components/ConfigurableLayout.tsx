@@ -227,17 +227,29 @@ export default function ConfigurableLayout() {
   };
 
   const addItem = (item: ConfigurableView) => {
-    // TODO: Implement smart insertion algorithm
-    // It just adds the item on a new grid row right now.
-    // const newItemWidth = 2;
-    // const newItemHeight = 4;
+    // This is set at 6 right now because all the breakpoints are set to 6 columns
+    // Make this dynamic if responsive column breakpoints are set
+    const COLS = 6;
+    const ITEM_WIDTH = 2;
+    const ITEM_HEIGHT = 4;
 
-    // let newItemX = 0;
-    // let newItemY = 0;
+    let desiredX = 0;
 
-    // const gridMaxX = Math.max(...gridItems.map((e) => e.layout.x + e.layout.w));
     let gridMaxY = Math.max(...gridItems.map((e) => e.layout.y + e.layout.h));
     gridMaxY = isFinite(gridMaxY) ? gridMaxY : 0;
+
+    if (gridItems.length != 0) {
+      const maxX = Math.max(
+        ...gridItems
+          .filter((e) => e.layout.y + e.layout.h === gridMaxY)
+          .map((e) => e.layout.x + e.layout.w),
+      );
+      console.log(maxX);
+      if (maxX <= COLS - ITEM_WIDTH) {
+        desiredX = maxX;
+        gridMaxY -= ITEM_HEIGHT;
+      }
+    }
 
     setGridItems([
       ...gridItems,
@@ -245,10 +257,10 @@ export default function ConfigurableLayout() {
         id: uuidv4(),
         view: item,
         layout: {
-          x: 0,
+          x: desiredX,
           y: gridMaxY,
-          w: 2,
-          h: 4,
+          w: ITEM_WIDTH,
+          h: ITEM_HEIGHT,
           isDraggable: true,
           isResizable: true,
         },
