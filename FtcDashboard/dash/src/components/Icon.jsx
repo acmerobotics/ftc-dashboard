@@ -1,4 +1,3 @@
-import React from 'react';
 import PropTypes from 'prop-types';
 
 const Icon = ({ icon, size, opacity, onClick }) => (

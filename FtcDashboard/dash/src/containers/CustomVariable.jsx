@@ -1,9 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import Icon from '../components/Icon';
 import BasicVariable from './BasicVariable';
 import VariableType from '../enums/VariableType';
+
+import { ReactComponent as ExpandedLessIcon } from '../assets/icons/expand_less.svg';
+import { ReactComponent as ExpandedMoreIcon } from '../assets/icons/expand_more.svg';
 
 class CustomVariable extends React.Component {
   constructor(props) {
@@ -81,14 +83,27 @@ class CustomVariable extends React.Component {
     return (
       <tr>
         <td>
-          <div className="option-header">
-            <Icon
-              icon={this.state.expanded ? 'expand-less' : 'expand-more'}
-              size="tiny"
-              onClick={this.toggleVisibility}
-            />
+          <div
+            className="option-header py-1 cursor-pointer"
+            onClick={this.toggleVisibility}
+          >
+            <div>
+              {this.state.expanded ? (
+                <ExpandedLessIcon
+                  className="w-6 h-6 mr-2 bg-gray-100 rounded-full border border-gray-200"
+                  style={{ padding: '0.1rem' }}
+                />
+              ) : (
+                <ExpandedMoreIcon
+                  className="w-6 h-6 mr-2 bg-gray-100 rounded-full border border-gray-200"
+                  style={{ padding: '0.1rem' }}
+                />
+              )}
+            </div>
             <div className="flex justify-between items-center">
-              <h3>{name}</h3>
+              <h3 className={this.state.expanded ? 'font-bold' : 'font-normal'}>
+                {name}
+              </h3>
             </div>
           </div>
           {this.state.expanded ? (
