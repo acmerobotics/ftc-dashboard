@@ -107,7 +107,22 @@ const DeleteModeButton = styled.button.attrs({
   padding: 0.3em;
 `;
 
-const defaultGrid = [
+interface GridItemType {
+  id: string;
+  view: ConfigurableView;
+  layout: GridItemLayoutType;
+}
+
+interface GridItemLayoutType {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  isDraggable: boolean;
+  isResizable: boolean;
+}
+
+const defaultGrid: GridItemType[] = [
   {
     id: uuidv4(),
     view: ConfigurableView.FIELD_VIEW,
@@ -130,7 +145,7 @@ const defaultGrid = [
   },
 ];
 
-const defaultGridMedium = [
+const defaultGridMedium: GridItemType[] = [
   {
     id: uuidv4(),
     view: ConfigurableView.FIELD_VIEW,
@@ -153,7 +168,7 @@ const defaultGridMedium = [
   },
 ];
 
-const defaultGridTall = [
+const defaultGridTall: GridItemType[] = [
   {
     id: uuidv4(),
     view: ConfigurableView.FIELD_VIEW,
@@ -204,7 +219,7 @@ export default function ConfigurableLayout() {
 
     const newGridItems = (() => {
       if (initialLayoutStorageValue !== null) {
-        return JSON.parse(initialLayoutStorageValue);
+        return JSON.parse(initialLayoutStorageValue) as GridItemType[];
       } else {
         // This assumes that containerRef isn't null on render
         // This works completely fine now as containerRef is set
@@ -226,10 +241,8 @@ export default function ConfigurableLayout() {
         }
       }
     })();
-    setIsLayoutLocked(!newGridItems.every((e: any) => e.layout.isResizable));
+    setIsLayoutLocked(!newGridItems.every((e) => e.layout.isResizable));
     setGridItems(newGridItems);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
