@@ -59,7 +59,7 @@ export default function useMouseIdleListener(props: Props) {
       // listenerElement.removeEventListener('mouseenter', listenMouseEvents);
       if (timeoutTimer.current !== null) clearTimeout(timeoutTimer.current);
     };
-  }, [listenerElement]);
+  }, [listenerElement, props.timeout]);
 
   return isIdle;
 }
