@@ -18,13 +18,14 @@ import RadialFab from './RadialFab/RadialFab';
 import RadialFabChild from './RadialFab/RadialFabChild';
 import ViewPicker from './ViewPicker';
 
+import useMouseIdleListener from '../hooks/useMouseIdleListener';
+
 import { ReactComponent as AddSVG } from '../assets/icons/add.svg';
 import { ReactComponent as DeleteSVG } from '../assets/icons/delete.svg';
 import DeleteXSVGURL, {
   ReactComponent as DeleteXSVG,
 } from '../assets/icons/delete_x.svg';
 import { ReactComponent as LockSVG } from '../assets/icons/lock.svg';
-
 import { ReactComponent as LockOpenSVG } from '../assets/icons/lock_open.svg';
 
 const ViewMap: { [key in ConfigurableView]: ReactElement } = {
@@ -49,7 +50,13 @@ const ColBreakpoints = {
   xxs: 6,
 };
 
-const Container = styled.div`
+const Container = styled.div.attrs<{ isLayoutLocked: boolean }>(
+  ({ isLayoutLocked }) => ({
+    className: `${
+      !isLayoutLocked ? 'bg-gray-100' : 'bg-white'
+    } transition-colors`,
+  }),
+)<{ isLayoutLocked: boolean }>`
   position: relative;
 
   height: calc(100vh - 58px);
@@ -58,8 +65,10 @@ const Container = styled.div`
   overflow-y: scroll;
   padding-bottom: 1em;
 
-  background: #f1f5f9;
-  background-image: radial-gradient(#d2d2d2 5%, transparent 0);
+  ${({ isLayoutLocked }) =>
+    !isLayoutLocked
+      ? 'background-image: radial-gradient(#d2d2d2 5%, transparent 0);'
+      : ''}
   background-size: 35px 35px;
 `;
 
@@ -177,9 +186,16 @@ export default function ConfigurableLayout() {
   const [gridItems, setGridItems] = useState(defaultGrid);
 
   const [isFabOpen, setIsFabOpen] = useState(false);
-  const [isLayoutLocked, setIsLayoutLocked] = useState(false);
+  const [isLayoutLocked, setIsLayoutLocked] = useState(true);
   const [isInDeleteMode, setIsInDeleteMode] = useState(false);
   const [isShowingViewPicker, setIsShowingViewPicker] = useState(false);
+
+  const isFabIdle = useMouseIdleListener({
+    bottom: '0',
+    right: '0',
+    width: '14em',
+    height: '13em',
+  });
 
   useEffect(() => {
     const initialLayoutStorageValue = window.localStorage.getItem(
@@ -223,16 +239,23 @@ export default function ConfigurableLayout() {
     );
   }, [gridItems]);
 
-  const toggleLayoutLocked = () => {
-    const isLocked = isLayoutLocked;
+  useEffect(() => {
+    if (isFabIdle) {
+      setIsFabOpen(false);
+      setIsShowingViewPicker(false);
+    }
+  }, [isFabIdle]);
 
-    setIsLayoutLocked(!isLocked);
+  const toggleLayoutLocked = () => {
+    const toBeLocked = !isLayoutLocked;
+
+    setIsLayoutLocked(toBeLocked);
     setGridItems(
       gridItems.map((i) => {
         i.layout = {
           ...i.layout,
-          isResizable: isLocked,
-          isDraggable: isLocked,
+          isResizable: !toBeLocked,
+          isDraggable: !toBeLocked,
         };
         return i;
       }),
@@ -307,7 +330,7 @@ export default function ConfigurableLayout() {
   };
 
   return (
-    <Container ref={containerRef}>
+    <Container ref={containerRef} isLayoutLocked={isLayoutLocked}>
       {gridItems.length == 0 ? (
         <div className="text-center mt-16 bg-gray-100 p-12">
           <h3 className="text-2xl">Your custom layout is empty!</h3>
@@ -331,13 +354,13 @@ export default function ConfigurableLayout() {
           lg: gridItems.map((item) => ({ i: item.id, ...item.layout })),
         }}
         onLayoutChange={onLayoutChange}
-        margin={[0, 0]}
+        margin={isLayoutLocked ? [0, 0] : [10, 10]}
       >
         {gridItems.map((item) => (
           <div key={item.id}>
             {React.cloneElement(ViewMap[item.view], {
               isDraggable: item.layout.isDraggable,
-              showShadow: true,
+              showShadow: !isLayoutLocked,
             })}
             {isInDeleteMode ? (
               <DeleteModeChild>
@@ -357,6 +380,7 @@ export default function ConfigurableLayout() {
         bottom="2em"
         right="3.5em"
         isOpen={isFabOpen}
+        isShowing={!isFabIdle}
         clickEvent={() => {
           if (isFabOpen) setIsShowingViewPicker(false);
           setIsFabOpen(!isFabOpen);

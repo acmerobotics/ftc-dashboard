@@ -5,6 +5,7 @@ import CreateSVG from '../../assets/icons/create.svg';
 
 interface RadialFabProps {
   isOpen: boolean;
+  isShowing: boolean;
 
   width?: string;
   height?: string;
@@ -18,8 +19,11 @@ interface RadialFabProps {
 
 const FixedContainer = styled.div<RadialFabProps>`
   position: fixed;
-  bottom: ${({ bottom }) => bottom};
+  bottom: ${({ bottom, height, isShowing }) =>
+    isShowing ? bottom : `calc(${bottom} - (${height} * 2))`};
   right: ${({ right }) => right};
+
+  transition: bottom 300ms ease;
 `;
 
 const FloatingButton = styled.button.attrs({

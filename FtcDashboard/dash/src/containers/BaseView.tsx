@@ -5,8 +5,8 @@ interface BaseViewProps {
 }
 
 const BaseView = styled.div.attrs<BaseViewProps>(({ showShadow = false }) => ({
-  className: `h-full px-4 py-2 bg-white bg-opacity-75 rounded ${
-    showShadow ? '' : ''
+  className: `h-full px-4 py-2 bg-white bg-opacity-75 overflow-auto transition-shadow ${
+    showShadow ? 'shadow-md rounded-md' : ''
   }`,
 }))``;
 
