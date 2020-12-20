@@ -147,7 +147,7 @@ class GraphView extends Component {
                 </div>
               </div>
             </div>
-            <p className="text-center text-gray-600 mb-3">
+            <p className="text-center text-gray-600 mb-3 text-sm">
               Click the button in the top right to switch to the graphing view!
             </p>
           </div>
