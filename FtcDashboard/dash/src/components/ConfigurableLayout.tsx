@@ -1,5 +1,5 @@
 import React, { ReactElement, useState, useEffect, useRef } from 'react';
-import { Responsive, WidthProvider, Layout, Layouts } from 'react-grid-layout';
+import { Responsive, WidthProvider, Layout } from 'react-grid-layout';
 import { v4 as uuidv4 } from 'uuid';
 
 import 'react-grid-layout/css/styles.css';
@@ -54,6 +54,7 @@ const Container = styled.div`
 
   height: calc(100vh - 58px);
 
+  overflow-x: hidden;
   overflow-y: scroll;
   padding-bottom: 1em;
 
@@ -185,28 +186,32 @@ export default function ConfigurableLayout() {
       LOCAL_STORAGE_LAYOUT_KEY,
     );
 
-    if (initialLayoutStorageValue !== null) {
-      setGridItems(JSON.parse(initialLayoutStorageValue));
-    } else {
-      // This assumes that containerRef isn't null on render
-      // This works completely fine now as containerRef is set
-      // However, I don't know if this works with concurrent mode
-      // This project doesn't use concurrent mode since it's in beta
-      // Check back here if concurrent mode is ever enabled
-      const height = containerRef.current?.clientHeight;
-
-      if (height) {
-        if (height > HeightBreakpoints.TALL) {
-          setGridItems(defaultGridTall);
-        } else if (height > HeightBreakpoints.MEDIUM) {
-          setGridItems(defaultGridMedium);
-        } else {
-          setGridItems(defaultGrid);
-        }
+    const newGridItems = (() => {
+      if (initialLayoutStorageValue !== null) {
+        return JSON.parse(initialLayoutStorageValue);
       } else {
-        setGridItems(defaultGrid);
+        // This assumes that containerRef isn't null on render
+        // This works completely fine now as containerRef is set
+        // However, I don't know if this works with concurrent mode
+        // This project doesn't use concurrent mode since it's in beta
+        // Check back here if concurrent mode is ever enabled
+        const height = containerRef.current?.clientHeight;
+
+        if (height) {
+          if (height > HeightBreakpoints.TALL) {
+            return defaultGridTall;
+          } else if (height > HeightBreakpoints.MEDIUM) {
+            return defaultGridMedium;
+          } else {
+            return defaultGrid;
+          }
+        } else {
+          return defaultGrid;
+        }
       }
-    }
+    })();
+    setIsLayoutLocked(!newGridItems.every((e: any) => e.layout.isResizable));
+    setGridItems(newGridItems);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -214,18 +219,20 @@ export default function ConfigurableLayout() {
   useEffect(() => {
     window.localStorage.setItem(
       LOCAL_STORAGE_LAYOUT_KEY,
-      JSON.stringify(gridItems),
+      JSON.stringify([...gridItems]),
     );
   }, [gridItems]);
 
   const toggleLayoutLocked = () => {
-    setIsLayoutLocked(!isLayoutLocked);
+    const isLocked = isLayoutLocked;
+
+    setIsLayoutLocked(!isLocked);
     setGridItems(
       gridItems.map((i) => {
         i.layout = {
           ...i.layout,
-          isResizable: !i.layout.isResizable,
-          isDraggable: !i.layout.isDraggable,
+          isResizable: isLocked,
+          isDraggable: isLocked,
         };
         return i;
       }),
@@ -250,7 +257,6 @@ export default function ConfigurableLayout() {
           .filter((e) => e.layout.y + e.layout.h === gridMaxY)
           .map((e) => e.layout.x + e.layout.w),
       );
-      console.log(maxX);
       if (maxX <= COLS - ITEM_WIDTH) {
         desiredX = maxX;
         gridMaxY -= ITEM_HEIGHT;
@@ -267,8 +273,8 @@ export default function ConfigurableLayout() {
           y: gridMaxY,
           w: ITEM_WIDTH,
           h: ITEM_HEIGHT,
-          isDraggable: true,
-          isResizable: true,
+          isDraggable: !isLayoutLocked,
+          isResizable: !isLayoutLocked,
         },
       },
     ]);
@@ -278,7 +284,7 @@ export default function ConfigurableLayout() {
     setGridItems(gridItems.filter((e) => e.id != id));
   };
 
-  const onLayoutChange = (layout: Layout[], layouts: Layouts) => {
+  const onLayoutChange = (layout: Layout[]) => {
     setGridItems(
       gridItems.map((e) => {
         const newLayoutValue = layout.find((i) => i.i == e.id);
@@ -303,7 +309,7 @@ export default function ConfigurableLayout() {
   return (
     <Container ref={containerRef}>
       {gridItems.length == 0 ? (
-        <div className="text-center mt-16 bg-white p-12">
+        <div className="text-center mt-16 bg-gray-100 p-12">
           <h3 className="text-2xl">Your custom layout is empty!</h3>
           <p className="text-gray-600 mt-3">
             Press the floating pencil icon near the bottom left
@@ -325,11 +331,12 @@ export default function ConfigurableLayout() {
           lg: gridItems.map((item) => ({ i: item.id, ...item.layout })),
         }}
         onLayoutChange={onLayoutChange}
+        margin={[0, 0]}
       >
         {gridItems.map((item) => (
           <div key={item.id}>
             {React.cloneElement(ViewMap[item.view], {
-              isDraggable: !isLayoutLocked,
+              isDraggable: item.layout.isDraggable,
               showShadow: true,
             })}
             {isInDeleteMode ? (
