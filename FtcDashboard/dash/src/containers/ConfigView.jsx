@@ -45,8 +45,8 @@ const ConfigView = ({
           <Icon icon="refresh" size="small" onClick={onRefresh} />
         </IconGroup>
       </div>
-      <div>
-        <table className="block h-full overflow-auto">
+      <div style={{ height: 'calc(100% - 52px', overflow: 'auto' }}>
+        <table className="block h-full">
           <tbody>
             {sortedKeys.map((key) => (
               <CustomVariable

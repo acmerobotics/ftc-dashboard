@@ -345,7 +345,11 @@ export default function ConfigurableLayout() {
   return (
     <Container ref={containerRef} isLayoutLocked={isLayoutLocked}>
       {gridItems.length == 0 ? (
-        <div className="text-center mt-16 bg-gray-100 p-12">
+        <div
+          className={`text-center mt-16 p-12 transition-colors ${
+            isLayoutLocked ? 'bg-white' : 'bg-gray-100'
+          }`}
+        >
           <h3 className="text-2xl">Your custom layout is empty!</h3>
           <p className="text-gray-600 mt-3">
             Press the floating pencil icon near the bottom left
