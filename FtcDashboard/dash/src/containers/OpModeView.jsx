@@ -6,6 +6,7 @@ import { initOpMode, startOpMode, stopOpMode } from '../actions/opmode';
 import OpModeStatus from '../enums/OpModeStatus';
 import Icon from '../components/Icon';
 import IconGroup from '../components/IconGroup';
+import BaseView from './BaseView';
 
 const STOP_OP_MODE = '$Stop$Robot$';
 
@@ -114,7 +115,7 @@ class OpModeView extends React.Component {
 
     if (!available) {
       return (
-        <div className="h-full px-4 py-2 bg-white bg-opacity-75 rounded overflow-hidden shadow-md">
+        <BaseView showShadow={this.props.showShadow}>
           <div className="flex justify-between items-center" />
           <h2
             className={`${
@@ -124,12 +125,12 @@ class OpModeView extends React.Component {
             Op Mode
           </h2>
           <p>Event loop detached</p>
-        </div>
+        </BaseView>
       );
     }
 
     return (
-      <div className="h-full px-4 py-2 bg-white bg-opacity-75 rounded overflow-hidden shadow-md">
+      <BaseView showShadow={this.props.showShadow}>
         <div className="flex justify-between items-center">
           <h2
             className={`${
@@ -172,7 +173,7 @@ class OpModeView extends React.Component {
         {warningMessage !== '' ? (
           <p className="warning mt-5">Warning: {warningMessage}</p>
         ) : null}
-      </div>
+      </BaseView>
     );
   }
 }
@@ -187,7 +188,9 @@ OpModeView.propTypes = {
   dispatch: PropTypes.func.isRequired,
   gamepad1Connected: PropTypes.bool.isRequired,
   gamepad2Connected: PropTypes.bool.isRequired,
+
   isDraggable: PropTypes.bool,
+  showShadow: PropTypes.bool,
 };
 
 const mapStateToProps = ({ status, gamepad }) => ({

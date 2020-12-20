@@ -330,6 +330,7 @@ export default function ConfigurableLayout() {
           <div key={item.id}>
             {React.cloneElement(ViewMap[item.view], {
               isDraggable: !isLayoutLocked,
+              showShadow: true,
             })}
             {isInDeleteMode ? (
               <DeleteModeChild>

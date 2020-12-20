@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
+import BaseView from './BaseView';
 import MultipleCheckbox from '../components/MultipleCheckbox';
 import GraphCanvas from './GraphCanvas';
 import IconGroup from '../components/IconGroup';
@@ -68,7 +69,10 @@ class GraphView extends Component {
     ]);
 
     return (
-      <div className="h-full px-4 py-2 bg-white bg-opacity-75 rounded overflow-hidden shadow-md">
+      <BaseView
+        className="flex flex-col overflow-auto"
+        showShadow={this.props.showShadow}
+      >
         <div className="flex justify-between items-center">
           <h2
             className={`${
@@ -138,14 +142,16 @@ class GraphView extends Component {
             )}
           </div>
         )}
-      </div>
+      </BaseView>
     );
   }
 }
 
 GraphView.propTypes = {
   telemetry: telemetryType.isRequired,
+
   isDraggable: PropTypes.bool,
+  showShadow: PropTypes.bool,
 };
 
 const mapStateToProps = ({ telemetry }) => ({ telemetry });

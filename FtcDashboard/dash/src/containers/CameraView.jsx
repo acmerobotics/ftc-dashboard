@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import AutoFitCanvas from '../components/AutoFitCanvas';
 import IconGroup from '../components/IconGroup';
 import Icon from '../components/Icon';
+import BaseView from './BaseView';
 
 class CameraView extends React.Component {
   constructor(props) {
@@ -63,7 +64,7 @@ class CameraView extends React.Component {
 
   render() {
     return (
-      <div className="px-4 py-2 bg-white bg-opacity-75 rounded overflow-hidden shadow-md">
+      <BaseView showShadow={this.props.showShadow}>
         <div className="flex justify-between items-center">
           <h2
             className={`${
@@ -85,14 +86,16 @@ class CameraView extends React.Component {
         <div className="canvas-container">
           <AutoFitCanvas ref={this.canvasRef} onResize={this.renderImage} />
         </div>
-      </div>
+      </BaseView>
     );
   }
 }
 
 CameraView.propTypes = {
   imageStr: PropTypes.string.isRequired,
+
   isDraggable: PropTypes.bool,
+  showShadow: PropTypes.bool,
 };
 
 const mapStateToProps = ({ camera }) => ({

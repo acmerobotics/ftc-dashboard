@@ -29,7 +29,7 @@ class Dashboard extends Component {
       <div>
         <header className="bg-blue-600 border-b-6 border-red-500 px-3 py-1 text-white">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl">FTC Dashboard</h1>
+            <h1 className="text-2xl font-bold">FTC Dashboard</h1>
             <IconGroup>
               <select
                 className="text-black text-sm rounded py-1 bg-blue-100 border-blue-300"

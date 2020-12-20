@@ -1,10 +1,11 @@
-import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 import { telemetryType } from './types';
 
-const TelemetryView = ({ telemetry, isDraggable }) => {
+import BaseView from './BaseView';
+
+const TelemetryView = ({ telemetry, isDraggable, showShadow }) => {
   const latestPacket = telemetry[telemetry.length - 1];
   const telemetryLines = Object.keys(latestPacket.data).map((key) => (
     <span key={key}>
@@ -21,7 +22,7 @@ const TelemetryView = ({ telemetry, isDraggable }) => {
   ));
 
   return (
-    <div className="h-full px-4 py-2 bg-white bg-opacity-75 rounded overflow-hidden shadow-md">
+    <BaseView showShadow={showShadow}>
       <h2
         className={`${
           isDraggable ? 'grab-handle' : ''
@@ -31,13 +32,15 @@ const TelemetryView = ({ telemetry, isDraggable }) => {
       </h2>
       <p>{telemetryLines}</p>
       <p>{telemetryLog}</p>
-    </div>
+    </BaseView>
   );
 };
 
 TelemetryView.propTypes = {
   telemetry: telemetryType.isRequired,
+
   isDraggable: PropTypes.bool,
+  showShadow: PropTypes.bool,
 };
 
 const mapStateToProps = ({ telemetry }) => ({ telemetry });
