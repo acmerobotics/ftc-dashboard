@@ -14,6 +14,9 @@ module.exports = {
       borderWidth: {
         6: '6px',
       },
+      fontFamily: {
+        sans: ['Roboto'],
+      }
     },
   },
   variants: {
