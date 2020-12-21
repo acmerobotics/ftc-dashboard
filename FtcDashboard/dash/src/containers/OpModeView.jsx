@@ -6,7 +6,7 @@ import { initOpMode, startOpMode, stopOpMode } from '../actions/opmode';
 import OpModeStatus from '../enums/OpModeStatus';
 import Icon from '../components/Icon';
 import IconGroup from '../components/IconGroup';
-import BaseView from './BaseView';
+import BaseView, { BaseViewHeading } from './BaseView';
 
 const STOP_OP_MODE = '$Stop$Robot$';
 
@@ -117,13 +117,9 @@ class OpModeView extends React.Component {
       return (
         <BaseView showShadow={this.props.showShadow}>
           <div className="flex justify-between items-center" />
-          <h2
-            className={`${
-              this.props.isDraggable ? 'grab-handle' : ''
-            } text-xl w-full py-2 font-bold`}
-          >
+          <BaseViewHeading isDraggable={this.props.isDraggable}>
             Op Mode
-          </h2>
+          </BaseViewHeading>
           <p>Event loop detached</p>
         </BaseView>
       );
@@ -132,13 +128,9 @@ class OpModeView extends React.Component {
     return (
       <BaseView showShadow={this.props.showShadow}>
         <div className="flex justify-between items-center">
-          <h2
-            className={`${
-              this.props.isDraggable ? 'grab-handle' : ''
-            } text-xl w-full py-2 font-bold`}
-          >
+          <BaseViewHeading isDraggable={this.props.isDraggable}>
             Op Mode
-          </h2>
+          </BaseViewHeading>
           <IconGroup>
             <Icon
               opacity={gamepad1Connected ? 1.0 : 0.3}

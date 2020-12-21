@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
-import BaseView from './BaseView';
+import BaseView, { BaseViewHeading } from './BaseView';
 import MultipleCheckbox from '../components/MultipleCheckbox';
 import GraphCanvas from './GraphCanvas';
 import Icon from '../components/Icon';
@@ -75,13 +75,9 @@ class GraphView extends Component {
         showShadow={this.props.showShadow}
       >
         <div className="flex justify-between items-center">
-          <h2
-            className={`${
-              this.props.isDraggable ? 'grab-handle' : ''
-            } text-xl w-full py-2 font-bold`}
-          >
+          <BaseViewHeading isDraggable={this.props.isDraggable}>
             Graph
-          </h2>
+          </BaseViewHeading>
           <button
             onClick={this.handleClick}
             className="rounded-md text-gray-800 w-8 h-8 flex justify-center items-center border border-transparent hover:border-gray-500 transition-colors"

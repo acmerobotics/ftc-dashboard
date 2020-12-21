@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import AutoFitCanvas from '../components/AutoFitCanvas';
 import IconGroup from '../components/IconGroup';
 import Icon from '../components/Icon';
-import BaseView from './BaseView';
+import BaseView, { BaseViewHeading } from './BaseView';
 
 class CameraView extends React.Component {
   constructor(props) {
@@ -66,13 +66,9 @@ class CameraView extends React.Component {
     return (
       <BaseView showShadow={this.props.showShadow}>
         <div className="flex justify-between items-center">
-          <h2
-            className={`${
-              this.props.isDraggable ? 'grab-handle' : ''
-            } text-xl w-full py-2 font-bold`}
-          >
+          <BaseViewHeading isDraggable={this.props.isDraggable}>
             Camera
-          </h2>
+          </BaseViewHeading>
           <IconGroup>
             <Icon
               onClick={() =>

@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import CustomVariable from './CustomVariable';
 import IconGroup from '../components/IconGroup';
 import Icon from '../components/Icon';
-import BaseView from './BaseView';
+import BaseView, { BaseViewHeading } from './BaseView';
 
 import {
   updateConfig,
@@ -29,13 +29,9 @@ const ConfigView = ({
   return (
     <BaseView className="overflow-hidden pr-0 pb-0" showShadow={showShadow}>
       <div className="flex justify-between items-center">
-        <h2
-          className={`${
-            isDraggable ? 'grab-handle' : ''
-          } text-xl w-full py-2 font-bold`}
-        >
+        <BaseViewHeading isDraggable={isDraggable}>
           Configuration
-        </h2>
+        </BaseViewHeading>
         <IconGroup>
           <Icon
             icon="save"
