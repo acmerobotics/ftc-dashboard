@@ -99,7 +99,7 @@ const LAYOUT_DETAILS: { [key in LayoutPreset]: Layout } = {
     ),
   },
   [LayoutPreset.CONFIGURABLE]: {
-    name: 'Configurable',
+    name: 'Custom',
     content: <ConfigurableLayout />,
   },
 };
