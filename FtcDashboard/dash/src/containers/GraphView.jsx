@@ -90,9 +90,7 @@ class GraphView extends Component {
           <div className="canvas-container">
             {this.state.keys.length === 0 ? (
               <div className="absolute top-0 left-0 w-full h-full flex justify-center items-center pointer-events-none">
-                <p className="text-center  mt-9">
-                  No variables selected to graph
-                </p>
+                <p className="text-center">No variables selected to graph</p>
               </div>
             ) : (
               <GraphCanvas
@@ -153,11 +151,13 @@ class GraphView extends Component {
             </p>
           </div>
         ) : (
-          <p className="text-center mt-10">
-            Graph related telemetry packets have not yet been received
-            <br />
-            They will appear here once sent
-          </p>
+          <div className="flex-grow flex items-center justify-center">
+            <p className="text-center">
+              Graph related telemetry packets have not yet been received
+              <br />
+              They will appear here once sent
+            </p>
+          </div>
         )}
       </BaseView>
     );

@@ -71,7 +71,7 @@ class GraphCanvas extends React.Component {
         </div>
         <div className="absolute top-0 left-0 w-full h-full flex justify-center items-center pointer-events-none">
           {this.graph === null || !this.graph?.hasGraphableContent ? (
-            <p className="text-center  mt-9">No content to graph</p>
+            <p className="text-center">No content to graph</p>
           ) : null}
         </div>
       </div>
