@@ -12,7 +12,7 @@ const BaseViewHeading = styled.h2.attrs<{ isDraggable: boolean }>(
   ({ isDraggable = false }) => ({
     className: `${
       isDraggable ? 'grab-handle' : ''
-    } text-xl w-full py-2 font-bold`,
+    } text-xl w-full py-2 font-medium`,
   }),
 )``;
 

@@ -101,7 +101,9 @@ class CustomVariable extends React.Component {
               )}
             </div>
             <div className="flex justify-between items-center">
-              <h3 className={this.state.expanded ? 'font-bold' : 'font-normal'}>
+              <h3
+                className={this.state.expanded ? 'font-medium' : 'font-normal'}
+              >
                 {name}
               </h3>
             </div>

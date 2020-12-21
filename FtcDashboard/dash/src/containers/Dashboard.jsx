@@ -27,9 +27,9 @@ class Dashboard extends Component {
   render() {
     return (
       <div>
-        <header className="bg-blue-600 border-b-6 border-red-500 px-3 py-1 text-white">
+        <header className="bg-blue-600 px-3 py-1 text-white">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold">FTC Dashboard</h1>
+            <h1 className="text-2xl font-medium">FTC Dashboard</h1>
             <IconGroup>
               <select
                 className="text-black text-sm rounded py-1 bg-blue-100 border-blue-300"

@@ -59,7 +59,7 @@ const Container = styled.div.attrs<{ isLayoutLocked: boolean }>(
 )<{ isLayoutLocked: boolean }>`
   position: relative;
 
-  height: calc(100vh - 58px);
+  height: calc(100vh - 52px);
 
   overflow-x: hidden;
   overflow-y: scroll;
