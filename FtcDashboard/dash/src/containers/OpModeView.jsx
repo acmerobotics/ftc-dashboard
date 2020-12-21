@@ -2,6 +2,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
+import styled from 'styled-components';
+
 import { initOpMode, startOpMode, stopOpMode } from '../actions/opmode';
 import OpModeStatus from '../enums/OpModeStatus';
 import Icon from '../components/Icon';
@@ -9,6 +11,10 @@ import IconGroup from '../components/IconGroup';
 import BaseView, { BaseViewHeading } from './BaseView';
 
 const STOP_OP_MODE = '$Stop$Robot$';
+
+const ActionButton = styled.button.attrs({
+  className: 'ml-3 py-1 px-4 border rounded-md shadow-md',
+})``;
 
 class OpModeView extends React.Component {
   constructor(props) {
@@ -46,36 +52,36 @@ class OpModeView extends React.Component {
 
   renderInitButton() {
     return (
-      <button
-        className="ml-3 bg-blue-200 rounded-md py-1 px-4 border border-blue-300 shadow-md"
+      <ActionButton
+        className="bg-blue-200 border-blue-300"
         onClick={() =>
           this.props.dispatch(initOpMode(this.state.selectedOpMode))
         }
       >
         Init
-      </button>
+      </ActionButton>
     );
   }
 
   renderStartButton() {
     return (
-      <button
-        className="ml-3 bg-green-200 rounded-md py-1 px-2 border border-green-300 shadow-md"
+      <ActionButton
+        className="bg-green-200 border-green-300"
         onClick={() => this.props.dispatch(startOpMode())}
       >
         Start
-      </button>
+      </ActionButton>
     );
   }
 
   renderStopButton() {
     return (
-      <button
-        className="ml-3 bg-red-200 rounded-md py-1 px-2 border border-red-300 shadow-md"
+      <ActionButton
+        className="bg-red-200 border-red-300"
         onClick={() => this.props.dispatch(stopOpMode())}
       >
         Stop
-      </button>
+      </ActionButton>
     );
   }
 
