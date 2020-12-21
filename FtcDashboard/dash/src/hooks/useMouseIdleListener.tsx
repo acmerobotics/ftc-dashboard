@@ -40,9 +40,7 @@ export default function useMouseIdleListener(props: Props) {
       ) {
         const timeout = props.timeout ?? 5000;
 
-        if (timeoutTimer.current !== null) {
-          clearInterval(timeoutTimer.current);
-        }
+        if (timeoutTimer.current !== null) clearInterval(timeoutTimer.current);
 
         timeoutTimer.current = setTimeout(() => setIsIdle(true), timeout);
         setIsIdle(false);
@@ -51,12 +49,10 @@ export default function useMouseIdleListener(props: Props) {
 
     document.body.appendChild(listenerElement);
     document.body.addEventListener('mousemove', listenMouseEvents);
-    // listenerElement.addEventListener('mouseenter', listenMouseEvents);
 
     return () => {
       document.body.removeChild(listenerElement);
       document.body.removeEventListener('mousemove', listenMouseEvents);
-      // listenerElement.removeEventListener('mouseenter', listenMouseEvents);
       if (timeoutTimer.current !== null) clearTimeout(timeoutTimer.current);
     };
   }, [listenerElement, props.timeout]);

@@ -198,7 +198,6 @@ export default function ConfigurableLayout() {
 
   const [gridItems, setGridItems] = useState(DEFAULT_GRID);
 
-  const [isFabOpen, setIsFabOpen] = useState(false);
   const [isLayoutLocked, setIsLayoutLocked] = useState(true);
   const [isInDeleteMode, setIsInDeleteMode] = useState(false);
   const [isShowingViewPicker, setIsShowingViewPicker] = useState(false);
@@ -252,7 +251,6 @@ export default function ConfigurableLayout() {
 
   useEffect(() => {
     if (isFabIdle) {
-      setIsFabOpen(false);
       setIsShowingViewPicker(false);
     }
   }, [isFabIdle]);
@@ -340,8 +338,6 @@ export default function ConfigurableLayout() {
     );
 
     if (toBeLocked) setIsShowingViewPicker(false);
-
-    setIsFabOpen(!toBeLocked);
   };
 
   return (
@@ -415,6 +411,7 @@ export default function ConfigurableLayout() {
           openMargin="5em"
           fineAdjustIconX="2%"
           fineAdjustIconY="2%"
+          toolTipText="Add Item"
           clickEvent={() => setIsShowingViewPicker(!isShowingViewPicker)}
         >
           <AddSVG className="text-white w-6 h-6" />
@@ -426,6 +423,7 @@ export default function ConfigurableLayout() {
           openMargin="5em"
           fineAdjustIconX="0"
           fineAdjustIconY="0"
+          toolTipText="Delete Item"
           clickEvent={() => setIsInDeleteMode(!isInDeleteMode)}
         >
           {isInDeleteMode ? (
@@ -441,6 +439,7 @@ export default function ConfigurableLayout() {
           openMargin="5em"
           fineAdjustIconX="8%"
           fineAdjustIconY="-2%"
+          toolTipText="Clear Layout"
           clickEvent={() => setGridItems([])}
         >
           <DeleteSweepSVG className="w-5 h-5" />

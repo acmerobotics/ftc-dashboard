@@ -1,6 +1,8 @@
 import { ReactNode, FunctionComponent } from 'react';
 import styled from 'styled-components';
 
+import useDelayedTooltip from '../../hooks/useDelayedTooltip';
+
 interface RadialFabChildProps {
   bgColor: string;
   borderColor: string;
@@ -16,13 +18,15 @@ interface RadialFabChildProps {
 
   isOpen?: boolean;
 
+  toolTipText?: string;
+
   clickEvent?: (e: React.MouseEvent) => void;
 
   children?: ReactNode;
 }
 
 const ButtonContainer = styled.button.attrs({
-  className: 'focus:outline-none',
+  className: 'focus:outline-none relative',
 })<RadialFabChildProps>`
   position: absolute;
   top: 50%;
@@ -146,12 +150,23 @@ const SVGIcon = styled.div<RadialFabChildProps>`
     }deg)`};
 `;
 
+const ToolTip = styled.span.attrs<{ isShowing: boolean }>(({ isShowing }) => ({
+  className: `rounded-md px-3 py-1 absolute w-max bg-gray-800 bg-opacity-80 text-white text-sm pointer-events-none transform transition ${
+    isShowing ? '-translate-y-11 opacity-100' : '-translate-y-9 opacity-0'
+  }`,
+}))<{ isShowing: boolean }>``;
+
 const RadialFabChild: FunctionComponent<RadialFabChildProps> = (
   props: RadialFabChildProps,
 ) => {
+  const { isShowingTooltip, ref } = useDelayedTooltip(0.5);
+
   return (
-    <ButtonContainer {...props} onClick={props.clickEvent}>
+    <ButtonContainer {...props} onClick={props.clickEvent} ref={ref}>
       <SVGIcon {...props}>{props.children}</SVGIcon>
+      {props.toolTipText !== '' ? (
+        <ToolTip isShowing={isShowingTooltip}>{props.toolTipText}</ToolTip>
+      ) : null}
     </ButtonContainer>
   );
 };
@@ -164,6 +179,8 @@ RadialFabChild.defaultProps = {
   fineAdjustIconY: '0',
 
   openMargin: '0',
+
+  toolTipText: '',
 
   isOpen: false,
 };
