@@ -5,7 +5,6 @@ import { connect } from 'react-redux';
 import BaseView, { BaseViewHeading } from './BaseView';
 import MultipleCheckbox from '../components/MultipleCheckbox';
 import GraphCanvas from './GraphCanvas';
-import Icon from '../components/Icon';
 import TextInput from '../components/inputs/TextInput';
 
 import { ReactComponent as ChartSVG } from '../assets/icons/chart.svg';
@@ -150,14 +149,14 @@ class GraphView extends Component {
               </div>
             </div>
             <p className="text-center mb-3 text-sm">
-              Click the button in the top right to switch to the graphing view!
+              Click the button in the upper right to switch to the graphing view
             </p>
           </div>
         ) : (
           <p className="text-center mt-10">
-            Graph related telemetry packets have not yet been received :(
+            Graph related telemetry packets have not yet been received
             <br />
-            They will appear here once sent!
+            They will appear here once sent
           </p>
         )}
       </BaseView>
