@@ -112,6 +112,8 @@ export default class Graph {
     this.options = cloneDeep(DEFAULT_OPTIONS);
     Object.assign(this.options, options || {});
 
+    this.hasGraphableContent = false;
+
     this.clear();
   }
 
@@ -119,6 +121,8 @@ export default class Graph {
     this.time = [];
     this.datasets = [];
     this.lastSampleTime = 0;
+
+    this.hasGraphableContent = false;
   }
 
   addSample(sample) {
@@ -193,6 +197,7 @@ export default class Graph {
     const width = this.canvas.width / devicePixelRatio;
     const height = this.canvas.height / devicePixelRatio;
     const keyHeight = this.renderKey(0, 0, width);
+
     this.renderGraph(0, keyHeight, width, height - keyHeight);
   }
 
@@ -228,9 +233,14 @@ export default class Graph {
 
   renderGraph(x, y, width, height) {
     const o = this.options;
+
     if (this.datasets.length === 0 || this.datasets[0].data.length === 0) {
+      this.hasGraphableContent = false;
+
       return;
     }
+
+    this.hasGraphableContent = true;
 
     // remove old points
     const now = Date.now();

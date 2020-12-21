@@ -91,14 +91,22 @@ class GraphView extends Component {
         </div>
         {this.state.graphing ? (
           <div className="canvas-container">
-            <GraphCanvas
-              data={graphData}
-              options={{
-                windowMs: this.state.windowMs.valid
-                  ? this.state.windowMs.value
-                  : DEFAULT_OPTIONS.windowMs,
-              }}
-            />
+            {this.state.keys.length === 0 ? (
+              <div className="absolute top-0 left-0 w-full h-full flex justify-center items-center pointer-events-none">
+                <p className="text-center  mt-9">
+                  No variables selected to graph
+                </p>
+              </div>
+            ) : (
+              <GraphCanvas
+                data={graphData}
+                options={{
+                  windowMs: this.state.windowMs.valid
+                    ? this.state.windowMs.value
+                    : DEFAULT_OPTIONS.windowMs,
+                }}
+              />
+            )}
           </div>
         ) : Object.keys(latestPacket.data).length > 0 ? (
           <div className="flex-grow flex flex-col justify-between">

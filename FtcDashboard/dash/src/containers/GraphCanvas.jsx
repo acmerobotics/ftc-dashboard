@@ -60,12 +60,20 @@ class GraphCanvas extends React.Component {
   render() {
     return (
       <div className="h-full flex justify-center items-center">
-        <AutoFitCanvas ref={this.canvasRef} />
-        {this.props.data.every((e) => e.length === 1) ? (
-          <div className="absolute top-0 left-0 w-full h-full flex justify-center items-center pointer-events-none">
-            <p className="text-center  mt-9">No variables selected to graph</p>
-          </div>
-        ) : null}
+        <div
+          className={`${
+            this.graph === null || !this.graph?.hasGraphableContent
+              ? 'hidden'
+              : ''
+          } w-full h-full`}
+        >
+          <AutoFitCanvas ref={this.canvasRef} />
+        </div>
+        <div className="absolute top-0 left-0 w-full h-full flex justify-center items-center pointer-events-none">
+          {this.graph === null || !this.graph?.hasGraphableContent ? (
+            <p className="text-center  mt-9">No content to graph</p>
+          ) : null}
+        </div>
       </div>
     );
   }
