@@ -19,6 +19,7 @@
     /* Safari, Android, iOS */
       url('assets/fonts/roboto-v20-latin-300.svg#Roboto') format('svg'); /* Legacy iOS */
 }
+
 /* roboto-regular - latin */
 @font-face {
   font-family: 'Roboto';
@@ -37,6 +38,7 @@
     /* Safari, Android, iOS */
       url('assets/fonts/roboto-v20-latin-regular.svg#Roboto') format('svg'); /* Legacy iOS */
 }
+
 /* roboto-500 - latin */
 @font-face {
   font-family: 'Roboto';
@@ -54,6 +56,7 @@
     /* Safari, Android, iOS */
       url('assets/fonts/roboto-v20-latin-500.svg#Roboto') format('svg'); /* Legacy iOS */
 }
+
 /* roboto-700 - latin */
 @font-face {
   font-family: 'Roboto';
@@ -82,95 +85,122 @@ body {
   height: calc(100vh - 60px);
   overflow: auto;
 }
+
 .tile {
   border: 1px solid #eee;
 }
+
 .tile > div {
   height: 100%;
   overflow: auto;
 }
+
 table {
   margin: 0;
   border-collapse: collapse;
   text-align: left;
 }
+
 table table {
   margin-left: 24px;
 }
+
 td {
   padding: 4px;
 }
+
 input {
   font-size: inherit;
 }
+
 .option-header {
   display: flex;
 }
+
 .icon-group {
   display: flex;
   align-items: center;
   order: 10;
 }
+
 .icon {
   background-repeat: round;
   margin: 4px;
 }
+
 .icon.tiny {
   width: 16px;
   height: 16px;
 }
+
 .icon.small {
   width: 24px;
   height: 24px;
 }
+
 .icon.large {
   width: 36px;
   height: 36px;
 }
+
 .save {
   background-image: url('assets/icons/save.svg');
 }
+
 .wifi {
   background-image: url('assets/icons/wifi.svg');
 }
+
 .no-wifi {
   background-image: url('assets/icons/wifi_off.svg');
 }
+
 .chart {
   background-image: url('assets/icons/chart.svg');
 }
+
 .close {
   background-image: url('assets/icons/close.svg');
 }
+
 .refresh {
   background-image: url('assets/icons/refresh.svg');
 }
+
 .add {
   background-image: url('assets/icons/add.svg');
 }
+
 .remove {
   background-image: url('assets/icons/remove.svg');
 }
+
 .expand-less {
   background-image: url('assets/icons/expand_less.svg');
 }
+
 .expand-more {
   background-image: url('assets/icons/expand_more.svg');
 }
+
 .gamepad {
   background-image: url('assets/icons/gamepad.svg');
 }
+
 .multiple-checkbox {
   overflow-y: scroll;
 }
+
 .error {
   font-weight: bold;
   color: red;
 }
+
 .warning {
   font-weight: bold;
   color: orange;
 }
+
 .canvas-container {
   height: calc(100% - 44px);
   overflow: hidden;
