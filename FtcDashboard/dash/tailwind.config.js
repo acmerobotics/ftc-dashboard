@@ -105,6 +105,7 @@ module.exports = {
         red: colors.rose,
         yellow: colors.amber,
         gray: colors.blueGray,
+        orange: colors.orange,
       },
       fontFamily: {
         sans: ['Roboto'],

@@ -16,10 +16,8 @@ export default function useDelayedTooltip(delay: number) {
 
         timeoutTimer.current = setTimeout(() => {
           if (isMouseStillIn.current) {
-            console.log('brooo');
             setIsShowingTooltip(true);
           } else {
-            console.log('braaa');
             setIsShowingTooltip(false);
           }
         }, delay * 1000);

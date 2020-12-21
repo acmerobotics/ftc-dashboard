@@ -441,7 +441,7 @@ export default function ConfigurableLayout() {
       </RadialFab>
       <ViewPicker
         isOpen={isShowingViewPicker}
-        bottom="11em"
+        bottom="13em"
         right="1.5em"
         clickEvent={addItem}
       />
