@@ -28,7 +28,7 @@ import DeleteXSVGURL, {
 import { ReactComponent as LockSVG } from '../assets/icons/lock.svg';
 import { ReactComponent as LockOpenSVG } from '../assets/icons/lock_open.svg';
 
-const ViewMap: { [key in ConfigurableView]: ReactElement } = {
+const VIEW_MAP: { [key in ConfigurableView]: ReactElement } = {
   [ConfigurableView.FIELD_VIEW]: <FieldView />,
   [ConfigurableView.GRAPH_VIEW]: <GraphView />,
   [ConfigurableView.CONFIG_VIEW]: <ConfigView />,
@@ -37,12 +37,12 @@ const ViewMap: { [key in ConfigurableView]: ReactElement } = {
   [ConfigurableView.OPMODE_VIEW]: <OpModeView />,
 };
 
-const HeightBreakpoints = {
+const HEIGHT_BREAKPOINTS = {
   MEDIUM: 730,
   TALL: 1200,
 };
 
-const ColBreakpoints = {
+const COL_BREAKPOINTS = {
   lg: 6,
   md: 6,
   sm: 6,
@@ -89,9 +89,7 @@ const DeleteModeChild = styled.div`
 const DeleteModeButton = styled.button.attrs({
   className: 'focus:outline-none focus:ring',
 })`
-  background: url(${DeleteXSVGURL});
-  background-repeat: no-repeat;
-  background-position: center;
+  background: url(${DeleteXSVGURL}) no-repeat center;
   background-size: 3.5em;
 
   filter: invert(0.9);
@@ -122,7 +120,7 @@ interface GridItemLayoutType {
   isResizable: boolean;
 }
 
-const defaultGrid: GridItemType[] = [
+const DEFAULT_GRID: GridItemType[] = [
   {
     id: uuidv4(),
     view: ConfigurableView.FIELD_VIEW,
@@ -145,7 +143,7 @@ const defaultGrid: GridItemType[] = [
   },
 ];
 
-const defaultGridMedium: GridItemType[] = [
+const DEFAULT_GRID_MEDIUM: GridItemType[] = [
   {
     id: uuidv4(),
     view: ConfigurableView.FIELD_VIEW,
@@ -168,7 +166,7 @@ const defaultGridMedium: GridItemType[] = [
   },
 ];
 
-const defaultGridTall: GridItemType[] = [
+const DEFAULT_GRID_TALL: GridItemType[] = [
   {
     id: uuidv4(),
     view: ConfigurableView.FIELD_VIEW,
@@ -191,14 +189,14 @@ const defaultGridTall: GridItemType[] = [
   },
 ];
 
-const LOCAL_STORAGE_LAYOUT_KEY = 'configurableStorageLayout';
+const LOCAL_STORAGE_LAYOUT_KEY = 'configurableLayoutStorage';
 
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
 export default function ConfigurableLayout() {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const [gridItems, setGridItems] = useState(defaultGrid);
+  const [gridItems, setGridItems] = useState(DEFAULT_GRID);
 
   const [isFabOpen, setIsFabOpen] = useState(false);
   const [isLayoutLocked, setIsLayoutLocked] = useState(true);
@@ -229,15 +227,15 @@ export default function ConfigurableLayout() {
         const height = containerRef.current?.clientHeight;
 
         if (height) {
-          if (height > HeightBreakpoints.TALL) {
-            return defaultGridTall;
-          } else if (height > HeightBreakpoints.MEDIUM) {
-            return defaultGridMedium;
+          if (height > HEIGHT_BREAKPOINTS.TALL) {
+            return DEFAULT_GRID_TALL;
+          } else if (height > HEIGHT_BREAKPOINTS.MEDIUM) {
+            return DEFAULT_GRID_MEDIUM;
           } else {
-            return defaultGrid;
+            return DEFAULT_GRID;
           }
         } else {
-          return defaultGrid;
+          return DEFAULT_GRID;
         }
       }
     })();
@@ -352,7 +350,7 @@ export default function ConfigurableLayout() {
         >
           <h3 className="text-2xl">Your custom layout is empty!</h3>
           <p className="text-gray-600 mt-3">
-            Press the floating pencil icon near the bottom left
+            Press the floating pencil icon near the bottom right
             <br />
             and then click the green plus button to create your own layouts!
           </p>
@@ -362,7 +360,7 @@ export default function ConfigurableLayout() {
       )}
       <ResponsiveReactGridLayout
         className="layout"
-        cols={ColBreakpoints}
+        cols={COL_BREAKPOINTS}
         resizeHandles={['ne', 'nw', 'se', 'sw']}
         draggableHandle=".grab-handle"
         compactType={null}
@@ -375,7 +373,7 @@ export default function ConfigurableLayout() {
       >
         {gridItems.map((item) => (
           <div key={item.id}>
-            {React.cloneElement(ViewMap[item.view], {
+            {React.cloneElement(VIEW_MAP[item.view], {
               isDraggable: item.layout.isDraggable,
               showShadow: !isLayoutLocked,
             })}
