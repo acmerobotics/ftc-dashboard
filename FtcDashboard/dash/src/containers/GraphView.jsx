@@ -80,7 +80,7 @@ class GraphView extends Component {
           </BaseViewHeading>
           <button onClick={this.handleClick} className="w-8 h-8 icon-btn">
             {this.state.graphing ? (
-              <CloseSVG className="w-6 h-6" />
+              <CloseSVG className="w-6 h-6 text-black" />
             ) : (
               <ChartSVG className="w-6 h-6" />
             )}
