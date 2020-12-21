@@ -391,9 +391,9 @@ export default function ConfigurableLayout() {
         isOpen={!isLayoutLocked}
         isShowing={!(isFabIdle && isLayoutLocked)}
         clickEvent={clickFAB}
-        icon={isLayoutLocked ? LockSVGURL : CreateSVGURL}
+        icon={!isLayoutLocked ? LockSVGURL : CreateSVGURL}
         customClassName={`${
-          isLayoutLocked
+          !isLayoutLocked
             ? `bg-gray-500 focus:ring-gray-600 shadow-gray-900-md-prominent hover:shadow-gray-900-lg-prominent`
             : `bg-red-500 focus:ring-red-600 shadow-red-500-md-prominent hover:shadow-red-500-lg-prominent`
         }`}
