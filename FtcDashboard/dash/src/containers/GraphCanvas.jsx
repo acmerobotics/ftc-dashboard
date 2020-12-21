@@ -63,9 +63,7 @@ class GraphCanvas extends React.Component {
         <AutoFitCanvas ref={this.canvasRef} />
         {this.props.data.every((e) => e.length === 1) ? (
           <div className="absolute top-0 left-0 w-full h-full flex justify-center items-center pointer-events-none">
-            <p className="text-center text-gray-500 mt-9">
-              No variables selected to graph
-            </p>
+            <p className="text-center  mt-9">No variables selected to graph</p>
           </div>
         ) : null}
       </div>

@@ -80,7 +80,7 @@ class GraphView extends Component {
           </BaseViewHeading>
           <button
             onClick={this.handleClick}
-            className="rounded-md text-gray-800 w-8 h-8 flex justify-center items-center border border-transparent hover:border-gray-500 transition-colors"
+            className="rounded-md w-8 h-8 flex justify-center items-center border border-transparent hover:border-gray-500 transition-colors"
           >
             {this.state.graphing ? (
               <Icon icon="close" size="small" onClick={this.handleClick} />
@@ -143,12 +143,12 @@ class GraphView extends Component {
                 </div>
               </div>
             </div>
-            <p className="text-center text-gray-600 mb-3 text-sm">
+            <p className="text-center mb-3 text-sm">
               Click the button in the top right to switch to the graphing view!
             </p>
           </div>
         ) : (
-          <p className="text-center mt-10 text-gray-600">
+          <p className="text-center mt-10">
             Graph related telemetry packets have not yet been received :(
             <br />
             They will appear here once sent!
