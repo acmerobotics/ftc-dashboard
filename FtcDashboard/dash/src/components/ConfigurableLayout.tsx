@@ -249,12 +249,6 @@ export default function ConfigurableLayout() {
     );
   }, [gridItems]);
 
-  useEffect(() => {
-    if (isFabIdle) {
-      setIsShowingViewPicker(false);
-    }
-  }, [isFabIdle]);
-
   const addItem = (item: ConfigurableView) => {
     // This is set at 6 right now because all the breakpoints are set to 6 columns
     // Make this dynamic if responsive column breakpoints are set
@@ -400,8 +394,8 @@ export default function ConfigurableLayout() {
         icon={isLayoutLocked ? LockSVGURL : CreateSVGURL}
         customClassName={`${
           isLayoutLocked
-            ? `bg-gray-500 focus:ring-gray-600`
-            : `bg-red-500 focus:ring-red-600`
+            ? `bg-gray-500 focus:ring-gray-600 shadow-gray-900-md-prominent hover:shadow-gray-900-lg-prominent`
+            : `bg-red-500 focus:ring-red-600 shadow-red-500-md-prominent hover:shadow-red-500-lg-prominent`
         }`}
       >
         <RadialFabChild
