@@ -21,12 +21,12 @@ import ViewPicker from './ViewPicker';
 import useMouseIdleListener from '../hooks/useMouseIdleListener';
 
 import { ReactComponent as AddSVG } from '../assets/icons/add.svg';
-import { ReactComponent as DeleteSVG } from '../assets/icons/delete.svg';
-import DeleteXSVGURL, {
-  ReactComponent as DeleteXSVG,
-} from '../assets/icons/delete_x.svg';
-import { ReactComponent as LockSVG } from '../assets/icons/lock.svg';
-import { ReactComponent as LockOpenSVG } from '../assets/icons/lock_open.svg';
+import { ReactComponent as DeleteSweepSVG } from '../assets/icons/delete_sweep.svg';
+import DeleteXSVGURL from '../assets/icons/delete_x.svg';
+import LockSVGURL from '../assets/icons/lock.svg';
+import { ReactComponent as RemoveCircleSVG } from '../assets/icons/remove_circle.svg';
+import { ReactComponent as RemoveCircleOutlineSVG } from '../assets/icons/remove_circle_outline.svg';
+import CreateSVGURL from '../assets/icons/create.svg';
 
 const VIEW_MAP: { [key in ConfigurableView]: ReactElement } = {
   [ConfigurableView.FIELD_VIEW]: <FieldView />,
@@ -257,22 +257,6 @@ export default function ConfigurableLayout() {
     }
   }, [isFabIdle]);
 
-  const toggleLayoutLocked = () => {
-    const toBeLocked = !isLayoutLocked;
-
-    setIsLayoutLocked(toBeLocked);
-    setGridItems(
-      gridItems.map((i) => {
-        i.layout = {
-          ...i.layout,
-          isResizable: !toBeLocked,
-          isDraggable: !toBeLocked,
-        };
-        return i;
-      }),
-    );
-  };
-
   const addItem = (item: ConfigurableView) => {
     // This is set at 6 right now because all the breakpoints are set to 6 columns
     // Make this dynamic if responsive column breakpoints are set
@@ -340,6 +324,26 @@ export default function ConfigurableLayout() {
     );
   };
 
+  const clickFAB = () => {
+    const toBeLocked = !isLayoutLocked;
+
+    setIsLayoutLocked(toBeLocked);
+    setGridItems(
+      gridItems.map((i) => {
+        i.layout = {
+          ...i.layout,
+          isResizable: !toBeLocked,
+          isDraggable: !toBeLocked,
+        };
+        return i;
+      }),
+    );
+
+    if (toBeLocked) setIsShowingViewPicker(false);
+
+    setIsFabOpen(!toBeLocked);
+  };
+
   return (
     <Container ref={containerRef} isLayoutLocked={isLayoutLocked}>
       {gridItems.length == 0 ? (
@@ -361,10 +365,10 @@ export default function ConfigurableLayout() {
       <ResponsiveReactGridLayout
         className="layout"
         cols={COL_BREAKPOINTS}
-        resizeHandles={['ne', 'nw', 'se', 'sw']}
+        resizeHandles={['se']}
         draggableHandle=".grab-handle"
         compactType={null}
-        rowHeight={60}
+        rowHeight={isLayoutLocked ? 70 : 60}
         layouts={{
           lg: gridItems.map((item) => ({ i: item.id, ...item.layout })),
         }}
@@ -394,12 +398,15 @@ export default function ConfigurableLayout() {
         height="4em"
         bottom="2em"
         right="3.5em"
-        isOpen={isFabOpen}
-        isShowing={!isFabIdle}
-        clickEvent={() => {
-          if (isFabOpen) setIsShowingViewPicker(false);
-          setIsFabOpen(!isFabOpen);
-        }}
+        isOpen={!isLayoutLocked}
+        isShowing={!(isFabIdle && isLayoutLocked)}
+        clickEvent={clickFAB}
+        icon={isLayoutLocked ? LockSVGURL : CreateSVGURL}
+        customClassName={`${
+          isLayoutLocked
+            ? `bg-gray-500 focus:ring-gray-600`
+            : `bg-red-500 focus:ring-red-600`
+        }`}
       >
         <RadialFabChild
           bgColor="#22C55E"
@@ -410,29 +417,33 @@ export default function ConfigurableLayout() {
           fineAdjustIconY="2%"
           clickEvent={() => setIsShowingViewPicker(!isShowingViewPicker)}
         >
-          <AddSVG className="text-white" />
-        </RadialFabChild>
-        <RadialFabChild
-          bgColor={`${isLayoutLocked ? `#4B5563` : `#4F46E5`}`}
-          borderColor={`${isLayoutLocked ? `#374151` : `#4338CA`}`}
-          angle={(-135 * Math.PI) / 180}
-          openMargin="5em"
-          fineAdjustIconX="-2%"
-          fineAdjustIconY="-3%"
-          clickEvent={toggleLayoutLocked}
-        >
-          {isLayoutLocked ? <LockSVG /> : <LockOpenSVG />}
+          <AddSVG className="text-white w-6 h-6" />
         </RadialFabChild>
         <RadialFabChild
           bgColor={`${isInDeleteMode ? '#F97316' : '#F59E0B'}`}
           borderColor={`${isInDeleteMode ? '#EA580C' : '#D97706'}`}
-          angle={(170 * Math.PI) / 180}
+          angle={(-135 * Math.PI) / 180}
           openMargin="5em"
-          fineAdjustIconX="-2%"
-          fineAdjustIconY="-2%"
+          fineAdjustIconX="0"
+          fineAdjustIconY="0"
           clickEvent={() => setIsInDeleteMode(!isInDeleteMode)}
         >
-          {isInDeleteMode ? <DeleteXSVG /> : <DeleteSVG />}
+          {isInDeleteMode ? (
+            <RemoveCircleOutlineSVG className="w-5 h-5" />
+          ) : (
+            <RemoveCircleSVG className="w-5 h-5" />
+          )}
+        </RadialFabChild>
+        <RadialFabChild
+          bgColor={`${isLayoutLocked ? `#4B5563` : `#4F46E5`}`}
+          borderColor={`${isLayoutLocked ? `#374151` : `#4338CA`}`}
+          angle={(170 * Math.PI) / 180}
+          openMargin="5em"
+          fineAdjustIconX="8%"
+          fineAdjustIconY="-2%"
+          clickEvent={() => setGridItems([])}
+        >
+          <DeleteSweepSVG className="w-5 h-5" />
         </RadialFabChild>
       </RadialFab>
       <ViewPicker
