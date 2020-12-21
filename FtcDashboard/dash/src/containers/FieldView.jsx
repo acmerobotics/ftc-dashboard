@@ -33,7 +33,7 @@ class FieldView extends React.Component {
 
   render() {
     return (
-      <BaseView showShadow={this.props.showShadow}>
+      <BaseView isUnlocked={this.props.isUnlocked}>
         <BaseViewHeading isDraggable={this.props.isDraggable}>
           Field
         </BaseViewHeading>
@@ -53,7 +53,7 @@ FieldView.propTypes = {
   }).isRequired,
 
   isDraggable: PropTypes.bool,
-  showShadow: PropTypes.bool,
+  isUnlocked: PropTypes.bool,
 };
 
 const mapStateToProps = ({ telemetry }) => ({

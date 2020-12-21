@@ -63,7 +63,7 @@ class CameraView extends React.Component {
 
   render() {
     return (
-      <BaseView showShadow={this.props.showShadow}>
+      <BaseView isUnlocked={this.props.isUnlocked}>
         <div className="flex justify-between items-center">
           <BaseViewHeading isDraggable={this.props.isDraggable}>
             Camera
@@ -89,7 +89,7 @@ CameraView.propTypes = {
   imageStr: PropTypes.string.isRequired,
 
   isDraggable: PropTypes.bool,
-  showShadow: PropTypes.bool,
+  isUnlocked: PropTypes.bool,
 };
 
 const mapStateToProps = ({ camera }) => ({

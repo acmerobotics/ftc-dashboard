@@ -121,7 +121,7 @@ class OpModeView extends React.Component {
 
     if (!available) {
       return (
-        <BaseView showShadow={this.props.showShadow}>
+        <BaseView isUnlocked={this.props.isUnlocked}>
           <div className="flex justify-between items-center" />
           <BaseViewHeading isDraggable={this.props.isDraggable}>
             Op Mode
@@ -132,7 +132,7 @@ class OpModeView extends React.Component {
     }
 
     return (
-      <BaseView showShadow={this.props.showShadow}>
+      <BaseView isUnlocked={this.props.isUnlocked}>
         <div className="flex justify-between items-center">
           <BaseViewHeading isDraggable={this.props.isDraggable}>
             Op Mode
@@ -188,7 +188,7 @@ OpModeView.propTypes = {
   gamepad2Connected: PropTypes.bool.isRequired,
 
   isDraggable: PropTypes.bool,
-  showShadow: PropTypes.bool,
+  isUnlocked: PropTypes.bool,
 };
 
 const mapStateToProps = ({ status, gamepad }) => ({

@@ -72,7 +72,7 @@ class GraphView extends Component {
     return (
       <BaseView
         className="flex flex-col overflow-auto"
-        showShadow={this.props.showShadow}
+        isUnlocked={this.props.isUnlocked}
       >
         <div className="flex justify-between items-center">
           <BaseViewHeading isDraggable={this.props.isDraggable}>
@@ -168,7 +168,7 @@ GraphView.propTypes = {
   telemetry: telemetryType.isRequired,
 
   isDraggable: PropTypes.bool,
-  showShadow: PropTypes.bool,
+  isUnlocked: PropTypes.bool,
 };
 
 const mapStateToProps = ({ telemetry }) => ({ telemetry });

@@ -20,14 +20,14 @@ const ConfigView = ({
   onSave,
   onChange,
   isDraggable,
-  showShadow,
+  isUnlocked,
 }) => {
   const sortedKeys = Object.keys(configRoot.__value || {});
 
   sortedKeys.sort();
 
   return (
-    <BaseView className="overflow-hidden pr-0 pb-0" showShadow={showShadow}>
+    <BaseView className="overflow-hidden pr-0 pb-0" isUnlocked={isUnlocked}>
       <div className="flex justify-between items-center">
         <BaseViewHeading isDraggable={isDraggable}>
           Configuration
@@ -84,7 +84,7 @@ ConfigView.propTypes = {
   onSave: PropTypes.func.isRequired,
 
   isDraggable: PropTypes.bool,
-  showShadow: PropTypes.bool,
+  isUnlocked: PropTypes.bool,
 };
 
 const mapStateToProps = ({ config }) => config;
