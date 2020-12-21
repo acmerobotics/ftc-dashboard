@@ -9,6 +9,7 @@ import Icon from '../components/Icon';
 import TextInput from '../components/inputs/TextInput';
 
 import { ReactComponent as ChartSVG } from '../assets/icons/chart.svg';
+import { ReactComponent as CloseSVG } from '../assets/icons/close.svg';
 
 import { validateInt } from '../components/inputs/validation';
 import { DEFAULT_OPTIONS } from './Graph';
@@ -78,12 +79,9 @@ class GraphView extends Component {
           <BaseViewHeading isDraggable={this.props.isDraggable}>
             Graph
           </BaseViewHeading>
-          <button
-            onClick={this.handleClick}
-            className="rounded-md w-8 h-8 flex justify-center items-center border border-transparent hover:border-gray-500 transition-colors"
-          >
+          <button onClick={this.handleClick} className="w-8 h-8 icon-btn">
             {this.state.graphing ? (
-              <Icon icon="close" size="small" onClick={this.handleClick} />
+              <CloseSVG className="w-6 h-6" />
             ) : (
               <ChartSVG className="w-6 h-6" />
             )}

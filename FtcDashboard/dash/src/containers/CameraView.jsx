@@ -3,8 +3,7 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 import AutoFitCanvas from '../components/AutoFitCanvas';
-import IconGroup from '../components/IconGroup';
-import Icon from '../components/Icon';
+import { ReactComponent as RefreshSVG } from '../assets/icons/refresh.svg';
 import BaseView, { BaseViewHeading } from './BaseView';
 
 class CameraView extends React.Component {
@@ -69,15 +68,14 @@ class CameraView extends React.Component {
           <BaseViewHeading isDraggable={this.props.isDraggable}>
             Camera
           </BaseViewHeading>
-          <IconGroup>
-            <Icon
-              onClick={() =>
-                this.setState({ rotation: (this.state.rotation + 1) % 4 })
-              }
-              icon="refresh"
-              size="small"
-            />
-          </IconGroup>
+          <button
+            className="icon-btn w-8 h-8"
+            onClick={() =>
+              this.setState({ rotation: (this.state.rotation + 1) % 4 })
+            }
+          >
+            <RefreshSVG className="w-6 h-6" />
+          </button>
         </div>
         <div className="canvas-container">
           <AutoFitCanvas ref={this.canvasRef} onResize={this.renderImage} />

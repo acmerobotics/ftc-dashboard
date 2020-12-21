@@ -2,9 +2,9 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 import CustomVariable from './CustomVariable';
-import IconGroup from '../components/IconGroup';
-import Icon from '../components/Icon';
 import BaseView, { BaseViewHeading } from './BaseView';
+import { ReactComponent as SaveSVG } from '../assets/icons/save.svg';
+import { ReactComponent as RefreshSVG } from '../assets/icons/refresh.svg';
 
 import {
   updateConfig,
@@ -32,14 +32,17 @@ const ConfigView = ({
         <BaseViewHeading isDraggable={isDraggable}>
           Configuration
         </BaseViewHeading>
-        <IconGroup>
-          <Icon
-            icon="save"
-            size="small"
-            onClick={() => onSave(getModifiedDiff(configRoot))}
-          />
-          <Icon icon="refresh" size="small" onClick={onRefresh} />
-        </IconGroup>
+        <div className="flex items-center mr-3 space-x-1">
+          <button className="icon-btn w-8 h-8">
+            <SaveSVG
+              className="w-6 h-6"
+              onClick={() => onSave(getModifiedDiff(configRoot))}
+            />
+          </button>
+          <button className="icon-btn w-8 h-8">
+            <RefreshSVG className="w-6 h-6" onClick={onRefresh} />
+          </button>
+        </div>
       </div>
       <div style={{ height: 'calc(100% - 52px', overflow: 'auto' }}>
         <table className="block h-full">

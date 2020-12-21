@@ -143,6 +143,10 @@ input {
   height: 36px;
 }
 
+.icon-btn {
+  @apply rounded-md flex justify-center items-center border border-transparent hover:border-gray-500 transition-colors;
+}
+
 .save {
   background-image: url('assets/icons/save.svg');
 }

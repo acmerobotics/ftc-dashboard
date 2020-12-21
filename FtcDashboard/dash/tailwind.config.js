@@ -11,12 +11,9 @@ module.exports = {
         yellow: colors.amber,
         gray: colors.blueGray,
       },
-      borderWidth: {
-        6: '6px',
-      },
       fontFamily: {
         sans: ['Roboto'],
-      }
+      },
     },
   },
   variants: {

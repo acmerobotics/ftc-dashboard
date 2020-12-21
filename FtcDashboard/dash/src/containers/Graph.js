@@ -197,7 +197,6 @@ export default class Graph {
     const width = this.canvas.width / devicePixelRatio;
     const height = this.canvas.height / devicePixelRatio;
     const keyHeight = this.renderKey(0, 0, width);
-
     this.renderGraph(0, keyHeight, width, height - keyHeight);
   }
 

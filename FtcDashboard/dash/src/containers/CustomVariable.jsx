@@ -87,15 +87,15 @@ class CustomVariable extends React.Component {
             className="option-header py-1 cursor-pointer"
             onClick={this.toggleVisibility}
           >
-            <div>
+            <div className="mr-2 bg-gray-100 rounded-full border border-gray-200 hover:border-gray-400 hover:bg-gray-200 transition-colors">
               {this.state.expanded ? (
                 <ExpandedLessIcon
-                  className="w-6 h-6 mr-2 bg-gray-100 rounded-full border border-gray-200"
+                  className="w-6 h-6"
                   style={{ padding: '0.1rem' }}
                 />
               ) : (
                 <ExpandedMoreIcon
-                  className="w-6 h-6 mr-2 bg-gray-100 rounded-full border border-gray-200"
+                  className="w-6 h-6"
                   style={{ padding: '0.1rem' }}
                 />
               )}
