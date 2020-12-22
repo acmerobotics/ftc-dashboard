@@ -31,7 +31,7 @@ class CameraView extends React.Component {
   }
 
   renderImage() {
-    if (this.ctx) {
+    if (this.ctx && this.props.imageStr.length > 0) {
       const canvas = this.canvasRef.current;
 
       // eslint-disable-next-line
