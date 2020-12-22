@@ -332,15 +332,12 @@ export default function ConfigurableLayout() {
   const [isInDeleteMode, setIsInDeleteMode] = useState(false);
   const [isShowingViewPicker, setIsShowingViewPicker] = useState(false);
 
-  const [{ gridStateHistory, currentHead }, dispatch] = useReducer(
-    stateHistoryReducer,
-    {
-      gridStateHistory: [],
-      actionHistory: [],
-      currentHistoryPosition: -1,
-      currentHead: [],
-    },
-  );
+  const [{ currentHead }, dispatch] = useReducer(stateHistoryReducer, {
+    gridStateHistory: [],
+    actionHistory: [],
+    currentHistoryPosition: -1,
+    currentHead: [],
+  });
 
   const isFabIdle = useMouseIdleListener({
     bottom: '0',
@@ -363,6 +360,7 @@ export default function ConfigurableLayout() {
         // However, I don't know if this works with concurrent mode
         // This project doesn't use concurrent mode since it's in beta
         // Check back here if concurrent mode is ever enabled
+        // Solution then is to use something like useCallback similar to the useDelayedTooltip hook
         const height = containerRef.current?.clientHeight;
 
         if (height) {
