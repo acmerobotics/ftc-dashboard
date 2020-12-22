@@ -9,8 +9,6 @@ class TextInput extends React.Component {
 
     this.handleChange = this.handleChange.bind(this);
     this.handleKeyDown = this.handleKeyDown.bind(this);
-
-    this.state = { value: props.value };
   }
 
   componentDidUpdate() {
@@ -20,8 +18,6 @@ class TextInput extends React.Component {
   }
 
   handleChange(evt) {
-    this.setState({ value: evt.target.value });
-
     const validated = this.props.validate(evt.target.value);
     if (validated) {
       this.props.onChange(validated);
@@ -43,7 +39,7 @@ class TextInput extends React.Component {
         ref={this.inputRef}
         type="text"
         size={15}
-        value={this.state.value}
+        value={this.props.value}
         onChange={this.handleChange}
         onKeyDown={this.handleKeyDown}
       />

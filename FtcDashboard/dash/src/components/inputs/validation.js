@@ -1,15 +1,19 @@
 // TODO: extract patterns into constants?
 
 export const validateDouble = (value) => {
-  if (!isNaN(Number(value))) {
+  if (
+    value === '' ||
+    /^-0?$/.test(value) ||
+    /^-?\d*\.([1-9]*0+)*$/.test(value)
+  ) {
+    return {
+      value: value,
+      valid: false,
+    };
+  } else if (/^-?\d*\.?\d*$/.test(value)) {
     return {
       value: parseFloat(value),
       valid: true,
-    };
-  } else {
-    return {
-      value,
-      valid: false,
     };
   }
 };
