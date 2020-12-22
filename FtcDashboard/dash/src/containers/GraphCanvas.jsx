@@ -4,6 +4,8 @@ import PropTypes from 'prop-types';
 import Graph from './Graph';
 import AutoFitCanvas from '../components/AutoFitCanvas';
 
+import { ReactComponent as PauseSVG } from '../assets/icons/pause.svg';
+
 class GraphCanvas extends React.Component {
   constructor(props) {
     super(props);
@@ -38,7 +40,7 @@ class GraphCanvas extends React.Component {
   }
 
   handleDocumentKeydown(evt) {
-    if (evt.code === 'Space') {
+    if (evt.code === 'Space' || evt.key === 'k') {
       this.setState(
         {
           paused: !this.state.paused,
@@ -74,6 +76,9 @@ class GraphCanvas extends React.Component {
             <p className="text-center">No content to graph</p>
           ) : null}
         </div>
+        {this.state.paused ? (
+          <PauseSVG className="w-20 h-20 absolute top-24 right-10" />
+        ) : null}
       </div>
     );
   }
