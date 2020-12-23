@@ -48,7 +48,8 @@
     ],
     "prettier/prettier": "error",
     "@typescript-eslint/explicit-module-boundary-types": "off",
-    "no-use-before-define": "off"
+    "no-use-before-define": "off",
+    "eqeqeq": ["error", "always", { "null": "ignore" }]
   },
   "settings": {
     "react": {

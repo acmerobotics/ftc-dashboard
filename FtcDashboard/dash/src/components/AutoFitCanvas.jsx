@@ -10,7 +10,7 @@ class AutoFitCanvas extends React.Component {
     this.containerRef = React.createRef();
     this.resizeObserver = new ResizeObserver((entries) => {
       for (let entry of entries) {
-        if (entry.target == this.containerRef.current) {
+        if (entry.target === this.containerRef.current) {
           this.resize();
         }
       }

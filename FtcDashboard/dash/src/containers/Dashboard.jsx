@@ -40,7 +40,7 @@ class Dashboard extends Component {
                 }
               >
                 {Object.keys(LayoutPreset)
-                  .filter((key) => typeof LayoutPreset[key] == 'string')
+                  .filter((key) => typeof LayoutPreset[key] === 'string')
                   .map((key) => (
                     <option key={key} value={key}>
                       {LayoutPreset.getName(key)}
