@@ -1,13 +1,6 @@
-import React, {
-  ReactElement,
-  useState,
-  useEffect,
-  useRef,
-  useReducer,
-} from 'react';
+import React, { ReactElement, useState, useEffect, useRef } from 'react';
 import RGL, { WidthProvider, Layout } from 'react-grid-layout';
 import { v4 as uuidv4 } from 'uuid';
-import { isEqual } from 'lodash';
 
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
@@ -26,6 +19,7 @@ import RadialFabChild from './RadialFab/RadialFabChild';
 import ViewPicker from './ViewPicker';
 
 import useMouseIdleListener from '../hooks/useMouseIdleListener';
+import useUndoHistory from '../hooks/useUndoHistory';
 
 import { ReactComponent as AddSVG } from '../assets/icons/add.svg';
 import { ReactComponent as DeleteSweepSVG } from '../assets/icons/delete_sweep.svg';
@@ -159,115 +153,6 @@ const DEFAULT_GRID_TALL: GridItemType[] = [
 
 const LOCAL_STORAGE_LAYOUT_KEY = 'configurableLayoutStorage';
 
-enum StateHistoryCommand {
-  APPEND,
-  UNDO,
-  REDO,
-}
-
-type StateHistoryAction =
-  | {
-      type: StateHistoryCommand.APPEND;
-      payload: GridItemType[];
-    }
-  | { type: StateHistoryCommand.UNDO }
-  | { type: StateHistoryCommand.REDO };
-
-interface StateHistoryReducerState {
-  gridStateHistory: GridItemType[][];
-  actionHistory: StateHistoryCommand[];
-  currentHistoryPosition: number;
-  currentHead: GridItemType[];
-}
-
-const stateHistoryReducer = (
-  state: StateHistoryReducerState,
-  action: StateHistoryAction,
-): StateHistoryReducerState => {
-  if (action.type === StateHistoryCommand.APPEND) {
-    if (state.gridStateHistory.length !== 0) {
-      if (
-        isEqual(
-          state.gridStateHistory[state.currentHistoryPosition],
-          action.payload,
-        )
-      ) {
-        return state;
-      }
-
-      const lastAction = state.actionHistory[state.actionHistory.length - 1];
-      if (
-        lastAction === StateHistoryCommand.UNDO ||
-        lastAction === StateHistoryCommand.REDO
-      ) {
-        if (isEqual(state.currentHead, action.payload)) return state;
-      }
-    }
-
-    const newGridStateHistory = [...state.gridStateHistory];
-
-    if (state.currentHistoryPosition !== newGridStateHistory.length - 1) {
-      newGridStateHistory.splice(
-        state.currentHistoryPosition + 1,
-        newGridStateHistory.length - state.currentHistoryPosition,
-      );
-    }
-
-    newGridStateHistory.push(action.payload);
-    const newActionHistory = [
-      ...state.actionHistory,
-      StateHistoryCommand.APPEND,
-    ];
-    const newCurrentHistoryPosition = state.currentHistoryPosition + 1;
-    const newCurrentHead = newGridStateHistory[newCurrentHistoryPosition];
-
-    return {
-      gridStateHistory: newGridStateHistory,
-      actionHistory: newActionHistory,
-      currentHistoryPosition: newCurrentHistoryPosition,
-      currentHead: newCurrentHead,
-    };
-  } else if (action.type === StateHistoryCommand.UNDO) {
-    if (state.currentHistoryPosition > 0) {
-      const newActionHistory = [
-        ...state.actionHistory,
-        StateHistoryCommand.UNDO,
-      ];
-      const newCurrentHistoryPosition = state.currentHistoryPosition - 1;
-      const newCurrentHead = state.gridStateHistory[newCurrentHistoryPosition];
-
-      return {
-        gridStateHistory: state.gridStateHistory,
-        actionHistory: newActionHistory,
-        currentHistoryPosition: newCurrentHistoryPosition,
-        currentHead: newCurrentHead,
-      };
-    }
-
-    return { ...state };
-  } else if (action.type === StateHistoryCommand.REDO) {
-    if (state.currentHistoryPosition < state.gridStateHistory.length - 1) {
-      const newActionHistory = [
-        ...state.actionHistory,
-        StateHistoryCommand.REDO,
-      ];
-      const newCurrentHistoryPosition = state.currentHistoryPosition + 1;
-      const newCurrentHead = state.gridStateHistory[newCurrentHistoryPosition];
-
-      return {
-        gridStateHistory: state.gridStateHistory,
-        actionHistory: newActionHistory,
-        currentHistoryPosition: newCurrentHistoryPosition,
-        currentHead: newCurrentHead,
-      };
-    }
-
-    return { ...state };
-  }
-
-  return { ...state };
-};
-
 const ReactGridLayout = WidthProvider(RGL);
 
 export default function ConfigurableLayout() {
@@ -277,15 +162,15 @@ export default function ConfigurableLayout() {
   const [isInDeleteMode, setIsInDeleteMode] = useState(false);
   const [isShowingViewPicker, setIsShowingViewPicker] = useState(false);
 
-  const [{ currentHead: gridItems }, dispatch] = useReducer(
-    stateHistoryReducer,
+  const [
+    gridItems,
     {
-      gridStateHistory: [],
-      actionHistory: [],
-      currentHistoryPosition: -1,
-      currentHead: [],
+      initialize: initializeGrid,
+      append: setGrid,
+      undo: undoGrid,
+      redo: redoGrid,
     },
-  );
+  ] = useUndoHistory<GridItemType[]>([]);
 
   const isFabIdle = useMouseIdleListener({
     bottom: '0',
@@ -324,17 +209,9 @@ export default function ConfigurableLayout() {
         }
       }
     })();
+    initializeGrid(newGridItems);
     setIsLayoutLocked(!newGridItems.every((e) => e.layout.isResizable));
-    dispatch({ type: StateHistoryCommand.APPEND, payload: newGridItems });
-  }, []);
-
-  const undo = () => {
-    dispatch({ type: StateHistoryCommand.UNDO });
-  };
-
-  const redo = () => {
-    dispatch({ type: StateHistoryCommand.REDO });
-  };
+  }, [initializeGrid]);
 
   useEffect(() => {
     const keyDownListener = (e: KeyboardEvent) => {
@@ -342,15 +219,15 @@ export default function ConfigurableLayout() {
         if (navigator.platform.indexOf('Mac') > -1) {
           if (e.metaKey && e.key === 'z') {
             if (e.shiftKey) {
-              redo();
+              redoGrid();
             } else {
-              undo();
+              undoGrid();
             }
           } else {
             if (e.ctrlKey && e.key === 'z') {
-              undo();
+              undoGrid();
             } else if (e.ctrlKey && e.key === 'y') {
-              redo();
+              redoGrid();
             }
           }
         }
@@ -362,7 +239,7 @@ export default function ConfigurableLayout() {
     return () => {
       document.removeEventListener('keydown', keyDownListener);
     };
-  }, [isLayoutLocked]);
+  }, [isLayoutLocked, undoGrid, redoGrid]);
 
   useEffect(() => {
     window.localStorage.setItem(
@@ -377,10 +254,10 @@ export default function ConfigurableLayout() {
 
     // [number] > [number]
     const moreThanNumberArray = (left: number[], right: number[]): boolean => {
+      // Mirrors JS native comparison
       if (left.length === 0) return false;
-      // Follows JS native comparison
+      // Mirrors JS native comparison
       else if (right.length === 0) return true;
-      // Follows JS native comparison
       else if (left[0] === right[0] && left.length > 1)
         return moreThanNumberArray(left.slice(1), right.slice(1));
       else return left[0] > right[0];
@@ -399,31 +276,25 @@ export default function ConfigurableLayout() {
       newItemBot += ITEM_HEIGHT;
     }
 
-    dispatch({
-      type: StateHistoryCommand.APPEND,
-      payload: [
-        ...gridItems,
-        {
-          id: uuidv4(),
-          view: item,
-          layout: {
-            x: newItemLeft,
-            y: newItemBot - ITEM_HEIGHT,
-            w: ITEM_WIDTH,
-            h: ITEM_HEIGHT,
-            isDraggable: !isLayoutLocked,
-            isResizable: !isLayoutLocked,
-          },
+    setGrid([
+      ...gridItems,
+      {
+        id: uuidv4(),
+        view: item,
+        layout: {
+          x: newItemLeft,
+          y: newItemBot - ITEM_HEIGHT,
+          w: ITEM_WIDTH,
+          h: ITEM_HEIGHT,
+          isDraggable: !isLayoutLocked,
+          isResizable: !isLayoutLocked,
         },
-      ],
-    });
+      },
+    ]);
   };
 
   const removeItem = (id: string) => {
-    dispatch({
-      type: StateHistoryCommand.APPEND,
-      payload: gridItems.filter((e) => e.id !== id),
-    });
+    setGrid(gridItems.filter((e) => e.id !== id));
   };
 
   const onLayoutChange = (layout: Layout[]) => {
@@ -445,16 +316,15 @@ export default function ConfigurableLayout() {
       return e;
     });
 
-    dispatch({ type: StateHistoryCommand.APPEND, payload: newGrid });
+    setGrid(newGrid);
   };
 
   const clickFAB = () => {
     const toBeLocked = !isLayoutLocked;
 
     setIsLayoutLocked(toBeLocked);
-    dispatch({
-      type: StateHistoryCommand.APPEND,
-      payload: gridItems.map((i) => {
+    setGrid(
+      gridItems.map((i) => {
         i.layout = {
           ...i.layout,
           isResizable: !toBeLocked,
@@ -462,7 +332,7 @@ export default function ConfigurableLayout() {
         };
         return i;
       }),
-    });
+    );
 
     if (toBeLocked) setIsShowingViewPicker(false);
   };
@@ -572,9 +442,7 @@ export default function ConfigurableLayout() {
           fineAdjustIconX="8%"
           fineAdjustIconY="-2%"
           toolTipText="Clear Layout"
-          clickEvent={() =>
-            dispatch({ type: StateHistoryCommand.APPEND, payload: [] })
-          }
+          clickEvent={() => setGrid([])}
         >
           <DeleteSweepSVG className="w-5 h-5" />
         </RadialFabChild>
