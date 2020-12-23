@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import RGL, { WidthProvider, Layout } from 'react-grid-layout';
 import { v4 as uuidv4 } from 'uuid';
+import { isEqual } from 'lodash';
 
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
@@ -47,6 +48,8 @@ const HEIGHT_BREAKPOINTS = {
   MEDIUM: 730,
   TALL: 1200,
 };
+
+const GRID_COL = 6;
 
 const Container = styled.div.attrs<{ isLayoutLocked: boolean }>(
   ({ isLayoutLocked }) => ({
@@ -182,12 +185,6 @@ const stateHistoryReducer = (
   action: StateHistoryAction,
 ): StateHistoryReducerState => {
   if (action.type === StateHistoryCommand.APPEND) {
-    const arrEquals = (arr1: GridItemType[], arr2: GridItemType[]) => {
-      if ((arr1.length === 0 && arr2.length === 0) || (!arr1 && !arr2))
-        return true;
-      return JSON.stringify(arr1) === JSON.stringify(arr2);
-    };
-
     let shouldAppend = false;
 
     if (state.gridStateHistory.length === 0) {
@@ -196,7 +193,7 @@ const stateHistoryReducer = (
       shouldAppend = true;
 
       if (
-        arrEquals(
+        isEqual(
           state.gridStateHistory[state.currentHistoryPosition],
           action.payload,
         )
@@ -210,7 +207,7 @@ const stateHistoryReducer = (
         state.actionHistory[state.actionHistory.length - 1] ===
           StateHistoryCommand.REDO
       ) {
-        if (arrEquals(state.currentHead, action.payload)) shouldAppend = false;
+        if (isEqual(state.currentHead, action.payload)) shouldAppend = false;
       }
     }
 
@@ -282,7 +279,7 @@ const stateHistoryReducer = (
   return { ...state };
 };
 
-const ResponsiveReactGridLayout = WidthProvider(RGL);
+const ReactGridLayout = WidthProvider(RGL);
 
 export default function ConfigurableLayout() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -492,9 +489,9 @@ export default function ConfigurableLayout() {
       ) : (
         ''
       )}
-      <ResponsiveReactGridLayout
+      <ReactGridLayout
         className="layout"
-        cols={6}
+        cols={GRID_COL}
         resizeHandles={['se']}
         draggableHandle=".grab-handle"
         compactType={null}
@@ -527,7 +524,7 @@ export default function ConfigurableLayout() {
             </div>
           </div>
         ))}
-      </ResponsiveReactGridLayout>
+      </ReactGridLayout>
       <RadialFab
         width="4em"
         height="4em"
