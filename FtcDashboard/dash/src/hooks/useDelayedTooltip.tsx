@@ -29,12 +29,16 @@ export default function useDelayedTooltip(delay: number) {
 
       if (ref.current !== null) {
         ref.current?.removeEventListener('mouseenter', onMouseEnter);
+        ref.current?.removeEventListener('focusin', onMouseEnter);
         ref.current?.removeEventListener('mouseleave', onMouseLeave);
+        ref.current?.removeEventListener('focusout', onMouseLeave);
       }
 
       if (node) {
         node.addEventListener('mouseenter', onMouseEnter);
+        node.addEventListener('focusin', onMouseEnter);
         node.addEventListener('mouseleave', onMouseLeave);
+        node.addEventListener('focusout', onMouseLeave);
       }
 
       ref.current = node;

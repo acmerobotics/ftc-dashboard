@@ -6,7 +6,6 @@ import { ConfigurableView } from '../enums/ConfigurableView';
 import { ReactComponent as CameraSVG } from '../assets/icons/camera.svg';
 import { ReactComponent as SettingsSVG } from '../assets/icons/settings.svg';
 import { ReactComponent as ChartSVG } from '../assets/icons/chart.svg';
-import { ReactComponent as ControlCameraSVG } from '../assets/icons/control_camera.svg';
 import { ReactComponent as ApiSVG } from '../assets/icons/api.svg';
 import { ReactComponent as SubjectSVG } from '../assets/icons/subject.svg';
 import { ReactComponent as WidgetSVG } from '../assets/icons/widgets.svg';
@@ -103,11 +102,11 @@ const ViewPicker: FunctionComponent<ViewPickerProps> = (
           index={index}
           customStyles={item.customStyles}
           onClick={() => props.clickEvent(item.view)}
+          disabled={!props.isOpen}
         >
           <div
             className={`w-8 h-8  rounded mr-3 flex justify-center items-center ${item.iconBg}`}
           >
-            {/* <AddSVG className="text-white transform rotate-45" /> */}
             {React.cloneElement(item.icon)}
           </div>
           <div className="flex flex-col items-start">

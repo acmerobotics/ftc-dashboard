@@ -32,7 +32,7 @@ class Dashboard extends Component {
             <h1 className="text-2xl font-medium">FTC Dashboard</h1>
             <IconGroup>
               <select
-                className="text-black text-sm rounded py-1 bg-blue-100 border-blue-300"
+                className="text-black text-sm rounded py-1 bg-blue-100 border-blue-300 focus:ring focus:ring-blue-200"
                 style={{ margin: '0px 8px 0px 8px' }}
                 value={this.props.layoutPreset}
                 onChange={(evt) =>

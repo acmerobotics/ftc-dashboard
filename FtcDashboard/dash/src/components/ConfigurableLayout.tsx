@@ -384,6 +384,7 @@ export default function ConfigurableLayout() {
                 onClick={() => {
                   removeItem(item.id);
                 }}
+                disabled={!isInDeleteMode}
               >
                 <DeleteXSVG className="text-yellow-600 w-20 h-20" />
               </button>
@@ -402,13 +403,12 @@ export default function ConfigurableLayout() {
         icon={!isLayoutLocked ? LockSVGURL : CreateSVGURL}
         customClassName={`${
           !isLayoutLocked
-            ? `bg-gray-500 focus:ring-gray-600 shadow-gray-900-md-prominent hover:shadow-gray-900-lg-prominent`
-            : `bg-red-500 focus:ring-red-600 shadow-red-500-md-prominent hover:shadow-red-500-lg-prominent`
+            ? `bg-gray-500 focus:ring-4 focus:ring-gray-600 shadow-gray-900-md-prominent hover:shadow-gray-900-lg-prominent`
+            : `bg-red-500 focus:ring-4 focus:ring-red-600 shadow-red-500-md-prominent hover:shadow-red-500-lg-prominent`
         }`}
       >
         <RadialFabChild
-          bgColor="#22C55E"
-          borderColor="#16A34A"
+          customClass="w-12 h-12 bg-green-500 border border-green-600 shadow-green-500-md-prominent hover:shadow-green-500-lg-prominent focus:ring focus:ring-green-600"
           angle={(-80 * Math.PI) / 180}
           openMargin="5em"
           fineAdjustIconX="2%"
@@ -419,8 +419,11 @@ export default function ConfigurableLayout() {
           <AddSVG className="text-white w-6 h-6" />
         </RadialFabChild>
         <RadialFabChild
-          bgColor={`${isInDeleteMode ? '#F97316' : '#F59E0B'}`}
-          borderColor={`${isInDeleteMode ? '#EA580C' : '#D97706'}`}
+          customClass={`w-12 h-12 border shadow-orange-500-md-prominent hover:shadow-orange-500-lg-prominent focus:ring ${
+            isInDeleteMode
+              ? 'bg-orange-500 border-yellow-600 focus:ring-yellow-300'
+              : 'bg-yellow-500 border-yellow-600 focus:ring-orange-300'
+          }`}
           angle={(-135 * Math.PI) / 180}
           openMargin="5em"
           fineAdjustIconX="0"
@@ -435,8 +438,7 @@ export default function ConfigurableLayout() {
           )}
         </RadialFabChild>
         <RadialFabChild
-          bgColor={`${isLayoutLocked ? `#4B5563` : `#4F46E5`}`}
-          borderColor={`${isLayoutLocked ? `#374151` : `#4338CA`}`}
+          customClass="w-12 h-12 bg-indigo-500 border border-indigo-600 shadow-indigo-500-md-prominent hover:shadow-indigo-500-lg-prominent focus:ring focus:ring-indigo-300"
           angle={(170 * Math.PI) / 180}
           openMargin="5em"
           fineAdjustIconX="8%"
