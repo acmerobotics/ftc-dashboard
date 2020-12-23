@@ -185,20 +185,14 @@ const stateHistoryReducer = (
   action: StateHistoryAction,
 ): StateHistoryReducerState => {
   if (action.type === StateHistoryCommand.APPEND) {
-    let shouldAppend = false;
-
-    if (state.gridStateHistory.length === 0) {
-      shouldAppend = true;
-    } else {
-      shouldAppend = true;
-
+    if (state.gridStateHistory.length !== 0) {
       if (
         isEqual(
           state.gridStateHistory[state.currentHistoryPosition],
           action.payload,
         )
       ) {
-        shouldAppend = false;
+        return state;
       }
 
       if (
@@ -207,37 +201,33 @@ const stateHistoryReducer = (
         state.actionHistory[state.actionHistory.length - 1] ===
           StateHistoryCommand.REDO
       ) {
-        if (isEqual(state.currentHead, action.payload)) shouldAppend = false;
+        if (isEqual(state.currentHead, action.payload)) return state;
       }
     }
 
-    if (shouldAppend) {
-      const newGridStateHistory = [...state.gridStateHistory];
+    const newGridStateHistory = [...state.gridStateHistory];
 
-      if (state.currentHistoryPosition !== newGridStateHistory.length - 1) {
-        newGridStateHistory.splice(
-          state.currentHistoryPosition + 1,
-          newGridStateHistory.length - state.currentHistoryPosition,
-        );
-      }
-
-      newGridStateHistory.push(action.payload);
-      const newActionHistory = [
-        ...state.actionHistory,
-        StateHistoryCommand.APPEND,
-      ];
-      const newCurrentHistoryPosition = state.currentHistoryPosition + 1;
-      const newCurrentHead = newGridStateHistory[newCurrentHistoryPosition];
-
-      return {
-        gridStateHistory: newGridStateHistory,
-        actionHistory: newActionHistory,
-        currentHistoryPosition: newCurrentHistoryPosition,
-        currentHead: newCurrentHead,
-      };
-    } else {
-      return { ...state };
+    if (state.currentHistoryPosition !== newGridStateHistory.length - 1) {
+      newGridStateHistory.splice(
+        state.currentHistoryPosition + 1,
+        newGridStateHistory.length - state.currentHistoryPosition,
+      );
     }
+
+    newGridStateHistory.push(action.payload);
+    const newActionHistory = [
+      ...state.actionHistory,
+      StateHistoryCommand.APPEND,
+    ];
+    const newCurrentHistoryPosition = state.currentHistoryPosition + 1;
+    const newCurrentHead = newGridStateHistory[newCurrentHistoryPosition];
+
+    return {
+      gridStateHistory: newGridStateHistory,
+      actionHistory: newActionHistory,
+      currentHistoryPosition: newCurrentHistoryPosition,
+      currentHead: newCurrentHead,
+    };
   } else if (action.type === StateHistoryCommand.UNDO) {
     if (state.currentHistoryPosition > 0) {
       const newActionHistory = [
@@ -372,27 +362,31 @@ export default function ConfigurableLayout() {
   }, [currentHead]);
 
   const addItem = (item: ConfigurableView) => {
-    // This is set at 6 right now because all the breakpoints are set to 6 columns
-    // Make this dynamic if responsive column breakpoints are set
-    const COLS = 6;
     const ITEM_WIDTH = 2;
     const ITEM_HEIGHT = 4;
 
-    let desiredX = 0;
+    // [number] > [number]
+    const moreThanNumberArray = (left: number[], right: number[]): boolean => {
+      if (left.length == 0) return false;
+      // Follows JS native comparison
+      else if (right.length == 0) return true;
+      // Follows JS native comparison
+      else if (left[0] === right[0] && left.length > 1)
+        return moreThanNumberArray(left.slice(1), right.slice(1));
+      else return left[0] > right[0];
+    };
 
-    let gridMaxY = Math.max(...currentHead.map((e) => e.layout.y + e.layout.h));
-    gridMaxY = isFinite(gridMaxY) ? gridMaxY : 0;
+    let [newItemBot, newItemLeft] = currentHead
+      .map((e) => [e.layout.y + e.layout.h, e.layout.x + e.layout.w])
+      .reduce((e, acc) => (moreThanNumberArray(e, acc) ? e : acc), [
+        ITEM_HEIGHT,
+        0,
+      ]);
 
-    if (currentHead.length != 0) {
-      const maxX = Math.max(
-        ...currentHead
-          .filter((e) => e.layout.y + e.layout.h === gridMaxY)
-          .map((e) => e.layout.x + e.layout.w),
-      );
-      if (maxX <= COLS - ITEM_WIDTH) {
-        desiredX = maxX;
-        gridMaxY -= ITEM_HEIGHT;
-      }
+    if (newItemLeft >= GRID_COL) {
+      // final row overflow
+      newItemLeft = 0;
+      newItemBot += ITEM_HEIGHT;
     }
 
     dispatch({
@@ -403,8 +397,8 @@ export default function ConfigurableLayout() {
           id: uuidv4(),
           view: item,
           layout: {
-            x: desiredX,
-            y: gridMaxY,
+            x: newItemLeft,
+            y: newItemBot - ITEM_HEIGHT,
             w: ITEM_WIDTH,
             h: ITEM_HEIGHT,
             isDraggable: !isLayoutLocked,
