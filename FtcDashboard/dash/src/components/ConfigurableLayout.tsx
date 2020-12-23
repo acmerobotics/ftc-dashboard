@@ -5,7 +5,7 @@ import React, {
   useRef,
   useReducer,
 } from 'react';
-import { Responsive, WidthProvider, Layout } from 'react-grid-layout';
+import RGL, { WidthProvider, Layout } from 'react-grid-layout';
 import { v4 as uuidv4 } from 'uuid';
 
 import 'react-grid-layout/css/styles.css';
@@ -28,7 +28,7 @@ import useMouseIdleListener from '../hooks/useMouseIdleListener';
 
 import { ReactComponent as AddSVG } from '../assets/icons/add.svg';
 import { ReactComponent as DeleteSweepSVG } from '../assets/icons/delete_sweep.svg';
-import DeleteXSVGURL from '../assets/icons/delete_x.svg';
+import { ReactComponent as DeleteXSVG } from '../assets/icons/delete_x.svg';
 import LockSVGURL from '../assets/icons/lock.svg';
 import { ReactComponent as RemoveCircleSVG } from '../assets/icons/remove_circle.svg';
 import { ReactComponent as RemoveCircleOutlineSVG } from '../assets/icons/remove_circle_outline.svg';
@@ -46,14 +46,6 @@ const VIEW_MAP: { [key in ConfigurableView]: ReactElement } = {
 const HEIGHT_BREAKPOINTS = {
   MEDIUM: 730,
   TALL: 1200,
-};
-
-const COL_BREAKPOINTS = {
-  lg: 6,
-  md: 6,
-  sm: 6,
-  xs: 6,
-  xxs: 6,
 };
 
 const Container = styled.div.attrs<{ isLayoutLocked: boolean }>(
@@ -76,39 +68,6 @@ const Container = styled.div.attrs<{ isLayoutLocked: boolean }>(
       ? 'background-image: radial-gradient(#d2d2d2 5%, transparent 0);'
       : ''}
   background-size: 35px 35px;
-`;
-
-const DeleteModeChild = styled.div`
-  background: #fbbf2466;
-
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-
-const DeleteModeButton = styled.button.attrs({
-  className: 'focus:outline-none focus:ring',
-})`
-  background: url(${DeleteXSVGURL}) no-repeat center;
-  background-size: 3.5em;
-
-  filter: invert(0.9);
-  mix-blend-mode: overlay;
-
-  width: 6em;
-  height: 6em;
-
-  outline: none;
-  border: 3px solid #fff;
-  border-radius: 50%;
-
-  padding: 0.3em;
 `;
 
 interface GridItemType {
@@ -323,7 +282,7 @@ const stateHistoryReducer = (
   return { ...state };
 };
 
-const ResponsiveReactGridLayout = WidthProvider(Responsive);
+const ResponsiveReactGridLayout = WidthProvider(RGL);
 
 export default function ConfigurableLayout() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -535,14 +494,12 @@ export default function ConfigurableLayout() {
       )}
       <ResponsiveReactGridLayout
         className="layout"
-        cols={COL_BREAKPOINTS}
+        cols={6}
         resizeHandles={['se']}
         draggableHandle=".grab-handle"
         compactType={null}
         rowHeight={isLayoutLocked ? 70 : 60}
-        layouts={{
-          lg: currentHead.map((item) => ({ i: item.id, ...item.layout })),
-        }}
+        layout={currentHead.map((item) => ({ i: item.id, ...item.layout }))}
         onLayoutChange={onLayoutChange}
         margin={isLayoutLocked ? [0, 0] : [10, 10]}
       >
@@ -552,15 +509,22 @@ export default function ConfigurableLayout() {
               isDraggable: item.layout.isDraggable,
               isUnlocked: !isLayoutLocked,
             })}
-            {isInDeleteMode ? (
-              <DeleteModeChild>
-                <DeleteModeButton
-                  onClick={() => {
-                    removeItem(item.id);
-                  }}
-                />
-              </DeleteModeChild>
-            ) : null}
+            <div
+              className={`absolute top-0 left-0 w-full h-full bg-yellow-300 bg-opacity-50 flex justify-center items-center rounded transition ${
+                isInDeleteMode
+                  ? 'pointer-events opacity-100'
+                  : 'pointer-events-none opacity-0'
+              }`}
+            >
+              <button
+                className="p-4 border-4 border-yellow-600 rounded-full bg-opacity-50 opacity-50 focus:outline-none focus:ring focus:ring-yellow-800"
+                onClick={() => {
+                  removeItem(item.id);
+                }}
+              >
+                <DeleteXSVG className="text-yellow-600 w-20 h-20" />
+              </button>
+            </div>
           </div>
         ))}
       </ResponsiveReactGridLayout>
