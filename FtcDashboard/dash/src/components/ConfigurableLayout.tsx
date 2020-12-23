@@ -277,12 +277,15 @@ export default function ConfigurableLayout() {
   const [isInDeleteMode, setIsInDeleteMode] = useState(false);
   const [isShowingViewPicker, setIsShowingViewPicker] = useState(false);
 
-  const [{ currentHead }, dispatch] = useReducer(stateHistoryReducer, {
-    gridStateHistory: [],
-    actionHistory: [],
-    currentHistoryPosition: -1,
-    currentHead: [],
-  });
+  const [{ currentHead: gridItems }, dispatch] = useReducer(
+    stateHistoryReducer,
+    {
+      gridStateHistory: [],
+      actionHistory: [],
+      currentHistoryPosition: -1,
+      currentHead: [],
+    },
+  );
 
   const isFabIdle = useMouseIdleListener({
     bottom: '0',
@@ -364,9 +367,9 @@ export default function ConfigurableLayout() {
   useEffect(() => {
     window.localStorage.setItem(
       LOCAL_STORAGE_LAYOUT_KEY,
-      JSON.stringify([...currentHead]),
+      JSON.stringify([...gridItems]),
     );
-  }, [currentHead]);
+  }, [gridItems]);
 
   const addItem = (item: ConfigurableView) => {
     const ITEM_WIDTH = 2;
@@ -383,7 +386,7 @@ export default function ConfigurableLayout() {
       else return left[0] > right[0];
     };
 
-    let [newItemBot, newItemLeft] = currentHead
+    let [newItemBot, newItemLeft] = gridItems
       .map((e) => [e.layout.y + e.layout.h, e.layout.x + e.layout.w])
       .reduce((e, acc) => (moreThanNumberArray(e, acc) ? e : acc), [
         ITEM_HEIGHT,
@@ -399,7 +402,7 @@ export default function ConfigurableLayout() {
     dispatch({
       type: StateHistoryCommand.APPEND,
       payload: [
-        ...currentHead,
+        ...gridItems,
         {
           id: uuidv4(),
           view: item,
@@ -419,12 +422,12 @@ export default function ConfigurableLayout() {
   const removeItem = (id: string) => {
     dispatch({
       type: StateHistoryCommand.APPEND,
-      payload: currentHead.filter((e) => e.id !== id),
+      payload: gridItems.filter((e) => e.id !== id),
     });
   };
 
   const onLayoutChange = (layout: Layout[]) => {
-    const newGrid = currentHead.map((e) => {
+    const newGrid = gridItems.map((e) => {
       const newLayoutValue = layout.find((i) => i.i === e.id);
       if (newLayoutValue != null) {
         const newLayout = {
@@ -451,7 +454,7 @@ export default function ConfigurableLayout() {
     setIsLayoutLocked(toBeLocked);
     dispatch({
       type: StateHistoryCommand.APPEND,
-      payload: currentHead.map((i) => {
+      payload: gridItems.map((i) => {
         i.layout = {
           ...i.layout,
           isResizable: !toBeLocked,
@@ -466,7 +469,7 @@ export default function ConfigurableLayout() {
 
   return (
     <Container ref={containerRef} isLayoutLocked={isLayoutLocked}>
-      {currentHead.length === 0 ? (
+      {gridItems.length === 0 ? (
         <div
           className={`text-center mt-16 p-12 transition-colors ${
             isLayoutLocked ? 'bg-white' : 'bg-gray-100'
@@ -489,11 +492,11 @@ export default function ConfigurableLayout() {
         draggableHandle=".grab-handle"
         compactType={null}
         rowHeight={isLayoutLocked ? 70 : 60}
-        layout={currentHead.map((item) => ({ i: item.id, ...item.layout }))}
+        layout={gridItems.map((item) => ({ i: item.id, ...item.layout }))}
         onLayoutChange={onLayoutChange}
         margin={isLayoutLocked ? [0, 0] : [10, 10]}
       >
-        {currentHead.map((item) => (
+        {gridItems.map((item) => (
           <div key={item.id}>
             {React.cloneElement(VIEW_MAP[item.view], {
               isDraggable: item.layout.isDraggable,
