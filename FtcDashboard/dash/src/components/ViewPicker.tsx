@@ -7,6 +7,7 @@ import { ReactComponent as CameraSVG } from '../assets/icons/camera.svg';
 import { ReactComponent as SettingsSVG } from '../assets/icons/settings.svg';
 import { ReactComponent as ChartSVG } from '../assets/icons/chart.svg';
 import { ReactComponent as ControlCameraSVG } from '../assets/icons/control_camera.svg';
+import { ReactComponent as ApiSVG } from '../assets/icons/api.svg';
 import { ReactComponent as SubjectSVG } from '../assets/icons/subject.svg';
 import { ReactComponent as WidgetSVG } from '../assets/icons/widgets.svg';
 
@@ -56,7 +57,7 @@ const listContent = [
   {
     title: 'Field View',
     view: ConfigurableView.FIELD_VIEW,
-    icon: <ControlCameraSVG className="w-6 h-6" />,
+    icon: <ApiSVG className="w-7 h-7 transform rotate-45" />,
     customStyles: 'focus:ring-blue-600',
     iconBg: 'bg-blue-500',
   },
