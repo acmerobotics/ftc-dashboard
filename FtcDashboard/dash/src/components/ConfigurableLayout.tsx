@@ -195,11 +195,10 @@ const stateHistoryReducer = (
         return state;
       }
 
+      const lastAction = state.actionHistory[state.actionHistory.length - 1];
       if (
-        state.actionHistory[state.actionHistory.length - 1] ===
-          StateHistoryCommand.UNDO ||
-        state.actionHistory[state.actionHistory.length - 1] ===
-          StateHistoryCommand.REDO
+        lastAction === StateHistoryCommand.UNDO ||
+        lastAction === StateHistoryCommand.REDO
       ) {
         if (isEqual(state.currentHead, action.payload)) return state;
       }
@@ -326,20 +325,28 @@ export default function ConfigurableLayout() {
     dispatch({ type: StateHistoryCommand.APPEND, payload: newGridItems });
   }, []);
 
+  const undo = () => {
+    dispatch({ type: StateHistoryCommand.UNDO });
+  };
+
+  const redo = () => {
+    dispatch({ type: StateHistoryCommand.REDO });
+  };
+
   useEffect(() => {
     const keyDownListener = (e: KeyboardEvent) => {
       if (!isLayoutLocked) {
-        if (window.navigator.userAgent.indexOf('Mac') != 1) {
-          if (e.metaKey && e.key == 'z') {
+        if (navigator.platform.indexOf('Mac') > -1) {
+          if (e.metaKey && e.key === 'z') {
             if (e.shiftKey) {
               redo();
             } else {
               undo();
             }
           } else {
-            if (e.ctrlKey && e.key == 'z') {
+            if (e.ctrlKey && e.key === 'z') {
               undo();
-            } else if (e.ctrlKey && e.key == 'y') {
+            } else if (e.ctrlKey && e.key === 'y') {
               redo();
             }
           }
@@ -367,9 +374,9 @@ export default function ConfigurableLayout() {
 
     // [number] > [number]
     const moreThanNumberArray = (left: number[], right: number[]): boolean => {
-      if (left.length == 0) return false;
+      if (left.length === 0) return false;
       // Follows JS native comparison
-      else if (right.length == 0) return true;
+      else if (right.length === 0) return true;
       // Follows JS native comparison
       else if (left[0] === right[0] && left.length > 1)
         return moreThanNumberArray(left.slice(1), right.slice(1));
@@ -412,13 +419,13 @@ export default function ConfigurableLayout() {
   const removeItem = (id: string) => {
     dispatch({
       type: StateHistoryCommand.APPEND,
-      payload: currentHead.filter((e) => e.id != id),
+      payload: currentHead.filter((e) => e.id !== id),
     });
   };
 
   const onLayoutChange = (layout: Layout[]) => {
     const newGrid = currentHead.map((e) => {
-      const newLayoutValue = layout.find((i) => i.i == e.id);
+      const newLayoutValue = layout.find((i) => i.i === e.id);
       if (newLayoutValue != null) {
         const newLayout = {
           x: newLayoutValue.x,
@@ -457,17 +464,9 @@ export default function ConfigurableLayout() {
     if (toBeLocked) setIsShowingViewPicker(false);
   };
 
-  const undo = () => {
-    dispatch({ type: StateHistoryCommand.UNDO });
-  };
-
-  const redo = () => {
-    dispatch({ type: StateHistoryCommand.REDO });
-  };
-
   return (
     <Container ref={containerRef} isLayoutLocked={isLayoutLocked}>
-      {currentHead.length == 0 ? (
+      {currentHead.length === 0 ? (
         <div
           className={`text-center mt-16 p-12 transition-colors ${
             isLayoutLocked ? 'bg-white' : 'bg-gray-100'
