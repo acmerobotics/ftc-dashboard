@@ -1,9 +1,14 @@
-import { FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
 
 import { ConfigurableView } from '../enums/ConfigurableView';
 
-import { ReactComponent as AddIconSVG } from '../assets/icons/add.svg';
+import { ReactComponent as CameraSVG } from '../assets/icons/camera.svg';
+import { ReactComponent as SettingsSVG } from '../assets/icons/settings.svg';
+import { ReactComponent as ChartSVG } from '../assets/icons/chart.svg';
+import { ReactComponent as ControlCameraSVG } from '../assets/icons/control_camera.svg';
+import { ReactComponent as SubjectSVG } from '../assets/icons/subject.svg';
+import { ReactComponent as WidgetSVG } from '../assets/icons/widgets.svg';
 
 type ViewPickerProps = {
   isOpen: boolean;
@@ -26,12 +31,12 @@ const CardButton = styled.button.attrs<{
   isOpen: boolean;
   customStyles: string;
 }>(({ isOpen, customStyles }) => ({
-  className: `rounded bg-white border-2 shadow-md hover:shadow-lg flex justify-center px-3 py-4 transform transition
-    hover:-translate-y-0.5 focus:-translate-y-0.5 focus:border-0 focus:outline-none ring-2 ring-transparent ${customStyles} ${
-    isOpen
-      ? 'pointer-events-auto opacity-100 scale-100'
-      : 'pointer-events-none opacity-0 scale-75'
-  }`,
+  className: `rounded bg-white border border-gray-300 hover:border-gray-400 shadow-md hover:shadow-lg flex justify-start items-center px-4 py-4 transform transition
+    hover:-translate-y-0.5 focus:-translate-y-0.5 focus:border-0 focus:outline-none ring-2 ring-transparent ${
+      isOpen
+        ? 'pointer-events-auto opacity-100 scale-100'
+        : 'pointer-events-none opacity-0 scale-75'
+    } ${customStyles}`,
 }))<{
   isOpen: boolean;
   customStyles: string;
@@ -44,38 +49,44 @@ const listContent = [
   {
     title: 'OpMode View',
     view: ConfigurableView.OPMODE_VIEW,
-    customStyles:
-      'border-red-500 focus:ring-red-600 hover:bg-red-100 focus:bg-red-200',
+    icon: <WidgetSVG className="w-6 h-6" />,
+    customStyles: 'focus:ring-red-600',
+    iconBg: 'bg-red-500',
   },
   {
     title: 'Field View',
     view: ConfigurableView.FIELD_VIEW,
-    customStyles:
-      'border-blue-500 focus:ring-blue-600 hover:bg-blue-100 focus:bg-blue-200',
+    icon: <ControlCameraSVG className="w-6 h-6" />,
+    customStyles: 'focus:ring-blue-600',
+    iconBg: 'bg-blue-500',
   },
   {
     title: 'Graph View',
     view: ConfigurableView.GRAPH_VIEW,
-    customStyles:
-      'border-green-500 focus:ring-green-600 hover:bg-green-100 focus:bg-green-200',
+    icon: <ChartSVG className="text-white w-6 h-6" />,
+    customStyles: 'focus:ring-green-600',
+    iconBg: 'bg-green-500',
   },
   {
     title: 'Config View',
     view: ConfigurableView.CONFIG_VIEW,
-    customStyles:
-      'border-orange-500 focus:ring-orange-600 hover:bg-orange-100 focus:bg-orange-200',
+    icon: <SettingsSVG className="w-6 h-6" />,
+    customStyles: 'focus:ring-orange-600',
+    iconBg: 'bg-orange-500',
   },
   {
     title: 'Telemetry View',
     view: ConfigurableView.TELEMETRY_VIEW,
-    customStyles:
-      'border-yellow-500 focus:ring-yellow-600 hover:bg-yellow-100 focus:bg-yellow-200',
+    icon: <SubjectSVG className="w-6 h-6" />,
+    customStyles: 'focus:ring-yellow-600',
+    iconBg: 'bg-yellow-500',
   },
   {
     title: 'Camera View',
     view: ConfigurableView.CAMERA_VIEW,
-    customStyles:
-      'border-purple-500 focus:ring-purple-600 hover:bg-purple-100 focus:bg-purple-200',
+    icon: <CameraSVG className="w-5 h-5" />,
+    customStyles: 'focus:ring-purple-600',
+    iconBg: 'bg-purple-500',
   },
 ];
 
@@ -92,7 +103,15 @@ const ViewPicker: FunctionComponent<ViewPickerProps> = (
           customStyles={item.customStyles}
           onClick={() => props.clickEvent(item.view)}
         >
-          <h3 className="text-lg">{item.title}</h3>
+          <div
+            className={`w-8 h-8  rounded mr-3 flex justify-center items-center ${item.iconBg}`}
+          >
+            {/* <AddSVG className="text-white transform rotate-45" /> */}
+            {React.cloneElement(item.icon)}
+          </div>
+          <div className="flex flex-col items-start">
+            <h3 className="text-lg mt-0 leading-4 font-medium">{item.title}</h3>
+          </div>
         </CardButton>
       ))}
     </Container>
