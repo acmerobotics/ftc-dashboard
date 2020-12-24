@@ -56,12 +56,13 @@ const VIEW_MAP: { [key in ConfigurableView]: ReactElement } = {
   [ConfigurableView.OPMODE_VIEW]: <OpModeView />,
 };
 
-const HEIGHT_BREAKPOINTS = {
-  MEDIUM: 730,
-  TALL: 1200,
-};
+const LOCAL_STORAGE_LAYOUT_KEY = 'configurableLayoutStorage';
 
 const GRID_COL = 6;
+const GRID_ROW_HEIGHT = 60;
+const GRID_MARGIN = 10;
+
+const ReactGridLayout = WidthProvider(RGL);
 
 const Container = styled.div.attrs<{ isLayoutLocked: boolean }>(
   ({ isLayoutLocked }) => ({
@@ -85,13 +86,13 @@ const Container = styled.div.attrs<{ isLayoutLocked: boolean }>(
   background-size: 35px 35px;
 `;
 
-interface GridItemType {
+interface GridItem {
   id: string;
   view: ConfigurableView;
-  layout: GridItemLayoutType;
+  layout: GridItemLayout;
 }
 
-interface GridItemLayoutType {
+interface GridItemLayout {
   x: number;
   y: number;
   w: number;
@@ -100,7 +101,12 @@ interface GridItemLayoutType {
   isResizable: boolean;
 }
 
-const DEFAULT_GRID: GridItemType[] = [
+const HEIGHT_BREAKPOINTS = {
+  MEDIUM: 730,
+  TALL: 1200,
+};
+
+const DEFAULT_GRID: GridItem[] = [
   {
     id: uuidv4(),
     view: ConfigurableView.FIELD_VIEW,
@@ -123,7 +129,7 @@ const DEFAULT_GRID: GridItemType[] = [
   },
 ];
 
-const DEFAULT_GRID_MEDIUM: GridItemType[] = [
+const DEFAULT_GRID_MEDIUM: GridItem[] = [
   {
     id: uuidv4(),
     view: ConfigurableView.FIELD_VIEW,
@@ -146,7 +152,7 @@ const DEFAULT_GRID_MEDIUM: GridItemType[] = [
   },
 ];
 
-const DEFAULT_GRID_TALL: GridItemType[] = [
+const DEFAULT_GRID_TALL: GridItem[] = [
   {
     id: uuidv4(),
     view: ConfigurableView.FIELD_VIEW,
@@ -169,10 +175,6 @@ const DEFAULT_GRID_TALL: GridItemType[] = [
   },
 ];
 
-const LOCAL_STORAGE_LAYOUT_KEY = 'configurableLayoutStorage';
-
-const ReactGridLayout = WidthProvider(RGL);
-
 export default function ConfigurableLayout() {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -188,7 +190,7 @@ export default function ConfigurableLayout() {
       undo: undoGrid,
       redo: redoGrid,
     },
-  ] = useUndoHistory<GridItemType[]>([]);
+  ] = useUndoHistory<GridItem[]>([]);
 
   const isFabIdle = useMouseIdleListener({
     bottom: '0',
@@ -204,11 +206,14 @@ export default function ConfigurableLayout() {
 
     const newGridItems = (() => {
       if (initialLayoutStorageValue !== null) {
-        return JSON.parse(initialLayoutStorageValue) as GridItemType[];
+        return JSON.parse(initialLayoutStorageValue) as GridItem[];
       } else {
         // This assumes that containerRef isn't null on render
         // This works completely fine now as containerRef is set
+        // Right now refs are guaranteed to be set before componentDidMount
+        // https://stackoverflow.com/a/50019873/3360147
         // However, I don't know if this works with concurrent mode
+        // Refs aren't very safe in concurrent mode
         // This project doesn't use concurrent mode since it's in beta
         // Check back here if concurrent mode is ever enabled
         // Solution then is to use something like useCallback similar to the useDelayedTooltip hook
@@ -316,9 +321,27 @@ export default function ConfigurableLayout() {
     setGrid(gridItems.filter((e) => e.id !== id));
   };
 
+  const clickFAB = () => {
+    const toBeLocked = !isLayoutLocked;
+
+    setIsLayoutLocked(toBeLocked);
+    setGrid(
+      gridItems.map((i) => {
+        i.layout = {
+          ...i.layout,
+          isResizable: !toBeLocked,
+          isDraggable: !toBeLocked,
+        };
+        return i;
+      }),
+    );
+
+    if (toBeLocked) setIsShowingViewPicker(false);
+  };
+
   const onLayoutChange = (layout: Layout[]) => {
     const newGrid = gridItems.map((e) => {
-      const newLayoutValue = layout.find((i) => i.i === e.id);
+      const newLayoutValue = layout.find((item) => item.i === e.id);
       if (newLayoutValue != null) {
         const newLayout = {
           x: newLayoutValue.x,
@@ -336,24 +359,6 @@ export default function ConfigurableLayout() {
     });
 
     setGrid(newGrid);
-  };
-
-  const clickFAB = () => {
-    const toBeLocked = !isLayoutLocked;
-
-    setIsLayoutLocked(toBeLocked);
-    setGrid(
-      gridItems.map((i) => {
-        i.layout = {
-          ...i.layout,
-          isResizable: !toBeLocked,
-          isDraggable: !toBeLocked,
-        };
-        return i;
-      }),
-    );
-
-    if (toBeLocked) setIsShowingViewPicker(false);
   };
 
   return (
@@ -380,10 +385,12 @@ export default function ConfigurableLayout() {
         resizeHandles={['se']}
         draggableHandle=".grab-handle"
         compactType={null}
-        rowHeight={isLayoutLocked ? 70 : 60}
+        rowHeight={
+          isLayoutLocked ? GRID_ROW_HEIGHT + GRID_MARGIN : GRID_ROW_HEIGHT
+        }
         layout={gridItems.map((item) => ({ i: item.id, ...item.layout }))}
         onLayoutChange={onLayoutChange}
-        margin={isLayoutLocked ? [0, 0] : [10, 10]}
+        margin={isLayoutLocked ? [0, 0] : [GRID_MARGIN, GRID_MARGIN]}
       >
         {gridItems.map((item) => (
           <div key={item.id}>
