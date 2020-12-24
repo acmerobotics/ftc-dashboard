@@ -44,8 +44,8 @@ export default function useUndoHistory<T>(
     switch (action.type) {
       case StateHistoryCommand.INITIALIZE: {
         return {
-          ...state,
           history: [action.payload],
+          actionHistory: [StateHistoryCommand.INITIALIZE],
           currentHistoryPosition: 0,
         };
       }
