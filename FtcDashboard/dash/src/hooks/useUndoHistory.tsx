@@ -123,8 +123,6 @@ export default function useUndoHistory<T>(
           currentHistoryPosition: newCurrentHistoryPosition,
         };
       }
-      default:
-        return state;
     }
   };
 
