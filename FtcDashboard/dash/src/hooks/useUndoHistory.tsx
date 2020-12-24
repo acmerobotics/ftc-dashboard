@@ -43,12 +43,10 @@ export default function useUndoHistory<T>(
   ): StateHistoryReducerState => {
     switch (action.type) {
       case StateHistoryCommand.INITIALIZE: {
-        const history = [...state.history];
-        history[0] = action.payload;
-
         return {
           ...state,
-          history: history,
+          history: [action.payload],
+          currentHistoryPosition: 0,
         };
       }
       case StateHistoryCommand.APPEND: {
