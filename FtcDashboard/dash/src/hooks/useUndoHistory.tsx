@@ -33,7 +33,6 @@ export default function useUndoHistory<T>(
 
   interface StateHistoryReducerState {
     history: T[];
-    actionHistory: StateHistoryCommand[];
     currentHistoryPosition: number;
   }
 
@@ -45,7 +44,6 @@ export default function useUndoHistory<T>(
       case StateHistoryCommand.INITIALIZE: {
         return {
           history: [action.payload],
-          actionHistory: [StateHistoryCommand.INITIALIZE],
           currentHistoryPosition: 0,
         };
       }
@@ -56,69 +54,31 @@ export default function useUndoHistory<T>(
           ) {
             return state;
           }
-
-          const lastAction =
-            state.actionHistory[state.actionHistory.length - 1];
-          if (
-            lastAction === StateHistoryCommand.UNDO ||
-            lastAction === StateHistoryCommand.REDO
-          ) {
-            if (
-              isEqual(
-                state.history[state.currentHistoryPosition],
-                action.payload,
-              )
-            )
-              return state;
-          }
         }
 
-        const newHistory = [
-          ...state.history.slice(0, state.currentHistoryPosition + 1),
-          action.payload,
-        ];
-
-        const newActionHistory = [
-          ...state.actionHistory,
-          StateHistoryCommand.APPEND,
-        ];
-        const newCurrentHistoryPosition = state.currentHistoryPosition + 1;
-
         return {
-          history: newHistory,
-          actionHistory: newActionHistory,
-          currentHistoryPosition: newCurrentHistoryPosition,
+          history: [
+            ...state.history.slice(0, state.currentHistoryPosition + 1),
+            action.payload,
+          ],
+          currentHistoryPosition: state.currentHistoryPosition + 1,
         };
       }
       case StateHistoryCommand.UNDO: {
         if (state.currentHistoryPosition <= 0) return state;
 
-        const newActionHistory = [
-          ...state.actionHistory,
-          StateHistoryCommand.UNDO,
-        ];
-        const newCurrentHistoryPosition = state.currentHistoryPosition - 1;
-
         return {
-          history: state.history,
-          actionHistory: newActionHistory,
-          currentHistoryPosition: newCurrentHistoryPosition,
+          ...state,
+          currentHistoryPosition: state.currentHistoryPosition - 1,
         };
       }
       case StateHistoryCommand.REDO: {
         if (state.currentHistoryPosition >= state.history.length - 1)
           return state;
 
-        const newActionHistory = [
-          ...state.actionHistory,
-          StateHistoryCommand.REDO,
-        ];
-        const newCurrentHistoryPosition = state.currentHistoryPosition + 1;
-
         return {
-          history: state.history,
-          actionHistory: newActionHistory,
-          currentHistoryPosition: newCurrentHistoryPosition,
+          ...state,
+          currentHistoryPosition: state.currentHistoryPosition + 1,
         };
       }
     }
@@ -128,7 +88,6 @@ export default function useUndoHistory<T>(
     stateHistoryReducer,
     {
       history: [initialHead],
-      actionHistory: [StateHistoryCommand.INITIALIZE],
       currentHistoryPosition: 0,
     },
   );
