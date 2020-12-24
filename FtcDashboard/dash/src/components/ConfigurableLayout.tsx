@@ -29,6 +29,24 @@ import { ReactComponent as RemoveCircleSVG } from '../assets/icons/remove_circle
 import { ReactComponent as RemoveCircleOutlineSVG } from '../assets/icons/remove_circle_outline.svg';
 import CreateSVGURL from '../assets/icons/create.svg';
 
+function maxArray(a: number[], b: number[]) {
+  if (a.length !== b.length) {
+    throw new Error('cannot compare arrays with different lengths');
+  }
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] > b[i]) {
+      return a;
+    } else if (b[i] > a[i]) {
+      return b;
+    }
+  }
+  return a;
+}
+
+function intervalsIntersect([a, b]: number[], [c, d]: number[]) {
+  return Math.max(a, c) < Math.min(b, d);
+}
+
 const VIEW_MAP: { [key in ConfigurableView]: ReactElement } = {
   [ConfigurableView.FIELD_VIEW]: <FieldView />,
   [ConfigurableView.GRAPH_VIEW]: <GraphView />,
@@ -251,24 +269,6 @@ export default function ConfigurableLayout() {
   const addItem = (item: ConfigurableView) => {
     const ITEM_WIDTH = 2;
     const ITEM_HEIGHT = 4;
-
-    function maxArray(a: number[], b: number[]) {
-      if (a.length !== b.length) {
-        throw new Error('cannot compare arrays with different lengths');
-      }
-      for (let i = 0; i < a.length; i++) {
-        if (a[i] > b[i]) {
-          return a;
-        } else if (b[i] > a[i]) {
-          return b;
-        }
-      }
-      return a;
-    }
-
-    function intervalsIntersect([a, b]: number[], [c, d]: number[]) {
-      return Math.max(a, c) < Math.min(b, d);
-    }
 
     // find the bottom, right grid item and tentatively place the new item to its right with bottoms aligned
     let [newItemBotMin, newItemLeft] = gridItems
