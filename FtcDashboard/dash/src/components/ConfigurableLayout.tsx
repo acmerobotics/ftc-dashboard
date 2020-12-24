@@ -252,29 +252,48 @@ export default function ConfigurableLayout() {
     const ITEM_WIDTH = 2;
     const ITEM_HEIGHT = 4;
 
-    // [number] > [number]
-    const moreThanNumberArray = (left: number[], right: number[]): boolean => {
-      // Mirrors JS native comparison
-      if (left.length === 0) return false;
-      // Mirrors JS native comparison
-      else if (right.length === 0) return true;
-      else if (left[0] === right[0] && left.length > 1)
-        return moreThanNumberArray(left.slice(1), right.slice(1));
-      else return left[0] > right[0];
-    };
-
-    let [newItemBot, newItemLeft] = gridItems
-      .map((e) => [e.layout.y + e.layout.h, e.layout.x + e.layout.w])
-      .reduce((e, acc) => (moreThanNumberArray(e, acc) ? e : acc), [
-        ITEM_HEIGHT,
-        0,
-      ]);
-
-    if (newItemLeft >= GRID_COL) {
-      // final row overflow
-      newItemLeft = 0;
-      newItemBot += ITEM_HEIGHT;
+    function maxArray(a: number[], b: number[]) {
+      if (a.length !== b.length) {
+        throw new Error('cannot compare arrays with different lengths');
+      }
+      for (let i = 0; i < a.length; i++) {
+        if (a[i] > b[i]) {
+          return a;
+        } else if (b[i] > a[i]) {
+          return b;
+        }
+      }
+      return a;
     }
+
+    function intervalsIntersect([a, b]: number[], [c, d]: number[]) {
+      return Math.max(a, c) < Math.min(b, d);
+    }
+
+    // find the bottom, right grid item and tentatively place the new item to its right with bottoms aligned
+    let [newItemBotMin, newItemLeft] = gridItems
+      .map((e) => [e.layout.y + e.layout.h, e.layout.x + e.layout.w])
+      .reduce(maxArray, [0, 0]);
+
+    // if this placement puts the new item off the screen, push it to the row below
+    if (newItemLeft + ITEM_WIDTH > GRID_COL) {
+      newItemLeft = 0;
+      newItemBotMin += ITEM_HEIGHT;
+    }
+
+    // find the minimum top for the new item to avoid intersecting items above
+    const newItemTopMin = gridItems
+      .filter((e) =>
+        intervalsIntersect(
+          [newItemLeft, newItemLeft + ITEM_WIDTH],
+          [e.layout.x, e.layout.x + e.layout.w],
+        ),
+      )
+      .map((e) => e.layout.y + e.layout.h)
+      .reduce((bottom, acc) => Math.max(bottom, acc), 0);
+
+    // adjust the original new item bottom if necessary given the minimum top
+    const newItemTop = Math.max(newItemBotMin - ITEM_HEIGHT, newItemTopMin);
 
     setGrid([
       ...gridItems,
@@ -283,7 +302,7 @@ export default function ConfigurableLayout() {
         view: item,
         layout: {
           x: newItemLeft,
-          y: newItemBot - ITEM_HEIGHT,
+          y: newItemTop,
           w: ITEM_WIDTH,
           h: ITEM_HEIGHT,
           isDraggable: !isLayoutLocked,
