@@ -206,6 +206,7 @@ input {
 }
 
 .canvas-container {
+  position: relative;
   height: calc(100% - 44px);
   overflow: hidden;
 }
