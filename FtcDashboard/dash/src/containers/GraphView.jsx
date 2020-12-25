@@ -106,7 +106,7 @@ class GraphView extends Component {
         ) : Object.keys(latestPacket.data).length > 0 ? (
           <div className="flex-grow flex flex-col justify-between">
             <div>
-              <h3 className="mt-2">Variables to graph:</h3>
+              <h3 className="mt-2">Telemetry to graph:</h3>
               <div className="ml-3">
                 <MultipleCheckbox
                   arr={Object.keys(latestPacket.data).filter(
