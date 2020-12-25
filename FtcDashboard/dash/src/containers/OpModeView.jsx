@@ -126,7 +126,7 @@ class OpModeView extends React.Component {
           <BaseViewHeading isDraggable={this.props.isDraggable}>
             Op Mode
           </BaseViewHeading>
-          <p>Op mode controls have not initialized</p>
+          <h3 className="text-lg">Op mode controls have not initialized</h3>
         </BaseView>
       );
     }

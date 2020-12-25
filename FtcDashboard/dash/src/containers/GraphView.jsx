@@ -104,51 +104,49 @@ class GraphView extends Component {
             )}
           </div>
         ) : Object.keys(latestPacket.data).length > 0 ? (
-          <div className="flex-grow flex flex-col justify-between">
-            <div>
-              <h3 className="mt-2">Telemetry to graph:</h3>
-              <div className="ml-3">
-                <MultipleCheckbox
-                  arr={Object.keys(latestPacket.data).filter(
-                    (key) => !isNaN(parseFloat(latestPacket.data[key])),
-                  )}
-                  onChange={(selected) => this.setState({ keys: selected })}
-                  selected={this.state.keys}
-                />
-              </div>
-              <div style={{ marginTop: '20px' }}>
-                <div className="flex justify-between items-center">
-                  <h3>Options:</h3>
-                </div>
-                <div className="ml-3">
-                  <table>
-                    <tbody>
-                      <tr>
-                        <td>Window (ms)</td>
-                        <td>
-                          <TextInput
-                            value={this.state.windowMs.value}
-                            valid={this.state.windowMs.valid}
-                            validate={validateInt}
-                            onChange={({ value, valid }) =>
-                              this.setState({
-                                windowMs: {
-                                  value,
-                                  valid,
-                                },
-                              })
-                            }
-                          />
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-            <p className="text-center mb-3 text-sm">
+          <div>
+            <p className="text-lg">
               Press the upper-right button to graph selected keys over time
             </p>
+            <h3 className="mt-4">Telemetry to graph:</h3>
+            <div className="ml-3">
+              <MultipleCheckbox
+                arr={Object.keys(latestPacket.data).filter(
+                  (key) => !isNaN(parseFloat(latestPacket.data[key])),
+                )}
+                onChange={(selected) => this.setState({ keys: selected })}
+                selected={this.state.keys}
+              />
+            </div>
+            <div style={{ marginTop: '20px' }}>
+              <div className="flex justify-between items-center">
+                <h3>Options:</h3>
+              </div>
+              <div className="ml-3">
+                <table>
+                  <tbody>
+                    <tr>
+                      <td>Window (ms)</td>
+                      <td>
+                        <TextInput
+                          value={this.state.windowMs.value}
+                          valid={this.state.windowMs.valid}
+                          validate={validateInt}
+                          onChange={({ value, valid }) =>
+                            this.setState({
+                              windowMs: {
+                                value,
+                                valid,
+                              },
+                            })
+                          }
+                        />
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         ) : (
           <div className="flex-grow flex items-center justify-center">
