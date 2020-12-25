@@ -105,7 +105,7 @@ class GraphView extends Component {
           </div>
         ) : Object.keys(latestPacket.data).length > 0 ? (
           <div>
-            <p className="text-lg">
+            <p className="text-lg text-center">
               Press the upper-right button to graph selected keys over time
             </p>
             <h3 className="mt-4">Telemetry to graph:</h3>
