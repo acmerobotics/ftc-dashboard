@@ -232,8 +232,13 @@ export default function ConfigurableLayout() {
         }
       }
     })();
+
+    newGridItems.forEach((e) => {
+      e.layout.isResizable = false;
+      e.layout.isDraggable = false;
+    });
+
     initializeGrid(newGridItems);
-    setIsLayoutLocked(!newGridItems.every((e) => e.layout.isResizable));
   }, [initializeGrid]);
 
   useEffect(() => {
