@@ -15,15 +15,15 @@ export const validateDouble = (value) => {
 };
 
 export const validateInt = (value) => {
-  if (value === '-' || value === '') {
-    return {
-      value: value,
-      valid: false,
-    };
-  } else if (/^-?\d*$/.test(value)) {
+  if (/^-?\d*$/.test(value) && value !== '-' && value !== '') {
     return {
       value: parseInt(value, 10),
       valid: true,
+    };
+  } else {
+    return {
+      value: value,
+      valid: false,
     };
   }
 };
