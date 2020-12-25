@@ -151,7 +151,7 @@ class OpModeView extends React.Component {
           </IconGroup>
         </div>
         <select
-          className="bg-gray-200 rounded py-2 px-2 mt-4 border border-gray-300 m-1 shadow-md disabled:shadow-none disabled:text-gray-600 transition"
+          className="bg-gray-200 rounded py-2 pr-7 px-2 border border-gray-300 shadow-md disabled:shadow-none disabled:text-gray-600 transition"
           value={this.state.selectedOpMode}
           disabled={activeOpMode !== STOP_OP_MODE || opModeList.length === 0}
           onChange={this.onChange}
