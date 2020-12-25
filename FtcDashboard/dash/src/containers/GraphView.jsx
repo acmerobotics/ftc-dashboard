@@ -90,7 +90,7 @@ class GraphView extends Component {
           <div className="canvas-container">
             {this.state.keys.length === 0 ? (
               <div className="absolute top-0 left-0 w-full h-full flex justify-center items-center pointer-events-none">
-                <p className="text-center">No variables selected to graph</p>
+                <p className="text-center">No telemetry selected to graph</p>
               </div>
             ) : (
               <GraphCanvas
@@ -147,15 +147,13 @@ class GraphView extends Component {
               </div>
             </div>
             <p className="text-center mb-3 text-sm">
-              Click the button in the upper right to switch to the graphing view
+              Press the upper-right button to graph selected keys over time
             </p>
           </div>
         ) : (
           <div className="flex-grow flex items-center justify-center">
             <p className="text-center">
-              Graph related telemetry packets have not yet been received
-              <br />
-              They will appear here once sent
+              Send number-valued telemetry data to graph them over time
             </p>
           </div>
         )}

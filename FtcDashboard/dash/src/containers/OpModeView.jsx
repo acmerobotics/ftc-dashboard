@@ -126,7 +126,7 @@ class OpModeView extends React.Component {
           <BaseViewHeading isDraggable={this.props.isDraggable}>
             Op Mode
           </BaseViewHeading>
-          <p>Event loop detached</p>
+          <p>Op mode controls have not initialized</p>
         </BaseView>
       );
     }
