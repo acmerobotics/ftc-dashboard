@@ -404,7 +404,7 @@ export default function ConfigurableLayout() {
               isUnlocked: !isLayoutLocked,
             })}
             <div
-              className={`absolute top-0 left-0 w-full h-full bg-yellow-300 bg-opacity-50 flex justify-center items-center rounded transition ${
+              className={`absolute top-0 left-0 w-full h-full bg-yellow-300 bg-opacity-50 flex-center rounded transition ${
                 isInDeleteMode
                   ? 'pointer-events opacity-100'
                   : 'pointer-events-none opacity-0'

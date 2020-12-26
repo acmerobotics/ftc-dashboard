@@ -30,7 +30,7 @@ const FixedContainer = styled.div<RadialFabProps>`
 
 const FloatingButton = styled.button.attrs<RadialFabProps>(
   ({ customClassName }) => ({
-    className: `focus:outline-none focus:ring-2 focus:ring-opacity-50 flex justify-center items-center transition ${customClassName}`,
+    className: `focus:outline-none focus:ring-2 focus:ring-opacity-50 flex-center transition ${customClassName}`,
   }),
 )<RadialFabProps>`
   width: ${({ width }) => width};

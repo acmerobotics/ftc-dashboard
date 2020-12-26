@@ -23,7 +23,7 @@ interface RadialFabChildProps {
 
 const ButtonContainer = styled.button.attrs<RadialFabChildProps>(
   ({ customClass }) => ({
-    className: `top-1/2 left-1/2 rounded-full outline-none focus:outline-none relative flex justify-center items-center transition ${customClass}`,
+    className: `top-1/2 left-1/2 rounded-full outline-none focus:outline-none relative flex-center transition ${customClass}`,
   }),
 )<RadialFabChildProps>`
   /* Not sure why but removing this breaks the button */

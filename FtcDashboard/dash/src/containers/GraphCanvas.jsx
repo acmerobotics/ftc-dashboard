@@ -61,7 +61,7 @@ class GraphCanvas extends React.Component {
 
   render() {
     return (
-      <div className="h-full flex justify-center items-center">
+      <div className="h-full flex-center">
         <div
           className={`${
             this.graph === null || !this.graph?.hasGraphableContent
@@ -71,7 +71,7 @@ class GraphCanvas extends React.Component {
         >
           <AutoFitCanvas ref={this.canvasRef} />
         </div>
-        <div className="absolute top-0 left-0 w-full h-full flex justify-center items-center pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-full flex-center pointer-events-none">
           {this.graph === null || !this.graph?.hasGraphableContent ? (
             <p className="text-center">No content to graph</p>
           ) : null}

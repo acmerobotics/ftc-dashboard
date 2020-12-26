@@ -32,7 +32,7 @@ class MultipleCheckbox extends React.Component {
 
   render() {
     return (
-      <table className="multiple-checkbox">
+      <table className="overflow-y-scroll">
         <tbody>
           {this.props.arr
             .filter(

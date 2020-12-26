@@ -104,9 +104,7 @@ const ViewPicker: FunctionComponent<ViewPickerProps> = (
           onClick={() => props.clickEvent(item.view)}
           disabled={!props.isOpen}
         >
-          <div
-            className={`w-8 h-8  rounded mr-3 flex justify-center items-center ${item.iconBg}`}
-          >
+          <div className={`w-8 h-8  rounded mr-3 flex-center ${item.iconBg}`}>
             {React.cloneElement(item.icon)}
           </div>
           <div className="flex flex-col items-start">
