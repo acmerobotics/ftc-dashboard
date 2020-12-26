@@ -155,7 +155,7 @@ class OpModeView extends React.Component {
         </div>
         <BaseViewBody>
           <select
-            className="bg-gray-200 rounded py-2 pr-7 px-2 border border-gray-300 shadow-md disabled:shadow-none disabled:text-gray-600 transition"
+            className="bg-gray-200 rounded py-2 pr-7 px-2 m-1 border border-gray-300 shadow-md disabled:shadow-none disabled:text-gray-600 transition"
             value={this.state.selectedOpMode}
             disabled={activeOpMode !== STOP_OP_MODE || opModeList.length === 0}
             onChange={this.onChange}
@@ -170,10 +170,10 @@ class OpModeView extends React.Component {
           </select>
           {this.renderButtons()}
           {errorMessage !== '' ? (
-            <p className="error mt-5">Error: {errorMessage}</p>
+            <p className="error mt-5 ml-1">Error: {errorMessage}</p>
           ) : null}
           {warningMessage !== '' ? (
-            <p className="warning mt-5">Warning: {warningMessage}</p>
+            <p className="warning mt-5 ml-1">Warning: {warningMessage}</p>
           ) : null}
         </BaseViewBody>
       </BaseView>
