@@ -341,7 +341,10 @@ export default function ConfigurableLayout() {
       }),
     );
 
-    if (toBeLocked) setIsShowingViewPicker(false);
+    if (toBeLocked) {
+      setIsShowingViewPicker(false);
+      setIsInDeleteMode(false);
+    }
   };
 
   const onLayoutChange = (layout: Layout[]) => {
