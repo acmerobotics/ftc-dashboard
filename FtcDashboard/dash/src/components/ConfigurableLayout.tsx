@@ -58,9 +58,10 @@ const VIEW_MAP: { [key in ConfigurableView]: ReactElement } = {
 
 const LOCAL_STORAGE_LAYOUT_KEY = 'configurableLayoutStorage';
 
-const GRID_COL = 6;
+const GRID_COL = 12;
 const GRID_ROW_HEIGHT = 60;
 const GRID_MARGIN = 10;
+const GRID_ITEM_MIN_WIDTH = 3;
 
 const ReactGridLayout = WidthProvider(RGL);
 
@@ -97,6 +98,7 @@ interface GridItemLayout {
   y: number;
   w: number;
   h: number;
+  minW: number;
   isDraggable: boolean;
   isResizable: boolean;
 }
@@ -110,22 +112,54 @@ const DEFAULT_GRID: GridItem[] = [
   {
     id: uuidv4(),
     view: ConfigurableView.FIELD_VIEW,
-    layout: { x: 0, y: 0, w: 2, h: 9, isDraggable: true, isResizable: true },
+    layout: {
+      x: 0,
+      y: 0,
+      w: 4,
+      h: 9,
+      minW: GRID_ITEM_MIN_WIDTH,
+      isDraggable: true,
+      isResizable: true,
+    },
   },
   {
     id: uuidv4(),
     view: ConfigurableView.GRAPH_VIEW,
-    layout: { x: 2, y: 0, w: 2, h: 9, isDraggable: true, isResizable: true },
+    layout: {
+      x: 4,
+      y: 0,
+      w: 4,
+      h: 9,
+      minW: GRID_ITEM_MIN_WIDTH,
+      isDraggable: true,
+      isResizable: true,
+    },
   },
   {
     id: uuidv4(),
     view: ConfigurableView.CONFIG_VIEW,
-    layout: { x: 4, y: 0, w: 2, h: 7, isDraggable: true, isResizable: true },
+    layout: {
+      x: 8,
+      y: 0,
+      w: 4,
+      h: 7,
+      minW: GRID_ITEM_MIN_WIDTH,
+      isDraggable: true,
+      isResizable: true,
+    },
   },
   {
     id: uuidv4(),
     view: ConfigurableView.TELEMETRY_VIEW,
-    layout: { x: 4, y: 7, w: 2, h: 2, isDraggable: true, isResizable: true },
+    layout: {
+      x: 8,
+      y: 7,
+      w: 4,
+      h: 2,
+      minW: GRID_ITEM_MIN_WIDTH,
+      isDraggable: true,
+      isResizable: true,
+    },
   },
 ];
 
@@ -133,22 +167,54 @@ const DEFAULT_GRID_MEDIUM: GridItem[] = [
   {
     id: uuidv4(),
     view: ConfigurableView.FIELD_VIEW,
-    layout: { x: 0, y: 0, w: 2, h: 13, isDraggable: true, isResizable: true },
+    layout: {
+      x: 0,
+      y: 0,
+      w: 4,
+      h: 13,
+      minW: GRID_ITEM_MIN_WIDTH,
+      isDraggable: true,
+      isResizable: true,
+    },
   },
   {
     id: uuidv4(),
     view: ConfigurableView.GRAPH_VIEW,
-    layout: { x: 2, y: 0, w: 2, h: 13, isDraggable: true, isResizable: true },
+    layout: {
+      x: 4,
+      y: 0,
+      w: 4,
+      h: 13,
+      minW: GRID_ITEM_MIN_WIDTH,
+      isDraggable: true,
+      isResizable: true,
+    },
   },
   {
     id: uuidv4(),
     view: ConfigurableView.CONFIG_VIEW,
-    layout: { x: 4, y: 0, w: 2, h: 11, isDraggable: true, isResizable: true },
+    layout: {
+      x: 8,
+      y: 0,
+      w: 4,
+      h: 11,
+      minW: GRID_ITEM_MIN_WIDTH,
+      isDraggable: true,
+      isResizable: true,
+    },
   },
   {
     id: uuidv4(),
     view: ConfigurableView.TELEMETRY_VIEW,
-    layout: { x: 4, y: 11, w: 2, h: 2, isDraggable: true, isResizable: true },
+    layout: {
+      x: 8,
+      y: 11,
+      w: 4,
+      h: 2,
+      minW: GRID_ITEM_MIN_WIDTH,
+      isDraggable: true,
+      isResizable: true,
+    },
   },
 ];
 
@@ -156,22 +222,54 @@ const DEFAULT_GRID_TALL: GridItem[] = [
   {
     id: uuidv4(),
     view: ConfigurableView.FIELD_VIEW,
-    layout: { x: 0, y: 0, w: 2, h: 18, isDraggable: true, isResizable: true },
+    layout: {
+      x: 0,
+      y: 0,
+      w: 4,
+      h: 18,
+      minW: GRID_ITEM_MIN_WIDTH,
+      isDraggable: true,
+      isResizable: true,
+    },
   },
   {
     id: uuidv4(),
     view: ConfigurableView.GRAPH_VIEW,
-    layout: { x: 2, y: 0, w: 2, h: 18, isDraggable: true, isResizable: true },
+    layout: {
+      x: 4,
+      y: 0,
+      w: 4,
+      h: 18,
+      minW: GRID_ITEM_MIN_WIDTH,
+      isDraggable: true,
+      isResizable: true,
+    },
   },
   {
     id: uuidv4(),
     view: ConfigurableView.CONFIG_VIEW,
-    layout: { x: 4, y: 0, w: 2, h: 14, isDraggable: true, isResizable: true },
+    layout: {
+      x: 8,
+      y: 0,
+      w: 4,
+      h: 14,
+      minW: GRID_ITEM_MIN_WIDTH,
+      isDraggable: true,
+      isResizable: true,
+    },
   },
   {
     id: uuidv4(),
     view: ConfigurableView.TELEMETRY_VIEW,
-    layout: { x: 4, y: 11, w: 2, h: 4, isDraggable: true, isResizable: true },
+    layout: {
+      x: 8,
+      y: 11,
+      w: 4,
+      h: 4,
+      minW: GRID_ITEM_MIN_WIDTH,
+      isDraggable: true,
+      isResizable: true,
+    },
   },
 ];
 
@@ -277,7 +375,7 @@ export default function ConfigurableLayout() {
   }, [gridItems]);
 
   const addItem = (item: ConfigurableView) => {
-    const ITEM_WIDTH = 2;
+    const ITEM_WIDTH = 4;
     const ITEM_HEIGHT = 4;
 
     // find the bottom, right grid item and tentatively place the new item to its right with bottoms aligned
@@ -315,6 +413,7 @@ export default function ConfigurableLayout() {
           y: newItemTop,
           w: ITEM_WIDTH,
           h: ITEM_HEIGHT,
+          minW: GRID_ITEM_MIN_WIDTH,
           isDraggable: !isLayoutLocked,
           isResizable: !isLayoutLocked,
         },
@@ -356,6 +455,7 @@ export default function ConfigurableLayout() {
           y: newLayoutValue.y,
           w: newLayoutValue.w,
           h: newLayoutValue.h,
+          minW: newLayoutValue.minW ?? GRID_ITEM_MIN_WIDTH,
           isDraggable: newLayoutValue.isDraggable ?? true,
           isResizable: newLayoutValue.isResizable ?? true,
         };
