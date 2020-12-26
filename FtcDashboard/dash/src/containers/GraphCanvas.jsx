@@ -4,56 +4,38 @@ import PropTypes from 'prop-types';
 import Graph from './Graph';
 import AutoFitCanvas from '../components/AutoFitCanvas';
 
-import { ReactComponent as PauseSVG } from '../assets/icons/pause.svg';
-
 class GraphCanvas extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      paused: false,
-    };
-
     this.canvasRef = React.createRef();
 
-    this.handleDocumentKeydown = this.handleDocumentKeydown.bind(this);
     this.renderGraph = this.renderGraph.bind(this);
   }
 
   componentDidMount() {
     this.graph = new Graph(this.canvasRef.current, this.props.options);
     this.renderGraph();
-
-    document.addEventListener('keydown', this.handleDocumentKeydown);
   }
 
   componentWillUnmount() {
     if (this.requestId) {
       cancelAnimationFrame(this.requestId);
     }
-
-    document.removeEventListener('keydown', this.handleDocumentKeydown);
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps) {
     this.props.data.forEach((sample) => this.graph.addSample(sample));
-  }
 
-  handleDocumentKeydown(evt) {
-    if (evt.code === 'Space' || evt.key === 'k') {
-      this.setState(
-        {
-          paused: !this.state.paused,
-        },
-        () => {
-          this.renderGraph();
-        },
-      );
+    if (prevProps.paused !== this.props.paused) {
+      if (this.requestId) cancelAnimationFrame(this.requestId);
+
+      if (!this.props.paused) this.renderGraph();
     }
   }
 
   renderGraph() {
-    if (!this.state.paused && this.graph) {
+    if (!this.props.paused && this.graph) {
       this.graph.render();
       this.requestId = requestAnimationFrame(this.renderGraph);
     }
@@ -76,9 +58,6 @@ class GraphCanvas extends React.Component {
             <p className="text-center">No content to graph</p>
           ) : null}
         </div>
-        {this.state.paused ? (
-          <PauseSVG className="w-20 h-20 absolute top-24 right-10" />
-        ) : null}
       </div>
     );
   }
@@ -94,6 +73,7 @@ GraphCanvas.propTypes = {
     ),
   ).isRequired,
   options: PropTypes.object,
+  paused: PropTypes.bool,
 };
 
 export default GraphCanvas;

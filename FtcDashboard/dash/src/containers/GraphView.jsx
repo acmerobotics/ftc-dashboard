@@ -9,6 +9,8 @@ import TextInput from '../components/inputs/TextInput';
 
 import { ReactComponent as ChartSVG } from '../assets/icons/chart.svg';
 import { ReactComponent as CloseSVG } from '../assets/icons/close.svg';
+import { ReactComponent as PlaySVG } from '../assets/icons/play_arrow.svg';
+import { ReactComponent as PauseSVG } from '../assets/icons/pause.svg';
 
 import { validateInt } from '../components/inputs/validation';
 import { DEFAULT_OPTIONS } from './Graph';
@@ -20,6 +22,7 @@ class GraphView extends Component {
 
     this.state = {
       graphing: false,
+      graphPaused: false,
       keys: [],
       windowMs: {
         value: DEFAULT_OPTIONS.windowMs,
@@ -27,17 +30,47 @@ class GraphView extends Component {
       },
     };
 
+    this.containerRef = React.createRef();
+
     this.handleClick = this.handleClick.bind(this);
+    this.handleDocumentKeydown = this.handleDocumentKeydown.bind(this);
+  }
+
+  componentDidMount() {
+    this.containerRef.current.addEventListener(
+      'keydown',
+      this.handleDocumentKeydown,
+    );
+  }
+
+  componentWillUnmount() {
+    this.containerRef.current.removeEventListener(
+      'keydown',
+      this.handleDocumentKeydown,
+    );
+  }
+
+  handleDocumentKeydown(evt) {
+    if (evt.code === 'Space' || evt.key === 'k') {
+      console.log('bruh');
+      this.setState({
+        ...this.state,
+        graphPaused: !this.state.graphPaused,
+      });
+    }
   }
 
   startGraphing() {
     this.setState({
+      ...this.state,
       graphing: true,
+      graphPaused: false,
     });
   }
 
   stopGraphing() {
     this.setState({
+      ...this.state,
       graphing: false,
     });
   }
@@ -73,18 +106,40 @@ class GraphView extends Component {
       <BaseView
         className="flex flex-col overflow-auto"
         isUnlocked={this.props.isUnlocked}
+        ref={this.containerRef}
+        tabIndex="0"
       >
         <div className="flex-center">
           <BaseViewHeading isDraggable={this.props.isDraggable}>
             Graph
           </BaseViewHeading>
-          <button onClick={this.handleClick} className="w-8 h-8 icon-btn mr-3">
-            {this.state.graphing ? (
-              <CloseSVG className="w-6 h-6 text-black" />
-            ) : (
-              <ChartSVG className="w-6 h-6" />
-            )}
-          </button>
+          <div className="flex items-center mr-3 space-x-1">
+            {this.state.graphing && this.state.keys.length !== 0 ? (
+              <button
+                onClick={() => {
+                  this.setState({
+                    ...this.state,
+                    graphPaused: !this.state.graphPaused,
+                  });
+                }}
+                className="w-8 h-8 icon-btn"
+              >
+                {this.state.graphPaused ? (
+                  <PlaySVG className="w-6 h-6" />
+                ) : (
+                  <PauseSVG className="w-6 h-6" />
+                )}
+              </button>
+            ) : null}
+
+            <button onClick={this.handleClick} className="w-8 h-8 icon-btn">
+              {this.state.graphing ? (
+                <CloseSVG className="w-6 h-6 text-black" />
+              ) : (
+                <ChartSVG className="w-6 h-6" />
+              )}
+            </button>
+          </div>
         </div>
         {this.state.graphing ? (
           <BaseViewBody>
@@ -101,6 +156,7 @@ class GraphView extends Component {
                       ? this.state.windowMs.value
                       : DEFAULT_OPTIONS.windowMs,
                   }}
+                  paused={this.state.graphPaused}
                 />
               )}
             </div>

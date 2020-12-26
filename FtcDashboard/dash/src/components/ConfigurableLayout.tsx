@@ -68,7 +68,7 @@ const Container = styled.div.attrs<{ isLayoutLocked: boolean }>(
   ({ isLayoutLocked }) => ({
     className: `${
       !isLayoutLocked ? 'bg-gray-100' : 'bg-white'
-    } transition-colors`,
+    } p-2 transition-colors`,
   }),
 )<{ isLayoutLocked: boolean }>`
   position: relative;
