@@ -8,7 +8,7 @@ import { initOpMode, startOpMode, stopOpMode } from '../actions/opmode';
 import OpModeStatus from '../enums/OpModeStatus';
 import Icon from '../components/Icon';
 import IconGroup from '../components/IconGroup';
-import BaseView, { BaseViewHeading } from './BaseView';
+import BaseView, { BaseViewHeading, BaseViewBody } from './BaseView';
 
 const STOP_OP_MODE = '$Stop$Robot$';
 
@@ -122,20 +122,21 @@ class OpModeView extends React.Component {
     if (!available) {
       return (
         <BaseView isUnlocked={this.props.isUnlocked}>
-          <div className="flex justify-between items-center" />
           <BaseViewHeading isDraggable={this.props.isDraggable}>
             Op Mode
           </BaseViewHeading>
-          <h3 className="text-lg text-center">
-            Op mode controls have not initialized
-          </h3>
+          <BaseViewBody>
+            <h3 className="text-lg text-center">
+              Op mode controls have not initialized
+            </h3>
+          </BaseViewBody>
         </BaseView>
       );
     }
 
     return (
       <BaseView isUnlocked={this.props.isUnlocked}>
-        <div className="flex justify-between items-center">
+        <div className="flex-center">
           <BaseViewHeading isDraggable={this.props.isDraggable}>
             Op Mode
           </BaseViewHeading>
@@ -152,27 +153,29 @@ class OpModeView extends React.Component {
             />
           </IconGroup>
         </div>
-        <select
-          className="bg-gray-200 rounded py-2 pr-7 px-2 border border-gray-300 shadow-md disabled:shadow-none disabled:text-gray-600 transition"
-          value={this.state.selectedOpMode}
-          disabled={activeOpMode !== STOP_OP_MODE || opModeList.length === 0}
-          onChange={this.onChange}
-        >
-          {opModeList.length === 0 ? (
-            <option>Loading...</option>
-          ) : (
-            opModeList
-              .sort()
-              .map((opMode) => <option key={opMode}>{opMode}</option>)
-          )}
-        </select>
-        {this.renderButtons()}
-        {errorMessage !== '' ? (
-          <p className="error mt-5">Error: {errorMessage}</p>
-        ) : null}
-        {warningMessage !== '' ? (
-          <p className="warning mt-5">Warning: {warningMessage}</p>
-        ) : null}
+        <BaseViewBody>
+          <select
+            className="bg-gray-200 rounded py-2 pr-7 px-2 border border-gray-300 shadow-md disabled:shadow-none disabled:text-gray-600 transition"
+            value={this.state.selectedOpMode}
+            disabled={activeOpMode !== STOP_OP_MODE || opModeList.length === 0}
+            onChange={this.onChange}
+          >
+            {opModeList.length === 0 ? (
+              <option>Loading...</option>
+            ) : (
+              opModeList
+                .sort()
+                .map((opMode) => <option key={opMode}>{opMode}</option>)
+            )}
+          </select>
+          {this.renderButtons()}
+          {errorMessage !== '' ? (
+            <p className="error mt-5">Error: {errorMessage}</p>
+          ) : null}
+          {warningMessage !== '' ? (
+            <p className="warning mt-5">Warning: {warningMessage}</p>
+          ) : null}
+        </BaseViewBody>
       </BaseView>
     );
   }

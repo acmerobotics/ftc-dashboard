@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 import CustomVariable from './CustomVariable';
-import BaseView, { BaseViewHeading } from './BaseView';
+import BaseView, { BaseViewHeading, BaseViewBody } from './BaseView';
 import { ReactComponent as SaveSVG } from '../assets/icons/save.svg';
 import { ReactComponent as RefreshSVG } from '../assets/icons/refresh.svg';
 
@@ -27,8 +27,8 @@ const ConfigView = ({
   sortedKeys.sort();
 
   return (
-    <BaseView className="overflow-hidden pr-0 pb-0" isUnlocked={isUnlocked}>
-      <div className="flex justify-between items-center">
+    <BaseView isUnlocked={isUnlocked}>
+      <div className="flex-center">
         <BaseViewHeading isDraggable={isDraggable}>
           Configuration
         </BaseViewHeading>
@@ -44,7 +44,7 @@ const ConfigView = ({
           </button>
         </div>
       </div>
-      <div style={{ height: 'calc(100% - 52px', overflow: 'auto' }}>
+      <BaseViewBody>
         <table className="block h-full">
           <tbody>
             {sortedKeys.map((key) => (
@@ -72,7 +72,7 @@ const ConfigView = ({
             ))}
           </tbody>
         </table>
-      </div>
+      </BaseViewBody>
     </BaseView>
   );
 };

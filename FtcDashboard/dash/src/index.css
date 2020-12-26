@@ -205,14 +205,12 @@ input {
   color: orange;
 }
 
-.canvas-container {
-  position: relative;
-  height: calc(100% - 44px);
-  overflow: hidden;
-}
-
 .grab-handle {
   cursor: grab;
+}
+
+.flex-center {
+  @apply rounded-md flex justify-center items-center;
 }
 
 select {

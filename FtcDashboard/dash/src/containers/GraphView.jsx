@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
-import BaseView, { BaseViewHeading } from './BaseView';
+import BaseView, { BaseViewHeading, BaseViewBody } from './BaseView';
 import MultipleCheckbox from '../components/MultipleCheckbox';
 import GraphCanvas from './GraphCanvas';
 import TextInput from '../components/inputs/TextInput';
@@ -74,11 +74,11 @@ class GraphView extends Component {
         className="flex flex-col overflow-auto"
         isUnlocked={this.props.isUnlocked}
       >
-        <div className="flex justify-between items-center">
+        <div className="flex-center">
           <BaseViewHeading isDraggable={this.props.isDraggable}>
             Graph
           </BaseViewHeading>
-          <button onClick={this.handleClick} className="w-8 h-8 icon-btn">
+          <button onClick={this.handleClick} className="w-8 h-8 icon-btn mr-3">
             {this.state.graphing ? (
               <CloseSVG className="w-6 h-6 text-black" />
             ) : (
@@ -87,24 +87,26 @@ class GraphView extends Component {
           </button>
         </div>
         {this.state.graphing ? (
-          <div className="canvas-container">
-            {this.state.keys.length === 0 ? (
-              <div className="absolute top-0 left-0 w-full h-full flex justify-center items-center pointer-events-none">
-                <p className="text-center">No telemetry selected to graph</p>
-              </div>
-            ) : (
-              <GraphCanvas
-                data={graphData}
-                options={{
-                  windowMs: this.state.windowMs.valid
-                    ? this.state.windowMs.value
-                    : DEFAULT_OPTIONS.windowMs,
-                }}
-              />
-            )}
-          </div>
+          <BaseViewBody>
+            <div style={{ height: '100%', minHeight: '10rem' }}>
+              {this.state.keys.length === 0 ? (
+                <div className="absolute top-0 left-0 w-full h-full flex-center pointer-events-none">
+                  <p className="text-center">No telemetry selected to graph</p>
+                </div>
+              ) : (
+                <GraphCanvas
+                  data={graphData}
+                  options={{
+                    windowMs: this.state.windowMs.valid
+                      ? this.state.windowMs.value
+                      : DEFAULT_OPTIONS.windowMs,
+                  }}
+                />
+              )}
+            </div>
+          </BaseViewBody>
         ) : Object.keys(latestPacket.data).length > 0 ? (
-          <div>
+          <BaseViewBody>
             <p className="text-lg text-center">
               Press the upper-right button to graph selected keys over time
             </p>
@@ -147,9 +149,9 @@ class GraphView extends Component {
                 </table>
               </div>
             </div>
-          </div>
+          </BaseViewBody>
         ) : (
-          <div className="flex-grow flex items-center justify-center">
+          <div className="flex-grow flex-center">
             <p className="text-center">
               Send number-valued telemetry data to graph them over time
             </p>
