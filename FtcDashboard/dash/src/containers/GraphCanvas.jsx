@@ -4,8 +4,6 @@ import PropTypes from 'prop-types';
 import Graph from './Graph';
 import AutoFitCanvas from '../components/AutoFitCanvas';
 
-import { ReactComponent as PauseSVG } from '../assets/icons/pause.svg';
-
 class GraphCanvas extends React.Component {
   constructor(props) {
     super(props);
