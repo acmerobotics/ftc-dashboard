@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 
 import { telemetryType } from './types';
 
-import BaseView, { BaseViewHeading } from './BaseView';
+import BaseView, { BaseViewHeading, BaseViewBody } from './BaseView';
 
 const TelemetryView = ({ telemetry, isDraggable, isUnlocked }) => {
   const latestPacket = telemetry[telemetry.length - 1];
@@ -24,8 +24,10 @@ const TelemetryView = ({ telemetry, isDraggable, isUnlocked }) => {
   return (
     <BaseView isUnlocked={isUnlocked}>
       <BaseViewHeading isDraggable={isDraggable}>Telemetry</BaseViewHeading>
-      <p>{telemetryLines}</p>
-      <p>{telemetryLog}</p>
+      <BaseViewBody>
+        <p>{telemetryLines}</p>
+        <p>{telemetryLog}</p>
+      </BaseViewBody>
     </BaseView>
   );
 };

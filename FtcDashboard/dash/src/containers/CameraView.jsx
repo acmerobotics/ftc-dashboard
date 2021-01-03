@@ -3,8 +3,13 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 import AutoFitCanvas from '../components/AutoFitCanvas';
-import { ReactComponent as RefreshSVG } from '../assets/icons/refresh.svg';
-import BaseView, { BaseViewHeading } from './BaseView';
+import { ReactComponent as RefreshIcon } from '../assets/icons/refresh.svg';
+import BaseView, {
+  BaseViewHeading,
+  BaseViewBody,
+  BaseViewIcons,
+  BaseViewIconButton,
+} from './BaseView';
 
 class CameraView extends React.Component {
   constructor(props) {
@@ -64,22 +69,26 @@ class CameraView extends React.Component {
   render() {
     return (
       <BaseView isUnlocked={this.props.isUnlocked}>
-        <div className="flex justify-between items-center">
+        <div className="flex">
           <BaseViewHeading isDraggable={this.props.isDraggable}>
             Camera
           </BaseViewHeading>
-          <button
-            className="icon-btn w-8 h-8"
-            onClick={() =>
-              this.setState({ rotation: (this.state.rotation + 1) % 4 })
-            }
-          >
-            <RefreshSVG className="w-6 h-6" />
-          </button>
+          <BaseViewIcons>
+            <BaseViewIconButton>
+              <RefreshIcon
+                className="w-6 h-6"
+                onClick={() =>
+                  this.setState({ rotation: (this.state.rotation + 1) % 4 })
+                }
+              />
+            </BaseViewIconButton>
+          </BaseViewIcons>
         </div>
-        <div className="canvas-container">
-          <AutoFitCanvas ref={this.canvasRef} onResize={this.renderImage} />
-        </div>
+        <BaseViewBody>
+          <div style={{ height: '100%', minHeight: '10rem' }}>
+            <AutoFitCanvas ref={this.canvasRef} onResize={this.renderImage} />
+          </div>
+        </BaseViewBody>
       </BaseView>
     );
   }

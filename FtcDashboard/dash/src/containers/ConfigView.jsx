@@ -2,9 +2,15 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 import CustomVariable from './CustomVariable';
-import BaseView, { BaseViewHeading } from './BaseView';
-import { ReactComponent as SaveSVG } from '../assets/icons/save.svg';
-import { ReactComponent as RefreshSVG } from '../assets/icons/refresh.svg';
+import BaseView, {
+  BaseViewHeading,
+  BaseViewBody,
+  BaseViewIcons,
+  BaseViewIconButton,
+} from './BaseView';
+
+import { ReactComponent as SaveIcon } from '../assets/icons/save.svg';
+import { ReactComponent as RefreshIcon } from '../assets/icons/refresh.svg';
 
 import {
   updateConfig,
@@ -27,24 +33,24 @@ const ConfigView = ({
   sortedKeys.sort();
 
   return (
-    <BaseView className="overflow-hidden pr-0 pb-0" isUnlocked={isUnlocked}>
-      <div className="flex justify-between items-center">
+    <BaseView isUnlocked={isUnlocked}>
+      <div className="flex">
         <BaseViewHeading isDraggable={isDraggable}>
           Configuration
         </BaseViewHeading>
-        <div className="flex items-center mr-3 space-x-1">
-          <button className="icon-btn w-8 h-8">
-            <SaveSVG
+        <BaseViewIcons>
+          <BaseViewIconButton>
+            <SaveIcon
               className="w-6 h-6"
               onClick={() => onSave(getModifiedDiff(configRoot))}
             />
-          </button>
-          <button className="icon-btn w-8 h-8">
-            <RefreshSVG className="w-6 h-6" onClick={onRefresh} />
-          </button>
-        </div>
+          </BaseViewIconButton>
+          <BaseViewIconButton>
+            <RefreshIcon className="w-6 h-6" onClick={onRefresh} />
+          </BaseViewIconButton>
+        </BaseViewIcons>
       </div>
-      <div style={{ height: 'calc(100% - 52px)', overflow: 'auto' }}>
+      <BaseViewBody>
         <table className="block h-full">
           <tbody>
             {sortedKeys.map((key) => (
@@ -72,7 +78,7 @@ const ConfigView = ({
             ))}
           </tbody>
         </table>
-      </div>
+      </BaseViewBody>
     </BaseView>
   );
 };

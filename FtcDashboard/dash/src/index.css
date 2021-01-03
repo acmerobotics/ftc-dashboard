@@ -81,9 +81,8 @@ body {
 
 .tile-grid {
   display: grid;
-  width: 100%;
-  height: calc(100vh - 60px);
   overflow: auto;
+  flex: 1;
 }
 
 .tile {
@@ -117,100 +116,26 @@ input {
   display: flex;
 }
 
-.icon-group {
-  display: flex;
-  align-items: center;
-  order: 10;
-}
-
-.icon {
-  background-repeat: round;
-  margin: 4px;
-}
-
-.icon.tiny {
-  width: 16px;
-  height: 16px;
-}
-
-.icon.small {
-  width: 24px;
-  height: 24px;
-}
-
-.icon.large {
-  width: 36px;
-  height: 36px;
-}
-
 .icon-btn {
   @apply rounded-md flex justify-center items-center border border-transparent hover:border-gray-500 transition-colors;
 }
 
-.save {
-  background-image: url('assets/icons/save.svg');
-}
-
-.wifi {
-  background-image: url('assets/icons/wifi.svg');
-}
-
-.no-wifi {
-  background-image: url('assets/icons/wifi_off.svg');
-}
-
-.chart {
-  background-image: url('assets/icons/chart.svg');
-}
-
-.close {
-  background-image: url('assets/icons/close.svg');
-}
-
-.refresh {
-  background-image: url('assets/icons/refresh.svg');
-}
-
-.add {
-  background-image: url('assets/icons/add.svg');
-}
-
-.remove {
-  background-image: url('assets/icons/remove.svg');
-}
-
-.expand-less {
-  background-image: url('assets/icons/expand_less.svg');
-}
-
-.expand-more {
-  background-image: url('assets/icons/expand_more.svg');
-}
-
-.gamepad {
-  background-image: url('assets/icons/gamepad.svg');
-}
-
-.multiple-checkbox {
-  overflow-y: scroll;
-}
-
 .error {
-  font-weight: bold;
-  color: red;
+  @apply font-bold text-red-500;
 }
 
 .warning {
-  font-weight: bold;
-  color: orange;
-}
-
-.canvas-container {
-  position: relative;
-  height: calc(100% - 44px);
-  overflow: hidden;
+  @apply font-bold text-yellow-500;
 }
 
 .grab-handle {
   cursor: grab;
+}
+
+.flex-center {
+  @apply flex justify-center items-center;
+}
+
+select {
+  background-position: right 0.15rem center;
 }

@@ -3,12 +3,12 @@ import styled from 'styled-components';
 
 import { ConfigurableView } from '../enums/ConfigurableView';
 
-import { ReactComponent as CameraSVG } from '../assets/icons/camera.svg';
-import { ReactComponent as SettingsSVG } from '../assets/icons/settings.svg';
-import { ReactComponent as ChartSVG } from '../assets/icons/chart.svg';
-import { ReactComponent as ApiSVG } from '../assets/icons/api.svg';
-import { ReactComponent as SubjectSVG } from '../assets/icons/subject.svg';
-import { ReactComponent as WidgetSVG } from '../assets/icons/widgets.svg';
+import { ReactComponent as CameraIcon } from '../assets/icons/camera.svg';
+import { ReactComponent as SettingsIcon } from '../assets/icons/settings.svg';
+import { ReactComponent as ChartIcon } from '../assets/icons/chart.svg';
+import { ReactComponent as ApiIcon } from '../assets/icons/api.svg';
+import { ReactComponent as SubjectIcon } from '../assets/icons/subject.svg';
+import { ReactComponent as WidgetIcon } from '../assets/icons/widgets.svg';
 
 type ViewPickerProps = {
   isOpen: boolean;
@@ -49,42 +49,42 @@ const listContent = [
   {
     title: 'OpMode View',
     view: ConfigurableView.OPMODE_VIEW,
-    icon: <WidgetSVG className="w-6 h-6" />,
+    icon: <WidgetIcon className="w-6 h-6" />,
     customStyles: 'focus:ring-red-600',
     iconBg: 'bg-red-500',
   },
   {
     title: 'Field View',
     view: ConfigurableView.FIELD_VIEW,
-    icon: <ApiSVG className="w-7 h-7 transform rotate-45" />,
+    icon: <ApiIcon className="w-7 h-7 transform rotate-45" />,
     customStyles: 'focus:ring-blue-600',
     iconBg: 'bg-blue-500',
   },
   {
     title: 'Graph View',
     view: ConfigurableView.GRAPH_VIEW,
-    icon: <ChartSVG className="text-white w-6 h-6" />,
+    icon: <ChartIcon className="text-white w-6 h-6" />,
     customStyles: 'focus:ring-green-600',
     iconBg: 'bg-green-500',
   },
   {
     title: 'Config View',
     view: ConfigurableView.CONFIG_VIEW,
-    icon: <SettingsSVG className="w-6 h-6" />,
+    icon: <SettingsIcon className="w-6 h-6" />,
     customStyles: 'focus:ring-orange-600',
     iconBg: 'bg-orange-500',
   },
   {
     title: 'Telemetry View',
     view: ConfigurableView.TELEMETRY_VIEW,
-    icon: <SubjectSVG className="w-6 h-6" />,
+    icon: <SubjectIcon className="w-6 h-6" />,
     customStyles: 'focus:ring-yellow-600',
     iconBg: 'bg-yellow-500',
   },
   {
     title: 'Camera View',
     view: ConfigurableView.CAMERA_VIEW,
-    icon: <CameraSVG className="w-5 h-5" />,
+    icon: <CameraIcon className="w-5 h-5" />,
     customStyles: 'focus:ring-purple-600',
     iconBg: 'bg-purple-500',
   },
@@ -104,9 +104,7 @@ const ViewPicker: FunctionComponent<ViewPickerProps> = (
           onClick={() => props.clickEvent(item.view)}
           disabled={!props.isOpen}
         >
-          <div
-            className={`w-8 h-8  rounded mr-3 flex justify-center items-center ${item.iconBg}`}
-          >
+          <div className={`w-8 h-8  rounded mr-3 flex-center ${item.iconBg}`}>
             {React.cloneElement(item.icon)}
           </div>
           <div className="flex flex-col items-start">

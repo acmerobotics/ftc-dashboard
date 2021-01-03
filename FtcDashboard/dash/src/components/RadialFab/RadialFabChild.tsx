@@ -23,7 +23,7 @@ interface RadialFabChildProps {
 
 const ButtonContainer = styled.button.attrs<RadialFabChildProps>(
   ({ customClass }) => ({
-    className: `top-1/2 left-1/2 rounded-full outline-none focus:outline-none relative flex justify-center items-center transition ${customClass}`,
+    className: `top-1/2 left-1/2 rounded-full outline-none focus:outline-none relative flex-center transition ${customClass}`,
   }),
 )<RadialFabChildProps>`
   /* Not sure why but removing this breaks the button */
@@ -43,7 +43,7 @@ const ButtonContainer = styled.button.attrs<RadialFabChildProps>(
   z-index: -1;
 `;
 
-const SVGIcon = styled.div<RadialFabChildProps>`
+const Icon = styled.div<RadialFabChildProps>`
   transition: transform 300ms ease;
 
   transform: ${({ fineAdjustIconX, fineAdjustIconY, isOpen }) =>
@@ -65,7 +65,7 @@ const RadialFabChild: FunctionComponent<RadialFabChildProps> = (
 
   return (
     <ButtonContainer {...props} onClick={props.clickEvent} ref={ref}>
-      <SVGIcon {...props}>{props.children}</SVGIcon>
+      <Icon {...props}>{props.children}</Icon>
       {props.toolTipText !== '' ? (
         <ToolTip isShowing={isShowingTooltip}>{props.toolTipText}</ToolTip>
       ) : null}
