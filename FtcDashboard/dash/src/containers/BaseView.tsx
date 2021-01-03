@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 const BaseView = styled.div.attrs<{ isUnlocked: boolean }>(
   ({ isUnlocked = false }) => ({
-    className: `h-full pl-4 pt-2 bg-white bg-opacity-75 overflow-hidden transition-shadow ${
+    className: `flex flex-col h-full bg-white bg-opacity-75 overflow-hidden transition-shadow ${
       isUnlocked ? 'shadow-md rounded-md select-none' : ''
     }`,
   }),
@@ -10,15 +10,36 @@ const BaseView = styled.div.attrs<{ isUnlocked: boolean }>(
 
 const BaseViewHeading = styled.h2.attrs<{ isDraggable: boolean }>(
   ({ isDraggable = false }) => ({
-    className: `${
+    className: `text-xl w-full px-4 py-2 font-medium ${
       isDraggable ? 'grab-handle' : ''
-    } text-xl w-full py-2 font-medium`,
+    }`,
   }),
 )``;
 
-const BaseViewBody = styled.div`
-  height: calc(100% - 52px);
+const BaseViewBody = styled.div.attrs({
+  className: 'px-4',
+})`
+  flex: 1;
   overflow: auto;
 `;
 
-export { BaseView as default, BaseViewHeading, BaseViewBody };
+const BaseViewIcons = styled.div.attrs({
+  className: 'flex items-center mr-3 space-x-1',
+})``;
+
+const BaseViewIcon = styled.div.attrs({
+  className: 'w-8 h-8 flex-center',
+})``;
+
+const BaseViewIconButton = styled.button.attrs({
+  className: 'icon-btn w-8 h-8',
+})``;
+
+export {
+  BaseView as default,
+  BaseViewHeading,
+  BaseViewBody,
+  BaseViewIcons,
+  BaseViewIcon,
+  BaseViewIconButton,
+};

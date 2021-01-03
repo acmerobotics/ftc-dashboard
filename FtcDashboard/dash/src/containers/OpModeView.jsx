@@ -6,14 +6,19 @@ import styled from 'styled-components';
 
 import { initOpMode, startOpMode, stopOpMode } from '../actions/opmode';
 import OpModeStatus from '../enums/OpModeStatus';
-import Icon from '../components/Icon';
-import IconGroup from '../components/IconGroup';
-import BaseView, { BaseViewHeading, BaseViewBody } from './BaseView';
+import BaseView, {
+  BaseViewHeading,
+  BaseViewBody,
+  BaseViewIcon,
+  BaseViewIcons,
+} from './BaseView';
+
+import { ReactComponent as GamepadIcon } from '../assets/icons/gamepad.svg';
 
 const STOP_OP_MODE = '$Stop$Robot$';
 
 const ActionButton = styled.button.attrs({
-  className: 'ml-3 py-1 px-4 border rounded-md shadow-md',
+  className: 'ml-2 py-1 px-3 border rounded-md shadow-md',
 })``;
 
 class OpModeView extends React.Component {
@@ -125,8 +130,8 @@ class OpModeView extends React.Component {
           <BaseViewHeading isDraggable={this.props.isDraggable}>
             Op Mode
           </BaseViewHeading>
-          <BaseViewBody>
-            <h3 className="text-lg text-center">
+          <BaseViewBody className="flex-center">
+            <h3 className="text-md text-center">
               Op mode controls have not initialized
             </h3>
           </BaseViewBody>
@@ -136,26 +141,32 @@ class OpModeView extends React.Component {
 
     return (
       <BaseView isUnlocked={this.props.isUnlocked}>
-        <div className="flex-center">
+        <div className="flex">
           <BaseViewHeading isDraggable={this.props.isDraggable}>
             Op Mode
           </BaseViewHeading>
-          <IconGroup>
-            <Icon
-              opacity={gamepad1Connected ? 1.0 : 0.3}
-              icon="gamepad"
-              size="small"
-            />
-            <Icon
-              opacity={gamepad2Connected ? 1.0 : 0.3}
-              icon="gamepad"
-              size="small"
-            />
-          </IconGroup>
+          <BaseViewIcons>
+            <BaseViewIcon>
+              <GamepadIcon
+                className="w-6 h-6"
+                style={{
+                  opacity: gamepad1Connected ? 1.0 : 0.3,
+                }}
+              />
+            </BaseViewIcon>
+            <BaseViewIcon>
+              <GamepadIcon
+                className="w-6 h-6"
+                style={{
+                  opacity: gamepad2Connected ? 1.0 : 0.3,
+                }}
+              />
+            </BaseViewIcon>
+          </BaseViewIcons>
         </div>
         <BaseViewBody>
           <select
-            className="bg-gray-200 rounded py-2 pr-7 px-2 m-1 border border-gray-300 shadow-md disabled:shadow-none disabled:text-gray-600 transition"
+            className="bg-gray-200 rounded p-1 pr-6 m-1 mr-2 border border-gray-300 shadow-md disabled:shadow-none disabled:text-gray-600 transition"
             value={this.state.selectedOpMode}
             disabled={activeOpMode !== STOP_OP_MODE || opModeList.length === 0}
             onChange={this.onChange}

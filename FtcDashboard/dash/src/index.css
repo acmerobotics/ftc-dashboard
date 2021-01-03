@@ -81,9 +81,8 @@ body {
 
 .tile-grid {
   display: grid;
-  width: 100%;
-  height: calc(100vh - 60px);
   overflow: auto;
+  flex: 1;
 }
 
 .tile {
@@ -117,41 +116,8 @@ input {
   display: flex;
 }
 
-.icon-group {
-  display: flex;
-  align-items: center;
-  order: 10;
-}
-
-.icon {
-  background-repeat: round;
-  margin: 4px;
-}
-
-.icon.small {
-  width: 24px;
-  height: 24px;
-}
-
-.icon.large {
-  width: 36px;
-  height: 36px;
-}
-
 .icon-btn {
   @apply rounded-md flex justify-center items-center border border-transparent hover:border-gray-500 transition-colors;
-}
-
-.wifi {
-  background-image: url('assets/icons/wifi.svg');
-}
-
-.no-wifi {
-  background-image: url('assets/icons/wifi_off.svg');
-}
-
-.gamepad {
-  background-image: url('assets/icons/gamepad.svg');
 }
 
 .error {

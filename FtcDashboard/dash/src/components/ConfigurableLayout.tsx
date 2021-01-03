@@ -21,13 +21,13 @@ import ViewPicker from './ViewPicker';
 import useMouseIdleListener from '../hooks/useMouseIdleListener';
 import useUndoHistory from '../hooks/useUndoHistory';
 
-import { ReactComponent as AddSVG } from '../assets/icons/add.svg';
-import { ReactComponent as DeleteSweepSVG } from '../assets/icons/delete_sweep.svg';
-import { ReactComponent as DeleteXSVG } from '../assets/icons/delete_x.svg';
-import LockSVGURL from '../assets/icons/lock.svg';
-import { ReactComponent as RemoveCircleSVG } from '../assets/icons/remove_circle.svg';
-import { ReactComponent as RemoveCircleOutlineSVG } from '../assets/icons/remove_circle_outline.svg';
-import CreateSVGURL from '../assets/icons/create.svg';
+import { ReactComponent as AddIcon } from '../assets/icons/add.svg';
+import { ReactComponent as DeleteSweepIcon } from '../assets/icons/delete_sweep.svg';
+import { ReactComponent as DeleteXIcon } from '../assets/icons/delete_x.svg';
+import LockIconURL from '../assets/icons/lock.svg';
+import { ReactComponent as RemoveCircleIcon } from '../assets/icons/remove_circle.svg';
+import { ReactComponent as RemoveCircleOutlineIcon } from '../assets/icons/remove_circle_outline.svg';
+import CreateIconURL from '../assets/icons/create.svg';
 
 function maxArray(a: number[], b: number[]) {
   if (a.length !== b.length) {
@@ -551,7 +551,7 @@ export default function ConfigurableLayout() {
                   }}
                   disabled={!isInDeleteMode}
                 >
-                  <DeleteXSVG className="text-yellow-600 w-20 h-20" />
+                  <DeleteXIcon className="text-yellow-600 w-20 h-20" />
                 </button>
               </div>
             </div>
@@ -566,7 +566,7 @@ export default function ConfigurableLayout() {
         isOpen={!isLayoutLocked}
         isShowing={!(isFabIdle && isLayoutLocked)}
         clickEvent={clickFAB}
-        icon={!isLayoutLocked ? LockSVGURL : CreateSVGURL}
+        icon={!isLayoutLocked ? LockIconURL : CreateIconURL}
         customClassName={`${
           !isLayoutLocked
             ? `bg-gray-500 focus:ring-4 focus:ring-gray-600 shadow-gray-900-md-prominent hover:shadow-gray-900-lg-prominent`
@@ -582,7 +582,7 @@ export default function ConfigurableLayout() {
           toolTipText="Add Item"
           clickEvent={() => setIsShowingViewPicker(!isShowingViewPicker)}
         >
-          <AddSVG className="text-white w-6 h-6" />
+          <AddIcon className="text-white w-6 h-6" />
         </RadialFabChild>
         <RadialFabChild
           customClass={`w-12 h-12 border shadow-orange-500-md-prominent hover:shadow-orange-500-lg-prominent focus:ring ${
@@ -598,9 +598,9 @@ export default function ConfigurableLayout() {
           clickEvent={() => setIsInDeleteMode(!isInDeleteMode)}
         >
           {isInDeleteMode ? (
-            <RemoveCircleOutlineSVG className="w-5 h-5" />
+            <RemoveCircleOutlineIcon className="w-5 h-5" />
           ) : (
-            <RemoveCircleSVG className="w-5 h-5" />
+            <RemoveCircleIcon className="w-5 h-5" />
           )}
         </RadialFabChild>
         <RadialFabChild
@@ -612,7 +612,7 @@ export default function ConfigurableLayout() {
           toolTipText="Clear Layout"
           clickEvent={() => setGrid([])}
         >
-          <DeleteSweepSVG className="w-5 h-5" />
+          <DeleteSweepIcon className="w-5 h-5" />
         </RadialFabChild>
       </RadialFab>
       <ViewPicker
