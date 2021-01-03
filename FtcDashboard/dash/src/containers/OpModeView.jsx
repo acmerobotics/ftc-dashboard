@@ -2,13 +2,24 @@ import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
+import styled from 'styled-components';
+
 import { initOpMode, startOpMode, stopOpMode } from '../actions/opmode';
 import OpModeStatus from '../enums/OpModeStatus';
-import Heading from '../components/Heading';
-import Icon from '../components/Icon';
-import IconGroup from '../components/IconGroup';
+import BaseView, {
+  BaseViewHeading,
+  BaseViewBody,
+  BaseViewIcon,
+  BaseViewIcons,
+} from './BaseView';
+
+import { ReactComponent as GamepadIcon } from '../assets/icons/gamepad.svg';
 
 const STOP_OP_MODE = '$Stop$Robot$';
+
+const ActionButton = styled.button.attrs({
+  className: 'ml-2 py-1 px-3 border rounded-md shadow-md',
+})``;
 
 class OpModeView extends React.Component {
   constructor(props) {
@@ -46,36 +57,36 @@ class OpModeView extends React.Component {
 
   renderInitButton() {
     return (
-      <button
-        style={{ margin: '4px' }}
+      <ActionButton
+        className="bg-blue-200 border-blue-300"
         onClick={() =>
           this.props.dispatch(initOpMode(this.state.selectedOpMode))
         }
       >
         Init
-      </button>
+      </ActionButton>
     );
   }
 
   renderStartButton() {
     return (
-      <button
-        style={{ margin: '4px' }}
+      <ActionButton
+        className="bg-green-200 border-green-300"
         onClick={() => this.props.dispatch(startOpMode())}
       >
         Start
-      </button>
+      </ActionButton>
     );
   }
 
   renderStopButton() {
     return (
-      <button
-        style={{ margin: '4px' }}
+      <ActionButton
+        className="bg-red-200 border-red-300"
         onClick={() => this.props.dispatch(stopOpMode())}
       >
         Stop
-      </button>
+      </ActionButton>
     );
   }
 
@@ -115,51 +126,68 @@ class OpModeView extends React.Component {
 
     if (!available) {
       return (
-        <div>
-          <Heading level={2} text="Op Mode" />
-          <p>Event loop detached</p>
-        </div>
+        <BaseView isUnlocked={this.props.isUnlocked}>
+          <BaseViewHeading isDraggable={this.props.isDraggable}>
+            Op Mode
+          </BaseViewHeading>
+          <BaseViewBody className="flex-center">
+            <h3 className="text-md text-center">
+              Op mode controls have not initialized
+            </h3>
+          </BaseViewBody>
+        </BaseView>
       );
     }
 
     return (
-      <div>
-        <Heading level={2} text="Op Mode">
-          <IconGroup>
-            <Icon
-              opacity={gamepad1Connected ? 1.0 : 0.3}
-              icon="gamepad"
-              size="small"
-            />
-            <Icon
-              opacity={gamepad2Connected ? 1.0 : 0.3}
-              icon="gamepad"
-              size="small"
-            />
-          </IconGroup>
-        </Heading>
-        <select
-          style={{ margin: '4px' }}
-          value={this.state.selectedOpMode}
-          disabled={activeOpMode !== STOP_OP_MODE || opModeList.length === 0}
-          onChange={this.onChange}
-        >
-          {opModeList.length === 0 ? (
-            <option>Loading...</option>
-          ) : (
-            opModeList
-              .sort()
-              .map((opMode) => <option key={opMode}>{opMode}</option>)
-          )}
-        </select>
-        {this.renderButtons()}
-        {errorMessage !== '' ? (
-          <p className="error">Error: {errorMessage}</p>
-        ) : null}
-        {warningMessage !== '' ? (
-          <p className="warning">Warning: {warningMessage}</p>
-        ) : null}
-      </div>
+      <BaseView isUnlocked={this.props.isUnlocked}>
+        <div className="flex">
+          <BaseViewHeading isDraggable={this.props.isDraggable}>
+            Op Mode
+          </BaseViewHeading>
+          <BaseViewIcons>
+            <BaseViewIcon>
+              <GamepadIcon
+                className="w-6 h-6"
+                style={{
+                  opacity: gamepad1Connected ? 1.0 : 0.3,
+                }}
+              />
+            </BaseViewIcon>
+            <BaseViewIcon>
+              <GamepadIcon
+                className="w-6 h-6"
+                style={{
+                  opacity: gamepad2Connected ? 1.0 : 0.3,
+                }}
+              />
+            </BaseViewIcon>
+          </BaseViewIcons>
+        </div>
+        <BaseViewBody>
+          <select
+            className="bg-gray-200 rounded p-1 pr-6 m-1 mr-2 border border-gray-300 shadow-md disabled:shadow-none disabled:text-gray-600 transition"
+            value={this.state.selectedOpMode}
+            disabled={activeOpMode !== STOP_OP_MODE || opModeList.length === 0}
+            onChange={this.onChange}
+          >
+            {opModeList.length === 0 ? (
+              <option>Loading...</option>
+            ) : (
+              opModeList
+                .sort()
+                .map((opMode) => <option key={opMode}>{opMode}</option>)
+            )}
+          </select>
+          {this.renderButtons()}
+          {errorMessage !== '' ? (
+            <p className="error mt-5 ml-1">Error: {errorMessage}</p>
+          ) : null}
+          {warningMessage !== '' ? (
+            <p className="warning mt-5 ml-1">Warning: {warningMessage}</p>
+          ) : null}
+        </BaseViewBody>
+      </BaseView>
     );
   }
 }
@@ -174,6 +202,9 @@ OpModeView.propTypes = {
   dispatch: PropTypes.func.isRequired,
   gamepad1Connected: PropTypes.bool.isRequired,
   gamepad2Connected: PropTypes.bool.isRequired,
+
+  isDraggable: PropTypes.bool,
+  isUnlocked: PropTypes.bool,
 };
 
 const mapStateToProps = ({ status, gamepad }) => ({

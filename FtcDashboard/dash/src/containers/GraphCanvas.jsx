@@ -8,57 +8,58 @@ class GraphCanvas extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      paused: false,
-    };
-
     this.canvasRef = React.createRef();
 
-    this.handleDocumentKeydown = this.handleDocumentKeydown.bind(this);
     this.renderGraph = this.renderGraph.bind(this);
   }
 
   componentDidMount() {
     this.graph = new Graph(this.canvasRef.current, this.props.options);
     this.renderGraph();
-
-    document.addEventListener('keydown', this.handleDocumentKeydown);
   }
 
   componentWillUnmount() {
     if (this.requestId) {
       cancelAnimationFrame(this.requestId);
     }
-
-    document.removeEventListener('keydown', this.handleDocumentKeydown);
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps) {
     this.props.data.forEach((sample) => this.graph.addSample(sample));
-  }
 
-  handleDocumentKeydown(evt) {
-    if (evt.code === 'Space') {
-      this.setState(
-        {
-          paused: !this.state.paused,
-        },
-        () => {
-          this.renderGraph();
-        },
-      );
+    if (prevProps.paused !== this.props.paused) {
+      if (this.requestId) cancelAnimationFrame(this.requestId);
+
+      if (!this.props.paused) this.renderGraph();
     }
   }
 
   renderGraph() {
-    if (!this.state.paused && this.graph) {
+    if (!this.props.paused && this.graph) {
       this.graph.render();
       this.requestId = requestAnimationFrame(this.renderGraph);
     }
   }
 
   render() {
-    return <AutoFitCanvas ref={this.canvasRef} />;
+    return (
+      <div className="h-full flex-center">
+        <div
+          className={`${
+            this.graph === null || !this.graph?.hasGraphableContent
+              ? 'hidden'
+              : ''
+          } w-full h-full`}
+        >
+          <AutoFitCanvas ref={this.canvasRef} />
+        </div>
+        <div className="absolute top-0 left-0 w-full h-full flex-center pointer-events-none">
+          {this.graph === null || !this.graph?.hasGraphableContent ? (
+            <p className="text-center">No content to graph</p>
+          ) : null}
+        </div>
+      </div>
+    );
   }
 }
 
@@ -72,6 +73,7 @@ GraphCanvas.propTypes = {
     ),
   ).isRequired,
   options: PropTypes.object,
+  paused: PropTypes.bool,
 };
 
 export default GraphCanvas;

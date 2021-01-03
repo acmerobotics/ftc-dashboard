@@ -2,6 +2,8 @@ import React from 'react';
 
 import TileGrid from '../components/TileGrid';
 import Tile from '../components/Tile';
+import ConfigurableLayout from '../components/ConfigurableLayout';
+
 import OpModeView from '../containers/OpModeView';
 import CameraView from '../containers/CameraView';
 import GraphView from '../containers/GraphView';
@@ -14,14 +16,20 @@ enum LayoutPreset {
   FIELD = 'FIELD',
   GRAPH = 'GRAPH',
   ORIGINAL = 'ORIGINAL',
+  CONFIGURABLE = 'CONFIGURABLE',
 }
 
-const LAYOUT_DETAILS = {
+interface Layout {
+  name: string;
+  content: JSX.Element;
+}
+
+const LAYOUT_DETAILS: { [key in LayoutPreset]: Layout } = {
   [LayoutPreset.DEFAULT]: {
     name: 'Default',
     content: (
-      <TileGrid gridTemplate="150px calc(60% - 150px) 40% / 30% 40% 30%">
-        <Tile row={1} col={1}>
+      <TileGrid gridTemplate="220px calc(60% - 220px) 40% / 30% 40% 30%">
+        <Tile row="1 / span 1" col={1}>
           <OpModeView />
         </Tile>
         <Tile row="2 / span 2" col={1}>
@@ -30,7 +38,6 @@ const LAYOUT_DETAILS = {
         <Tile row="1 / span 3" col={2}>
           <GraphView />
         </Tile>
-        =
         <Tile row="1 / span 2" col={3}>
           <ConfigView />
         </Tile>
@@ -43,8 +50,8 @@ const LAYOUT_DETAILS = {
   [LayoutPreset.FIELD]: {
     name: 'Field',
     content: (
-      <TileGrid gridTemplate="150px calc(60% - 150px) 40% / 30% 40% 30%">
-        <Tile row={1} col={1}>
+      <TileGrid gridTemplate="220px calc(60% - 220px) 40% / 30% 40% 30%">
+        <Tile row="1 / span 1" col={1}>
           <OpModeView />
         </Tile>
         <Tile row="2 / span 2" col={1}>
@@ -53,7 +60,6 @@ const LAYOUT_DETAILS = {
         <Tile row="1 / span 3" col={2}>
           <GraphView />
         </Tile>
-        =
         <Tile row="1 / span 2" col={3}>
           <ConfigView />
         </Tile>
@@ -83,7 +89,6 @@ const LAYOUT_DETAILS = {
         <Tile row="1 / span 2" col={1}>
           <GraphView />
         </Tile>
-        =
         <Tile row={1} col={2}>
           <ConfigView />
         </Tile>
@@ -92,6 +97,10 @@ const LAYOUT_DETAILS = {
         </Tile>
       </TileGrid>
     ),
+  },
+  [LayoutPreset.CONFIGURABLE]: {
+    name: 'Custom',
+    content: <ConfigurableLayout />,
   },
 };
 

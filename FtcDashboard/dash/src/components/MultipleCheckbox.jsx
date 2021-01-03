@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { v4 as uuid4 } from 'uuid';
 
 class MultipleCheckbox extends React.Component {
   constructor(props) {
@@ -7,6 +8,7 @@ class MultipleCheckbox extends React.Component {
 
     this.state = {
       selected: this.props.selected || [],
+      uuid: uuid4(),
     };
   }
 
@@ -30,7 +32,7 @@ class MultipleCheckbox extends React.Component {
 
   render() {
     return (
-      <table className="multiple-checkbox">
+      <table className="overflow-y-scroll">
         <tbody>
           {this.props.arr
             .filter(
@@ -41,12 +43,20 @@ class MultipleCheckbox extends React.Component {
               <tr key={val}>
                 <td>
                   <input
+                    id={`multiple-checkbox-${this.state.uuid}-${val}`}
+                    className="rounded"
                     type="checkbox"
                     onChange={(evt) => this.handleChange(evt, val)}
                     checked={this.state.selected.indexOf(val) !== -1}
                   />
                 </td>
-                <td>{val}</td>
+                <td>
+                  <label
+                    htmlFor={`multiple-checkbox-${this.state.uuid}-${val}`}
+                  >
+                    {val}
+                  </label>
+                </td>
               </tr>
             ))}
         </tbody>

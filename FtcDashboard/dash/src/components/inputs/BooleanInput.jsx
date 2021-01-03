@@ -2,8 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 const BooleanInput = ({ value, onChange, onSave }) => (
-  <span>
+  <span className="flex items-center">
     <input
+      className="mr-4 rounded"
       type="checkbox"
       checked={value}
       onChange={(evt) =>
@@ -13,7 +14,12 @@ const BooleanInput = ({ value, onChange, onSave }) => (
         })
       }
     />
-    <button onClick={onSave}>Save</button>
+    <button
+      className="bg-gray-100 px-2 rounded border border-gray-200"
+      onClick={onSave}
+    >
+      Save
+    </button>
   </span>
 );
 
