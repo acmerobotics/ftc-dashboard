@@ -13,7 +13,7 @@ export const validateDouble = (value) => {
 };
 
 export const validateInt = (value) => {
-  if (/^-?\d*$/.test(value) && value !== '-' && value !== '') {
+  if (/^-?\d+$/.test(value)) {
     return {
       value: parseInt(value, 10),
       valid: true,
