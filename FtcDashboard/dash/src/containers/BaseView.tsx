@@ -1,8 +1,8 @@
 import styled from 'styled-components';
 
-export interface BaseViewProps {
+type BaseViewProps = {
   isUnlocked?: boolean;
-}
+};
 
 const BaseView = styled.div.attrs<BaseViewProps>((props) => ({
   className: `flex flex-col h-full bg-white bg-opacity-75 overflow-hidden transition-shadow ${
@@ -10,9 +10,9 @@ const BaseView = styled.div.attrs<BaseViewProps>((props) => ({
   }`,
 }))<BaseViewProps>``;
 
-export interface BaseViewHeadingProps {
+type BaseViewHeadingProps = {
   isDraggable?: boolean;
-}
+};
 
 const BaseViewHeading = styled.h2.attrs<BaseViewHeadingProps>((props) => ({
   className: `text-xl w-full px-4 py-2 font-medium ${
@@ -49,3 +49,4 @@ export {
   BaseViewIcon,
   BaseViewIconButton,
 };
+export type { BaseViewProps, BaseViewHeadingProps };

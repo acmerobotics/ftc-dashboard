@@ -98,11 +98,11 @@ class CustomVariable extends React.Component {
               <h3 className="text-lg select-none">{name}</h3>
             </div>
           </div>
-          {this.state.expanded ? (
+          {this.state.expanded && (
             <table>
               <tbody>{options}</tbody>
             </table>
-          ) : null}
+          )}
         </td>
       </tr>
     );

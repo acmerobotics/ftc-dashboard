@@ -163,7 +163,7 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
             Graph
           </BaseViewHeading>
           <BaseViewIcons>
-            {this.state.graphing && this.state.keys.length !== 0 ? (
+            {this.state.graphing && this.state.keys.length !== 0 && (
               <BaseViewIconButton className="w-8 h-8 icon-btn">
                 {this.state.paused ? (
                   <PlayIcon className="w-6 h-6" onClick={this.play} />
@@ -171,7 +171,7 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
                   <PauseIcon className="w-6 h-6" onClick={this.pause} />
                 )}
               </BaseViewIconButton>
-            ) : null}
+            )}
 
             <BaseViewIconButton>
               {this.state.graphing ? (

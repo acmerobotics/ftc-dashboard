@@ -21,10 +21,10 @@ const LayoutPreset = {
   CONFIGURABLE: 'CONFIGURABLE',
 } as const;
 
-interface Layout {
+type Layout = {
   name: string;
   content: JSX.Element;
-}
+};
 
 const LAYOUT_DETAILS: { [key in Values<typeof LayoutPreset>]: Layout } = {
   [LayoutPreset.DEFAULT]: {

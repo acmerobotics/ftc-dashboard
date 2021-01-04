@@ -89,13 +89,13 @@ const Container = styled.div.attrs<{ isLayoutLocked: boolean }>(
   background-position: ${`calc(0.5rem + ${GRID_DOT_PADDING}px) calc(0.5rem + ${GRID_DOT_PADDING}px - 5px)`};
 `;
 
-interface GridItem {
+type GridItem = {
   id: string;
   view: ConfigurableView;
   layout: GridItemLayout;
-}
+};
 
-interface GridItemLayout {
+type GridItemLayout = {
   x: number;
   y: number;
   w: number;
@@ -103,7 +103,7 @@ interface GridItemLayout {
   minW: number;
   isDraggable: boolean;
   isResizable: boolean;
-}
+};
 
 const HEIGHT_BREAKPOINTS = {
   MEDIUM: 730,
@@ -501,7 +501,7 @@ export default function ConfigurableLayout() {
       isLayoutLocked={isLayoutLocked}
       bgGridSize={gridBgSize}
     >
-      {gridItems.length === 0 ? (
+      {gridItems.length === 0 && (
         <div
           className={`text-center mt-16 p-12 transition-colors ${
             isLayoutLocked ? 'bg-white' : 'bg-gray-100'
@@ -514,8 +514,6 @@ export default function ConfigurableLayout() {
             and then click the green plus button to create your own layouts!
           </p>
         </div>
-      ) : (
-        ''
       )}
       <div ref={gridWrapperRef}>
         <ReactGridLayout

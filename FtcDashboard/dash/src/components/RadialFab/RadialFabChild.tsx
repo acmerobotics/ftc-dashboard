@@ -1,9 +1,9 @@
-import { ReactNode, FunctionComponent } from 'react';
 import styled from 'styled-components';
 
+import { WithChildren } from '../../typeHelpers';
 import useDelayedTooltip from '../../hooks/useDelayedTooltip';
 
-interface RadialFabChildProps {
+type RadialFabChildProps = {
   customClass?: string;
 
   fineAdjustIconX?: string;
@@ -17,16 +17,14 @@ interface RadialFabChildProps {
   toolTipText?: string;
 
   clickEvent?: (e: React.MouseEvent) => void;
-
-  children?: ReactNode;
-}
+};
 
 const ButtonContainer = styled.button.attrs<RadialFabChildProps>(
   ({ customClass }) => ({
     className: `top-1/2 left-1/2 rounded-full outline-none focus:outline-none relative flex-center transition ${customClass}`,
   }),
 )<RadialFabChildProps>`
-  /* Not sure why but removing this breaks the button */
+  /* Not sure why but removing this and replacing it with the tailwind absolute class breaks the button */
   position: absolute;
 
   transform: ${({ angle, openMargin, isOpen }) => {
@@ -58,17 +56,15 @@ const ToolTip = styled.span.attrs<{ isShowing: boolean }>(({ isShowing }) => ({
   }`,
 }))<{ isShowing: boolean }>``;
 
-const RadialFabChild: FunctionComponent<RadialFabChildProps> = (
-  props: RadialFabChildProps,
-) => {
+const RadialFabChild = (props: WithChildren<RadialFabChildProps>) => {
   const { isShowingTooltip, ref } = useDelayedTooltip(0.5);
 
   return (
     <ButtonContainer {...props} onClick={props.clickEvent} ref={ref}>
       <Icon {...props}>{props.children}</Icon>
-      {props.toolTipText !== '' ? (
+      {props.toolTipText !== '' && (
         <ToolTip isShowing={isShowingTooltip}>{props.toolTipText}</ToolTip>
-      ) : null}
+      )}
     </ButtonContainer>
   );
 };

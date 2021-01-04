@@ -48,7 +48,7 @@ class Dashboard extends Component {
                   </option>
                 ))}
             </select>
-            {this.props.isConnected ? (
+            {this.props.isConnected && (
               <p
                 className="mx-2"
                 style={{
@@ -58,7 +58,7 @@ class Dashboard extends Component {
               >
                 {this.props.pingTime}ms
               </p>
-            ) : null}
+            )}
             {this.props.isConnected ? (
               <ConnectedIcon className="ml-4 w-10 h-10" />
             ) : (

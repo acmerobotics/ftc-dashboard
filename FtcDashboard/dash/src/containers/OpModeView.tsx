@@ -217,12 +217,12 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
             )}
           </select>
           {this.renderButtons()}
-          {errorMessage !== '' ? (
+          {errorMessage !== '' && (
             <p className="error mt-5 ml-1">Error: {errorMessage}</p>
-          ) : null}
-          {warningMessage !== '' ? (
+          )}
+          {warningMessage !== '' && (
             <p className="warning mt-5 ml-1">Warning: {warningMessage}</p>
-          ) : null}
+          )}
         </BaseViewBody>
       </BaseView>
     );

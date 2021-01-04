@@ -31,10 +31,10 @@ export default function useUndoHistory<T>(
     | { type: StateHistoryCommand.UNDO }
     | { type: StateHistoryCommand.REDO };
 
-  interface StateHistoryReducerState {
+  type StateHistoryReducerState = {
     history: T[];
     currentHistoryPosition: number;
-  }
+  };
 
   const stateHistoryReducer = (
     state: StateHistoryReducerState,

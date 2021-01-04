@@ -1,7 +1,9 @@
-import React, { FunctionComponent, ReactNode, ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 import styled from 'styled-components';
 
-interface RadialFabProps {
+import { WithChildren } from '../../typeHelpers';
+
+type RadialFabProps = {
   isOpen: boolean;
   isShowing: boolean;
 
@@ -14,10 +16,9 @@ interface RadialFabProps {
 
   bottom?: string;
   right?: string;
-  children?: ReactNode;
 
   clickEvent: () => void;
-}
+};
 
 const FixedContainer = styled.div<RadialFabProps>`
   position: fixed;
@@ -51,9 +52,7 @@ const CreateIcon = styled.img`
   color: white;
 `;
 
-const RadialFab: FunctionComponent<RadialFabProps> = (
-  props: RadialFabProps,
-) => {
+const RadialFab = (props: WithChildren<RadialFabProps>) => {
   return (
     <FixedContainer {...props}>
       <FloatingButton {...props} onClick={props.clickEvent}>
