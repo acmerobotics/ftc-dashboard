@@ -10,12 +10,12 @@ export const REFRESH_CONFIG = 'REFRESH_CONFIG';
 
 export type ReceiveConfigAction = {
   type: typeof RECEIVE_CONFIG;
-  config: Config;
+  configRoot: Config;
 };
 
 export const receiveConfig = (config: Config): ReceiveConfigAction => ({
   type: 'RECEIVE_CONFIG',
-  config,
+  configRoot: config,
 });
 
 export type GetConfigAction = {

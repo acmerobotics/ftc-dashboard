@@ -1,5 +1,8 @@
 import LayoutPreset from '../../enums/LayoutPreset';
-import { RECEIVE_LAYOUT_PRESET } from '../actions/settings';
+import {
+  RECEIVE_LAYOUT_PRESET,
+  ReceiveLayoutPresetAction,
+} from '../actions/settings';
 
 import { Values } from '../../typeHelpers';
 
@@ -11,7 +14,10 @@ const initialState = {
   layoutPreset: LayoutPreset.DEFAULT,
 };
 
-const telemetry = (state: SettingState = initialState, action: any) => {
+const telemetry = (
+  state: SettingState = initialState,
+  action: ReceiveLayoutPresetAction,
+) => {
   switch (action.type) {
     case RECEIVE_LAYOUT_PRESET:
       return {

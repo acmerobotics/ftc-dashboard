@@ -1,6 +1,8 @@
 import {
   RECEIVE_PING_TIME,
   RECEIVE_CONNECTION_STATUS,
+  ReceivePingTimeAction,
+  ReceiveConnectionStatusAction,
 } from '../actions/socket';
 
 type SocketState = {
@@ -13,7 +15,10 @@ const initialState: SocketState = {
   pingTime: 0,
 };
 
-const socket = (state = initialState, action: any) => {
+const socket = (
+  state = initialState,
+  action: ReceivePingTimeAction | ReceiveConnectionStatusAction,
+) => {
   switch (action.type) {
     case RECEIVE_PING_TIME:
       return {

@@ -29,8 +29,8 @@ export const gamepadDisconnected = (
 
 export type ReceiveGamepadStateAction = {
   type: typeof RECEIVE_GAMEPAD_STATE;
-  gamepad1: any;
-  gamepad2: any;
+  gamepad1: boolean;
+  gamepad2: boolean;
 };
 
 export const receiveGamepadState = (

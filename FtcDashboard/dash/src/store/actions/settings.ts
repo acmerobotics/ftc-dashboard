@@ -5,7 +5,7 @@ export const GET_LAYOUT_PRESET = 'GET_LAYOUT_PRESET';
 import { Values } from '../../typeHelpers';
 import LayoutPreset from '../../enums/LayoutPreset';
 
-type SaveLayoutPresetAction = {
+export type SaveLayoutPresetAction = {
   type: typeof SAVE_LAYOUT_PRESET;
   preset: Values<typeof LayoutPreset>;
 };
@@ -17,7 +17,7 @@ export const saveLayoutPreset = (
   preset,
 });
 
-type ReceiveLayoutPresetAction = {
+export type ReceiveLayoutPresetAction = {
   type: typeof RECEIVE_LAYOUT_PRESET;
   preset: Values<typeof LayoutPreset>;
 };
@@ -29,7 +29,7 @@ export const receiveLayoutPreset = (
   preset,
 });
 
-type GetLayoutPresetAction = {
+export type GetLayoutPresetAction = {
   type: typeof GET_LAYOUT_PRESET;
 };
 

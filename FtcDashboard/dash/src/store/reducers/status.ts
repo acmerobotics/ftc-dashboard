@@ -1,22 +1,46 @@
-import { RECEIVE_TELEMETRY } from '../actions/telemetry';
+import {
+  RECEIVE_ROBOT_STATUS,
+  RECEIVE_OP_MODE_LIST,
+  ReceiveRobotStatusAction,
+  ReceiveOpModeListAction,
+} from '../actions/status';
+import OpModeStatus from '../../enums/OpModeStatus';
 
-import { Telemetry } from '../../containers/types';
+import { Values } from '../../typeHelpers';
 
-const initialState: Telemetry = [
-  {
-    timestamp: 0,
-    data: {},
-    log: [],
-    fieldOverlay: {
-      ops: [],
-    },
-  },
-];
+export type Status = {
+  available: boolean;
+  activeOpMode: string;
+  activeOpModeStatus: Values<typeof OpModeStatus>;
+  opModeList: string[];
+  warningMessage: string;
+  errorMessage: string;
+};
 
-const telemetry = (state = initialState, action: any) => {
+const initialState = {
+  available: false,
+  activeOpMode: '',
+  activeOpModeStatus: OpModeStatus.STOPPED,
+  opModeList: [],
+  warningMessage: '',
+  errorMessage: '',
+};
+
+const telemetry = (
+  state = initialState,
+  action: ReceiveRobotStatusAction | ReceiveOpModeListAction,
+) => {
   switch (action.type) {
-    case RECEIVE_TELEMETRY:
-      return action.telemetry;
+    case RECEIVE_ROBOT_STATUS:
+      return {
+        ...state,
+        ...action.status,
+      };
+    case RECEIVE_OP_MODE_LIST:
+      return {
+        ...state,
+        opModeList: action.opModeList,
+      };
     default:
       return state;
   }

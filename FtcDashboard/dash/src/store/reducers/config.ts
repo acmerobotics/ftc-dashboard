@@ -164,14 +164,14 @@ const initialState: ConfigState = {
   configRoot: {} as Config,
 };
 
-// const config = (
-//   state: ConfigState = initialState,
-//   action:
-//     | ReceiveConfigAction
-//     | UpdateConfigAction
-//     | SaveConfigAction
-//     | RefreshConfigAction,
-const config = (state: ConfigState = initialState, action: any) => {
+const config = (
+  state: ConfigState = initialState,
+  action:
+    | ReceiveConfigAction
+    | UpdateConfigAction
+    | SaveConfigAction
+    | RefreshConfigAction,
+) => {
   switch (action.type) {
     case RECEIVE_CONFIG:
       return {
