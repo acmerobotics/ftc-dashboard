@@ -11,6 +11,7 @@ import {
   REFRESH_CONFIG,
   SAVE_CONFIG,
   UPDATE_CONFIG,
+  ConfigVariable,
 } from '../types';
 
 export const receiveConfig = (config: Config): ReceiveConfigAction => ({
@@ -36,7 +37,7 @@ export const refreshConfig = (): RefreshConfigAction => ({
   type: REFRESH_CONFIG,
 });
 
-export const getModifiedDiff = (baseConfig: Config, root = true) => {
+export const getModifiedDiff = (baseConfig: Config, root = true): Config => {
   if (baseConfig.__type === VariableType.CUSTOM) {
     const modifiedConfig: ConfigCustom = {
       __type: VariableType.CUSTOM,
@@ -59,6 +60,8 @@ export const getModifiedDiff = (baseConfig: Config, root = true) => {
       __value: baseConfig.__newValue,
       __valid: true,
       __enumClass: baseConfig.__enumClass,
-    };
+    } as ConfigVariable;
   }
+
+  return {} as Config;
 };

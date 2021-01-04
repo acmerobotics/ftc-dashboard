@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { Values } from '../typeHelpers';
+
 import TileGrid from '../components/TileGrid';
 import Tile from '../components/Tile';
 import ConfigurableLayout from '../components/ConfigurableLayout';
@@ -10,7 +12,6 @@ import GraphView from '../containers/GraphView';
 import ConfigView from '../containers/ConfigView';
 import TelemetryView from '../containers/TelemetryView';
 import FieldView from '../containers/FieldView';
-import { Values } from '../typeHelpers';
 
 const LayoutPreset = {
   DEFAULT: 'DEFAULT',
@@ -114,3 +115,5 @@ export default Object.freeze({
     LAYOUT_DETAILS[preset]?.content ??
     LAYOUT_DETAILS[LayoutPreset.DEFAULT].content,
 });
+
+export type LayoutPresetType = Values<typeof LayoutPreset>;

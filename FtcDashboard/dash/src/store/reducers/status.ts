@@ -4,9 +4,10 @@ import {
   ReceiveRobotStatusAction,
   RECEIVE_OP_MODE_LIST,
   RECEIVE_ROBOT_STATUS,
+  StatusState,
 } from '../types';
 
-const initialState = {
+const initialState: StatusState = {
   available: false,
   activeOpMode: '',
   activeOpModeStatus: OpModeStatus.STOPPED,

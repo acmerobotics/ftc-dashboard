@@ -7,6 +7,7 @@ import {
   GAMEPAD_CONNECTED,
   GAMEPAD_DISCONNECTED,
   RECEIVE_GAMEPAD_STATE,
+  GamepadState,
 } from '../types';
 
 export const gamepadConnected = (user: number): GamepadConnectedAction => ({
@@ -22,8 +23,8 @@ export const gamepadDisconnected = (
 });
 
 export const receiveGamepadState = (
-  gamepad1: boolean,
-  gamepad2: boolean,
+  gamepad1: GamepadState,
+  gamepad2: GamepadState,
 ): ReceiveGamepadStateAction => ({
   type: RECEIVE_GAMEPAD_STATE,
   gamepad1,
@@ -37,13 +38,14 @@ the watchdog on the RC (to reset the gamepads in case the connection is cut abru
 */
 const MAX_GAMEPAD_MS = 150;
 
-let lastGamepad1: boolean;
-let lastGamepad2: boolean;
+let lastGamepad1: GamepadState;
+let lastGamepad2: GamepadState;
 let lastGamepadTimestamp: number;
 
-export const sendGamepadState = (gamepad1: boolean, gamepad2: boolean) => (
-  dispatch: Dispatch<ReceiveGamepadStateAction>,
-) => {
+export const sendGamepadState = (
+  gamepad1: GamepadState,
+  gamepad2: GamepadState,
+) => (dispatch: Dispatch<ReceiveGamepadStateAction>) => {
   const timestamp = Date.now();
   if (
     !isEqual(lastGamepad1, gamepad1) ||

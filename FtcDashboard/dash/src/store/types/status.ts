@@ -5,7 +5,7 @@ export const GET_ROBOT_STATUS = 'GET_ROBOT_STATUS';
 export const RECEIVE_ROBOT_STATUS = 'RECEIVE_ROBOT_STATUS';
 export const RECEIVE_OP_MODE_LIST = 'RECEIVE_OP_MODE_LIST';
 
-export type Status = {
+export type StatusState = {
   available: boolean;
   activeOpMode: string;
   activeOpModeStatus: Values<typeof OpModeStatus>;
@@ -20,7 +20,7 @@ export type GetRobotStatusAction = {
 
 export type ReceiveRobotStatusAction = {
   type: typeof RECEIVE_ROBOT_STATUS;
-  status: Status;
+  status: StatusState;
 };
 
 export type ReceiveOpModeListAction = {

@@ -5,10 +5,13 @@ import thunk from 'redux-thunk';
 import gamepadMiddleware from './middleware/gamepadMiddleware';
 import socketMiddleware from './middleware/socketMiddleware';
 import storageMiddleware from './middleware/storageMiddleware';
-import reducer from './reducers/index';
-import { RECEIVE_PING_TIME } from './actions/socket';
-import { RECEIVE_TELEMETRY } from './actions/telemetry';
-import { RECEIVE_ROBOT_STATUS, GET_ROBOT_STATUS } from './actions/status';
+import rootReducer from './reducers';
+import {
+  GET_ROBOT_STATUS,
+  RECEIVE_PING_TIME,
+  RECEIVE_ROBOT_STATUS,
+  RECEIVE_TELEMETRY,
+} from './types';
 
 const HIDDEN_ACTIONS = [
   RECEIVE_PING_TIME,
@@ -34,7 +37,7 @@ const configureStore = () => {
     middlewares.push(logger);
   }
 
-  return createStore(reducer, applyMiddleware.apply(null, middlewares));
+  return createStore(rootReducer, applyMiddleware(...middlewares));
 };
 
 export default configureStore;

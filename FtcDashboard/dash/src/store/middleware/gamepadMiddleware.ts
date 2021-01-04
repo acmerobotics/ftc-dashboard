@@ -1,3 +1,5 @@
+import { Middleware } from 'redux';
+
 /*
  * Some of this gamepad logic is based on FTC Team 731's robotics simulator.
  * https://github.com/nicholasday/robotics-simulator
@@ -9,15 +11,23 @@ import {
   sendGamepadState,
 } from '../actions/gamepad';
 import GamepadType from '../../enums/GamepadType';
+import { GamepadState } from '../types';
+import { AppThunkDispatch, RootState } from '../reducers';
 
-const scale = (value, oldMin, oldMax, newMin, newMax) =>
-  newMin + ((value - oldMin) * (newMax - newMin)) / (oldMax - oldMin);
+const scale = (
+  value: number,
+  oldMin: number,
+  oldMax: number,
+  newMin: number,
+  newMax: number,
+) => newMin + ((value - oldMin) * (newMax - newMin)) / (oldMax - oldMin);
 
 // based on the corresponding function in the SDK Gamepad
-const cleanMotionValues = (value, joystickDeadzone, maxMotionRange) => {
-  joystickDeadzone = joystickDeadzone || 0.2;
-  maxMotionRange = maxMotionRange || 1.0;
-
+const cleanMotionValues = (
+  value: number,
+  joystickDeadzone = 0.2,
+  maxMotionRange = 1.0,
+) => {
   // apply deadzone
   if (-joystickDeadzone < value && value < joystickDeadzone) return 0;
 
@@ -33,31 +43,37 @@ const cleanMotionValues = (value, joystickDeadzone, maxMotionRange) => {
   }
 };
 
-const REST_GAMEPAD_STATE = {
+const REST_GAMEPAD_STATE: GamepadState = {
   left_stick_x: 0,
   left_stick_y: 0,
   right_stick_x: 0,
   right_stick_y: 0,
+
   dpad_up: false,
   dpad_down: false,
   dpad_left: false,
   dpad_right: false,
+
   a: false,
   b: false,
   x: false,
   y: false,
+
   guide: false,
   start: false,
   back: false,
+
   left_bumper: false,
   right_bumper: false,
+
   left_stick_button: false,
   right_stick_button: false,
+
   left_trigger: 0,
   right_trigger: 0,
 };
 
-const extractGamepadState = (gamepad) => {
+const extractGamepadState = (gamepad: Gamepad) => {
   const type = GamepadType.getFromGamepad(gamepad);
   if (!GamepadType.isSupported(type)) {
     throw new Error('Unable to extract state from unsupported gamepad.');
@@ -70,21 +86,27 @@ const extractGamepadState = (gamepad) => {
         left_stick_y: cleanMotionValues(gamepad.axes[2]),
         right_stick_x: cleanMotionValues(-gamepad.axes[3]),
         right_stick_y: cleanMotionValues(gamepad.axes[4]),
+
         dpad_up: gamepad.buttons[12].pressed,
         dpad_down: gamepad.buttons[13].pressed,
         dpad_left: gamepad.buttons[14].pressed,
         dpad_right: gamepad.buttons[15].pressed,
+
         a: gamepad.buttons[1].pressed,
         b: gamepad.buttons[2].pressed,
         x: gamepad.buttons[0].pressed,
         y: gamepad.buttons[3].pressed,
+
         guide: false,
         start: gamepad.buttons[9].pressed,
         back: gamepad.buttons[8].pressed,
+
         left_bumper: gamepad.buttons[4].pressed,
         right_bumper: gamepad.buttons[5].pressed,
+
         left_stick_button: gamepad.buttons[10].pressed,
         right_stick_button: gamepad.buttons[11].pressed,
+
         left_trigger: gamepad.buttons[6].value,
         right_trigger: gamepad.buttons[7].value,
       };
@@ -94,19 +116,24 @@ const extractGamepadState = (gamepad) => {
         left_stick_y: cleanMotionValues(-gamepad.axes[1]),
         right_stick_x: cleanMotionValues(gamepad.axes[3]),
         right_stick_y: cleanMotionValues(-gamepad.axes[4]),
+
         dpad_up: gamepad.buttons[0].pressed,
         dpad_down: gamepad.buttons[1].pressed,
         dpad_left: gamepad.buttons[2].pressed,
         dpad_right: gamepad.buttons[3].pressed,
+
         a: gamepad.buttons[11].pressed,
         b: gamepad.buttons[12].pressed,
         x: gamepad.buttons[13].pressed,
         y: gamepad.buttons[14].pressed,
+
         guide: false,
         start: gamepad.buttons[4].pressed,
         back: gamepad.buttons[5].pressed,
+
         left_bumper: gamepad.buttons[8].pressed,
         right_bumper: gamepad.buttons[9].pressed,
+
         left_stick_button: gamepad.buttons[6].pressed,
         right_stick_button: gamepad.buttons[7].pressed,
         // the trigger range is [-1, 1] although it starts at 0.0 for some reason
@@ -122,7 +149,9 @@ const extractGamepadState = (gamepad) => {
 let gamepad1Index = -1;
 let gamepad2Index = -1;
 
-const gamepadMiddleware = (store) => {
+const gamepadMiddleware: Middleware<Record<string, unknown>, RootState> = (
+  store,
+) => {
   function updateGamepads() {
     const gamepads = navigator.getGamepads();
     if (gamepads.length === 0) {
@@ -131,7 +160,7 @@ const gamepadMiddleware = (store) => {
     }
 
     // check for Start-A/Start-B
-    for (let gamepad of navigator.getGamepads()) {
+    for (const gamepad of navigator.getGamepads()) {
       if (gamepad === null || !gamepad.connected) {
         continue;
       }
@@ -169,25 +198,44 @@ const gamepadMiddleware = (store) => {
       // actually dispatch motion events
       let gamepad1State;
       if (gamepad1Index !== -1) {
-        gamepad1State = extractGamepadState(gamepads[gamepad1Index], 1);
+        const gamepad = gamepads[gamepad1Index];
+
+        if (gamepad) {
+          gamepad1State = extractGamepadState(gamepad);
+        } else {
+          gamepad1State = REST_GAMEPAD_STATE;
+        }
       } else {
         gamepad1State = REST_GAMEPAD_STATE;
       }
 
       let gamepad2State;
       if (gamepad2Index !== -1) {
-        gamepad2State = extractGamepadState(gamepads[gamepad2Index], 2);
+        const gamepad = gamepads[gamepad2Index];
+
+        if (gamepad) {
+          gamepad2State = extractGamepadState(gamepad);
+        } else {
+          gamepad2State = REST_GAMEPAD_STATE;
+        }
       } else {
         gamepad2State = REST_GAMEPAD_STATE;
       }
 
-      store.dispatch(sendGamepadState(gamepad1State, gamepad2State));
+      (store.dispatch as AppThunkDispatch)(
+        sendGamepadState(gamepad1State, gamepad2State),
+      );
     }
 
     requestAnimationFrame(updateGamepads);
   }
 
-  window.addEventListener('gamepaddisconnected', ({ gamepad }) => {
+  window.addEventListener('gamepaddisconnected', (evt: Event) => {
+    // Required because lib.dom.d.ts doesn't have proper types for the gamepad events
+    // Looks like it's fixed but currently not merged in the version we are using
+    // See: https://github.com/microsoft/TypeScript/issues/39425 & https://github.com/microsoft/TypeScript-DOM-lib-generator/pull/925
+    const { gamepad } = evt as GamepadEvent;
+
     if (gamepad1Index === gamepad.index) {
       store.dispatch(gamepadDisconnected(gamepad1Index));
 

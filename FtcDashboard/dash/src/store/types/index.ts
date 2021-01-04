@@ -26,6 +26,7 @@ export {
   RECEIVE_GAMEPAD_STATE,
 } from './gamepad';
 export type {
+  GamepadState,
   GamepadConnectionState,
   GamepadConnectedAction,
   GamepadDisonnectedAction,
@@ -72,7 +73,7 @@ export {
   RECEIVE_OP_MODE_LIST,
 } from './status';
 export type {
-  Status,
+  StatusState,
   GetRobotStatusAction,
   ReceiveRobotStatusAction,
   ReceiveOpModeListAction,

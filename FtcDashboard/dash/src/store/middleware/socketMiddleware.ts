@@ -1,22 +1,32 @@
+import { Middleware } from 'redux';
+
+import { RootState, AppThunkAction, AppThunkDispatch } from './../reducers';
+import { getRobotStatus } from '../actions/status';
 import {
-  CONNECT,
-  DISCONNECT,
   connect,
   receiveConnectionStatus,
   receivePingTime,
 } from '../actions/socket';
-import { GET_CONFIG, SAVE_CONFIG } from '../actions/config';
 import {
+  CONNECT,
+  DISCONNECT,
+  GET_CONFIG,
   GET_ROBOT_STATUS,
+  INIT_OP_MODE,
+  RECEIVE_GAMEPAD_STATE,
   RECEIVE_ROBOT_STATUS,
-  getRobotStatus,
-} from '../actions/status';
-import { INIT_OP_MODE, START_OP_MODE, STOP_OP_MODE } from '../actions/opmode';
-import { RECEIVE_GAMEPAD_STATE } from '../actions/gamepad';
+  SAVE_CONFIG,
+  START_OP_MODE,
+  STOP_OP_MODE,
+} from '../types';
 
-let socket, statusSentTime;
+let socket: WebSocket;
+let statusSentTime: number;
 
-const robotStatusLoop = () => (dispatch, getState) => {
+const robotStatusLoop = (): AppThunkAction => (
+  dispatch: AppThunkDispatch,
+  getState: () => RootState,
+) => {
   const { isConnected } = getState().socket;
 
   if (!isConnected) {
@@ -32,7 +42,9 @@ const robotStatusLoop = () => (dispatch, getState) => {
   }, 1000);
 };
 
-const socketMiddleware = (store) => (next) => (action) => {
+const socketMiddleware: Middleware<Record<string, unknown>, RootState> = (
+  store,
+) => (next) => (action) => {
   switch (action.type) {
     case CONNECT:
       socket = new WebSocket(`ws://${action.host}:${action.port}`);
@@ -43,13 +55,13 @@ const socketMiddleware = (store) => (next) => (action) => {
       };
 
       socket.onopen = () => {
-        store.dispatch(receiveConnectionStatus(true));
+        (store.dispatch as AppThunkDispatch)(receiveConnectionStatus(true));
 
-        store.dispatch(robotStatusLoop());
+        (store.dispatch as AppThunkDispatch)(robotStatusLoop());
       };
 
       socket.onclose = () => {
-        store.dispatch(receiveConnectionStatus(false));
+        (store.dispatch as AppThunkDispatch)(receiveConnectionStatus(false));
 
         setTimeout(
           () => store.dispatch(connect(action.host, action.port)),
@@ -64,6 +76,7 @@ const socketMiddleware = (store) => (next) => (action) => {
     case RECEIVE_ROBOT_STATUS: {
       const pingTime = Date.now() - statusSentTime;
       store.dispatch(receivePingTime(pingTime));
+
       next(action);
       break;
     }

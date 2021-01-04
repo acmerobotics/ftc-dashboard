@@ -1,28 +1,42 @@
-import { Values } from '../../typeHelpers';
-import LayoutPreset from '../../enums/LayoutPreset';
+import { Dispatch } from 'redux';
+
 import {
-  GetLayoutPresetAction,
-  ReceiveLayoutPresetAction,
-  SaveLayoutPresetAction,
-  GET_LAYOUT_PRESET,
-  RECEIVE_LAYOUT_PRESET,
-  SAVE_LAYOUT_PRESET,
+  CONNECT,
+  DISCONNECT,
+  ConnectAction,
+  DisconnectAction,
+  ReceiveConnectionStatusAction,
+  ReceiveOpModeListAction,
+  ReceivePingTimeAction,
+  RECEIVE_CONNECTION_STATUS,
+  RECEIVE_PING_TIME,
 } from '../types';
+import { receiveOpModeList } from './status';
 
-export const saveLayoutPreset = (
-  preset: Values<typeof LayoutPreset>,
-): SaveLayoutPresetAction => ({
-  type: SAVE_LAYOUT_PRESET,
-  preset,
+export const connect = (host: string, port: string): ConnectAction => ({
+  type: CONNECT,
+  host,
+  port,
 });
 
-export const receiveLayoutPreset = (
-  preset: Values<typeof LayoutPreset>,
-): ReceiveLayoutPresetAction => ({
-  type: RECEIVE_LAYOUT_PRESET,
-  preset,
+export const disconnect = (): DisconnectAction => ({
+  type: DISCONNECT,
 });
 
-export const getLayoutPreset = (): GetLayoutPresetAction => ({
-  type: GET_LAYOUT_PRESET,
+export const receivePingTime = (pingTime: number): ReceivePingTimeAction => ({
+  type: RECEIVE_PING_TIME,
+  pingTime,
 });
+
+export const receiveConnectionStatus = (isConnected: boolean) => (
+  dispatch: Dispatch<ReceiveConnectionStatusAction | ReceiveOpModeListAction>,
+) => {
+  dispatch({
+    type: RECEIVE_CONNECTION_STATUS,
+    isConnected,
+  });
+
+  if (!isConnected) {
+    dispatch(receiveOpModeList([]));
+  }
+};

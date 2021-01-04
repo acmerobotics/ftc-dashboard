@@ -1,5 +1,4 @@
-import { Values } from '../../typeHelpers';
-import LayoutPreset from '../../enums/LayoutPreset';
+import { LayoutPresetType } from '../../enums/LayoutPreset';
 import {
   GetLayoutPresetAction,
   ReceiveLayoutPresetAction,
@@ -10,14 +9,14 @@ import {
 } from '../types';
 
 export const saveLayoutPreset = (
-  preset: Values<typeof LayoutPreset>,
+  preset: LayoutPresetType,
 ): SaveLayoutPresetAction => ({
   type: SAVE_LAYOUT_PRESET,
   preset,
 });
 
 export const receiveLayoutPreset = (
-  preset: Values<typeof LayoutPreset>,
+  preset: LayoutPresetType,
 ): ReceiveLayoutPresetAction => ({
   type: RECEIVE_LAYOUT_PRESET,
   preset,
