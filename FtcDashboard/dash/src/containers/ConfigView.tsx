@@ -1,8 +1,9 @@
-import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import CustomVariable from './CustomVariable';
 import BaseView, {
+  BaseViewProps,
+  BaseViewHeadingProps,
   BaseViewHeading,
   BaseViewBody,
   BaseViewIcons,
@@ -19,15 +20,22 @@ import {
   getModifiedDiff,
 } from '../store/actions/config';
 import VariableType from '../enums/VariableType';
+import { RootState } from '../store/reducers';
+import { Config, ConfigCustom } from '../store/types';
+
+type ConfigViewProps = BaseViewProps & BaseViewHeadingProps;
 
 const ConfigView = ({
-  configRoot,
-  onRefresh,
-  onSave,
-  onChange,
-  isDraggable,
-  isUnlocked,
-}) => {
+  isDraggable = false,
+  isUnlocked = false,
+}: ConfigViewProps) => {
+  const dispatch = useDispatch();
+  const configRoot = useSelector((state: RootState) => state.config.configRoot);
+
+  const onRefresh = () => dispatch(refreshConfig());
+  const onSave = (configDiff: Config) => dispatch(saveConfig(configDiff));
+  const onChange = (configDiff: Config) => dispatch(updateConfig(configDiff));
+
   const sortedKeys = Object.keys(configRoot.__value || {});
 
   sortedKeys.sort();
@@ -39,14 +47,11 @@ const ConfigView = ({
           Configuration
         </BaseViewHeading>
         <BaseViewIcons>
-          <BaseViewIconButton>
-            <SaveIcon
-              className="w-6 h-6"
-              onClick={() => onSave(getModifiedDiff(configRoot))}
-            />
+          <BaseViewIconButton onClick={() => getModifiedDiff(configRoot)}>
+            <SaveIcon className="w-6 h-6" />
           </BaseViewIconButton>
-          <BaseViewIconButton>
-            <RefreshIcon className="w-6 h-6" onClick={onRefresh} />
+          <BaseViewIconButton onClick={onRefresh}>
+            <RefreshIcon className="w-6 h-6" />
           </BaseViewIconButton>
         </BaseViewIcons>
       </div>
@@ -57,16 +62,16 @@ const ConfigView = ({
               <CustomVariable
                 key={key}
                 name={key}
-                value={configRoot.__value[key].__value || {}}
-                onChange={(newValue) => {
+                value={(configRoot as ConfigCustom).__value[key].__value || {}}
+                onChange={(newValue: Config) => {
                   onChange({
                     __type: VariableType.CUSTOM,
                     __value: {
                       [key]: newValue,
                     },
-                  });
+                  } as ConfigCustom);
                 }}
-                onSave={(newValue) => {
+                onSave={(newValue: Config) => {
                   onSave({
                     __type: VariableType.CUSTOM,
                     __value: {
@@ -83,28 +88,4 @@ const ConfigView = ({
   );
 };
 
-ConfigView.propTypes = {
-  configRoot: PropTypes.object.isRequired,
-  onRefresh: PropTypes.func.isRequired,
-  onChange: PropTypes.func.isRequired,
-  onSave: PropTypes.func.isRequired,
-
-  isDraggable: PropTypes.bool,
-  isUnlocked: PropTypes.bool,
-};
-
-const mapStateToProps = ({ config }) => config;
-
-const mapDispatchToProps = (dispatch) => ({
-  onRefresh: () => {
-    dispatch(refreshConfig());
-  },
-  onSave: (configDiff) => {
-    dispatch(saveConfig(configDiff));
-  },
-  onChange: (configDiff) => {
-    dispatch(updateConfig(configDiff));
-  },
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(ConfigView);
+export default ConfigView;

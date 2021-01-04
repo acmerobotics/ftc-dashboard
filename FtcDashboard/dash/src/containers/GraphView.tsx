@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 
 import BaseView, {
   BaseViewHeading,
   BaseViewBody,
   BaseViewIcons,
   BaseViewIconButton,
+  BaseViewProps,
+  BaseViewHeadingProps,
 } from './BaseView';
 import MultipleCheckbox from '../components/MultipleCheckbox';
 import GraphCanvas from './GraphCanvas';
@@ -17,12 +18,34 @@ import { ReactComponent as CloseIcon } from '../assets/icons/close.svg';
 import { ReactComponent as PlayIcon } from '../assets/icons/play_arrow.svg';
 import { ReactComponent as PauseIcon } from '../assets/icons/pause.svg';
 
+import { RootState } from '../store/reducers';
 import { validateInt } from '../components/inputs/validation';
 import { DEFAULT_OPTIONS } from './Graph';
-import { telemetryType } from './types';
 
-class GraphView extends Component {
-  constructor(props) {
+type GraphViewState = {
+  graphing: boolean;
+  paused: boolean;
+  keys: string[];
+  windowMs: {
+    value: number;
+    valid: boolean;
+  };
+};
+
+const mapStateToProps = (state: RootState) => ({
+  telemetry: state.telemetry,
+});
+
+const connector = connect(mapStateToProps);
+
+type GraphViewProps = ConnectedProps<typeof connector> &
+  BaseViewProps &
+  BaseViewHeadingProps;
+
+class GraphView extends Component<GraphViewProps, GraphViewState> {
+  containerRef: React.RefObject<HTMLDivElement>;
+
+  constructor(props: GraphViewProps) {
     super(props);
 
     this.state = {
@@ -47,20 +70,24 @@ class GraphView extends Component {
   }
 
   componentDidMount() {
-    this.containerRef.current.addEventListener(
-      'keydown',
-      this.handleDocumentKeydown,
-    );
+    if (this.containerRef.current) {
+      this.containerRef.current.addEventListener(
+        'keydown',
+        this.handleDocumentKeydown,
+      );
+    }
   }
 
   componentWillUnmount() {
-    this.containerRef.current.removeEventListener(
-      'keydown',
-      this.handleDocumentKeydown,
-    );
+    if (this.containerRef.current) {
+      this.containerRef.current.removeEventListener(
+        'keydown',
+        this.handleDocumentKeydown,
+      );
+    }
   }
 
-  handleDocumentKeydown(evt) {
+  handleDocumentKeydown(evt: KeyboardEvent) {
     if (evt.code === 'Space' || evt.key === 'k') {
       this.setState({
         ...this.state,
@@ -129,7 +156,7 @@ class GraphView extends Component {
         className="flex flex-col overflow-auto"
         isUnlocked={this.props.isUnlocked}
         ref={this.containerRef}
-        tabIndex="0"
+        tabIndex={0}
       >
         <div className="flex">
           <BaseViewHeading isDraggable={this.props.isDraggable}>
@@ -170,7 +197,9 @@ class GraphView extends Component {
                 <div className="ml-3">
                   <MultipleCheckbox
                     arr={numericKeys}
-                    onChange={(selected) => this.setState({ keys: selected })}
+                    onChange={(selected: string[]) =>
+                      this.setState({ keys: selected })
+                    }
                     selected={this.state.keys}
                   />
                 </div>
@@ -188,7 +217,13 @@ class GraphView extends Component {
                               value={this.state.windowMs.value}
                               valid={this.state.windowMs.valid}
                               validate={validateInt}
-                              onChange={({ value, valid }) =>
+                              onChange={({
+                                value,
+                                valid,
+                              }: {
+                                value: number;
+                                valid: boolean;
+                              }) =>
                                 this.setState({
                                   windowMs: {
                                     value,
@@ -226,13 +261,4 @@ class GraphView extends Component {
   }
 }
 
-GraphView.propTypes = {
-  telemetry: telemetryType.isRequired,
-
-  isDraggable: PropTypes.bool,
-  isUnlocked: PropTypes.bool,
-};
-
-const mapStateToProps = ({ telemetry }) => ({ telemetry });
-
-export default connect(mapStateToProps)(GraphView);
+export default connector(GraphView);

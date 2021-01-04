@@ -1,9 +1,10 @@
-import React from 'react';
-import { connect } from 'react-redux';
+import { Component, ChangeEvent } from 'react';
+import { connect, ConnectedProps } from 'react-redux';
 import PropTypes from 'prop-types';
 
 import styled from 'styled-components';
 
+import { RootState } from '../store/reducers';
 import { initOpMode, startOpMode, stopOpMode } from '../store/actions/opmode';
 import OpModeStatus from '../enums/OpModeStatus';
 import BaseView, {
@@ -11,18 +12,48 @@ import BaseView, {
   BaseViewBody,
   BaseViewIcon,
   BaseViewIcons,
+  BaseViewProps,
+  BaseViewHeadingProps,
 } from './BaseView';
 
 import { ReactComponent as GamepadIcon } from '../assets/icons/gamepad.svg';
 
+type OpModeViewState = {
+  selectedOpMode: string;
+};
+
+// TODO move this elsewhere
 const STOP_OP_MODE = '$Stop$Robot$';
 
-const ActionButton = styled.button.attrs({
-  className: 'ml-2 py-1 px-3 border rounded-md shadow-md',
-})``;
+const mapStateToProps = (state: RootState) => ({
+  available: state.status.available,
+  activeOpMode: state.status.activeOpMode,
+  activeOpModeStatus: state.status.activeOpModeStatus,
+  opModeList: state.status.opModeList,
+  warningMessage: state.status.warningMessage,
+  errorMessage: state.status.errorMessage,
+  gamepad1Connected: state.gamepad.gamepad1Connected,
+  gamepad2Connected: state.gamepad.gamepad2Connected,
+});
 
-class OpModeView extends React.Component {
-  constructor(props) {
+const mapDispatchToProps = {
+  initOpMode: (opModeName: string) => initOpMode(opModeName),
+  startOpMode: () => startOpMode(),
+  stopOpMode: () => stopOpMode(),
+};
+
+const connector = connect(mapStateToProps, mapDispatchToProps);
+
+type OpModeViewProps = ConnectedProps<typeof connector> &
+  BaseViewProps &
+  BaseViewHeadingProps;
+
+const ActionButton = styled.button.attrs<{ className: string }>((props) => ({
+  className: `ml-2 py-1 px-3 border rounded-md shadow-md ${props.className}`,
+}))``;
+
+class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
+  constructor(props: OpModeViewProps) {
     super(props);
 
     this.state = {
@@ -32,7 +63,15 @@ class OpModeView extends React.Component {
     this.onChange = this.onChange.bind(this);
   }
 
-  static getDerivedStateFromProps(props, state) {
+  static propTypes = {
+    isDraggable: PropTypes.bool,
+    isUnlocked: PropTypes.bool,
+  };
+
+  static getDerivedStateFromProps(
+    props: OpModeViewProps,
+    state: OpModeViewState,
+  ) {
     if (props.activeOpMode !== STOP_OP_MODE) {
       return {
         selectedOpMode: props.activeOpMode,
@@ -49,7 +88,7 @@ class OpModeView extends React.Component {
     }
   }
 
-  onChange(evt) {
+  onChange(evt: ChangeEvent<HTMLSelectElement>) {
     this.setState({
       selectedOpMode: evt.target.value,
     });
@@ -59,9 +98,7 @@ class OpModeView extends React.Component {
     return (
       <ActionButton
         className="bg-blue-200 border-blue-300"
-        onClick={() =>
-          this.props.dispatch(initOpMode(this.state.selectedOpMode))
-        }
+        onClick={() => this.props.initOpMode(this.state.selectedOpMode)}
       >
         Init
       </ActionButton>
@@ -72,7 +109,7 @@ class OpModeView extends React.Component {
     return (
       <ActionButton
         className="bg-green-200 border-green-300"
-        onClick={() => this.props.dispatch(startOpMode())}
+        onClick={() => this.props.startOpMode()}
       >
         Start
       </ActionButton>
@@ -83,7 +120,7 @@ class OpModeView extends React.Component {
     return (
       <ActionButton
         className="bg-red-200 border-red-300"
-        onClick={() => this.props.dispatch(stopOpMode())}
+        onClick={() => this.props.stopOpMode()}
       >
         Stop
       </ActionButton>
@@ -176,7 +213,7 @@ class OpModeView extends React.Component {
             ) : (
               opModeList
                 .sort()
-                .map((opMode) => <option key={opMode}>{opMode}</option>)
+                .map((opMode: string) => <option key={opMode}>{opMode}</option>)
             )}
           </select>
           {this.renderButtons()}
@@ -192,24 +229,4 @@ class OpModeView extends React.Component {
   }
 }
 
-OpModeView.propTypes = {
-  available: PropTypes.bool.isRequired,
-  activeOpMode: PropTypes.string.isRequired,
-  activeOpModeStatus: PropTypes.oneOf(Object.keys(OpModeStatus)),
-  opModeList: PropTypes.arrayOf(PropTypes.string).isRequired,
-  warningMessage: PropTypes.string.isRequired,
-  errorMessage: PropTypes.string.isRequired,
-  dispatch: PropTypes.func.isRequired,
-  gamepad1Connected: PropTypes.bool.isRequired,
-  gamepad2Connected: PropTypes.bool.isRequired,
-
-  isDraggable: PropTypes.bool,
-  isUnlocked: PropTypes.bool,
-};
-
-const mapStateToProps = ({ status, gamepad }) => ({
-  ...status,
-  ...gamepad,
-});
-
-export default connect(mapStateToProps)(OpModeView);
+export default connector(OpModeView);
