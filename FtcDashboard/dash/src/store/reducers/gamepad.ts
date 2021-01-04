@@ -11,7 +11,7 @@ const initialState: GamepadConnectionState = {
   gamepad2Connected: false,
 };
 
-const gamepad = (
+const gamepadReducer = (
   state: GamepadConnectionState = initialState,
   action: GamepadConnectedAction | GamepadDisonnectedAction,
 ): GamepadConnectionState => {
@@ -45,4 +45,4 @@ const gamepad = (
   }
 };
 
-export default gamepad;
+export default gamepadReducer;

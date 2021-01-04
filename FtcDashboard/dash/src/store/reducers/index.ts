@@ -1,19 +1,19 @@
 import { combineReducers } from 'redux';
 
-import telemetry from './telemetry';
-import socket from './socket';
-import config from './config';
-import status from './status';
-import camera from './camera';
-import settings from './settings';
-import gamepad from './gamepad';
+import telemetryReducer from './telemetry';
+import socketReducer from './socket';
+import configReducer from './config';
+import statusReducer from './status';
+import cameraReducer from './camera';
+import settingsReducer from './settings';
+import gamepadReducer from './gamepad';
 
 export default combineReducers({
-  telemetry,
-  socket,
-  config,
-  status,
-  camera,
-  settings,
-  gamepad,
+  telemetry: telemetryReducer,
+  socket: socketReducer,
+  config: configReducer,
+  status: statusReducer,
+  camera: cameraReducer,
+  settings: settingsReducer,
+  gamepad: gamepadReducer,
 });

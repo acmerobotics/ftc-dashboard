@@ -141,7 +141,7 @@ const initialState: ConfigState = {
   configRoot: {} as Config,
 };
 
-const config = (
+const configReducer = (
   state: ConfigState = initialState,
   action:
     | ReceiveConfigAction
@@ -175,4 +175,4 @@ const config = (
   }
 };
 
-export default config;
+export default configReducer;

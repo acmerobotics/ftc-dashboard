@@ -15,7 +15,7 @@ const initialState = {
   errorMessage: '',
 };
 
-const telemetry = (
+const statusReducer = (
   state = initialState,
   action: ReceiveRobotStatusAction | ReceiveOpModeListAction,
 ) => {
@@ -35,4 +35,4 @@ const telemetry = (
   }
 };
 
-export default telemetry;
+export default statusReducer;

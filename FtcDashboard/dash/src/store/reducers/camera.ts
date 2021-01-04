@@ -4,7 +4,7 @@ const initialState: CameraState = {
   imageStr: '',
 };
 
-const telemetry = (
+const cameraReducer = (
   state: CameraState = initialState,
   action: ReceiveImageAction,
 ): CameraState => {
@@ -19,4 +19,4 @@ const telemetry = (
   }
 };
 
-export default telemetry;
+export default cameraReducer;

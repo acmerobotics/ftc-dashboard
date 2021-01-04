@@ -10,7 +10,7 @@ const initialState: SettingState = {
   layoutPreset: LayoutPreset.DEFAULT,
 };
 
-const telemetry = (
+const settingsReducer = (
   state: SettingState = initialState,
   action: ReceiveLayoutPresetAction,
 ) => {
@@ -25,4 +25,4 @@ const telemetry = (
   }
 };
 
-export default telemetry;
+export default settingsReducer;

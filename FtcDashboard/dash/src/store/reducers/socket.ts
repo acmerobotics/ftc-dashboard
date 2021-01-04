@@ -11,7 +11,7 @@ const initialState: SocketState = {
   pingTime: 0,
 };
 
-const socket = (
+const socketReducer = (
   state = initialState,
   action: ReceivePingTimeAction | ReceiveConnectionStatusAction,
 ) => {
@@ -31,4 +31,4 @@ const socket = (
   }
 };
 
-export default socket;
+export default socketReducer;
