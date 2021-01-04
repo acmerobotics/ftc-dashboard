@@ -1,5 +1,3 @@
-// TODO: extract patterns into constants?
-
 export const validateDouble = (value) => {
   if (!isNaN(Number(value)) && value !== '') {
     return {
@@ -22,7 +20,7 @@ export const validateInt = (value) => {
     };
   } else {
     return {
-      value: value,
+      value,
       valid: false,
     };
   }
@@ -30,7 +28,7 @@ export const validateInt = (value) => {
 
 export const validateString = (value) => {
   return {
-    value: value,
+    value,
     valid: true,
   };
 };
