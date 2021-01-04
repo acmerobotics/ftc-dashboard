@@ -4,27 +4,66 @@ import {
   UPDATE_CONFIG,
   SAVE_CONFIG,
   REFRESH_CONFIG,
+  ReceiveConfigAction,
+  UpdateConfigAction,
+  SaveConfigAction,
+  RefreshConfigAction,
 } from '../actions/config';
-import VariableType from '../enums/VariableType';
+import VariableType, {
+  VariableBasic,
+  VariableCustom,
+} from '../enums/VariableType';
 
-const receiveConfig = (baseConfig, newConfig) => {
-  baseConfig = baseConfig || {};
-  baseConfig.__value = baseConfig.__value || {};
+type Values<T> = T[keyof T];
+type Extends<T, U extends T> = U;
+
+export type Config = ConfigCustom | ConfigVariable;
+
+export type ConfigCustom = {
+  __type: Extends<Values<typeof VariableType>, VariableCustom>;
+  __value: Record<string, Config>;
+};
+
+export type ConfigVariable = {
+  __type: Extends<Values<typeof VariableType>, VariableBasic>;
+  __value: number | boolean | string;
+  __newValue: number | boolean | string;
+  __valid: boolean;
+  __modified: boolean;
+  __enumClass: string;
+  __enumValues: string[];
+};
+
+export type ConfigState = {
+  configRoot: Config;
+};
+
+const receiveConfig = (baseConfig: Config, newConfig: Config) => {
   if (newConfig.__type === VariableType.CUSTOM) {
-    const mergedConfig = {
+    const mergedConfig: ConfigCustom = {
       __type: VariableType.CUSTOM,
       __value: {},
     };
+
     // iterate over the keys in the new config
     // we treat this as the master config; it's from the server
-    for (let key of Object.keys(newConfig.__value)) {
+    for (const key of Object.keys(newConfig.__value)) {
+      let newBaseValue = {} as Config;
+      if (typeof baseConfig.__value === 'object') {
+        newBaseValue = (<ConfigCustom>baseConfig).__value[key];
+      } else {
+        newBaseValue = {} as Config;
+      }
+
       mergedConfig.__value[key] = receiveConfig(
-        baseConfig.__value[key] || {},
+        newBaseValue,
         newConfig.__value[key],
       );
     }
     return mergedConfig;
   } else {
+    baseConfig = <ConfigVariable>baseConfig;
+
     if (baseConfig.__modified) {
       return {
         __type: newConfig.__type,
@@ -49,16 +88,21 @@ const receiveConfig = (baseConfig, newConfig) => {
   }
 };
 
-const updateConfig = (baseConfig, configDiff, modified) => {
+const updateConfig = (
+  baseConfig: Config,
+  configDiff: Config,
+  modified: boolean,
+): Config => {
   if (baseConfig.__type === VariableType.CUSTOM) {
-    const mergedConfig = {
+    const mergedConfig: ConfigCustom = {
       __type: VariableType.CUSTOM,
       __value: {},
     };
+
     // iterate over the base config keys; the diff
     // is only a subset of those
-    for (let key of Object.keys(baseConfig.__value)) {
-      if (key in configDiff.__value) {
+    for (const key of Object.keys(baseConfig.__value)) {
+      if (typeof configDiff.__value === 'object' && key in configDiff.__value) {
         // if the config diff has the key, recurse
         mergedConfig.__value[key] = updateConfig(
           baseConfig.__value[key],
@@ -70,30 +114,38 @@ const updateConfig = (baseConfig, configDiff, modified) => {
         mergedConfig.__value[key] = cloneDeep(baseConfig.__value[key]);
       }
     }
-    return mergedConfig;
+
+    return mergedConfig as Config;
   } else {
+    let validValue = true;
+    if (typeof configDiff.__value !== 'object') {
+      validValue = (configDiff as ConfigVariable).__valid;
+    }
+
     // update the value based on the config diff
     return {
       __type: baseConfig.__type,
       __value: baseConfig.__value,
       __newValue: configDiff.__value,
-      __valid: configDiff.__valid,
+      __valid: validValue,
       __modified: modified,
       __enumClass: baseConfig.__enumClass,
       __enumValues: baseConfig.__enumValues,
-    };
+    } as Config;
   }
 };
 
-const refreshConfig = (config) => {
+const refreshConfig = (config: Config) => {
   if (config.__type === VariableType.CUSTOM) {
-    const refreshedConfig = {
+    const refreshedConfig: ConfigCustom = {
       __type: VariableType.CUSTOM,
       __value: {},
     };
-    for (let key of Object.keys(config.__value)) {
+
+    for (const key of Object.keys(config.__value)) {
       refreshedConfig.__value[key] = refreshConfig(config.__value[key]);
     }
+
     return refreshedConfig;
   } else {
     return {
@@ -108,11 +160,18 @@ const refreshConfig = (config) => {
   }
 };
 
-const initialState = {
-  configRoot: {},
+const initialState: ConfigState = {
+  configRoot: {} as Config,
 };
 
-const config = (state = initialState, action) => {
+// const config = (
+//   state: ConfigState = initialState,
+//   action:
+//     | ReceiveConfigAction
+//     | UpdateConfigAction
+//     | SaveConfigAction
+//     | RefreshConfigAction,
+const config = (state: ConfigState = initialState, action: any) => {
   switch (action.type) {
     case RECEIVE_CONFIG:
       return {

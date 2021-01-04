@@ -10,21 +10,22 @@ import GraphView from '../containers/GraphView';
 import ConfigView from '../containers/ConfigView';
 import TelemetryView from '../containers/TelemetryView';
 import FieldView from '../containers/FieldView';
+import { Values } from '../typeHelpers';
 
-enum LayoutPreset {
-  DEFAULT = 'DEFAULT',
-  FIELD = 'FIELD',
-  GRAPH = 'GRAPH',
-  ORIGINAL = 'ORIGINAL',
-  CONFIGURABLE = 'CONFIGURABLE',
-}
+const LayoutPreset = {
+  DEFAULT: 'DEFAULT',
+  FIELD: 'FIELD',
+  GRAPH: 'GRAPH',
+  ORIGINAL: 'ORIGINAL',
+  CONFIGURABLE: 'CONFIGURABLE',
+} as const;
 
 interface Layout {
   name: string;
   content: JSX.Element;
 }
 
-const LAYOUT_DETAILS: { [key in LayoutPreset]: Layout } = {
+const LAYOUT_DETAILS: { [key in Values<typeof LayoutPreset>]: Layout } = {
   [LayoutPreset.DEFAULT]: {
     name: 'Default',
     content: (
@@ -107,9 +108,9 @@ const LAYOUT_DETAILS: { [key in LayoutPreset]: Layout } = {
 export default Object.freeze({
   ...LayoutPreset,
 
-  getName: (preset: LayoutPreset) => LAYOUT_DETAILS[preset].name,
+  getName: (preset: Values<typeof LayoutPreset>) => LAYOUT_DETAILS[preset].name,
 
-  getContent: (preset: LayoutPreset) =>
+  getContent: (preset: Values<typeof LayoutPreset>) =>
     LAYOUT_DETAILS[preset]?.content ??
     LAYOUT_DETAILS[LayoutPreset.DEFAULT].content,
 });

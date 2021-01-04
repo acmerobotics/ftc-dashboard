@@ -1,10 +1,18 @@
+import { ReceiveImageAction } from './../actions/camera';
 import { RECEIVE_IMAGE } from '../actions/camera';
 
-const initialState = {
+export type CameraState = {
+  imageStr: string;
+};
+
+const initialState: CameraState = {
   imageStr: '',
 };
 
-const telemetry = (state = initialState, action) => {
+const telemetry = (
+  state: CameraState = initialState,
+  action: ReceiveImageAction,
+): CameraState => {
   switch (action.type) {
     case RECEIVE_IMAGE:
       return {

@@ -3,12 +3,17 @@ import {
   RECEIVE_CONNECTION_STATUS,
 } from '../actions/socket';
 
-const initialState = {
+type SocketState = {
+  isConnected: boolean;
+  pingTime: number;
+};
+
+const initialState: SocketState = {
   isConnected: false,
   pingTime: 0,
 };
 
-const socket = (state = initialState, action) => {
+const socket = (state = initialState, action: any) => {
   switch (action.type) {
     case RECEIVE_PING_TIME:
       return {
