@@ -1,24 +1,18 @@
 import { isEqual } from 'lodash';
 import { Dispatch } from 'redux';
-
-export const GAMEPAD_CONNECTED = 'GAMEPAD_CONNECTED';
-export const GAMEPAD_DISCONNECTED = 'GAMEPAD_DISCONNECTED';
-export const RECEIVE_GAMEPAD_STATE = 'RECEIVE_GAMEPAD_STATE';
-
-export type GamepadConnectedAction = {
-  type: typeof GAMEPAD_CONNECTED;
-  user: number;
-};
+import {
+  GamepadConnectedAction,
+  GamepadDisonnectedAction,
+  ReceiveGamepadStateAction,
+  GAMEPAD_CONNECTED,
+  GAMEPAD_DISCONNECTED,
+  RECEIVE_GAMEPAD_STATE,
+} from '../types';
 
 export const gamepadConnected = (user: number): GamepadConnectedAction => ({
   type: GAMEPAD_CONNECTED,
   user,
 });
-
-export type GamepadDisonnectedAction = {
-  type: typeof GAMEPAD_DISCONNECTED;
-  user: number;
-};
 
 export const gamepadDisconnected = (
   user: number,
@@ -26,12 +20,6 @@ export const gamepadDisconnected = (
   type: GAMEPAD_DISCONNECTED,
   user,
 });
-
-export type ReceiveGamepadStateAction = {
-  type: typeof RECEIVE_GAMEPAD_STATE;
-  gamepad1: boolean;
-  gamepad2: boolean;
-};
 
 export const receiveGamepadState = (
   gamepad1: boolean,

@@ -1,21 +1,10 @@
-import {
-  RECEIVE_ROBOT_STATUS,
-  RECEIVE_OP_MODE_LIST,
-  ReceiveRobotStatusAction,
-  ReceiveOpModeListAction,
-} from '../actions/status';
 import OpModeStatus from '../../enums/OpModeStatus';
-
-import { Values } from '../../typeHelpers';
-
-export type Status = {
-  available: boolean;
-  activeOpMode: string;
-  activeOpModeStatus: Values<typeof OpModeStatus>;
-  opModeList: string[];
-  warningMessage: string;
-  errorMessage: string;
-};
+import {
+  ReceiveOpModeListAction,
+  ReceiveRobotStatusAction,
+  RECEIVE_OP_MODE_LIST,
+  RECEIVE_ROBOT_STATUS,
+} from '../types';
 
 const initialState = {
   available: false,

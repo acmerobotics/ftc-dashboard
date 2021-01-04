@@ -1,56 +1,28 @@
-import { Dispatch } from 'redux';
-import { receiveOpModeList, ReceiveOpModeListAction } from './status';
+import { Values } from '../../typeHelpers';
+import LayoutPreset from '../../enums/LayoutPreset';
+import {
+  GetLayoutPresetAction,
+  ReceiveLayoutPresetAction,
+  SaveLayoutPresetAction,
+  GET_LAYOUT_PRESET,
+  RECEIVE_LAYOUT_PRESET,
+  SAVE_LAYOUT_PRESET,
+} from '../types';
 
-export const CONNECT = 'CONNECT';
-export const DISCONNECT = 'DISCONNECT';
-export const RECEIVE_PING_TIME = 'RECEIVE_PING_TIME';
-export const RECEIVE_CONNECTION_STATUS = 'RECEIVE_CONNECTION_STATUS';
-export const SEND_MESSAGE = 'SEND_MESSAGE';
-
-export type ConnectAction = {
-  type: typeof CONNECT;
-  host: string;
-  port: string;
-};
-
-export const connect = (host: string, port: string): ConnectAction => ({
-  type: CONNECT,
-  host,
-  port,
+export const saveLayoutPreset = (
+  preset: Values<typeof LayoutPreset>,
+): SaveLayoutPresetAction => ({
+  type: SAVE_LAYOUT_PRESET,
+  preset,
 });
 
-export type DisconnectAction = {
-  type: typeof DISCONNECT;
-};
-
-export const disconnect = (): DisconnectAction => ({
-  type: DISCONNECT,
+export const receiveLayoutPreset = (
+  preset: Values<typeof LayoutPreset>,
+): ReceiveLayoutPresetAction => ({
+  type: RECEIVE_LAYOUT_PRESET,
+  preset,
 });
 
-export type ReceivePingTimeAction = {
-  type: typeof RECEIVE_PING_TIME;
-  pingTime: number;
-};
-
-export const receivePingTime = (pingTime: number): ReceivePingTimeAction => ({
-  type: RECEIVE_PING_TIME,
-  pingTime,
+export const getLayoutPreset = (): GetLayoutPresetAction => ({
+  type: GET_LAYOUT_PRESET,
 });
-
-export type ReceiveConnectionStatusAction = {
-  type: typeof RECEIVE_CONNECTION_STATUS;
-  isConnected: boolean;
-};
-
-export const receiveConnectionStatus = (isConnected: boolean) => (
-  dispatch: Dispatch<ReceiveConnectionStatusAction | ReceiveOpModeListAction>,
-) => {
-  dispatch({
-    type: RECEIVE_CONNECTION_STATUS,
-    isConnected,
-  });
-
-  if (!isConnected) {
-    dispatch(receiveOpModeList([]));
-  }
-};

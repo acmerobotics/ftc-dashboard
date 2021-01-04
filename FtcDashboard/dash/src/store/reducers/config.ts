@@ -1,42 +1,19 @@
 import { cloneDeep } from 'lodash';
+import VariableType from '../../enums/VariableType';
 import {
-  RECEIVE_CONFIG,
-  UPDATE_CONFIG,
-  SAVE_CONFIG,
-  REFRESH_CONFIG,
+  Config,
+  ConfigCustom,
+  ConfigState,
+  ConfigVariable,
   ReceiveConfigAction,
-  UpdateConfigAction,
-  SaveConfigAction,
   RefreshConfigAction,
-} from '../actions/config';
-import VariableType, {
-  VariableBasic,
-  VariableCustom,
-} from '../../enums/VariableType';
-
-type Values<T> = T[keyof T];
-type Extends<T, U extends T> = U;
-
-export type Config = ConfigCustom | ConfigVariable;
-
-export type ConfigCustom = {
-  __type: Extends<Values<typeof VariableType>, VariableCustom>;
-  __value: Record<string, Config>;
-};
-
-export type ConfigVariable = {
-  __type: Extends<Values<typeof VariableType>, VariableBasic>;
-  __value: number | boolean | string;
-  __newValue: number | boolean | string;
-  __valid: boolean;
-  __modified: boolean;
-  __enumClass: string;
-  __enumValues: string[];
-};
-
-export type ConfigState = {
-  configRoot: Config;
-};
+  SaveConfigAction,
+  UpdateConfigAction,
+  RECEIVE_CONFIG,
+  REFRESH_CONFIG,
+  SAVE_CONFIG,
+  UPDATE_CONFIG,
+} from '../types';
 
 const receiveConfig = (baseConfig: Config, newConfig: Config) => {
   if (newConfig.__type === VariableType.CUSTOM) {

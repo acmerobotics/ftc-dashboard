@@ -1,14 +1,10 @@
 import {
-  RECEIVE_PING_TIME,
-  RECEIVE_CONNECTION_STATUS,
-  ReceivePingTimeAction,
+  SocketState,
   ReceiveConnectionStatusAction,
-} from '../actions/socket';
-
-type SocketState = {
-  isConnected: boolean;
-  pingTime: number;
-};
+  ReceivePingTimeAction,
+  RECEIVE_CONNECTION_STATUS,
+  RECEIVE_PING_TIME,
+} from '../types';
 
 const initialState: SocketState = {
   isConnected: false,

@@ -1,14 +1,10 @@
 import {
+  GamepadConnectedAction,
+  GamepadConnectionState,
+  GamepadDisonnectedAction,
   GAMEPAD_CONNECTED,
   GAMEPAD_DISCONNECTED,
-  GamepadConnectedAction,
-  GamepadDisonnectedAction,
-} from '../actions/gamepad';
-
-export type GamepadConnectionState = {
-  gamepad1Connected: boolean;
-  gamepad2Connected: boolean;
-};
+} from '../types';
 
 const initialState: GamepadConnectionState = {
   gamepad1Connected: false,

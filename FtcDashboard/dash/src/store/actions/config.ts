@@ -1,54 +1,36 @@
 import VariableType from '../../enums/VariableType';
-
-import { Config, ConfigCustom } from '../reducers/config';
-
-export const RECEIVE_CONFIG = 'RECEIVE_CONFIG';
-export const GET_CONFIG = 'GET_CONFIG';
-export const UPDATE_CONFIG = 'UPDATE_CONFIG';
-export const SAVE_CONFIG = 'SAVE_CONFIG';
-export const REFRESH_CONFIG = 'REFRESH_CONFIG';
-
-export type ReceiveConfigAction = {
-  type: typeof RECEIVE_CONFIG;
-  configRoot: Config;
-};
+import {
+  Config,
+  ConfigCustom,
+  GetConfigAction,
+  ReceiveConfigAction,
+  RefreshConfigAction,
+  SaveConfigAction,
+  UpdateConfigAction,
+  GET_CONFIG,
+  REFRESH_CONFIG,
+  SAVE_CONFIG,
+  UPDATE_CONFIG,
+} from '../types';
 
 export const receiveConfig = (config: Config): ReceiveConfigAction => ({
   type: 'RECEIVE_CONFIG',
   configRoot: config,
 });
 
-export type GetConfigAction = {
-  type: typeof GET_CONFIG;
-};
-
 export const getConfig = (): GetConfigAction => ({
   type: GET_CONFIG,
 });
-
-export type UpdateConfigAction = {
-  type: typeof UPDATE_CONFIG;
-  configDiff: Config;
-};
 
 export const updateConfig = (configDiff: Config): UpdateConfigAction => ({
   type: UPDATE_CONFIG,
   configDiff,
 });
 
-export type SaveConfigAction = {
-  type: typeof SAVE_CONFIG;
-  configDiff: Config;
-};
-
 export const saveConfig = (configDiff: Config): SaveConfigAction => ({
   type: SAVE_CONFIG,
   configDiff,
 });
-
-export type RefreshConfigAction = {
-  type: typeof REFRESH_CONFIG;
-};
 
 export const refreshConfig = (): RefreshConfigAction => ({
   type: REFRESH_CONFIG,

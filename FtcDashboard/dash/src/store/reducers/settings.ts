@@ -1,16 +1,12 @@
 import LayoutPreset from '../../enums/LayoutPreset';
+
 import {
-  RECEIVE_LAYOUT_PRESET,
+  SettingState,
   ReceiveLayoutPresetAction,
-} from '../actions/settings';
+  RECEIVE_LAYOUT_PRESET,
+} from '../types';
 
-import { Values } from '../../typeHelpers';
-
-export type SettingState = {
-  layoutPreset: Values<typeof LayoutPreset>;
-};
-
-const initialState = {
+const initialState: SettingState = {
   layoutPreset: LayoutPreset.DEFAULT,
 };
 
