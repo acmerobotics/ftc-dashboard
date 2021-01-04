@@ -1836,6 +1836,13 @@
     "@types/prop-types" "*"
     csstype "^3.0.2"
 
+"@types/redux-logger@^3.0.8":
+  version "3.0.8"
+  resolved "https://registry.yarnpkg.com/@types/redux-logger/-/redux-logger-3.0.8.tgz#1fb6d26917bb198792bb1cf57feb31cae1532c5d"
+  integrity sha512-zM+cxiSw6nZtRbxpVp9SE3x/X77Z7e7YAfHD1NkxJyJbAGSXJGF0E9aqajZfPOa/sTYnuwutmlCldveExuCeLw==
+  dependencies:
+    redux "^4.0.0"
+
 "@types/resize-observer-browser@^0.1.4":
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/@types/resize-observer-browser/-/resize-observer-browser-0.1.4.tgz#84879a4d6d4aaefde53d4b29c91c0c4cbcffc26f"
@@ -9619,7 +9626,7 @@ redux-thunk@^2.3.0:
   resolved "https://registry.yarnpkg.com/redux-thunk/-/redux-thunk-2.3.0.tgz#51c2c19a185ed5187aaa9a2d08b666d0d6467622"
   integrity sha512-km6dclyFnmcvxhAcrQV2AkZmPQjzPDjgVlQtR0EQjxZPyJ0BnMf3in1ryuR8A2qU0HldVRfxYXbFSKlI3N7Slw==
 
-redux@4.0.5:
+redux@4.0.5, redux@^4.0.0:
   version "4.0.5"
   resolved "https://registry.yarnpkg.com/redux/-/redux-4.0.5.tgz#4db5de5816e17891de8a80c424232d06f051d93f"
   integrity sha512-VSz1uMAH24DM6MF72vcojpYPtrTUu3ByVWfPL1nPfVRb5mZVTve5GnNCUV53QM/BZ66xfWrm0CTWoM+Xlz8V1w==
