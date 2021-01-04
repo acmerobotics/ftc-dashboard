@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import BasicVariable from './BasicVariable';
 import VariableType from '../enums/VariableType';
 
-import { ReactComponent as ExpandedLessIcon } from '../assets/icons/expand_less.svg';
 import { ReactComponent as ExpandedMoreIcon } from '../assets/icons/expand_more.svg';
 
 class CustomVariable extends React.Component {
@@ -87,21 +86,16 @@ class CustomVariable extends React.Component {
             className="option-header py-1 cursor-pointer"
             onClick={this.toggleVisibility}
           >
-            <div className="mr-2 bg-gray-100 flex-center rounded-full border border-gray-200 hover:border-gray-400 hover:bg-gray-200 transition-colors">
-              {this.state.expanded ? (
-                <ExpandedLessIcon
-                  className="w-6 h-6"
-                  style={{ padding: '0.1rem' }}
-                />
-              ) : (
-                <ExpandedMoreIcon
-                  className="w-6 h-6"
-                  style={{ padding: '0.1rem' }}
-                />
-              )}
+            <div
+              className={`w-7 h-7 mr-2 bg-gray-100 flex-center rounded-full border border-gray-200 hover:border-gray-400 hover:bg-gray-200
+                          transition transform ${
+                            this.state.expanded ? `` : '-rotate-90'
+                          }`}
+            >
+              <ExpandedMoreIcon className="w-6 h-6" />
             </div>
             <div className="flex justify-between items-center">
-              <h3 className="text-lg">{name}</h3>
+              <h3 className="text-lg select-none">{name}</h3>
             </div>
           </div>
           {this.state.expanded ? (
