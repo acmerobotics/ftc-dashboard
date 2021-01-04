@@ -1,4 +1,4 @@
-import { ReceiveImageAction } from './../actions/camera';
+import { ReceiveImageAction } from '../actions/camera';
 import { RECEIVE_IMAGE } from '../actions/camera';
 
 export type CameraState = {

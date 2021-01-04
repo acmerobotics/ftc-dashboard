@@ -3,7 +3,7 @@ import {
   SAVE_LAYOUT_PRESET,
   receiveLayoutPreset,
 } from '../actions/settings';
-import LayoutPreset from '../enums/LayoutPreset';
+import LayoutPreset from '../../enums/LayoutPreset';
 
 const LAYOUT_PRESET_KEY = 'layoutPreset';
 

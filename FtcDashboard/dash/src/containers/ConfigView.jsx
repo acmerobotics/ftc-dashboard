@@ -17,7 +17,7 @@ import {
   saveConfig,
   refreshConfig,
   getModifiedDiff,
-} from '../actions/config';
+} from '../store/actions/config';
 import VariableType from '../enums/VariableType';
 
 const ConfigView = ({

@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 
 import styled from 'styled-components';
 
-import { initOpMode, startOpMode, stopOpMode } from '../actions/opmode';
+import { initOpMode, startOpMode, stopOpMode } from '../store/actions/opmode';
 import OpModeStatus from '../enums/OpModeStatus';
 import BaseView, {
   BaseViewHeading,

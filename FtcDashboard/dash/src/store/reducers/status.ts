@@ -1,6 +1,6 @@
 import { RECEIVE_TELEMETRY } from '../actions/telemetry';
 
-import { Telemetry } from '../containers/types';
+import { Telemetry } from '../../containers/types';
 
 const initialState: Telemetry = [
   {

@@ -3,8 +3,8 @@ import { connect as reduxConnect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 import LayoutPreset from '../enums/LayoutPreset';
-import { connect, disconnect } from '../actions/socket';
-import { saveLayoutPreset, getLayoutPreset } from '../actions/settings';
+import { connect, disconnect } from '../store/actions/socket';
+import { saveLayoutPreset, getLayoutPreset } from '../store/actions/settings';
 
 import { ReactComponent as ConnectedIcon } from '../assets/icons/wifi.svg';
 import { ReactComponent as DisconnectedIcon } from '../assets/icons/wifi_off.svg';

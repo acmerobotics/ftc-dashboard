@@ -1,4 +1,4 @@
-import VariableType from '../enums/VariableType';
+import VariableType from '../../enums/VariableType';
 
 import { Config, ConfigCustom } from '../reducers/config';
 

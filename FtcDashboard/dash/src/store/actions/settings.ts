@@ -2,8 +2,8 @@ export const SAVE_LAYOUT_PRESET = 'SAVE_LAYOUT_PRESET';
 export const RECEIVE_LAYOUT_PRESET = 'RECEIVE_LAYOUT_PRESET';
 export const GET_LAYOUT_PRESET = 'GET_LAYOUT_PRESET';
 
-import { Values } from '../typeHelpers';
-import LayoutPreset from '../enums/LayoutPreset';
+import { Values } from '../../typeHelpers';
+import LayoutPreset from '../../enums/LayoutPreset';
 
 type SaveLayoutPresetAction = {
   type: typeof SAVE_LAYOUT_PRESET;

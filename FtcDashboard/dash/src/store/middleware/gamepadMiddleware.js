@@ -8,7 +8,7 @@ import {
   gamepadDisconnected,
   sendGamepadState,
 } from '../actions/gamepad';
-import GamepadType from '../enums/GamepadType';
+import GamepadType from '../../enums/GamepadType';
 
 const scale = (value, oldMin, oldMax, newMin, newMax) =>
   newMin + ((value - oldMin) * (newMax - newMin)) / (oldMax - oldMin);

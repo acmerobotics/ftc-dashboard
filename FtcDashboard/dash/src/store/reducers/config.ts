@@ -12,7 +12,7 @@ import {
 import VariableType, {
   VariableBasic,
   VariableCustom,
-} from '../enums/VariableType';
+} from '../../enums/VariableType';
 
 type Values<T> = T[keyof T];
 type Extends<T, U extends T> = U;

@@ -1,4 +1,4 @@
-import { Telemetry } from '../containers/types';
+import { Telemetry } from '../../containers/types';
 
 export const RECEIVE_TELEMETRY = 'RECEIVE_TELEMETRY';
 

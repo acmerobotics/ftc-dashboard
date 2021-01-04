@@ -1,7 +1,7 @@
-import LayoutPreset from '../enums/LayoutPreset';
+import LayoutPreset from '../../enums/LayoutPreset';
 import { RECEIVE_LAYOUT_PRESET } from '../actions/settings';
 
-import { Values } from '../typeHelpers';
+import { Values } from '../../typeHelpers';
 
 export type SettingState = {
   layoutPreset: Values<typeof LayoutPreset>;
