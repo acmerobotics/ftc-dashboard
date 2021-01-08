@@ -5,7 +5,6 @@ import { GET_LAYOUT_PRESET } from '../types';
 import { receiveLayoutPreset } from '../actions/settings';
 import { RootState } from '../reducers';
 
-// TODO move this elsewhere
 const LAYOUT_PRESET_KEY = 'layoutPreset';
 
 const storageMiddleware: Middleware<Record<string, unknown>, RootState> = (

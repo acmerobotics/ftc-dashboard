@@ -1,6 +1,5 @@
 import { Component, ChangeEvent } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-import PropTypes from 'prop-types';
 
 import styled from 'styled-components';
 
@@ -22,18 +21,11 @@ type OpModeViewState = {
   selectedOpMode: string;
 };
 
-// TODO move this elsewhere
 const STOP_OP_MODE = '$Stop$Robot$';
 
-const mapStateToProps = (state: RootState) => ({
-  available: state.status.available,
-  activeOpMode: state.status.activeOpMode,
-  activeOpModeStatus: state.status.activeOpModeStatus,
-  opModeList: state.status.opModeList,
-  warningMessage: state.status.warningMessage,
-  errorMessage: state.status.errorMessage,
-  gamepad1Connected: state.gamepad.gamepad1Connected,
-  gamepad2Connected: state.gamepad.gamepad2Connected,
+const mapStateToProps = ({ status, gamepad }: RootState) => ({
+  ...status,
+  ...gamepad,
 });
 
 const mapDispatchToProps = {
@@ -62,11 +54,6 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
 
     this.onChange = this.onChange.bind(this);
   }
-
-  static propTypes = {
-    isDraggable: PropTypes.bool,
-    isUnlocked: PropTypes.bool,
-  };
 
   static getDerivedStateFromProps(
     props: OpModeViewProps,
