@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { Values } from '../typeHelpers';
+
 import TileGrid from '../components/TileGrid';
 import Tile from '../components/Tile';
 import ConfigurableLayout from '../components/ConfigurableLayout';
@@ -11,20 +13,20 @@ import ConfigView from '../containers/ConfigView';
 import TelemetryView from '../containers/TelemetryView';
 import FieldView from '../containers/FieldView';
 
-enum LayoutPreset {
-  DEFAULT = 'DEFAULT',
-  FIELD = 'FIELD',
-  GRAPH = 'GRAPH',
-  ORIGINAL = 'ORIGINAL',
-  CONFIGURABLE = 'CONFIGURABLE',
-}
+const LayoutPreset = {
+  DEFAULT: 'DEFAULT',
+  FIELD: 'FIELD',
+  GRAPH: 'GRAPH',
+  ORIGINAL: 'ORIGINAL',
+  CONFIGURABLE: 'CONFIGURABLE',
+} as const;
 
-interface Layout {
+type Layout = {
   name: string;
   content: JSX.Element;
-}
+};
 
-const LAYOUT_DETAILS: { [key in LayoutPreset]: Layout } = {
+const LAYOUT_DETAILS: { [key in Values<typeof LayoutPreset>]: Layout } = {
   [LayoutPreset.DEFAULT]: {
     name: 'Default',
     content: (
@@ -107,9 +109,11 @@ const LAYOUT_DETAILS: { [key in LayoutPreset]: Layout } = {
 export default Object.freeze({
   ...LayoutPreset,
 
-  getName: (preset: LayoutPreset) => LAYOUT_DETAILS[preset].name,
+  getName: (preset: Values<typeof LayoutPreset>) => LAYOUT_DETAILS[preset].name,
 
-  getContent: (preset: LayoutPreset) =>
+  getContent: (preset: Values<typeof LayoutPreset>) =>
     LAYOUT_DETAILS[preset]?.content ??
     LAYOUT_DETAILS[LayoutPreset.DEFAULT].content,
 });
+
+export type LayoutPresetType = Values<typeof LayoutPreset>;

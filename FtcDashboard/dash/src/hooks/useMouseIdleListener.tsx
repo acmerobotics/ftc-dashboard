@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 
-interface Props {
+type Props = {
   top?: string;
   bottom?: string;
   left?: string;
@@ -10,7 +10,7 @@ interface Props {
   height: string;
 
   timeout?: number;
-}
+};
 
 export default function useMouseIdleListener(props: Props) {
   const [isIdle, setIsIdle] = useState(false);

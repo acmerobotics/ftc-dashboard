@@ -3,8 +3,8 @@ import { connect as reduxConnect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 import LayoutPreset from '../enums/LayoutPreset';
-import { connect, disconnect } from '../actions/socket';
-import { saveLayoutPreset, getLayoutPreset } from '../actions/settings';
+import { connect, disconnect } from '../store/actions/socket';
+import { saveLayoutPreset, getLayoutPreset } from '../store/actions/settings';
 
 import { ReactComponent as ConnectedIcon } from '../assets/icons/wifi.svg';
 import { ReactComponent as DisconnectedIcon } from '../assets/icons/wifi_off.svg';
@@ -48,7 +48,7 @@ class Dashboard extends Component {
                   </option>
                 ))}
             </select>
-            {this.props.isConnected ? (
+            {this.props.isConnected && (
               <p
                 className="mx-2"
                 style={{
@@ -58,7 +58,7 @@ class Dashboard extends Component {
               >
                 {this.props.pingTime}ms
               </p>
-            ) : null}
+            )}
             {this.props.isConnected ? (
               <ConnectedIcon className="ml-4 w-10 h-10" />
             ) : (

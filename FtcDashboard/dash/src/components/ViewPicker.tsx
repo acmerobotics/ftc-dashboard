@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { ConfigurableView } from '../enums/ConfigurableView';
@@ -90,9 +90,7 @@ const listContent = [
   },
 ];
 
-const ViewPicker: FunctionComponent<ViewPickerProps> = (
-  props: ViewPickerProps,
-) => {
+const ViewPicker = (props: ViewPickerProps) => {
   return (
     <Container {...props}>
       {listContent.map((item, index) => (
