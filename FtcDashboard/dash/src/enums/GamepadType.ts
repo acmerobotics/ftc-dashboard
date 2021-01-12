@@ -1,8 +1,3 @@
-/*
-The gamepad mappings have been tested with the following devices:
-  - 46d-c216-Logitech Dual Action
-  - 46d-c21d-Xbox 360 Wired Controller
-*/
 /**
  * Notes on the PS4 gamepad:
  *
@@ -24,7 +19,15 @@ const GamepadType = {
   UNKNOWN: 'UNKNOWN',
 } as const;
 
-export default Object.freeze({
+const SONY_VID = '054c';
+const DUALSHOCK_GEN_1_PID = '09cc';
+const DUALSHOCK_GEN_2_PID = '05c4';
+
+// https://github.com/OpenFTC/Extracted-RC/blob/6720cf8b4296c90b6ea4638752c2df4a52b043b9/Hardware/src/main/java/com/qualcomm/hardware/sony/SonyGamepadPS4.java#L145
+const ETPACK_VID = '7545';
+const ETPACK_PID = '104';
+
+export default {
   ...GamepadType,
 
   getFromGamepad: (gamepad: Gamepad) => {
@@ -33,13 +36,16 @@ export default Object.freeze({
     } else if (gamepad.id.search('Xbox 360') !== -1) {
       return GamepadType.XBOX_360;
     } else if (
-      // Dualshock Gen 1 & 2
-      (gamepad.id.search('054c') !== -1 &&
-        (gamepad.id.search('09cc') !== -1 ||
-          gamepad.id.search('05c4') !== -1)) ||
-      // Etpack Wired Controller
-      // https://github.com/OpenFTC/OpenRC-Turbo/blob/b75e0f8da4925c077c6c6e5d9d119676ebba2c56/Hardware/src/main/java/com/qualcomm/hardware/sony/SonyGamepadPS4.java#L145
-      (gamepad.id.search('7545') !== -1 && gamepad.id.search('104') !== -1)
+      gamepad.id.search(SONY_VID) !== -1 &&
+      gamepad.id.search(
+        new RegExp(`${DUALSHOCK_GEN_1_PID}|${DUALSHOCK_GEN_2_PID}`, 'i'),
+      ) !== -1
+    ) {
+      return GamepadType.SONY_DUALSHOCK_4;
+    } else if (
+      gamepad.id.search(
+        new RegExp(`(?=.*${ETPACK_VID})(?=.*${ETPACK_PID})`, 'i'),
+      )
     ) {
       return GamepadType.SONY_DUALSHOCK_4;
     } else {
@@ -62,4 +68,4 @@ export default Object.freeze({
 
   isSupported: (gamepadType: Values<typeof GamepadType>) =>
     gamepadType !== GamepadType.UNKNOWN,
-});
+} as const;
