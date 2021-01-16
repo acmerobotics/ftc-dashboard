@@ -1,4 +1,3 @@
-import { SaveLayoutPresetAction } from './../types/settings';
 import LayoutPreset from '../../enums/LayoutPreset';
 
 import {
@@ -13,7 +12,7 @@ const initialState: SettingState = {
 
 const settingsReducer = (
   state: SettingState = initialState,
-  action: ReceiveLayoutPresetAction | SaveLayoutPresetAction,
+  action: ReceiveLayoutPresetAction,
 ) => {
   switch (action.type) {
     case RECEIVE_LAYOUT_PRESET:
