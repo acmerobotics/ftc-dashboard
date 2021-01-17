@@ -30,12 +30,16 @@ import com.acmerobotics.dashboard.message.redux.ReceiveOpModeList;
 import com.acmerobotics.dashboard.message.redux.ReceiveRobotStatus;
 import com.acmerobotics.dashboard.message.redux.ReceiveTelemetry;
 import com.acmerobotics.dashboard.message.redux.SaveConfig;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.qualcomm.ftccommon.FtcEventLoop;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpModeManager;
+import com.qualcomm.robotcore.eventloop.opmode.OpModeRegistrar;
 import com.qualcomm.robotcore.exception.RobotCoreException;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ThreadPool;
@@ -47,10 +51,14 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.function.Consumer;
 import org.firstinspires.ftc.robotcore.external.function.Continuation;
 import org.firstinspires.ftc.robotcore.external.stream.CameraStreamSource;
+import org.firstinspires.ftc.robotcore.internal.opmode.AnnotatedOpModeClassFilter;
+import org.firstinspires.ftc.robotcore.internal.opmode.InstanceOpModeManager;
+import org.firstinspires.ftc.robotcore.internal.opmode.InstanceOpModeRegistrar;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeManagerImpl;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeMeta;
 import org.firstinspires.ftc.robotcore.internal.opmode.RegisteredOpModes;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
+import org.firstinspires.ftc.robotcore.internal.system.Misc;
 import org.firstinspires.ftc.robotcore.internal.webserver.WebHandler;
 import org.firstinspires.ftc.robotserver.internal.webserver.MimeTypesUtil;
 
@@ -101,12 +109,23 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     private static FtcDashboard instance;
 
+    @OpModeRegistrar
+    public static void registerOpMode(OpModeManager manager) {
+        if (instance != null && !instance.withoutOpMode) {
+            instance.internalRegisterOpMode(manager);
+        }
+    }
+
     /**
-     * Starts the instance and a WebSocket server that listens for external connections.
+     * Starts the dashboard.
      */
     public static void start() {
+        start(false);
+    }
+
+    public static void start(boolean withoutOpMode) {
         if (instance == null) {
-            instance = new FtcDashboard();
+            instance = new FtcDashboard(withoutOpMode);
         }
     }
 
@@ -200,6 +219,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private LinearLayout parentLayout;
 
     private Gson gson;
+
+    private boolean withoutOpMode;
 
     private class TelemetryUpdateRunnable implements Runnable {
         @Override
@@ -332,7 +353,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         }
     }
 
-    private FtcDashboard() {
+    private FtcDashboard(boolean withoutOpMode) {
         telemetry = new TelemetryPacket.Adapter(this);
 
         gson = new GsonBuilder()
@@ -355,6 +376,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         }
 
         injectStatusView();
+
+        this.withoutOpMode = withoutOpMode;
     }
 
     private boolean getAutoEnable() {
@@ -369,6 +392,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     private void enable() {
         if (enabled) return;
+
+        setAutoEnable(true);
 
         server = new DashboardWebSocketServer(this);
         try {
@@ -390,6 +415,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     private void disable() {
         if (!enabled) return;
+
+        setAutoEnable(false);
 
         telemetryExecutorService.shutdownNow();
         gamepadWatchdogExecutor.shutdownNow();
@@ -567,7 +594,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     private void internalPopulateMenu(Menu menu) {
-        final MenuItem enable = menu.add(Menu.NONE, Menu.NONE, 700, "Enable Dashboard");
+        MenuItem enable = menu.add(Menu.NONE, Menu.NONE, 700, "Enable Dashboard");
         MenuItem disable = menu.add(Menu.NONE, Menu.NONE, 700, "Disable Dashboard");
 
         enable.setVisible(!enabled);
@@ -585,8 +612,6 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 enable();
-
-                setAutoEnable(true);
 
                 synchronized (enableMenuItems) {
                     for (MenuItem menuItem : enableMenuItems) {
@@ -609,8 +634,6 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             public boolean onMenuItemClick(MenuItem item) {
                 disable();
 
-                setAutoEnable(false);
-
                 synchronized (enableMenuItems) {
                     for (MenuItem menuItem : enableMenuItems) {
                         menuItem.setVisible(true);
@@ -626,6 +649,33 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 return true;
             }
         });
+    }
+
+    private void internalRegisterOpMode(OpModeManager manager) {
+        manager.register(
+                new OpModeMeta("Dashboard Enable/Disable", OpModeMeta.Flavor.TELEOP, "dash"),
+                new LinearOpMode() {
+                    @Override
+                    public void runOpMode() throws InterruptedException {
+                        telemetry.log().add(Misc.formatInvariant("Dashboard is currently %s. Press Start to %s it.",
+                                enabled ? "enabled" : "disabled", enabled ? "disable" : "enable"));
+                        telemetry.update();
+
+                        waitForStart();
+
+                        if (enabled) {
+                            disable();
+                        } else {
+                            enable();
+                        }
+
+                        telemetry.log().clear();
+                        telemetry.log().add("Done");
+                        telemetry.update();
+
+                        while (opModeIsActive()) sleep(500L);
+                    }
+                });
     }
 
     <T> T fromJson(String json, Class<T> classOfT) throws JsonSyntaxException {

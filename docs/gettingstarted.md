@@ -31,11 +31,11 @@ layout: default
 
 1. Navigate to the main activity (`org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity`) inside of the `FtcRobotController` module.
 
-1. Insert `FtcDashboard.start();` at the end of `onCreate()`.
+1. Insert `FtcDashboard.start();` at the end of `onCreate()` (pass `true` to suppress enable/disable op mode registration).
 
 1. Insert `FtcDashboard.stop();` at the end of `onDestroy()`.
 
-1. Insert `FtcDashboard.populateMenu(popupMenu.getMenu());` [here](https://github.com/acmerobotics/ftc-dashboard/blob/e6c8f5799f167023cce47fdf6b0003355ad721c8/FtcRobotController/src/main/java/org/firstinspires/ftc/robotcontroller/internal/FtcRobotControllerActivity.java#L285) and `FtcDashboard.populateMenu(menu);` [here](https://github.com/acmerobotics/ftc-dashboard/blob/e6c8f5799f167023cce47fdf6b0003355ad721c8/FtcRobotController/src/main/java/org/firstinspires/ftc/robotcontroller/internal/FtcRobotControllerActivity.java#L496) (this is recommended for disabling the dashboard during competition).
+1. Insert `FtcDashboard.populateMenu(popupMenu.getMenu());` [here](https://github.com/acmerobotics/ftc-dashboard/blob/e6c8f5799f167023cce47fdf6b0003355ad721c8/FtcRobotController/src/main/java/org/firstinspires/ftc/robotcontroller/internal/FtcRobotControllerActivity.java#L285) and `FtcDashboard.populateMenu(menu);` [here](https://github.com/acmerobotics/ftc-dashboard/blob/e6c8f5799f167023cce47fdf6b0003355ad721c8/FtcRobotController/src/main/java/org/firstinspires/ftc/robotcontroller/internal/FtcRobotControllerActivity.java#L496) (this is recommended for disabling the dashboard during competition through the RC UI).
 
 1. To serve the static pages from the built-in web server, insert `FtcDashboard.attachWebServer(service.getWebServer());` at the end of `onServiceBind()`.
 
