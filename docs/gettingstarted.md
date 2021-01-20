@@ -18,11 +18,11 @@ layout: default
     }
     ```
 
-1. Open `build.release.gradle` in `FtcRobotController`. In the `dependencies` section add `implementation 'com.acmerobotics.dashboard:dashboard:0.3.10'`.
+1. Open `build.release.gradle` in `FtcRobotController`. In the `dependencies` section add `implementation 'com.acmerobotics.dashboard:dashboard:0.4.0'`.
 
     Note: If you're using OpenRC or use non-Bintray SDK dependencies, add the following exclusion.
     ```groovy
-    implementation('com.acmerobotics.dashboard:dashboard:0.3.10') {
+    implementation('com.acmerobotics.dashboard:dashboard:0.4.0') {
         exclude group: 'org.firstinspires.ftc'
     }
     ```
