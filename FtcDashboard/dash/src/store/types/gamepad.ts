@@ -7,23 +7,31 @@ export type GamepadState = {
   left_stick_y: number;
   right_stick_x: number;
   right_stick_y: number;
+
   dpad_up: boolean;
   dpad_down: boolean;
   dpad_left: boolean;
   dpad_right: boolean;
+
   a: boolean;
   b: boolean;
   x: boolean;
   y: boolean;
+
   guide: boolean;
   start: boolean;
   back: boolean;
+
   left_bumper: boolean;
   right_bumper: boolean;
+
   left_stick_button: boolean;
   right_stick_button: boolean;
+
   left_trigger: number;
   right_trigger: number;
+
+  touchpad?: boolean;
 };
 
 export type GamepadConnectionState = {
