@@ -28,6 +28,7 @@ import LockIconURL from '../assets/icons/lock.svg';
 import { ReactComponent as RemoveCircleIcon } from '../assets/icons/remove_circle.svg';
 import { ReactComponent as RemoveCircleOutlineIcon } from '../assets/icons/remove_circle_outline.svg';
 import CreateIconURL from '../assets/icons/create.svg';
+import LoggingView from '../containers/LoggingView';
 
 function maxArray(a: number[], b: number[]) {
   if (a.length !== b.length) {
@@ -54,6 +55,7 @@ const VIEW_MAP: { [key in ConfigurableView]: ReactElement } = {
   [ConfigurableView.TELEMETRY_VIEW]: <TelemetryView />,
   [ConfigurableView.CAMERA_VIEW]: <CameraView />,
   [ConfigurableView.OPMODE_VIEW]: <OpModeView />,
+  [ConfigurableView.LOGGING_VIEW]: <LoggingView />,
 };
 
 const LOCAL_STORAGE_LAYOUT_KEY = 'configurableLayoutStorage';

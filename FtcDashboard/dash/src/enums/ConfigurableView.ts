@@ -5,4 +5,5 @@ export enum ConfigurableView {
   TELEMETRY_VIEW,
   CAMERA_VIEW,
   OPMODE_VIEW,
+  LOGGING_VIEW,
 }

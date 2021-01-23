@@ -9,6 +9,7 @@ import { ReactComponent as ChartIcon } from '../assets/icons/chart.svg';
 import { ReactComponent as ApiIcon } from '../assets/icons/api.svg';
 import { ReactComponent as SubjectIcon } from '../assets/icons/subject.svg';
 import { ReactComponent as WidgetIcon } from '../assets/icons/widgets.svg';
+import { ReactComponent as ListIcon } from '../assets/icons/list.svg';
 
 type ViewPickerProps = {
   isOpen: boolean;
@@ -77,9 +78,16 @@ const listContent = [
   {
     title: 'Telemetry View',
     view: ConfigurableView.TELEMETRY_VIEW,
-    icon: <SubjectIcon className="w-6 h-6" />,
+    icon: <ListIcon className="w-7 h-7" />,
     customStyles: 'focus:ring-yellow-600',
     iconBg: 'bg-yellow-500',
+  },
+  {
+    title: 'Logging View',
+    view: ConfigurableView.LOGGING_VIEW,
+    icon: <SubjectIcon className="w-6 h-6" />,
+    customStyles: 'focus:ring-ping-600',
+    iconBg: 'bg-pink-500',
   },
   {
     title: 'Camera View',
