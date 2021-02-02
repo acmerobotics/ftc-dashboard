@@ -45,7 +45,7 @@ export default {
     } else if (
       gamepad.id.search(
         new RegExp(`(?=.*${ETPACK_VID})(?=.*${ETPACK_PID})`, 'i'),
-      )
+      ) !== -1 
     ) {
       return GamepadType.SONY_DUALSHOCK_4;
     } else {
