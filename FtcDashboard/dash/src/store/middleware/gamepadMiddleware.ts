@@ -113,7 +113,9 @@ const extractGamepadState = (gamepad: Gamepad) => {
     case GamepadType.XBOX_360:
       return {
         // same as SONY_DUALSHOCK_4 except guide and touchpad buttons
-        // tested with generic controller (VID=24C6, PID=530A) on Win10/Chrome v88 and Edge v87
+        // tested with generic controller id='Xbox 360 Controller (XInput STANDARD GAMEPAD)' and mapping='standard'
+        // on Win10/Chrome v88 and Edge v87
+        // USB ID=24C6, PID=530A        
         left_stick_x: cleanMotionValues(gamepad.axes[0]),
         left_stick_y: cleanMotionValues(gamepad.axes[1]),
         right_stick_x: cleanMotionValues(gamepad.axes[3]),
