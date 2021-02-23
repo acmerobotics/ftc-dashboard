@@ -13,7 +13,7 @@ layout: default
     ```groovy
     allprojects {
         repositories {
-            jcenter()
+            maven { url = "https://maven.brott.dev/" }
         }
     }
     ```
@@ -51,7 +51,7 @@ layout: default
 
 1. After making changes, publish them locally with `./gradlew publishToMavenLocal` (this has to be done on each computer).
 
-1. Complete the basic instructions, adjusting the version and adding `mavenLocal()` to `repositories` in addition to `jcenter()`.
+1. Complete the basic instructions, adjusting the version and adding `mavenLocal()` to `repositories`.
 
 1. Build and deploy like normal.
 
