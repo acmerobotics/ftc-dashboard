@@ -1,13 +1,5 @@
 buildscript {
     ext.dashboard_version = '0.4.0'
-
-    repositories {
-        jcenter()
-    }
-
-    dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
-    }
 }
 
 plugins {
@@ -15,7 +7,6 @@ plugins {
 }
 apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
-apply plugin: 'com.jfrog.bintray'
 apply plugin: 'checkstyle'
 
 android {
@@ -95,14 +86,14 @@ repositories {
     flatDir {
         dirs '../libs'
     }
-    maven { url = "https://dl.bintray.com/first-tech-challenge/ftcsdk/" }
+    mavenCentral()
 }
 
 dependencies {
-    api 'org.firstinspires.ftc:RobotCore:5.5'
-    api 'org.firstinspires.ftc:Hardware:5.5'
-    api 'org.firstinspires.ftc:RobotServer:5.5'
-    api 'org.firstinspires.ftc:FtcCommon:5.5'
+    api 'org.firstinspires.ftc:RobotCore:6.2.1'
+    api 'org.firstinspires.ftc:Hardware:6.2.1'
+    api 'org.firstinspires.ftc:RobotServer:6.2.1'
+    api 'org.firstinspires.ftc:FtcCommon:6.2.1'
 
     implementation 'androidx.annotation:annotation:1.1.0'
 
@@ -191,23 +182,5 @@ project.afterEvaluate {
                 }
             }
         }
-    }
-}
-
-bintray {
-    user = System.getenv('BINTRAY_USER')
-    key = System.getenv('BINTRAY_KEY')
-    publish = true
-    pkg {
-        repo = 'maven'
-        name = 'ftc-dashboard'
-        userOrg = 'acmerobotics'
-        licenses = ['MIT']
-        vcsUrl = 'https://github.com/acmerobotics/ftc-dashboard.git'
-        version {
-            name = dashboard_version
-            released  = new Date()
-        }
-        publications = ['maven']
     }
 }
