@@ -8,26 +8,14 @@ layout: default
 
 ### Basic
 
-1. Open `build.gradle` in the root of your project. Add the following lines to the end:
+1. Open `build.dependencies.gradle`. In the `repositories` section add `maven { url = "https://maven.brott.dev/" }`, and in the `dependencies` section add `implementation 'com.acmerobotics.dashboard:dashboard:0.4.0'`.
 
-    ```groovy
-    allprojects {
-        repositories {
-            maven { url = "https://maven.brott.dev/" }
-        }
-    }
-    ```
-
-1. Open `build.release.gradle` in `FtcRobotController`. In the `dependencies` section add `implementation 'com.acmerobotics.dashboard:dashboard:0.4.0'`.
-
-    Note: If you're using OpenRC or use non-Bintray SDK dependencies, add the following exclusion.
+    Note: If you're using OpenRC or have non-standard SDK dependencies, add the following exclusion.
     ```groovy
     implementation('com.acmerobotics.dashboard:dashboard:0.4.0') {
         exclude group: 'org.firstinspires.ftc'
     }
     ```
-
-1. Repeat the previous step for `TeamCode` (and other modules you'd like to use the dashboard in).
 
 1. Navigate to the main activity (`org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity`) inside of the `FtcRobotController` module.
 
@@ -47,7 +35,7 @@ layout: default
 
 1. Clone this repo locally.
 
-1. Append `-SNAPSHOT` to the end of `ext.dashboard_version` in `FtcDashboard/build.gradle` (this differentiates your local build from the releases on Bintray).
+1. Append `-SNAPSHOT` to the end of `ext.dashboard_version` in `FtcDashboard/build.gradle`.
 
 1. After making changes, publish them locally with `./gradlew publishToMavenLocal` (this has to be done on each computer).
 
