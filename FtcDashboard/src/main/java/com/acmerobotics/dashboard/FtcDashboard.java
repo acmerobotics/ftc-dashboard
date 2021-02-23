@@ -653,7 +653,11 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     private void internalRegisterOpMode(OpModeManager manager) {
         manager.register(
-                new OpModeMeta("Dashboard Enable/Disable", OpModeMeta.Flavor.TELEOP, "dash"),
+                new OpModeMeta.Builder()
+                    .setName("Dashboard Enabled/Disable")
+                    .setFlavor(OpModeMeta.Flavor.TELEOP)
+                    .setGroup("dash")
+                    .build(),
                 new LinearOpMode() {
                     @Override
                     public void runOpMode() throws InterruptedException {

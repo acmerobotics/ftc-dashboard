@@ -21,8 +21,4 @@ android {
     }
 }
 
-dependencies {
-    implementation project(':FtcDashboard')
-}
-
 apply from: '../build.dependencies.gradle'
