@@ -654,7 +654,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private void internalRegisterOpMode(OpModeManager manager) {
         manager.register(
                 new OpModeMeta.Builder()
-                    .setName("Dashboard Enabled/Disable")
+                    .setName("Dashboard Enable/Disable")
                     .setFlavor(OpModeMeta.Flavor.TELEOP)
                     .setGroup("dash")
                     .build(),
