@@ -47,7 +47,9 @@ const ConfigView = ({
           Configuration
         </BaseViewHeading>
         <BaseViewIcons>
-          <BaseViewIconButton onClick={() => getModifiedDiff(configRoot)}>
+          <BaseViewIconButton
+            onClick={() => onSave(getModifiedDiff(configRoot))}
+          >
             <SaveIcon className="w-6 h-6" />
           </BaseViewIconButton>
           <BaseViewIconButton onClick={onRefresh}>

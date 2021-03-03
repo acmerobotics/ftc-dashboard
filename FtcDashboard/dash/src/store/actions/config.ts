@@ -1,3 +1,4 @@
+import { isEmpty } from 'lodash';
 import VariableType from '../../enums/VariableType';
 import {
   Config,
@@ -37,7 +38,7 @@ export const refreshConfig = (): RefreshConfigAction => ({
   type: REFRESH_CONFIG,
 });
 
-export const getModifiedDiff = (baseConfig: Config, root = true): Config => {
+const getModifiedDiffHelper = (baseConfig: Config): Config | undefined => {
   if (baseConfig.__type === VariableType.CUSTOM) {
     const modifiedConfig: ConfigCustom = {
       __type: VariableType.CUSTOM,
@@ -45,13 +46,13 @@ export const getModifiedDiff = (baseConfig: Config, root = true): Config => {
     };
 
     for (const key of Object.keys(baseConfig.__value)) {
-      const subConfig = getModifiedDiff(baseConfig.__value[key], false);
+      const subConfig = getModifiedDiffHelper(baseConfig.__value[key]);
 
       if (subConfig) {
         modifiedConfig.__value[key] = subConfig as Config;
       }
     }
-    if (Object.entries(modifiedConfig.__value).length > 0 || root) {
+    if (!isEmpty(modifiedConfig.__value)) {
       return modifiedConfig;
     }
   } else if (baseConfig.__modified && baseConfig.__valid) {
@@ -62,6 +63,10 @@ export const getModifiedDiff = (baseConfig: Config, root = true): Config => {
       __enumClass: baseConfig.__enumClass,
     } as ConfigVariable;
   }
-
-  return {} as Config;
 };
+
+export const getModifiedDiff = (baseConfig: Config): Config =>
+  getModifiedDiffHelper(baseConfig) ?? {
+    __type: VariableType.CUSTOM,
+    __value: {},
+  };
