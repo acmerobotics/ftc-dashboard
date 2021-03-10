@@ -25,7 +25,9 @@ class GraphCanvas extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    this.props.data.forEach((sample) => this.graph.addSample(sample));
+    this.props.data
+      .filter((e) => e.length > 1)
+      .forEach((sample) => this.graph.addSample(sample));
 
     if (prevProps.paused !== this.props.paused) {
       if (this.requestId) cancelAnimationFrame(this.requestId);
