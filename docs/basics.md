@@ -10,8 +10,6 @@ There are two ways to send telemetry to the dashboard: through the familiar `Tel
 
 In general, one **should not use both in the same op mode** as the contents of each new packet overwrite the last. 
 
-  <!-- **Note** that both methods use the same underlying transmission mechanism and **are therefore mutually exclusive**. There is also no **rate limiting** so be careful with sending telemetry too frequently (20ms and slower is probably fine). -->
-
 ### SDK Telemetry
 
 The method `FtcDashboard#getTelemetry()` returns a `Telemetry` implementation that can be used as follows.
