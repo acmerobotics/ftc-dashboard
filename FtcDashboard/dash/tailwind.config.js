@@ -115,6 +115,9 @@ module.exports = {
           ...buildShadowPalette(theme),
         };
       },
+      cursor: {
+        'col-resize': 'col-resize',
+      },
     },
   },
   variants: {
