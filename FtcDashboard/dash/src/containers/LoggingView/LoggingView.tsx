@@ -1,4 +1,4 @@
-import { useState, useEffect, useReducer } from 'react';
+import { useState, useEffect, useReducer, useRef } from 'react';
 import { useSelector } from 'react-redux';
 
 import { RootState } from '../../store/reducers';
@@ -13,6 +13,11 @@ import BaseView, {
 } from '../BaseView';
 import CustomVirtualGrid from './CustomVirtualGrid';
 import { DateToHHMMSS } from './DateFormatting';
+import useDelayedTooltip from '../../hooks/useDelayedTooltip';
+import ToolTip from '../../components/ToolTip';
+
+import { ReactComponent as DownloadSVG } from '../../assets/icons/file_download.svg';
+import { ReactComponent as DownloadOffSVG } from '../../assets/icons/file_download_off.svg';
 
 type LoggingViewProps = BaseViewProps & BaseViewHeadingProps;
 
@@ -94,12 +99,10 @@ const LoggingView = ({
   const [isRecording, setIsRecording] = useState(false);
   const [currentOpModeName, setCurrentOpModeName] = useState('');
 
-  const clearPastTelemetry = () => {
-    dispatchTelemetryStore({
-      type: TelemetryStoreCommand.SET,
-      payload: { store: [], keys: [], raw: [] },
-    });
-  };
+  const [isDownloadable, setIsDownloadable] = useState(false);
+
+  const downloadButtonRef = useRef(null);
+  const isShowingDownloadTooltip = useDelayedTooltip(0.5, downloadButtonRef);
 
   useEffect(() => {
     if (opModeList?.length === 0) {
@@ -118,6 +121,22 @@ const LoggingView = ({
   }, [activeOpMode, activeOpModeStatus, isRecording, opModeList, telemetry]);
 
   useEffect(() => {
+    if (activeOpModeStatus === OpModeStatus.RUNNING) {
+      setCurrentOpModeName(activeOpMode ?? '');
+    }
+  }, [activeOpMode, activeOpModeStatus]);
+
+  useEffect(() => {
+    if (!isRecording && telemetryStore.store.length !== 0) {
+      setIsDownloadable(true);
+    } else {
+      setIsDownloadable(false);
+    }
+  }, [isRecording, telemetryStore.store.length]);
+
+  useEffect(() => {
+    if (telemetry.length === 1 && telemetry[0].timestamp === 0) return;
+
     telemetry.forEach((e) => {
       dispatchTelemetryStore({
         type: TelemetryStoreCommand.APPEND,
@@ -126,12 +145,113 @@ const LoggingView = ({
     });
   }, [telemetry]);
 
+  const clearPastTelemetry = () => {
+    dispatchTelemetryStore({
+      type: TelemetryStoreCommand.SET,
+      payload: { store: [], keys: [], raw: [] },
+    });
+  };
+
+  const downloadCSV = () => {
+    if (!isDownloadable) return;
+
+    console.log('bruh');
+
+    function downloadBlob(data: string, fileName: string, mime: string) {
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      document.body.appendChild(a);
+
+      const blob = new Blob([data], { type: mime });
+      const url = window.URL.createObjectURL(blob);
+
+      a.href = url;
+      a.download = fileName;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+    }
+
+    const storeCopy = [...telemetryStore.store];
+    storeCopy.sort((a, b) => a.timestamp - b.timestamp);
+
+    const firstRow = ['time', ...telemetryStore.keys, 'logs'];
+    const body = storeCopy
+      .map(
+        (e) =>
+          `${DateToHHMMSS(new Date(e.timestamp))},${[
+            ...e.data,
+            ...new Array(telemetryStore.keys.length - e.data.length),
+          ].join(',')},"${e.log.join('\n')}"`,
+      )
+      .join('\r\n');
+    const csv = `${firstRow}\r\n${body}`;
+
+    const fileDate = new Date(storeCopy[0].timestamp);
+    const year = fileDate.getFullYear();
+    const month = `0${fileDate.getMonth()}`.slice(-2);
+    const date = `0${fileDate.getDay()}`.slice(-2);
+
+    const hourlyDate = DateToHHMMSS(fileDate)
+      .replaceAll(':', '_')
+      .split('.')[0];
+
+    downloadBlob(
+      csv,
+      `${currentOpModeName} ${year}-${month}-${date} ${hourlyDate}.csv`,
+      'text/csv',
+    );
+  };
+
+  const getToolTipError = () => {
+    if (
+      telemetryStore.store.length === 0 &&
+      activeOpModeStatus !== OpModeStatus.RUNNING
+    ) {
+      return 'No logs to download';
+    } else if (
+      activeOpModeStatus === OpModeStatus.RUNNING &&
+      activeOpMode !== STOP_OP_MODE_TAG
+    ) {
+      return 'Cannot download logs while OpMode is running';
+    }
+
+    return `Download logs for ${currentOpModeName}`;
+  };
+
   return (
     <BaseView isUnlocked={isUnlocked}>
-      <BaseViewHeading isDraggable={isDraggable}>Logging</BaseViewHeading>
+      <div className="flex-center">
+        <BaseViewHeading isDraggable={isDraggable}>Logging</BaseViewHeading>
+        <div className="flex items-center mr-3 space-x-1">
+          <button
+            className={`icon-btn w-8 h-8 ${
+              isDownloadable ? '' : 'border-gray-400'
+            }`}
+            onClick={downloadCSV}
+            ref={downloadButtonRef}
+          >
+            {isDownloadable ? (
+              <DownloadSVG className="w-6 h-6" />
+            ) : (
+              <DownloadOffSVG className="w-6 h-6 text-neutral-gray-400" />
+            )}
+            <ToolTip
+              hoverRef={downloadButtonRef}
+              isShowing={isShowingDownloadTooltip}
+            >
+              {getToolTipError()}
+            </ToolTip>
+          </button>
+        </div>
+      </div>
       <BaseViewBody>
         <CustomVirtualGrid
-          header={['time', ...telemetryStore.keys]}
+          header={
+            telemetryStore.keys.length !== 0
+              ? ['time', ...telemetryStore.keys]
+              : []
+          }
           data={telemetryStore.raw}
         />
       </BaseViewBody>

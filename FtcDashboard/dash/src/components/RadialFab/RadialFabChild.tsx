@@ -1,7 +1,9 @@
+import { useRef } from 'react';
 import styled from 'styled-components';
 
 import { WithChildren } from '../../typeHelpers';
 import useDelayedTooltip from '../../hooks/useDelayedTooltip';
+import ToolTip from '../ToolTip';
 
 type RadialFabChildProps = {
   customClass?: string;
@@ -50,20 +52,17 @@ const Icon = styled.div<RadialFabChildProps>`
     }deg)`};
 `;
 
-const ToolTip = styled.span.attrs<{ isShowing: boolean }>(({ isShowing }) => ({
-  className: `rounded-md px-3 py-1 absolute w-max bg-gray-800 bg-opacity-80 text-white text-sm pointer-events-none transform transition ${
-    isShowing ? '-translate-y-11 opacity-100' : '-translate-y-9 opacity-0'
-  }`,
-}))<{ isShowing: boolean }>``;
-
 const RadialFabChild = (props: WithChildren<RadialFabChildProps>) => {
-  const { isShowingTooltip, ref } = useDelayedTooltip(0.5);
+  const buttonRef = useRef(null);
+  const isShowingTooltip = useDelayedTooltip(0.5, buttonRef);
 
   return (
-    <ButtonContainer {...props} onClick={props.clickEvent} ref={ref}>
+    <ButtonContainer {...props} onClick={props.clickEvent} ref={buttonRef}>
       <Icon {...props}>{props.children}</Icon>
       {props.toolTipText !== '' && (
-        <ToolTip isShowing={isShowingTooltip}>{props.toolTipText}</ToolTip>
+        <ToolTip isShowing={isShowingTooltip} hoverRef={buttonRef}>
+          {props.toolTipText}
+        </ToolTip>
       )}
     </ButtonContainer>
   );

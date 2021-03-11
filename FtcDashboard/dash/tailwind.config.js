@@ -106,6 +106,7 @@ module.exports = {
         yellow: colors.amber,
         gray: colors.blueGray,
         orange: colors.orange,
+        'neutral-gray': colors.gray,
       },
       fontFamily: {
         sans: ['Roboto'],
