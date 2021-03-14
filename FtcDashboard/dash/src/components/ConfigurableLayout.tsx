@@ -306,13 +306,15 @@ export default function ConfigurableLayout() {
 
   useEffect(() => {
     const containerResizerObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        if (entry.target === gridWrapperRef.current) {
-          const width =
-            gridWrapperRef.current.clientWidth - 2 * GRID_DOT_PADDING;
-          setGridBgSize(
-            width / ((GRID_COL / 4) * Math.floor(width / 300) + 1) / 3,
-          );
+      if (gridWrapperRef.current) {
+        for (const entry of entries) {
+          if (entry.target === gridWrapperRef.current) {
+            const width =
+              gridWrapperRef.current.clientWidth - 2 * GRID_DOT_PADDING;
+            setGridBgSize(
+              width / ((GRID_COL / 4) * Math.floor(width / 300) + 1) / 3,
+            );
+          }
         }
       }
     });

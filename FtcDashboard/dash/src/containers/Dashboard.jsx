@@ -34,7 +34,7 @@ class Dashboard extends Component {
           <h1 className="text-2xl font-medium">FTC Dashboard</h1>
           <div className="flex-center">
             <select
-              className="text-black text-sm rounded mx-2 py-1 bg-blue-100 border-blue-300 focus:ring focus:ring-blue-200"
+              className="text-black text-sm rounded mx-2 py-1 bg-blue-100 border-blue-300 focus:border-blue-100 focus:ring-2 focus:ring-white focus:ring-opacity-40"
               value={this.props.layoutPreset}
               onChange={(evt) =>
                 this.props.dispatch(saveLayoutPreset(evt.target.value))
