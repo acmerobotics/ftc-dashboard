@@ -11,21 +11,27 @@ import { DraggableCore } from 'react-draggable';
 type Props = {
   header: string[];
   data: unknown[];
+  columnsShowing?: boolean[];
 };
 
-type CellProps = GridChildComponentProps & { data: unknown };
+const Cell = ({
+  columnIndex,
+  rowIndex,
+  style,
+  data,
+}: GridChildComponentProps) => {
+  const dataTyped = data as { cellData: string[]; visibleColumns: boolean[] };
 
-const Cell = ({ columnIndex, rowIndex, style, data }: CellProps) => {
-  return (
+  return dataTyped.visibleColumns[columnIndex] ? (
     <div
       className={`px-2 truncate ${
         columnIndex === 0 ? 'text-neutral-gray-400' : ''
       }`}
       style={style}
     >
-      {data[rowIndex][columnIndex]}
+      {dataTyped.cellData[rowIndex][columnIndex]}
     </div>
-  );
+  ) : null;
 };
 
 const DEFAULT_COL_WIDTH = 150;
@@ -35,7 +41,7 @@ const ROW_HEIGHT = 30;
 
 const AUTO_SCROLL_BOTTOM_THRESHOLD = 15;
 
-const CustomVirtualGrid = ({ header, data }: Props) => {
+const CustomVirtualGrid = ({ header, data, columnsShowing }: Props) => {
   const [colWidth, setColWidth] = useState<number[]>([]);
   const [headerOffset, setHeaderOffset] = useState(0);
 
@@ -55,7 +61,7 @@ const CustomVirtualGrid = ({ header, data }: Props) => {
 
   useEffect(() => {
     gridRef.current?.resetAfterColumnIndex(0);
-  }, [colWidth]);
+  }, [colWidth, columnsShowing]);
 
   useEffect(() => {
     if (gridRef.current) {
@@ -73,8 +79,7 @@ const CustomVirtualGrid = ({ header, data }: Props) => {
     if (index === -1) return;
 
     const colCopy = [...colWidth];
-    colCopy[index] += deltaX;
-    colCopy[index] = Math.max(COL_MIN_WIDTH, colCopy[index]);
+    colCopy[index] = Math.max(COL_MIN_WIDTH, colCopy[index] + deltaX);
 
     setColWidth(colCopy);
   };
@@ -99,6 +104,10 @@ const CustomVirtualGrid = ({ header, data }: Props) => {
     }
   };
 
+  const derivedColWidth = colWidth.map((e, i) =>
+    (columnsShowing ?? [])[i] === false ? 0 : e,
+  );
+
   return (
     <div className="w-full h-full flex flex-col overflow-x-hidden">
       <div
@@ -113,7 +122,9 @@ const CustomVirtualGrid = ({ header, data }: Props) => {
         {header.map((e, i) => (
           <div
             key={e}
-            className="inline-flex flex-row relative pr-8"
+            className={`inline-flex flex-row relative pr-8 ${
+              derivedColWidth[i] === 0 ? 'hidden' : ''
+            }`}
             style={{ width: colWidth[i], minWidth: '3em' }}
           >
             <span className="font-semibold flex-grow truncate">{e}</span>
@@ -132,12 +143,15 @@ const CustomVirtualGrid = ({ header, data }: Props) => {
               <Grid
                 ref={gridRef}
                 columnCount={header.length}
-                columnWidth={(i) => colWidth[i]}
+                columnWidth={(i) => derivedColWidth[i]}
                 height={height}
                 rowCount={data.length}
                 rowHeight={() => ROW_HEIGHT}
                 width={width}
-                itemData={data}
+                itemData={{
+                  cellData: data,
+                  visibleColumns: derivedColWidth.map((e) => e !== 0),
+                }}
                 onScroll={onScroll}
               >
                 {Cell}

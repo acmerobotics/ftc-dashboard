@@ -1,5 +1,13 @@
-import { useState, useEffect, useReducer, useRef } from 'react';
+import {
+  useState,
+  useEffect,
+  useReducer,
+  useRef,
+  FormEventHandler,
+} from 'react';
 import { useSelector } from 'react-redux';
+
+import { Transition, Switch } from '@headlessui/react';
 
 import { RootState } from '../../store/reducers';
 import { TelemetryItem, STOP_OP_MODE_TAG } from '../../store/types';
@@ -13,11 +21,14 @@ import BaseView, {
 } from '../BaseView';
 import CustomVirtualGrid from './CustomVirtualGrid';
 import { DateToHHMMSS } from './DateFormatting';
-import useDelayedTooltip from '../../hooks/useDelayedTooltip';
 import ToolTip from '../../components/ToolTip';
+
+import useDelayedTooltip from '../../hooks/useDelayedTooltip';
+import useOnClickOutside from '../../hooks/useOnClickOutside';
 
 import { ReactComponent as DownloadSVG } from '../../assets/icons/file_download.svg';
 import { ReactComponent as DownloadOffSVG } from '../../assets/icons/file_download_off.svg';
+import { ReactComponent as MoreVertSVG } from '../../assets/icons/more_vert.svg';
 
 type LoggingViewProps = BaseViewProps & BaseViewHeadingProps;
 
@@ -30,17 +41,23 @@ export type TelemetryStoreItem = {
 enum TelemetryStoreCommand {
   SET,
   APPEND,
+  SET_KEY_SHOWING,
 }
 
 type TelemetryStoreState = {
   store: TelemetryStoreItem[];
   keys: string[];
   raw: unknown[];
+  keysShowing: boolean[];
 };
 
 type TelemetryStoreAction =
   | { type: TelemetryStoreCommand.SET; payload: TelemetryStoreState }
-  | { type: TelemetryStoreCommand.APPEND; payload: TelemetryItem };
+  | { type: TelemetryStoreCommand.APPEND; payload: TelemetryItem }
+  | {
+      type: TelemetryStoreCommand.SET_KEY_SHOWING;
+      payload: { index: number; value: boolean };
+    };
 
 const telemetryStoreReducer = (
   state: TelemetryStoreState,
@@ -51,7 +68,7 @@ const telemetryStoreReducer = (
       return action.payload;
     }
     case TelemetryStoreCommand.APPEND: {
-      const { store, keys, raw } = state;
+      const { store, keys, raw, keysShowing } = state;
       const { timestamp, data, log } = action.payload;
 
       const newTelemetryStoreItem: TelemetryStoreItem = {
@@ -61,7 +78,10 @@ const telemetryStoreReducer = (
       };
 
       for (const [key, value] of Object.entries(data)) {
-        if (!keys.includes(key)) keys.push(key);
+        if (!keys.includes(key)) {
+          keys.push(key);
+          keysShowing.push(true);
+        }
 
         newTelemetryStoreItem.data[keys.indexOf(key)] = value;
       }
@@ -76,10 +96,49 @@ const telemetryStoreReducer = (
         store,
         keys,
         raw,
+        keysShowing,
       };
+    }
+    case TelemetryStoreCommand.SET_KEY_SHOWING: {
+      const newKeysShowing = [...state.keysShowing];
+      newKeysShowing[action.payload.index] = action.payload.value;
+
+      return { ...state, keysShowing: newKeysShowing };
     }
   }
 };
+
+const MenuItemSwitch = ({
+  checked,
+  onChange,
+  children,
+}: {
+  checked: boolean;
+  onChange:
+    | ((checked: boolean) => void)
+    | (FormEventHandler<HTMLButtonElement> & ((checked: boolean) => void));
+  children: JSX.Element | string;
+}) => (
+  <Switch.Group as="div" className="flex items-center space-x-4 py-1 px-3">
+    <Switch
+      as="button"
+      checked={checked}
+      onChange={onChange}
+      className={`${
+        checked ? 'bg-indigo-600' : 'bg-gray-200'
+      } relative inline-flex flex-shrink-0 h-4 transition-colors duration-200 ease-in-out border-2 border-transparent rounded-full cursor-pointer w-7 focus:outline-none focus:shadow-outline`}
+    >
+      {({ checked }) => (
+        <span
+          className={`${
+            checked ? 'translate-x-3' : 'translate-x-0'
+          } inline-block w-3 h-3 transition duration-200 ease-in-out transform bg-white rounded-full`}
+        />
+      )}
+    </Switch>
+    <Switch.Label className="ml-2">{children}</Switch.Label>
+  </Switch.Group>
+);
 
 const LoggingView = ({
   isDraggable = false,
@@ -91,18 +150,37 @@ const LoggingView = ({
 
   const telemetry = useSelector((state: RootState) => state.telemetry);
 
-  const [
-    telemetryStore,
-    dispatchTelemetryStore,
-  ] = useReducer(telemetryStoreReducer, { store: [], keys: [], raw: [] });
+  const [telemetryStore, dispatchTelemetryStore] = useReducer(
+    telemetryStoreReducer,
+    {
+      store: [],
+      keys: [],
+      raw: [],
+      keysShowing: [],
+    },
+  );
 
   const [isRecording, setIsRecording] = useState(false);
   const [currentOpModeName, setCurrentOpModeName] = useState('');
 
   const [isDownloadable, setIsDownloadable] = useState(false);
 
+  const [isKeyShowingMenuVisible, setIsKeyShowingMenuVisible] = useState(false);
+  const [isTimeShowing, setIsTimeShowing] = useState(true);
+
   const downloadButtonRef = useRef(null);
   const isShowingDownloadTooltip = useDelayedTooltip(0.5, downloadButtonRef);
+
+  const keyShowingMenuRef = useRef(null);
+  const keyShowingMenuButtonRef = useRef(null);
+
+  useOnClickOutside(
+    keyShowingMenuRef,
+    () => {
+      if (isKeyShowingMenuVisible) setIsKeyShowingMenuVisible(false);
+    },
+    [keyShowingMenuButtonRef],
+  );
 
   useEffect(() => {
     if (opModeList?.length === 0) {
@@ -148,14 +226,12 @@ const LoggingView = ({
   const clearPastTelemetry = () => {
     dispatchTelemetryStore({
       type: TelemetryStoreCommand.SET,
-      payload: { store: [], keys: [], raw: [] },
+      payload: { store: [], keys: [], raw: [], keysShowing: [] },
     });
   };
 
   const downloadCSV = () => {
     if (!isDownloadable) return;
-
-    console.log('bruh');
 
     function downloadBlob(data: string, fileName: string, mime: string) {
       const a = document.createElement('a');
@@ -243,16 +319,70 @@ const LoggingView = ({
               {getToolTipError()}
             </ToolTip>
           </button>
+          <div className="relative inline-block">
+            <button
+              ref={keyShowingMenuButtonRef}
+              className="icon-btn w-8 h-8"
+              onClick={() =>
+                setIsKeyShowingMenuVisible(!isKeyShowingMenuVisible)
+              }
+            >
+              <MoreVertSVG className="w-6 h-6" />
+            </button>
+            <Transition
+              show={isKeyShowingMenuVisible}
+              enter="transition ease-out duration-100"
+              enterFrom="transform opacity-0 scale-95"
+              enterTo="transform opacity-100 scale-100"
+              leave="transition ease-in duration-75"
+              leaveFrom="transform opacity-100 scale-100"
+              leaveTo="transform opacity-0 scale-95"
+            >
+              <div
+                ref={keyShowingMenuRef}
+                className="absolute right-0 mt-2 py-2 origin-top-right bg-white border border-gray-200 rounded-md shadow-lg outline-none"
+                style={{ zIndex: 99 }}
+              >
+                <p className="text-sm leading-5 border-b border-gray-100 pl-3 pb-1 mb-1 text-gray-500">
+                  Toggle Items
+                </p>
+                <MenuItemSwitch
+                  checked={isTimeShowing}
+                  onChange={setIsTimeShowing}
+                >
+                  Time
+                </MenuItemSwitch>
+                {[...telemetryStore.keys].map((e, i) => (
+                  <MenuItemSwitch
+                    key={e}
+                    checked={telemetryStore.keysShowing[i]}
+                    onChange={() =>
+                      dispatchTelemetryStore({
+                        type: TelemetryStoreCommand.SET_KEY_SHOWING,
+                        payload: {
+                          index: i,
+                          value: !telemetryStore.keysShowing[i],
+                        },
+                      })
+                    }
+                  >
+                    {e}
+                  </MenuItemSwitch>
+                ))}
+              </div>
+            </Transition>
+          </div>
         </div>
       </div>
       <BaseViewBody>
         <CustomVirtualGrid
           header={
             telemetryStore.keys.length !== 0
-              ? ['time', ...telemetryStore.keys]
+              ? ['Time', ...telemetryStore.keys]
               : []
           }
           data={telemetryStore.raw}
+          columnsShowing={[isTimeShowing, ...telemetryStore.keysShowing]}
         />
       </BaseViewBody>
     </BaseView>
