@@ -16,12 +16,11 @@ import BaseView, {
 } from './BaseView';
 
 import { ReactComponent as GamepadIcon } from '../assets/icons/gamepad.svg';
+import { STOP_OP_MODE_TAG } from '../store/types/opmode';
 
 type OpModeViewState = {
   selectedOpMode: string;
 };
-
-const STOP_OP_MODE = '$Stop$Robot$';
 
 const mapStateToProps = ({ status, gamepad }: RootState) => ({
   ...status,
@@ -59,7 +58,7 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
     props: OpModeViewProps,
     state: OpModeViewState,
   ) {
-    if (props.activeOpMode !== STOP_OP_MODE) {
+    if (props.activeOpMode !== STOP_OP_MODE_TAG) {
       return {
         selectedOpMode: props.activeOpMode,
       };
@@ -119,7 +118,7 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
 
     if (opModeList.length === 0) {
       return null;
-    } else if (activeOpMode === STOP_OP_MODE) {
+    } else if (activeOpMode === STOP_OP_MODE_TAG) {
       return this.renderInitButton();
     } else if (activeOpModeStatus === OpModeStatus.INIT) {
       return (
@@ -192,7 +191,9 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
           <select
             className="bg-gray-200 rounded p-1 pr-6 m-1 mr-2 border border-gray-300 shadow-md disabled:shadow-none disabled:text-gray-600 transition"
             value={this.state.selectedOpMode}
-            disabled={activeOpMode !== STOP_OP_MODE || opModeList.length === 0}
+            disabled={
+              activeOpMode !== STOP_OP_MODE_TAG || opModeList.length === 0
+            }
             onChange={this.onChange}
           >
             {opModeList.length === 0 ? (

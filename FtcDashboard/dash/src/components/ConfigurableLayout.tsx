@@ -28,6 +28,7 @@ import LockIconURL from '../assets/icons/lock.svg';
 import { ReactComponent as RemoveCircleIcon } from '../assets/icons/remove_circle.svg';
 import { ReactComponent as RemoveCircleOutlineIcon } from '../assets/icons/remove_circle_outline.svg';
 import CreateIconURL from '../assets/icons/create.svg';
+import LoggingView from '../containers/LoggingView/LoggingView';
 
 function maxArray(a: number[], b: number[]) {
   if (a.length !== b.length) {
@@ -54,6 +55,7 @@ const VIEW_MAP: { [key in ConfigurableView]: ReactElement } = {
   [ConfigurableView.TELEMETRY_VIEW]: <TelemetryView />,
   [ConfigurableView.CAMERA_VIEW]: <CameraView />,
   [ConfigurableView.OPMODE_VIEW]: <OpModeView />,
+  [ConfigurableView.LOGGING_VIEW]: <LoggingView />,
 };
 
 const LOCAL_STORAGE_LAYOUT_KEY = 'configurableLayoutStorage';
@@ -303,17 +305,21 @@ export default function ConfigurableLayout() {
   });
 
   useEffect(() => {
-    const containerResizerObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        if (entry.target === gridWrapperRef.current) {
-          const width =
-            gridWrapperRef.current.clientWidth - 2 * GRID_DOT_PADDING;
-          setGridBgSize(
-            width / ((GRID_COL / 4) * Math.floor(width / 300) + 1) / 3,
-          );
+    const containerResizerObserver = new ResizeObserver(
+      (entries: ResizeObserverEntry[]) => {
+        if (gridWrapperRef.current) {
+          for (const entry of entries) {
+            if (entry.target === gridWrapperRef.current) {
+              const width =
+                gridWrapperRef.current.clientWidth - 2 * GRID_DOT_PADDING;
+              setGridBgSize(
+                width / ((GRID_COL / 4) * Math.floor(width / 300) + 1) / 3,
+              );
+            }
+          }
         }
-      }
-    });
+      },
+    );
 
     if (gridWrapperRef.current !== null)
       containerResizerObserver.observe(gridWrapperRef.current);

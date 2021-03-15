@@ -33,7 +33,12 @@ export type {
   ReceiveGamepadStateAction,
 } from './gamepad';
 
-export { INIT_OP_MODE, START_OP_MODE, STOP_OP_MODE } from './opmode';
+export {
+  INIT_OP_MODE,
+  START_OP_MODE,
+  STOP_OP_MODE,
+  STOP_OP_MODE_TAG,
+} from './opmode';
 export type {
   InitOpModeAction,
   StartOpModeAction,
