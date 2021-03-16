@@ -13,8 +13,8 @@ class Dashboard extends Component {
   componentDidMount() {
     this.props.dispatch(
       connect(
-        process.env.REACT_APP_HOST || window.location.hostname,
-        process.env.REACT_APP_PORT,
+        import.meta.env['VITE_REACT_APP_HOST'] || window.location.hostname,
+        import.meta.env['VITE_REACT_APP_PORT'],
       ),
     );
     this.props.dispatch(getLayoutPreset());

@@ -1,4 +1,4 @@
-import { Component, ChangeEvent } from 'react';
+import React, { Component, ChangeEvent } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
 import styled from 'styled-components';

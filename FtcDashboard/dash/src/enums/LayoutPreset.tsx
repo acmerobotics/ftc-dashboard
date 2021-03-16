@@ -1,5 +1,4 @@
 import React from 'react';
-
 import { Values } from '../typeHelpers';
 
 import TileGrid from '../components/TileGrid';
