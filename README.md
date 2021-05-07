@@ -1,4 +1,4 @@
-# FTC Dashboard  [ ![Download](https://api.bintray.com/packages/acmerobotics/maven/ftc-dashboard/images/download.svg) ](https://bintray.com/acmerobotics/maven/ftc-dashboard/_latestVersion)
+# FTC Dashboard
 
 FTC Dashboard is a websocket-based React dashboard designed for FTC with the following features:
 
