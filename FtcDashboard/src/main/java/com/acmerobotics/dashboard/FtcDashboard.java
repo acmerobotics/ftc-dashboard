@@ -667,6 +667,19 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
                         waitForStart();
 
+                        // If the user stops the OpMode while waitForStart() is
+                        // running, the current thread gets interrupted.
+                        // However, interrupting the thread does not halt thread
+                        // execution, meaning that even if the user hits "stop"
+                        // during the initialization phase, dashboard's enable
+                        // state will be toggled. By checking that
+                        // isStopRequested() is false, we make sure that stop
+                        // has been pressed before toggling dashboard's enable
+                        // state.
+                        if (!isStopRequested()) {
+                            return;
+                        }
+                        
                         if (enabled) {
                             disable();
                         } else {
