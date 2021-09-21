@@ -42,7 +42,7 @@ public class RobotStatus {
         this.available = true;
         this.activeOpMode = activeOpMode;
         this.activeOpModeStatus = activeOpModeStatus;
-        this.warningMessage = RobotLog.getGlobalWarningMessage();
+        this.warningMessage = RobotLog.getGlobalWarningMessage().message;
         this.errorMessage = RobotLog.getGlobalErrorMsg();
     }
 }
