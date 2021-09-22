@@ -4,13 +4,12 @@ layout: default
 
 # Overview
 
-[FTC Dashboard]({{ site.github.repository_url }}) is a web dashboard made for FTC partly inspired by [FRC Dashboard](https://github.com/FRCDashboard/FRCDashboard) with the following features:
+[FTC Dashboard]({{ site.github.repository_url }}) is a web app for monitoring FTC robots during operation with the following features:
 
-* Live telemetry graphing and display
-* Real-time configuration variable tuning while op modes are running
-* DS-like op mode controls and gamepad integration
-* Fully-customizable field overlay
-* Camera view
+* Telemetry with plots and field graphics
+* Live configuration variables
+* Camera streaming
+* Limited op mode controls and gamepad support
 
 ![Dashboard screenshot](images/dashboard.png)
 
@@ -18,9 +17,7 @@ layout: default
 
 [Getting Started](gettingstarted)
 
-[Basics](basics)
-
-[Custom Widgets](customwidgets)
+[Features](features)
 
 [Competition Use](competition)
 
