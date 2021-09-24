@@ -1,5 +1,5 @@
 buildscript {
-    ext.dashboard_version = '0.4.2'
+    ext.dashboard_version = '0.4.3'
 }
 
 plugins {
