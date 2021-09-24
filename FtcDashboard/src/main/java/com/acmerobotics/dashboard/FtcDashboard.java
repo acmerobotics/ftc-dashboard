@@ -46,6 +46,11 @@ import com.qualcomm.robotcore.util.ThreadPool;
 import com.qualcomm.robotcore.util.WebHandlerManager;
 import com.qualcomm.robotcore.util.WebServer;
 
+import org.firstinspires.ftc.ftccommon.external.OnCreate;
+import org.firstinspires.ftc.ftccommon.external.OnCreateEventLoop;
+import org.firstinspires.ftc.ftccommon.external.OnCreateMenu;
+import org.firstinspires.ftc.ftccommon.external.OnDestroy;
+import org.firstinspires.ftc.ftccommon.external.WebHandlerRegistrar;
 import org.firstinspires.ftc.ftccommon.internal.FtcRobotControllerWatchdogService;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.function.Consumer;
@@ -94,6 +99,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private static final int DEFAULT_IMAGE_QUALITY = 50; // 0-100
     private static final int GAMEPAD_WATCHDOG_INTERVAL = 500; // ms
 
+    private static boolean suppressOpMode = false;
+
     private static final String PREFS_NAME = "FtcDashboard";
     private static final String PREFS_AUTO_ENABLE_KEY = "autoEnable";
 
@@ -111,39 +118,43 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     @OpModeRegistrar
     public static void registerOpMode(OpModeManager manager) {
-        if (instance != null && !instance.withoutOpMode) {
+        if (instance != null && !suppressOpMode) {
             instance.internalRegisterOpMode(manager);
         }
     }
 
     /**
-     * Starts the dashboard.
+     * Call before start to suppress the enable/disable op mode.
      */
-    public static void start() {
-        start(false);
+    public static void suppressOpMode() {
+        suppressOpMode = true;
     }
 
-    public static void start(boolean withoutOpMode) {
+    /**
+     * Starts the dashboard.
+     */
+    @OnCreate
+    public static void start(Context context) {
         if (instance == null) {
-            instance = new FtcDashboard(withoutOpMode);
+            instance = new FtcDashboard();
         }
     }
 
     /**
      * Attaches a web server for accessing the dashboard through the phone (like OBJ/Blocks).
-     * @param webServer web server
      */
-    public static void attachWebServer(WebServer webServer) {
+    @WebHandlerRegistrar
+    public static void attachWebServer(Context context, WebHandlerManager manager) {
         if (instance != null) {
-            instance.internalAttachWebServer(webServer);
+            instance.internalAttachWebServer(manager.getWebServer());
         }
     }
 
     /**
      * Attaches the event loop to the instance for op mode management.
-     * @param eventLoop event loop
      */
-    public static void attachEventLoop(FtcEventLoop eventLoop) {
+    @OnCreateEventLoop
+    public static void attachEventLoop(Context context, FtcEventLoop eventLoop) {
         if (instance != null) {
             instance.internalAttachEventLoop(eventLoop);
         }
@@ -153,7 +164,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * Populates the menu with dashboard enable/disable options.
      * @param menu menu
      */
-    public static void populateMenu(Menu menu) {
+    @OnCreateMenu
+    public static void populateMenu(Context context, Menu menu) {
         if (instance != null) {
             instance.internalPopulateMenu(menu);
         }
@@ -162,7 +174,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     /**
      * Stops the instance and the underlying WebSocket server.
      */
-    public static void stop() {
+    @OnDestroy
+    public static void stop(Context context) {
         if (!FtcRobotControllerWatchdogService.isLaunchActivity(AppUtil.getInstance().getRootActivity())) {
             // prevent premature stop when the app is launched via hardware attachment
             return;
@@ -175,7 +188,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     /**
-     * Returns the active instance instance. This should be called after {@link #start()}.
+     * Returns the active instance instance. This should be called after {@link #start(Context)}.
      * @return active instance instance or null outside of its lifecycle
      */
     public static FtcDashboard getInstance() {
@@ -219,8 +232,6 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private LinearLayout parentLayout;
 
     private Gson gson;
-
-    private boolean withoutOpMode;
 
     private class TelemetryUpdateRunnable implements Runnable {
         @Override
@@ -353,7 +364,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         }
     }
 
-    private FtcDashboard(boolean withoutOpMode) {
+    private FtcDashboard() {
         telemetry = new TelemetryPacket.Adapter(this);
 
         gson = new GsonBuilder()
@@ -376,8 +387,6 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         }
 
         injectStatusView();
-
-        this.withoutOpMode = withoutOpMode;
     }
 
     private boolean getAutoEnable() {
