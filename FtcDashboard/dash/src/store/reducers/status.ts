@@ -2,8 +2,10 @@ import OpModeStatus from '../../enums/OpModeStatus';
 import {
   ReceiveOpModeListAction,
   ReceiveRobotStatusAction,
+  ReceiveDashboardWarning,
   RECEIVE_OP_MODE_LIST,
   RECEIVE_ROBOT_STATUS,
+  RECEIVE_DASHBOARD_WARNING,
   StatusState,
 } from '../types';
 
@@ -14,11 +16,12 @@ const initialState: StatusState = {
   opModeList: [],
   warningMessage: '',
   errorMessage: '',
+  dashboardWarningMessage: '',
 };
 
 const statusReducer = (
   state = initialState,
-  action: ReceiveRobotStatusAction | ReceiveOpModeListAction,
+  action: ReceiveRobotStatusAction | ReceiveOpModeListAction | ReceiveDashboardWarning,
 ) => {
   switch (action.type) {
     case RECEIVE_ROBOT_STATUS:
@@ -30,6 +33,11 @@ const statusReducer = (
       return {
         ...state,
         opModeList: action.opModeList,
+      };
+    case RECEIVE_DASHBOARD_WARNING:
+      return {
+        ...state,
+        dashboardWarningMessage: action.dashboardWarningMessage,
       };
     default:
       return state;

@@ -11,7 +11,7 @@ import {
   sendGamepadState,
 } from '../actions/gamepad';
 import GamepadType from '../../enums/GamepadType';
-import { GamepadState } from '../types';
+import { GamepadState, RECEIVE_DASHBOARD_WARNING, ReceiveDashboardWarning } from '../types';
 import { AppThunkDispatch, RootState } from '../reducers';
 
 const scale = (
@@ -182,18 +182,24 @@ const extractGamepadState = (gamepad: Gamepad) => {
 let gamepad1Index = -1;
 let gamepad2Index = -1;
 
+
 const gamepadMiddleware: Middleware<Record<string, unknown>, RootState> = (
   store,
 ) => {
+  let getGamepads = navigator.getGamepads?.bind(navigator);
+  if (getGamepads == null) {
+    getGamepads = function() { return [null, null, null, null]; }
+    setTimeout(() => { store.dispatch({ type: RECEIVE_DASHBOARD_WARNING, dashboardWarningMessage: "Gamepads are only available when dashboard is served with HTTPS." }); }, 1000);
+  }
   function updateGamepads() {
-    const gamepads = navigator.getGamepads();
+    const gamepads = getGamepads();
     if (gamepads.length === 0) {
       setTimeout(updateGamepads, 500);
       return;
     }
 
     // check for Start-A/Start-B
-    for (const gamepad of navigator.getGamepads()) {
+    for (const gamepad of getGamepads()) {
       if (gamepad === null || !gamepad.connected) {
         continue;
       }

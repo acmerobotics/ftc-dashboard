@@ -76,12 +76,14 @@ export {
   GET_ROBOT_STATUS,
   RECEIVE_ROBOT_STATUS,
   RECEIVE_OP_MODE_LIST,
+  RECEIVE_DASHBOARD_WARNING,
 } from './status';
 export type {
   StatusState,
   GetRobotStatusAction,
   ReceiveRobotStatusAction,
   ReceiveOpModeListAction,
+  ReceiveDashboardWarning,
 } from './status';
 
 export { RECEIVE_TELEMETRY } from './telemetry';

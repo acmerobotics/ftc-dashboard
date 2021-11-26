@@ -143,6 +143,7 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
       opModeList,
       warningMessage,
       errorMessage,
+      dashboardWarningMessage,
     } = this.props;
 
     const { gamepad1Connected, gamepad2Connected } = this.props;
@@ -210,6 +211,9 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
           )}
           {warningMessage !== '' && (
             <p className="warning mt-5 ml-1">Warning: {warningMessage}</p>
+          )}
+          {dashboardWarningMessage !== '' && (
+            <p className="warning mt-5 ml-1">Dashboard: {dashboardWarningMessage}</p>
           )}
         </BaseViewBody>
       </BaseView>
