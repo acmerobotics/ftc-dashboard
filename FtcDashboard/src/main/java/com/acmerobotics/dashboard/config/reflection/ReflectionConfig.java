@@ -34,22 +34,30 @@ public class ReflectionConfig {
 
             @Override
             public void processClass(Class<?> configClass) {
-                // I'm doing the check this way because it's technically safer than using
-                //  configClass.isAnnotationPresent(Config.class). It *is* slightly slower, but
-                //  it's on the scale of nanoseconds, so I don't care. ~ryleu
-                Config config = configClass.getAnnotation(Config.class);
-                if (config != null) {
-                    if (!configClass.isAnnotationPresent(Disabled.class)
-                            || config.ignoreDisabled()) {
-                        Log.i(TAG, "Config class: " + configClass.getName());
-                        String name = configClass.getSimpleName();
-                        String altName = config.value();
-                        if (!altName.isEmpty()) {
-                            name = altName;
-                        }
+                // I'm doing the check this way because AS's linter screams at me for using
+                //  configClass.isAnnotationPresent(Config.class). It might technically be safer.
+                //  If it's slower, it's on the scale of nanoseconds, so I don't care.
+                //  ~ryleu
 
-                        configRoot.putVariable(name, createVariableFromClass(configClass));
+                // Grab the config annotation
+                Config config = configClass.getAnnotation(Config.class);
+
+                // If the annotation exists, and either ignoreDisabled is set or @Disabled is not
+                //  present...
+                if (config != null && (!configClass.isAnnotationPresent(Disabled.class)
+                            || config.ignoreDisabled())) {
+                    Log.i(TAG, "Config class: " + configClass.getName());
+
+                    // Set the name to either the simple name of the class, or, if present,
+                    //  @Config.value
+                    String name = configClass.getSimpleName();
+                    String altName = config.value();
+                    if (!altName.isEmpty()) {
+                        name = altName;
                     }
+
+                    // Add the variable to the configuration section of the dash
+                    configRoot.putVariable(name, createVariableFromClass(configClass));
                 }
             }
         });
