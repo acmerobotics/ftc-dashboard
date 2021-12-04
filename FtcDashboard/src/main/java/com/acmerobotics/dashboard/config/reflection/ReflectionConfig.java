@@ -34,16 +34,22 @@ public class ReflectionConfig {
 
             @Override
             public void processClass(Class<?> configClass) {
-                if (configClass.isAnnotationPresent(Config.class)
-                        && !configClass.isAnnotationPresent(Disabled.class)) {
-                    Log.i(TAG, "Config class: " + configClass.getName());
-                    String name = configClass.getSimpleName();
-                    String altName = configClass.getAnnotation(Config.class).value();
-                    if (!altName.isEmpty()) {
-                        name = altName;
-                    }
+                // I'm doing the check this way because it's technically safer than using
+                //  configClass.isAnnotationPresent(Config.class). It *is* slightly slower, but
+                //  it's on the scale of nanoseconds, so I don't care. ~ryleu
+                Config config = configClass.getAnnotation(Config.class);
+                if (config != null) {
+                    if (!configClass.isAnnotationPresent(Disabled.class)
+                            || config.ignoreDisabled()) {
+                        Log.i(TAG, "Config class: " + configClass.getName());
+                        String name = configClass.getSimpleName();
+                        String altName = config.value();
+                        if (!altName.isEmpty()) {
+                            name = altName;
+                        }
 
-                    configRoot.putVariable(name, createVariableFromClass(configClass));
+                        configRoot.putVariable(name, createVariableFromClass(configClass));
+                    }
                 }
             }
         });
