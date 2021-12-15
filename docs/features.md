@@ -166,4 +166,6 @@ Op mode controls replicate limited DS functionality. Some gamepads are supported
 
 ## Camera
 
-The camera view can show a live camera stream as demonstrated in [this op mode](https://github.com/acmerobotics/ftc-dashboard/blob/master/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/VuforiaStreamOpMode.java).
+The camera view can show a live camera stream as demonstrated in [this op mode](https://github.com/acmerobotics/ftc-dashboard/blob/master/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/VuforiaStreamOpMode.java). In brief, use a call like `FtcDashboard.getInstance().startCameraStream(camera, 0);` where `camera` implements `CameraStreamSource`. 
+
+Note: The current server interacts poorly with EasyOpenCV camera V1's implementation of `CameraStreamSource`. Stick with the camera V2 or webcam driver to avoid issues. 
