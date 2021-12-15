@@ -43,6 +43,8 @@ implementation('com.acmerobotics.dashboard:dashboard:0.4.3') {
 
 1. Run `yarn` in `FtcDashboard/dash/` (_this only needs to be done once!_).
 
+1. Optionally specify the server IP address through the environment variable `VITE_REACT_APP_HOST`. I prefer to save `VITE_REACT_APP_HOST=<insert IP>` in `.env.development.local` or prefix the following command with `VITE_REACT_APP_HOST=<insert IP> `.
+
 1. Run `yarn start` to start the development server.
 
 1. Navigate to `localhost:3000` (although the previous command will likely open it for you).
