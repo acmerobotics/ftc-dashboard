@@ -209,9 +209,9 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private final Object telemetryLock = new Object();
     private int telemetryTransmissionInterval = DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL;
 
-    private CustomVariable configRoot;
-    private final List<String[]> varsToRemove = new ArrayList<>();
     private final Object configLock = new Object();
+    private CustomVariable configRoot; // guarded by configLock
+    private final List<String[]> varsToRemove = new ArrayList<>(); // guarded by configLock
 
     private ExecutorService cameraStreamExecutor;
     private int imageQuality = DEFAULT_IMAGE_QUALITY;
@@ -741,14 +741,30 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * Sends updated configuration data to all instance clients.
      */
     public void updateConfig() {
-        sendAll(new ReceiveConfig(configRoot));
+        synchronized (configLock) {
+            sendAll(new ReceiveConfig(configRoot));
+        }
     }
 
     /**
      * Returns the configuration root for on-the-fly modifications.
+     *
+     * @deprecated Use {@link #withConfigRoot(Consumer)} for thread safety
      */
+    @Deprecated
     public CustomVariable getConfigRoot() {
         return configRoot;
+    }
+
+    /**
+     * Executes function in an exclusive context for config tree modification. Do not leak the
+     * config tree outside the function.
+     * @param function
+     */
+    public void withConfigRoot(Consumer<CustomVariable> function) {
+        synchronized (configLock) {
+            function.accept(configRoot);
+        }
     }
 
     /**
@@ -772,20 +788,20 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      */
     public <T> void addConfigVariable(String category, String name, ValueProvider<T> provider,
                                       boolean autoRemove) {
-        CustomVariable catVar = (CustomVariable) configRoot.getVariable(category);
-        if (catVar != null) {
-            catVar.putVariable(name, new BasicVariable<>(provider));
-        } else {
-            catVar = new CustomVariable();
-            catVar.putVariable(name, new BasicVariable<>(provider));
-            configRoot.putVariable(category, catVar);
-        }
-        if (autoRemove) {
-            synchronized (configLock) {
-                varsToRemove.add(new String[] { category, name });
+        synchronized (configLock) {
+            CustomVariable catVar = (CustomVariable) configRoot.getVariable(category);
+            if (catVar != null) {
+                catVar.putVariable(name, new BasicVariable<>(provider));
+            } else {
+                catVar = new CustomVariable();
+                catVar.putVariable(name, new BasicVariable<>(provider));
+                configRoot.putVariable(category, catVar);
             }
+            if (autoRemove) {
+                varsToRemove.add(new String[]{category, name});
+            }
+            updateConfig();
         }
-        updateConfig();
     }
 
     /**
@@ -794,12 +810,14 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * @param name variable name
      */
     public void removeConfigVariable(String category, String name) {
-        CustomVariable catVar = (CustomVariable) configRoot.getVariable(category);
-        catVar.removeVariable(name);
-        if (catVar.size() == 0) {
-            configRoot.removeVariable(category);
+        synchronized (configLock) {
+            CustomVariable catVar = (CustomVariable) configRoot.getVariable(category);
+            catVar.removeVariable(name);
+            if (catVar.size() == 0) {
+                configRoot.removeVariable(category);
+            }
+            updateConfig();
         }
-        updateConfig();
     }
 
     /**
@@ -896,7 +914,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             sockets.add(socket);
         }
 
-        socket.send(new ReceiveConfig(configRoot));
+        updateConfig();
+
         synchronized (opModeList) {
             if (opModeList.size() > 0) {
                 socket.send(new ReceiveOpModeList(opModeList));
@@ -921,7 +940,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 break;
             }
             case GET_CONFIG: {
-                socket.send(new ReceiveConfig(configRoot));
+                updateConfig();
                 break;
             }
             case INIT_OP_MODE: {
@@ -938,8 +957,10 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 break;
             }
             case SAVE_CONFIG: {
-                configRoot.update(((SaveConfig) msg).getConfigDiff());
-                updateConfig();
+                synchronized (configLock) {
+                    configRoot.update(((SaveConfig) msg).getConfigDiff());
+                    updateConfig();
+                }
                 break;
             }
             case RECEIVE_GAMEPAD_STATE: {
