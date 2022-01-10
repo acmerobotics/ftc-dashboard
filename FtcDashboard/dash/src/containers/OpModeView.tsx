@@ -1,4 +1,4 @@
-import React, { Component, ChangeEvent } from 'react';
+import React, { Component, ChangeEvent, createRef, MutableRefObject, PointerEvent } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
 import styled from 'styled-components';
@@ -16,10 +16,13 @@ import BaseView, {
 } from './BaseView';
 
 import { ReactComponent as GamepadIcon } from '../assets/icons/gamepad.svg';
+import { ReactComponent as GamepadNotSupportedIcon } from '../assets/icons/gamepad_not_supported.svg';
 import { STOP_OP_MODE_TAG } from '../store/types/opmode';
+import ToolTip from '../components/ToolTip';
 
 type OpModeViewState = {
   selectedOpMode: string;
+  shouldShowGamepadUnsupportedTooltip: boolean;
 };
 
 const mapStateToProps = ({ status, gamepad }: RootState) => ({
@@ -44,14 +47,31 @@ const ActionButton = styled.button.attrs<{ className: string }>((props) => ({
 }))``;
 
 class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
+  gamepadUnsupportedTooltipRef: MutableRefObject<HTMLDivElement | null>;
+  gamepadUnsupportedTooltipTimeout: NodeJS.Timeout | null = null;
+
   constructor(props: OpModeViewProps) {
     super(props);
 
     this.state = {
       selectedOpMode: '',
+      shouldShowGamepadUnsupportedTooltip: false,
     };
+  this.gamepadUnsupportedTooltipRef = createRef();
 
     this.onChange = this.onChange.bind(this);
+  }
+
+  gamepadIconsHover(_e: PointerEvent<HTMLDivElement>) {
+    let myTimeout: NodeJS.Timeout;
+    this.gamepadUnsupportedTooltipTimeout = setTimeout(() => {
+      if (this.gamepadUnsupportedTooltipTimeout === myTimeout) this.setState(_prevState => ({ shouldShowGamepadUnsupportedTooltip: true }));
+    }, 500);
+    myTimeout = this.gamepadUnsupportedTooltipTimeout;
+  }
+  gamepadIconsUnhover() {
+    this.gamepadUnsupportedTooltipTimeout = null;
+    this.setState(_prevState => ({ shouldShowGamepadUnsupportedTooltip: false }));
   }
 
   static getDerivedStateFromProps(
@@ -143,7 +163,7 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
       opModeList,
       warningMessage,
       errorMessage,
-      dashboardWarningMessage,
+      gamepadsSupported,
     } = this.props;
 
     const { gamepad1Connected, gamepad2Connected } = this.props;
@@ -163,30 +183,49 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
       );
     }
 
+    const isShowingGamepadUnsupportedTooltip = !gamepadsSupported && this.state.shouldShowGamepadUnsupportedTooltip;
+
     return (
       <BaseView isUnlocked={this.props.isUnlocked}>
         <div className="flex">
           <BaseViewHeading isDraggable={this.props.isDraggable}>
             Op Mode
           </BaseViewHeading>
-          <BaseViewIcons>
-            <BaseViewIcon>
-              <GamepadIcon
-                className="w-6 h-6"
-                style={{
-                  opacity: gamepad1Connected ? 1.0 : 0.3,
-                }}
-              />
-            </BaseViewIcon>
-            <BaseViewIcon>
-              <GamepadIcon
-                className="w-6 h-6"
-                style={{
-                  opacity: gamepad2Connected ? 1.0 : 0.3,
-                }}
-              />
-            </BaseViewIcon>
-          </BaseViewIcons>
+          <div onPointerEnter={this.gamepadIconsHover.bind(this)} onPointerLeave={this.gamepadIconsUnhover.bind(this)} ref={this.gamepadUnsupportedTooltipRef}>
+            <BaseViewIcons>
+              <BaseViewIcon>
+                  { gamepadsSupported ? 
+                    <GamepadIcon
+                      className="w-6 h-6"
+                      style={{
+                        opacity: gamepad1Connected ? 1.0 : 0.3,
+                      }}
+                    />
+                  :
+                    <GamepadNotSupportedIcon
+                      className="w-6 h-6"
+                      />
+                  }
+              </BaseViewIcon>
+              <BaseViewIcon>
+                  { gamepadsSupported ? 
+                    <GamepadIcon
+                      className="w-6 h-6"
+                      style={{
+                        opacity: gamepad2Connected ? 1.0 : 0.3,
+                      }}
+                    />
+                  :
+                    <GamepadNotSupportedIcon
+                      className="w-6 h-6"
+                      />
+                  }
+              </BaseViewIcon>
+            </BaseViewIcons>
+            <ToolTip isShowing={isShowingGamepadUnsupportedTooltip} hoverRef={this.gamepadUnsupportedTooltipRef} >
+              Due to changes to JavaScript, gamepads are no longer supported in your browser.
+            </ToolTip>
+          </div>
         </div>
         <BaseViewBody>
           <select
@@ -211,9 +250,6 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
           )}
           {warningMessage !== '' && (
             <p className="warning mt-5 ml-1">Warning: {warningMessage}</p>
-          )}
-          {dashboardWarningMessage !== '' && (
-            <p className="warning mt-5 ml-1">Dashboard: {dashboardWarningMessage}</p>
           )}
         </BaseViewBody>
       </BaseView>

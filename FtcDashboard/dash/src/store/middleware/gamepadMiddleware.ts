@@ -11,7 +11,7 @@ import {
   sendGamepadState,
 } from '../actions/gamepad';
 import GamepadType from '../../enums/GamepadType';
-import { GamepadState, RECEIVE_DASHBOARD_WARNING, ReceiveDashboardWarning } from '../types';
+import { GamepadState, GAMEPAD_SUPPORTED_STATUS } from '../types';
 import { AppThunkDispatch, RootState } from '../reducers';
 
 const scale = (
@@ -189,7 +189,10 @@ const gamepadMiddleware: Middleware<Record<string, unknown>, RootState> = (
   let getGamepads = navigator.getGamepads?.bind(navigator);
   if (getGamepads == null) {
     getGamepads = function() { return [null, null, null, null]; }
-    setTimeout(() => { store.dispatch({ type: RECEIVE_DASHBOARD_WARNING, dashboardWarningMessage: "Gamepads are only available when dashboard is served with HTTPS." }); }, 1000);
+    console.log("Gamepads not supported over non-https. See https://developer.mozilla.org/en-US/docs/Web/API/Gamepad");
+    setTimeout(() => { store.dispatch({ type: GAMEPAD_SUPPORTED_STATUS, gamepadsSupported: false }); }, 1000);
+  } else {
+    setTimeout(() => { store.dispatch({ type: GAMEPAD_SUPPORTED_STATUS, gamepadsSupported: true }); }, 1000);
   }
   function updateGamepads() {
     const gamepads = getGamepads();
