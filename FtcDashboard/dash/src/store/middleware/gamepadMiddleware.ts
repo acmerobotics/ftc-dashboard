@@ -11,7 +11,7 @@ import {
   sendGamepadState,
 } from '../actions/gamepad';
 import GamepadType from '../../enums/GamepadType';
-import { GamepadState } from '../types';
+import { GamepadState, GAMEPAD_SUPPORTED_STATUS } from '../types';
 import { AppThunkDispatch, RootState } from '../reducers';
 
 const scale = (
@@ -182,18 +182,27 @@ const extractGamepadState = (gamepad: Gamepad) => {
 let gamepad1Index = -1;
 let gamepad2Index = -1;
 
+
 const gamepadMiddleware: Middleware<Record<string, unknown>, RootState> = (
   store,
 ) => {
+  let getGamepads = navigator.getGamepads?.bind(navigator);
+  if (getGamepads == null) {
+    getGamepads = function() { return [null, null, null, null]; }
+    console.log("Gamepads not supported over non-https. See https://developer.mozilla.org/en-US/docs/Web/API/Gamepad");
+    setTimeout(() => { store.dispatch({ type: GAMEPAD_SUPPORTED_STATUS, gamepadsSupported: false }); }, 1000);
+  } else {
+    setTimeout(() => { store.dispatch({ type: GAMEPAD_SUPPORTED_STATUS, gamepadsSupported: true }); }, 1000);
+  }
   function updateGamepads() {
-    const gamepads = navigator.getGamepads();
+    const gamepads = getGamepads();
     if (gamepads.length === 0) {
       setTimeout(updateGamepads, 500);
       return;
     }
 
     // check for Start-A/Start-B
-    for (const gamepad of navigator.getGamepads()) {
+    for (const gamepad of getGamepads()) {
       if (gamepad === null || !gamepad.connected) {
         continue;
       }

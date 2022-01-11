@@ -2,8 +2,10 @@ import OpModeStatus from '../../enums/OpModeStatus';
 import {
   ReceiveOpModeListAction,
   ReceiveRobotStatusAction,
+  GamepadSupportedStatus,
   RECEIVE_OP_MODE_LIST,
   RECEIVE_ROBOT_STATUS,
+  GAMEPAD_SUPPORTED_STATUS,
   StatusState,
 } from '../types';
 
@@ -14,11 +16,12 @@ const initialState: StatusState = {
   opModeList: [],
   warningMessage: '',
   errorMessage: '',
+  gamepadsSupported: true,
 };
 
 const statusReducer = (
   state = initialState,
-  action: ReceiveRobotStatusAction | ReceiveOpModeListAction,
+  action: ReceiveRobotStatusAction | ReceiveOpModeListAction | GamepadSupportedStatus,
 ) => {
   switch (action.type) {
     case RECEIVE_ROBOT_STATUS:
@@ -30,6 +33,11 @@ const statusReducer = (
       return {
         ...state,
         opModeList: action.opModeList,
+      };
+    case GAMEPAD_SUPPORTED_STATUS:
+      return {
+        ...state,
+        gamepadsSupported: action.gamepadsSupported,
       };
     default:
       return state;

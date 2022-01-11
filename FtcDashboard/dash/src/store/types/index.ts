@@ -76,12 +76,14 @@ export {
   GET_ROBOT_STATUS,
   RECEIVE_ROBOT_STATUS,
   RECEIVE_OP_MODE_LIST,
+  GAMEPAD_SUPPORTED_STATUS,
 } from './status';
 export type {
   StatusState,
   GetRobotStatusAction,
   ReceiveRobotStatusAction,
   ReceiveOpModeListAction,
+  GamepadSupportedStatus,
 } from './status';
 
 export { RECEIVE_TELEMETRY } from './telemetry';
