@@ -20,10 +20,8 @@ public class ConfigVariableSerializer implements JsonSerializer<ConfigVariable<?
                 jsonSerializationContext.serialize(configVariable.getType()));
 
         if(configVariable.getType() == VariableType.DOUBLE){
-            if(configVariable.getType() == VariableType.DOUBLE){
-                if(Double.isNaN((Double) value) || Double.isInfinite((Double) value)){
-                    value = 0;
-                }
+            if(Double.isNaN((Double) value) || Double.isInfinite((Double) value)){
+                value = 0;
             }
         }
         obj.add(ConfigVariable.VALUE_KEY,
