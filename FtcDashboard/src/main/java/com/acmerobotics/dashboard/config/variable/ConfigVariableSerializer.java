@@ -18,6 +18,14 @@ public class ConfigVariableSerializer implements JsonSerializer<ConfigVariable<?
         JsonObject obj = new JsonObject();
         obj.add(ConfigVariable.TYPE_KEY,
                 jsonSerializationContext.serialize(configVariable.getType()));
+
+        if(configVariable.getType() == VariableType.DOUBLE){
+            if(configVariable.getType() == VariableType.DOUBLE){
+                if(Double.isNaN((Double) value) || Double.isInfinite((Double) value)){
+                    value = 0;
+                }
+            }
+        }
         obj.add(ConfigVariable.VALUE_KEY,
                 jsonSerializationContext.serialize(value));
         if (configVariable.getType() == VariableType.ENUM) {
