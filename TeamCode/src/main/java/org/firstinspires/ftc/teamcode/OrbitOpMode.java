@@ -59,5 +59,7 @@ public class OrbitOpMode extends LinearOpMode {
                     .fillPolygon(bxPoints, byPoints);
             dashboard.sendTelemetryPacket(packet);
         }
+
+        sleep(20);
     }
 }

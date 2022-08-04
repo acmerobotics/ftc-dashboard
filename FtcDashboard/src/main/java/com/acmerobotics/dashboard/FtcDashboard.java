@@ -30,7 +30,6 @@ import com.acmerobotics.dashboard.message.redux.ReceiveOpModeList;
 import com.acmerobotics.dashboard.message.redux.ReceiveRobotStatus;
 import com.acmerobotics.dashboard.message.redux.ReceiveTelemetry;
 import com.acmerobotics.dashboard.message.redux.SaveConfig;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -56,9 +55,6 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.function.Consumer;
 import org.firstinspires.ftc.robotcore.external.function.Continuation;
 import org.firstinspires.ftc.robotcore.external.stream.CameraStreamSource;
-import org.firstinspires.ftc.robotcore.internal.opmode.AnnotatedOpModeClassFilter;
-import org.firstinspires.ftc.robotcore.internal.opmode.InstanceOpModeManager;
-import org.firstinspires.ftc.robotcore.internal.opmode.InstanceOpModeRegistrar;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeManagerImpl;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeMeta;
 import org.firstinspires.ftc.robotcore.internal.opmode.RegisteredOpModes;
@@ -85,11 +81,6 @@ import fi.iki.elonen.NanoHTTPD;
  */
 public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private static final String TAG = "FtcDashboard";
-
-    /*
-     * Telemetry packets are dropped if they are sent faster than this interval.
-     */
-    private static final int MIN_TELEMETRY_PACKET_SPACING = 5; // ms
 
     /*
      * Telemetry packets are batched for transmission and sent at this interval.
@@ -204,10 +195,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     private TelemetryPacket.Adapter telemetry;
     private ExecutorService telemetryExecutorService;
-    private long lastPacketTimestamp;
-    private volatile List<TelemetryPacket> pendingTelemetry = new ArrayList<>();
-    private final Object telemetryLock = new Object();
-    private int telemetryTransmissionInterval = DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL;
+    private final List<TelemetryPacket> pendingTelemetry = new ArrayList<>(); // guarded by itself
+    private volatile int telemetryTransmissionInterval = DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL;
 
     private final Object configLock = new Object();
     private CustomVariable configRoot; // guarded by configLock
@@ -237,40 +226,25 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         @Override
         public void run() {
             while (!Thread.currentThread().isInterrupted()) {
-                while (pendingTelemetry.isEmpty()) {
-                    try {
-                        Thread.sleep(MIN_TELEMETRY_PACKET_SPACING / 2);
-                    } catch (InterruptedException e) {
-                        break;
+                List<TelemetryPacket> telemetryToSend = null;
+
+                try {
+                    synchronized (pendingTelemetry) {
+                        if (pendingTelemetry.isEmpty()) {
+                            pendingTelemetry.wait();
+                        } else {
+                            telemetryToSend = new ArrayList<>(pendingTelemetry);
+                            pendingTelemetry.clear();
+                        }
                     }
-                }
-                long startTime = System.currentTimeMillis();
-                List<TelemetryPacket> telemetryToSend;
-                synchronized (telemetryLock) {
-                    telemetryToSend = new ArrayList<>(pendingTelemetry);
-                    pendingTelemetry.clear();
-                }
 
-                // justified paranoia: apparently telemetryToSend can be empty
-                if (telemetryToSend.isEmpty()) {
-                    continue;
-                }
+                    if (telemetryToSend != null) {
+                        sendAll(new ReceiveTelemetry(telemetryToSend));
 
-                // for now only the latest packet field overlay is used
-                // this helps save bandwidth, especially for more complex overlays
-                for (TelemetryPacket packet : telemetryToSend.subList(0, telemetryToSend.size() - 1)) {
-                    packet.fieldOverlay().clear();
-                }
-                sendAll(new ReceiveTelemetry(telemetryToSend));
-
-                long elapsedTime = System.currentTimeMillis() - startTime;
-                long sleepTime = telemetryTransmissionInterval - elapsedTime;
-                if (sleepTime > 0) {
-                    try {
-                        Thread.sleep(sleepTime);
-                    } catch (InterruptedException e) {
-                        break;
+                        Thread.sleep(telemetryTransmissionInterval);
                     }
+                } catch (InterruptedException e) {
+                    return;
                 }
             }
         }
@@ -702,17 +676,13 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * @param telemetryPacket packet to send
      */
     public void sendTelemetryPacket(TelemetryPacket telemetryPacket) {
-        long timestamp = telemetryPacket.addTimestamp();
+        telemetryPacket.addTimestamp();
 
-        if ((timestamp - lastPacketTimestamp) < MIN_TELEMETRY_PACKET_SPACING) {
-            return;
-        }
-
-        synchronized (telemetryLock) {
+        synchronized (pendingTelemetry) {
             pendingTelemetry.add(telemetryPacket);
-        }
 
-        lastPacketTimestamp = timestamp;
+            pendingTelemetry.notifyAll();
+        }
     }
 
     /**
