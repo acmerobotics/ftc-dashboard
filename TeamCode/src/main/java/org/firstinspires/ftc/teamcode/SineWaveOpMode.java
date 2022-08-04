@@ -30,6 +30,8 @@ public class SineWaveOpMode extends LinearOpMode {
                     2 * Math.PI * FREQUENCY * getRuntime() + Math.toRadians(PHASE)
             ));
             telemetry.update();
+
+            sleep(20);
         }
     }
 }

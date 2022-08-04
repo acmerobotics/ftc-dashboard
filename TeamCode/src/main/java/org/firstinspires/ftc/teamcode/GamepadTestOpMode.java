@@ -44,6 +44,8 @@ public class GamepadTestOpMode extends LinearOpMode {
             logGamepad(telemetry, gamepad1, "gamepad1");
             logGamepad(telemetry, gamepad2, "gamepad2");
             telemetry.update();
+
+            sleep(20);
         }
     }
 }
