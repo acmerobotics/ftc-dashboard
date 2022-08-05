@@ -1,6 +1,17 @@
 export const RECEIVE_TELEMETRY = 'RECEIVE_TELEMETRY';
+export const CLEAR_TELEMETRY = 'CLEAR_TELEMETRY';
 
-export type Telemetry = TelemetryItem[];
+export type Telemetry = {
+  data: {
+    [key: string]: string;
+  };
+
+  fieldOverlay: {
+    ops: DrawOp[];
+  };
+  log: string[];
+  timestamp: number;
+};
 
 type Fill = {
   type: 'fill';
@@ -62,19 +73,11 @@ type DrawOp =
   | Polyline
   | Spline;
 
-export type TelemetryItem = {
-  data: {
-    [key: string]: string;
-  };
-
-  fieldOverlay: {
-    ops: DrawOp[];
-  };
-  log: string[];
-  timestamp: number;
-};
-
 export type ReceiveTelemetryAction = {
   type: typeof RECEIVE_TELEMETRY;
-  telemetry: Telemetry;
+  telemetry: Telemetry[];
+};
+
+export type ClearTelemetryAction = {
+  type: typeof CLEAR_TELEMETRY;
 };

@@ -127,29 +127,13 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
 
   render() {
     const { telemetry } = this.props;
-    const latestPacket = telemetry[telemetry.length - 1];
 
-    const numericKeys = Object.keys(latestPacket.data).filter(
-      (key) => !isNaN(parseFloat(latestPacket.data[key])),
+    const numericKeys = Object.keys(telemetry.data).filter(
+      (key) => !isNaN(parseFloat(telemetry.data[key])),
     );
     const showNoNumeric = !this.state.graphing && numericKeys.length === 0;
     const showEmpty = this.state.graphing && this.state.keys.length === 0;
     const showText = showNoNumeric || showEmpty;
-
-    const graphData = telemetry.map((packet) => [
-      {
-        name: 'time',
-        value: packet.timestamp,
-      },
-      ...Object.keys(packet.data)
-        .filter((key) => this.state.keys.includes(key))
-        .map((key) => {
-          return {
-            name: key,
-            value: parseFloat(packet.data[key]),
-          };
-        }),
-    ]);
 
     return (
       <BaseView
@@ -246,7 +230,7 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
             </p>
           ) : (
             <GraphCanvas
-              data={graphData}
+              keys={this.state.keys}
               options={{
                 windowMs: this.state.windowMs.valid
                   ? this.state.windowMs.value

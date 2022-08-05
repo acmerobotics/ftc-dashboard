@@ -17,15 +17,14 @@ const TelemetryView = ({
 }: TelemetryViewProps) => {
   const telemetry = useSelector((state: RootState) => state.telemetry);
 
-  const latestPacket = telemetry[telemetry.length - 1];
-  const telemetryLines = Object.keys(latestPacket.data).map((key) => (
+  const telemetryLines = Object.keys(telemetry.data).map((key) => (
     <span key={key}>
-      {key}: {latestPacket.data[key]}
+      {key}: {telemetry.data[key]}
       <br />
     </span>
   ));
 
-  const telemetryLog = latestPacket.log.map((line, i) => (
+  const telemetryLog = telemetry.log.map((line: string, i: number) => (
     <span key={i}>
       {line}
       <br />

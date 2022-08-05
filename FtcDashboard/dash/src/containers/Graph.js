@@ -112,71 +112,26 @@ export default class Graph {
     this.options = cloneDeep(DEFAULT_OPTIONS);
     Object.assign(this.options, options || {});
 
-    this.hasGraphableContent = false;
-
-    this.clear();
+    this.reset();
   }
 
-  clear() {
-    this.time = [];
-    this.datasets = [];
-    this.lastSampleTime = 0;
+  setData(data) {
+    // type: { [k: key]: { ts: number[]; vs: number[]; } }
+    this.data = data;
 
-    this.hasGraphableContent = false;
+    this.beginGraphNowMs = Number.NaN; // in telemetry time
+    this.beginRenderTimeMs = Number.NaN; // in browser time
   }
 
-  addSample(sample) {
-    if (this.lastSampleTime === 0) {
-      this.lastSimTime = Date.now() + 250;
-      this.time.push(this.lastSimTime);
-      let color = 0;
-      for (let i = 0; i < sample.length; i++) {
-        if (sample[i].name === 'time') {
-          this.lastSampleTime = sample[i].value;
-        } else {
-          this.datasets.push({
-            name: sample[i].name,
-            data: [sample[i].value],
-            color: this.options.colors[color % this.options.colors.length],
-          });
-          color++;
-        }
-      }
-    } else {
-      for (let i = 0; i < sample.length; i++) {
-        if (sample[i].name === 'time') {
-          this.lastSimTime += sample[i].value - this.lastSampleTime;
-          this.time.push(this.lastSimTime);
-          this.lastSampleTime = sample[i].value;
-        } else {
-          for (let j = 0; j < this.datasets.length; j++) {
-            if (sample[i].name === this.datasets[j].name) {
-              this.datasets[j].data.push(sample[i].value);
-            }
-          }
-        }
-      }
-    }
-  }
+  getYAxisScaling() {
+    const [min, max] = this.data.reduce((acc, { vs }) =>
+      vs.reduce(([min, max], v) => [Math.min(v, min), Math.max(v, max)], acc),
+      [Number.MAX_VALUE, Number.MIN_VALUE]);
 
-  getAxis() {
-    // get y-axis scaling
-    let min = Number.MAX_VALUE;
-    let max = Number.MIN_VALUE;
-    for (let i = 0; i < this.datasets.length; i++) {
-      for (let j = 0; j < this.datasets[i].data.length; j++) {
-        const val = this.datasets[i].data[j];
-        if (val > max) {
-          max = val;
-        }
-        if (val < min) {
-          min = val;
-        }
-      }
-    }
     if (Math.abs(min - max) < 1e-6) {
       return getAxisScaling(min - 1, max + 1, this.options.maxTicks);
     }
+
     return getAxisScaling(min, max, this.options.maxTicks);
   }
 
@@ -185,7 +140,32 @@ export default class Graph {
 
     // eslint-disable-next-line
     this.canvas.width = this.canvas.width; // clears the canvas
+    
+    // compute most recent timestamp to initialize graph
+    // with the ancillary effect of returning false when there's no data
+    const maxT = this.data.reduce((acc, { ts }) =>
+      ts.reduce((acc, t) => Math.max(acc, t), acc), Number.MIN_VALUE);
+    if (maxT === Number.MIN_VALUE) {
+      return false;
+    }
 
+    // update time offsets
+    if (isNaN(this.beginGraphNowMs)) {
+      this.beginGraphNowMs = maxT - 250; // introduce lag to allow for transmission time
+      this.beginRenderTimeMs = Date.now();
+    } 
+
+    const graphNowMs = this.beginGraphNowMs + (Date.now() - this.beginRenderTimeMs);
+
+    // prune old samples
+    for (const k of Object.keys(this.data)) {
+      const { ts, vs } = this.data[k];
+      while (ts.length > 0 && ts[0] + o.windowMs + 250 < graphNowMs) {
+        ts.shift();
+        vs.shift();
+      }
+    }
+    
     // scale the canvas to facilitate the use of CSS pixels
     this.ctx.scale(devicePixelRatio, devicePixelRatio);
 
@@ -201,7 +181,9 @@ export default class Graph {
     this.ctx.fillRect(0, 0, width, height);
 
     const keyHeight = this.renderKey(0, 0, width);
-    this.renderGraph(0, keyHeight, width, height - keyHeight);
+    this.renderGraph(0, keyHeight, width, height - keyHeight, graphNowMs);
+
+    return true;
   }
 
   renderKey(x, y, width) {
@@ -234,25 +216,8 @@ export default class Graph {
     return height;
   }
 
-  renderGraph(x, y, width, height) {
+  renderGraph(x, y, width, height, graphNowMs) {
     const o = this.options;
-
-    if (this.datasets.length === 0 || this.datasets[0].data.length === 0) {
-      this.hasGraphableContent = false;
-
-      return;
-    }
-
-    this.hasGraphableContent = true;
-
-    // remove old points
-    const now = Date.now();
-    while (now - this.time[0] > o.windowMs + 250) {
-      this.time.shift();
-      for (let i = 0; i < this.datasets.length; i++) {
-        this.datasets[i].data.shift();
-      }
-    }
 
     const graphHeight = height - 2 * o.padding;
 
@@ -282,6 +247,7 @@ export default class Graph {
       graphWidth,
       graphHeight,
       axis,
+      graphNowMs,
     );
   }
 
@@ -339,9 +305,8 @@ export default class Graph {
     this.ctx.restore();
   }
 
-  renderGraphLines(x, y, width, height, axis) {
+  renderGraphLines(x, y, width, height, axis, graphNowMs) {
     const o = this.options;
-    const now = Date.now();
 
     this.ctx.lineWidth = o.lineWidth;
 
@@ -353,22 +318,27 @@ export default class Graph {
     // draw data lines
     // scaling is used instead of transform because of the non-uniform stretching warps the plot line
     this.ctx.beginPath();
-    for (let i = 0; i < this.datasets.length; i++) {
-      const d = this.datasets[i];
+    Object.keys(this.data).forEach((k, i) => {
+      const { ts, vs } = this.data[k];
+
+      if (ts.length === 0) return;
+
+      const color = o.colors[i % o.colors.length];
+
       this.ctx.beginPath();
-      this.ctx.strokeStyle = d.color;
+      this.ctx.strokeStyle = color;
       this.ctx.fineMoveTo(
-        scale(this.time[0] - now + o.windowMs, 0, o.windowMs, 0, width),
-        scale(d.data[0], axis.min, axis.max, height, 0),
+        scale(ts[0] - graphNowMs + o.windowMs, 0, o.windowMs, 0, width),
+        scale(vs[0], axis.min, axis.max, height, 0),
       );
-      for (let j = 1; j < d.data.length; j++) {
+      for (let j = 1; j < ts.length; j++) {
         this.ctx.fineLineTo(
-          scale(this.time[j] - now + o.windowMs, 0, o.windowMs, 0, width),
-          scale(d.data[j], axis.min, axis.max, height, 0),
+          scale(ts[j] - now + o.windowMs, 0, o.windowMs, 0, width),
+          scale(vs[j], axis.min, axis.max, height, 0),
         );
       }
       this.ctx.stroke();
-    }
+    });
 
     this.ctx.restore();
   }

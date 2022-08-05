@@ -57,7 +57,7 @@ FieldView.propTypes = {
 };
 
 const mapStateToProps = ({ telemetry }) => ({
-  overlay: telemetry[telemetry.length - 1].fieldOverlay,
+  overlay: telemetry.fieldOverlay,
 });
 
 export default connect(mapStateToProps)(FieldView);

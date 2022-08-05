@@ -177,7 +177,7 @@ public class TelemetryPacket {
 
         @Override
         public boolean isAutoClear() {
-            return true;
+            return false;
         }
 
         @Override

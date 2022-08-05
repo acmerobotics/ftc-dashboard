@@ -3,14 +3,23 @@ import PropTypes from 'prop-types';
 
 import Graph from './Graph';
 import AutoFitCanvas from '../components/AutoFitCanvas';
+import { keys } from 'lodash';
+import { subToNumericTelemetryStream } from '../store/middleware/socketMiddleware';
 
-class GraphCanvas extends React.Component {
+// PureComponent implements shouldComponentUpdate()
+class GraphCanvas extends React.PureComponent {
   constructor(props) {
     super(props);
 
     this.canvasRef = React.createRef();
 
     this.renderGraph = this.renderGraph.bind(this);
+
+    this.unsubs = []; // unsub functions to be called to cleanup
+
+    this.state = {
+      graphEmpty: false,
+    };
   }
 
   componentDidMount() {
@@ -22,23 +31,37 @@ class GraphCanvas extends React.Component {
     if (this.requestId) {
       cancelAnimationFrame(this.requestId);
     }
+
+    for (let unsub of this.unsubs) {
+      unsub();
+    }
   }
 
   componentDidUpdate(prevProps) {
-    this.props.data
-      .filter((e) => e.length > 1)
-      .forEach((sample) => this.graph.addSample(sample));
+    if (this.props.keys !== prevProps.keys) {
+      for (const unsub of this.unsubs) {
+        unsub();
+      }
 
-    if (prevProps.paused !== this.props.paused) {
-      if (this.requestId) cancelAnimationFrame(this.requestId);
+      const data = {};
+      this.unsubs = [];
+      for (const k of this.props.keys) {
+        const { ts, vs, unsub } = subToNumericTelemetryStream(k);
 
-      if (!this.props.paused) this.renderGraph();
+        data[k] = { ts, vs };
+        this.unsubs.push(unsub);
+      }
+
+      this.graph.setData(data);
     }
   }
 
   renderGraph() {
     if (!this.props.paused && this.graph) {
-      this.graph.render();
+      this.setState(() => ({
+        graphEmpty: !this.graph.render()
+      }));
+
       this.requestId = requestAnimationFrame(this.renderGraph);
     }
   }
@@ -48,15 +71,13 @@ class GraphCanvas extends React.Component {
       <div className="h-full flex-center">
         <div
           className={`${
-            this.graph === null || !this.graph?.hasGraphableContent
-              ? 'hidden'
-              : ''
+            this.state.graphEmpty ? 'hidden' : ''
           } w-full h-full`}
         >
           <AutoFitCanvas ref={this.canvasRef} />
         </div>
         <div className="absolute top-0 left-0 w-full h-full flex-center pointer-events-none">
-          {(this.graph === null || !this.graph?.hasGraphableContent) && (
+          {this.state.graphEmpty && (
             <p className="text-center">No content to graph</p>
           )}
         </div>
@@ -66,16 +87,9 @@ class GraphCanvas extends React.Component {
 }
 
 GraphCanvas.propTypes = {
-  data: PropTypes.arrayOf(
-    PropTypes.arrayOf(
-      PropTypes.shape({
-        name: PropTypes.string,
-        value: PropTypes.number,
-      }),
-    ),
-  ).isRequired,
-  options: PropTypes.object,
-  paused: PropTypes.bool,
+  keys: PropTypes.arrayOf(PropTypes.string).isRequired,
+  options: PropTypes.object.isRequired,
+  paused: PropTypes.bool.isRequired,
 };
 
 export default GraphCanvas;

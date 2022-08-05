@@ -1,5 +1,6 @@
 package com.acmerobotics.dashboard.message;
 
+import com.acmerobotics.dashboard.message.redux.ClearTelemetry;
 import com.acmerobotics.dashboard.message.redux.GetConfig;
 import com.acmerobotics.dashboard.message.redux.GetRobotStatus;
 import com.acmerobotics.dashboard.message.redux.InitOpMode;
@@ -34,6 +35,7 @@ public enum MessageType {
 
     /* telemetry */
     RECEIVE_TELEMETRY(ReceiveTelemetry.class),
+    CLEAR_TELEMETRY(ClearTelemetry.class),
 
     /* camera */
     RECEIVE_IMAGE(ReceiveImage.class),

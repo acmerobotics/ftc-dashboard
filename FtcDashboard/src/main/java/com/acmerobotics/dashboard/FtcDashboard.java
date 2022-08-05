@@ -22,6 +22,7 @@ import com.acmerobotics.dashboard.config.variable.ConfigVariableSerializer;
 import com.acmerobotics.dashboard.config.variable.CustomVariable;
 import com.acmerobotics.dashboard.message.Message;
 import com.acmerobotics.dashboard.message.MessageDeserializer;
+import com.acmerobotics.dashboard.message.redux.ClearTelemetry;
 import com.acmerobotics.dashboard.message.redux.InitOpMode;
 import com.acmerobotics.dashboard.message.redux.ReceiveConfig;
 import com.acmerobotics.dashboard.message.redux.ReceiveGamepadState;
@@ -672,7 +673,11 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     /**
-     * Sends telemetry information to all instance clients.
+     * Queues a telemetry packet to be sent to all clients. Packets are sent in batches of
+     * approximate period {@link #getTelemetryTransmissionInterval()}. Clients display the most
+     * recent value received for each key, and the data is cleared upon op mode init or a call to
+     * {@link #clearTelemetry()}.
+     *
      * @param telemetryPacket packet to send
      */
     public void sendTelemetryPacket(TelemetryPacket telemetryPacket) {
@@ -686,7 +691,20 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     /**
-     * Returns a telemetry object that proxies {@link #sendTelemetryPacket(TelemetryPacket)}.
+     * Clears all telemetry on all clients.
+     */
+    public void clearTelemetry() {
+        synchronized (pendingTelemetry) {
+            pendingTelemetry.clear();
+        }
+
+        sendAll(new ClearTelemetry());
+    }
+
+    /**
+     * Returns a {@link Telemetry} object that delegates to the telemetry methods of this class.
+     * Beware that the implementation of the interface is incomplete, and users should test each
+     * method they intend to use.
      */
     public Telemetry getTelemetry() {
         return telemetry;
@@ -960,6 +978,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             activeOpModeStatus = RobotStatus.OpModeStatus.INIT;
             activeOpMode = opMode;
         }
+
+        clearTelemetry();
     }
 
     @Override
