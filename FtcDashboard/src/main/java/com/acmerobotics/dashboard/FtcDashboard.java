@@ -95,7 +95,6 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private static final String PREFS_NAME = "FtcDashboard";
     private static final String PREFS_AUTO_ENABLE_KEY = "autoEnable";
 
-    // TODO: make this configurable?
     private static final Set<String> IGNORED_PACKAGES = new HashSet<>(Arrays.asList(
             "java",
             "android",
@@ -226,23 +225,21 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         @Override
         public void run() {
             while (!Thread.currentThread().isInterrupted()) {
-                List<TelemetryPacket> telemetryToSend = null;
-
                 try {
+                    List<TelemetryPacket> telemetryToSend;
+
                     synchronized (pendingTelemetry) {
-                        if (pendingTelemetry.isEmpty()) {
+                        while (pendingTelemetry.isEmpty()) {
                             pendingTelemetry.wait();
-                        } else {
-                            telemetryToSend = new ArrayList<>(pendingTelemetry);
-                            pendingTelemetry.clear();
                         }
+
+                        telemetryToSend = new ArrayList<>(pendingTelemetry);
+                        pendingTelemetry.clear();
                     }
 
-                    if (telemetryToSend != null) {
-                        sendAll(new ReceiveTelemetry(telemetryToSend));
+                    sendAll(new ReceiveTelemetry(telemetryToSend));
 
-                        Thread.sleep(telemetryTransmissionInterval);
-                    }
+                    Thread.sleep(telemetryTransmissionInterval);
                 } catch (InterruptedException e) {
                     return;
                 }
@@ -672,7 +669,11 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     /**
-     * Sends telemetry information to all instance clients.
+     * Queues a telemetry packet to be sent to all clients. Packets are sent in batches of
+     * approximate period {@link #getTelemetryTransmissionInterval()}. Clients display the most
+     * recent value received for each key, and the data is cleared upon op mode init or a call to
+     * {@link #clearTelemetry()}.
+     *
      * @param telemetryPacket packet to send
      */
     public void sendTelemetryPacket(TelemetryPacket telemetryPacket) {
@@ -686,7 +687,20 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     /**
-     * Returns a telemetry object that proxies {@link #sendTelemetryPacket(TelemetryPacket)}.
+     * Clears telemetry data from all clients.
+     */
+    public void clearTelemetry() {
+        synchronized (pendingTelemetry) {
+            pendingTelemetry.clear();
+
+            sendAll(new ReceiveTelemetry(Collections.<TelemetryPacket>emptyList()));
+        }
+    }
+
+    /**
+     * Returns a {@link Telemetry} object that delegates to the telemetry methods of this class.
+     * Beware that the implementation of the interface is incomplete, and users should test each
+     * method they intend to use.
      */
     public Telemetry getTelemetry() {
         return telemetry;
@@ -959,6 +973,10 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         synchronized (opModeLock) {
             activeOpModeStatus = RobotStatus.OpModeStatus.INIT;
             activeOpMode = opMode;
+        }
+
+        if (!(opMode instanceof OpModeManagerImpl.DefaultOpMode)) {
+            clearTelemetry();
         }
     }
 

@@ -93,6 +93,10 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
     if (this.props.telemetry === prevProps.telemetry) return;
 
     this.setState((state) => {
+      if (this.props.telemetry.length === 0) {
+        return { availableKeys: [], selectedKeys: [] };
+      }
+
       const availableKeys = [...state.availableKeys];
       for (const { data } of this.props.telemetry) {
         for (const k of Object.keys(data)) {
@@ -106,6 +110,7 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
 
       return {
         availableKeys,
+        selectedKeys: state.selectedKeys,
       };
     });
   }
@@ -169,8 +174,6 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
           };
         }),
     ]);
-
-    // console.log(graphData);
 
     return (
       <BaseView

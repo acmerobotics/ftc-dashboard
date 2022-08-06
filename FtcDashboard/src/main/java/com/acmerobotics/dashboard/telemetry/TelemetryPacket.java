@@ -92,7 +92,8 @@ public class TelemetryPacket {
 
         public Adapter(FtcDashboard dashboard) {
             this.dashboard = dashboard;
-            clear();
+            currentPacket = new TelemetryPacket();
+            log = new LogAdapter(currentPacket);
         }
 
         @Override
@@ -123,13 +124,15 @@ public class TelemetryPacket {
 
         @Override
         public void clear() {
+            dashboard.clearTelemetry();
+
             currentPacket = new TelemetryPacket();
             log = new LogAdapter(currentPacket);
         }
 
         @Override
         public void clearAll() {
-            currentPacket = new TelemetryPacket();
+            clear();
         }
 
         @Override
@@ -155,7 +158,10 @@ public class TelemetryPacket {
         @Override
         public boolean update() {
             dashboard.sendTelemetryPacket(currentPacket);
-            clear();
+
+            currentPacket = new TelemetryPacket();
+            log = new LogAdapter(currentPacket);
+
             return true;
         }
 
@@ -177,12 +183,12 @@ public class TelemetryPacket {
 
         @Override
         public boolean isAutoClear() {
-            return true;
+            return false;
         }
 
         @Override
         public void setAutoClear(boolean autoClear) {
-
+            throw new UnsupportedOperationException();
         }
 
         @Override

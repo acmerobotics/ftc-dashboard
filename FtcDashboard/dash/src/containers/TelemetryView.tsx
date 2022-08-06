@@ -20,6 +20,12 @@ const TelemetryView = ({
 
   const packets = useSelector((state: RootState) => state.telemetry);
   useEffect(() => {
+    if (packets.length === 0) {
+      setLog([]);
+      setData({});
+      return;
+    }
+
     setLog(packets[packets.length - 1].log);
     setData(
       packets.reduce(
