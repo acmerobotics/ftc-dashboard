@@ -25,7 +25,8 @@ import { DEFAULT_OPTIONS } from './Graph';
 type GraphViewState = {
   graphing: boolean;
   paused: boolean;
-  keys: string[];
+  availableKeys: string[];
+  selectedKeys: string[];
   windowMs: {
     value: number;
     valid: boolean;
@@ -51,7 +52,8 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
     this.state = {
       graphing: false,
       paused: false,
-      keys: [],
+      availableKeys: [],
+      selectedKeys: [],
       windowMs: {
         value: DEFAULT_OPTIONS.windowMs,
         valid: true,
@@ -85,6 +87,27 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
         this.handleDocumentKeydown,
       );
     }
+  }
+
+  componentDidUpdate(prevProps: GraphViewProps) {
+    if (this.props.telemetry === prevProps.telemetry) return;
+
+    this.setState((state) => {
+      const availableKeys = [...state.availableKeys];
+      for (const { data } of this.props.telemetry) {
+        for (const k of Object.keys(data)) {
+          if (isNaN(parseFloat(data[k]))) continue;
+
+          if (availableKeys.includes(k)) continue;
+
+          availableKeys.push(k);
+        }
+      }
+
+      return {
+        availableKeys,
+      };
+    });
   }
 
   handleDocumentKeydown(evt: KeyboardEvent) {
@@ -126,23 +149,19 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
   }
 
   render() {
-    const { telemetry } = this.props;
-    const latestPacket = telemetry[telemetry.length - 1];
-
-    const numericKeys = Object.keys(latestPacket.data).filter(
-      (key) => !isNaN(parseFloat(latestPacket.data[key])),
-    );
-    const showNoNumeric = !this.state.graphing && numericKeys.length === 0;
-    const showEmpty = this.state.graphing && this.state.keys.length === 0;
+    const showNoNumeric =
+      !this.state.graphing && this.state.availableKeys.length === 0;
+    const showEmpty =
+      this.state.graphing && this.state.selectedKeys.length === 0;
     const showText = showNoNumeric || showEmpty;
 
-    const graphData = telemetry.map((packet) => [
+    const graphData = this.props.telemetry.map((packet) => [
       {
         name: 'time',
         value: packet.timestamp,
       },
       ...Object.keys(packet.data)
-        .filter((key) => this.state.keys.includes(key))
+        .filter((key) => this.state.selectedKeys.includes(key))
         .map((key) => {
           return {
             name: key,
@@ -150,6 +169,8 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
           };
         }),
     ]);
+
+    // console.log(graphData);
 
     return (
       <BaseView
@@ -163,7 +184,7 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
             Graph
           </BaseViewHeading>
           <BaseViewIcons>
-            {this.state.graphing && this.state.keys.length !== 0 && (
+            {this.state.graphing && this.state.selectedKeys.length !== 0 && (
               <BaseViewIconButton className="w-8 h-8 icon-btn">
                 {this.state.paused ? (
                   <PlayIcon className="w-6 h-6" onClick={this.play} />
@@ -196,11 +217,11 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
                 <h3 className="mt-6 font-medium">Telemetry to graph:</h3>
                 <div className="ml-3">
                   <MultipleCheckbox
-                    arr={numericKeys}
-                    onChange={(selected: string[]) =>
-                      this.setState({ keys: selected })
+                    arr={this.state.availableKeys}
+                    onChange={(selectedKeys: string[]) =>
+                      this.setState({ selectedKeys })
                     }
-                    selected={this.state.keys}
+                    selected={this.state.selectedKeys}
                   />
                 </div>
                 <div className="mt-4">
