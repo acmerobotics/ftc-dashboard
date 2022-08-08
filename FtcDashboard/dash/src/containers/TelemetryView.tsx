@@ -41,17 +41,14 @@ const TelemetryView = ({
   }, [packets]);
 
   const telemetryLines = Object.keys(data).map((key) => (
-    <span key={key}>
-      {key}: {data[key]}
-      <br />
-    </span>
+    <span
+      key={key}
+      dangerouslySetInnerHTML={{ __html: `${data[key]}<br />` }}
+    />
   ));
 
   const telemetryLog = log.map((line, i) => (
-    <span key={i}>
-      {line}
-      <br />
-    </span>
+    <span key={i} dangerouslySetInnerHTML={{ __html: `${line}<br />` }} />
   ));
 
   return (
