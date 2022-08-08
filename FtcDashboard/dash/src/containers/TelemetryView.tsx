@@ -26,7 +26,12 @@ const TelemetryView = ({
       return;
     }
 
-    setLog(packets.reduce((acc, { log: newLog }) => [...acc, ...newLog], log));
+    setLog(
+      packets.reduce(
+        (acc, { log: newLog }) => (newLog.length === 0 ? acc : newLog),
+        log,
+      ),
+    );
 
     setData(
       packets.reduce(
