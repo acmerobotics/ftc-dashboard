@@ -1,4 +1,4 @@
-/*
+ /*
 
 UltimateGoal01
 
@@ -20,9 +20,12 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
+//import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import static java.lang.Math.abs;
 import static java.lang.Thread.sleep;
@@ -36,19 +39,27 @@ public class TOP extends OpMode {
     private DcMotor motorFR;
     private DcMotor intake;
     private DcMotorEx shuter;
+
     private DcMotorEx arm;
     private DcMotorEx arm2;
     private DcMotorEx DJL;
     private DcMotor grip;
     private Servo loader1;
     private Servo loader2;
+    //private DistanceSensor Distanta;
     private Servo grabber_left;
     private Servo grabber_right;
-    private DigitalChannel digitalTouch;
-    private DigitalChannel digitalTouch2;
+    //private DigitalChannel digitalTouch;
+    //private DigitalChannel digitalTouch2;
+
+
+
+
+
+
     double  intakeDir = 1;
     double  intakeChange = -1;
-    double sm = 1;
+    double sm = 1,sm2 = 1;
     double poz = 0;
     double gpoz = 0;
     double y, x, rx;
@@ -81,12 +92,13 @@ public class TOP extends OpMode {
         arm     = (DcMotorEx) hardwareMap.dcMotor.get("gheara");
         arm2    = (DcMotorEx) hardwareMap.dcMotor.get("gheara2");
         DJL     = (DcMotorEx) hardwareMap.dcMotor.get("roata");
+        //Distanta = hardwareMap.get(DistanceSensor.class, "distanta dreapta");
         //grabber_left   = hardwareMap.servo.get("gheara");
         //grabber_right  = hardwareMap.servo.get("grabber_right");
         loader1        = hardwareMap.servo.get("cutie");
         loader2        = hardwareMap.servo.get("gheara 2");
-        digitalTouch   = hardwareMap.get(DigitalChannel.class, "rotila1");
-        digitalTouch2   = hardwareMap.get(DigitalChannel.class, "rotila2");
+        //digitalTouch   = hardwareMap.get(DigitalChannel.class, "rotila1");
+        //digitalTouch2   = hardwareMap.get(DigitalChannel.class, "rotila2");
 
 
         motorBL.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -98,8 +110,10 @@ public class TOP extends OpMode {
         motorBR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorFL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorFR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         DJL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        arm2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         motorFR.setMode(DcMotor.RunMode.RESET_ENCODERS);
         motorFL.setMode(DcMotor.RunMode.RESET_ENCODERS);
@@ -111,18 +125,19 @@ public class TOP extends OpMode {
         motorBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorBL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        digitalTouch.setMode(DigitalChannel.Mode.INPUT);
-        digitalTouch2.setMode(DigitalChannel.Mode.INPUT);
+                //digitalTouch.setMode(DigitalChannel.Mode.INPUT);
+        //digitalTouch2.setMode(DigitalChannel.Mode.INPUT);
 
         //arm.setMode(DcMotor.RunMode.RESET_ENCODERS);
         //arm.setTargetPosition(0);
-        //arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //arm.se tMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         //arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         telemetry.addData("Status", "Initialized");
         telemetry.addData("Resseting", "Encoders");
         telemetry.update();
+
         // Wait for the game to start (driver presses PLAY)
         // run until the end of the match (driver presses STOP)
 
@@ -132,6 +147,7 @@ public class TOP extends OpMode {
     public void start(){
         Chassis.start();
         Systems.start();
+
     }
     private Thread Chassis = new Thread( new Runnable() {
         @Override
@@ -142,10 +158,10 @@ public class TOP extends OpMode {
                 x = gamepad1.left_stick_x * 1.5;
                 rx = gamepad1.right_stick_x;
 
-                pmotorFL = y + x + rx;
+                pmotorFL = -y + x + rx;
                 pmotorBL = y - x + rx;
                 pmotorBR = y + x - rx;
-                pmotorFR = y - x - rx;
+                pmotorFR = -y - x - rx;
 
                 max = abs(pmotorFL);
                 if (abs(pmotorFR) > max) {
@@ -163,15 +179,14 @@ public class TOP extends OpMode {
                     pmotorBL /= max;
                     pmotorBR /= max;
                 }
-
                 //SLOW-MOTION
-                if (gamepad1.left_bumper) {
+                if (gamepad1.left_trigger > 0) {
                     sm = 2;
                     POWER(pmotorFR / sm, pmotorFL / sm, pmotorBR / sm, pmotorBL / sm);
                     //arm.setPower(poz/sm);
                 } else {
                     //SLOWER-MOTION
-                    if (gamepad1.right_bumper) {
+                    if (gamepad1.right_trigger > 0) {
                         sm = 5;
                         POWER(pmotorFR / sm, pmotorFL / sm, pmotorBR / sm, pmotorBL / sm);
                     } else {
@@ -186,6 +201,21 @@ public class TOP extends OpMode {
         @Override
         public void run() {
             while (!stop) {
+                if (gamepad2.left_trigger > 0) {
+                    sm2 = 2;
+                    //arm.setPower(poz/sm);
+                } else {
+                    //SLOWER-MOTION
+                    if (gamepad2.right_trigger > 0) {
+                        sm2 = 5;
+                    } else {
+                        sm2 = 0.5;
+                    }
+                }
+
+                arm.setPower(gamepad2.right_stick_y / sm2);
+                arm2.setPower(gamepad2.right_stick_y / sm2);
+
             /*
         if(gamepad1.a)
         {
@@ -231,7 +261,7 @@ public class TOP extends OpMode {
 
 
 
-                if (gamepad1.back)
+                if (gamepad2.back)
                     arm.setMode(DcMotor.RunMode.RESET_ENCODERS);
                 /*if (gamepad2.dpad_left)
                     arm.setMode(DcMotor.RunMode.RESET_ENCODERS);*/
@@ -256,35 +286,26 @@ public class TOP extends OpMode {
                 //     loader2.setPosition(0);
 
                 if (gamepad2.y)
-                    loader1.setPosition(0.6);
+                    loader1.setPosition(0);
                 if (gamepad2.a)
-                    loader1.setPosition(0.8);
+                    loader1.setPosition(0.3);
 
                 if (gamepad2.y)
-                    loader2.setPosition(0.2);
+                    loader2.setPosition(0.23);
                 if (gamepad2.a)
                     loader2.setPosition(0);
 
-                if (digitalTouch.getState() == false) {
-                    motorFL.setPower(-0.48);
-                    motorFR.setPower(0.48);
-                    motorBL.setPower(0.48);
-                    motorBR.setPower(-0.48);
-                }
 
 
 
-
-
-
-/*
-        BUN
-        if (loader.getPosition() == 1.0 && arm.getCurrentPosition() == 100 ) //90
-        {
-            loader.setPosition(0.0);
-            inchis = false;
-        }
-*/
+//
+                //      BUN
+                //      if (loader.getPosition() == 1.0 && a  rm.getCurrentPosition() == 100 ) //90
+                //      {
+                //          loader.setPosition(0.0);
+                //          inchis = false;
+                //
+                //      }
                 /*
                 if (overpower = true) {
                     if (inchis == true) {
@@ -300,7 +321,7 @@ public class TOP extends OpMode {
 
         /*
         if (loader.getPosition() == 1.0 && arm.getCurrentPosition() >= 300)
-        {
+
             loader.setPosition(0.0);
             inchis = false;
         }
@@ -357,8 +378,6 @@ public class TOP extends OpMode {
                 //if (gamepad2.right_stick_y < 0)
                 // arm.setPower(0);
                 //if (gamepad2.right_stick_y > 0 || gamepad2.right_stick_y < 0) {
-                arm.setPower(gamepad2.right_stick_y);
-                arm2.setPower(gamepad2.right_stick_y);
 
 
                 /*
@@ -433,6 +452,8 @@ public class TOP extends OpMode {
                     }
                 }
 
+
+
                 if (gamepad2.dpad_down) {
                     //while(arm.getCurrentPosition() != 160)
                     //arm.setTargetPosition(160);
@@ -455,6 +476,8 @@ public class TOP extends OpMode {
         }
     });
 
+    private void POWER(double v, double v1) {
+    }
 
 
     public void stop(){stop = true;}
@@ -467,8 +490,10 @@ public class TOP extends OpMode {
         telemetry.addData("permisie: ", permisie);
         telemetry.addData("asdf: ", gamepad1.right_stick_y);
         telemetry.addData("thread: ", tru);
-        telemetry.addData("Button", digitalTouch.getState());
-        telemetry.addData("Button2", digitalTouch2.getState());
+       // telemetry.addData("Button", digitalTouch.getState());
+        //telemetry.addData("Button2", digitalTouch2.getState());
+      //  telemetry.addData("distanta stanga", distanta_stanga.getDistance(DistanceUnit.CM));
+         //telemetry.addData("distanta dreapta", Distanta.getDistance(DistanceUnit.CM));
         telemetry.update();
     }
     public void POWER(double df1, double sf1, double ds1, double ss1){

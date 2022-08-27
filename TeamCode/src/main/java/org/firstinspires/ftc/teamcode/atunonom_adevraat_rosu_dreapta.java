@@ -8,7 +8,6 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 
 //import com.qualcomm.robotcore.hardware.PIDFCoefficients;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -30,7 +29,7 @@ import java.util.List;
 
 @Autonomous
 //@Disabled
-public class Atunonom_Adevraat extends LinearOpMode {
+public class atunonom_adevraat_rosu_dreapta extends LinearOpMode {
     /* Declare OpMode members. */
     /*
     HardwarePushbot         robot   = new HardwarePushbot();   // Use a Pushbot's hardware
@@ -57,8 +56,6 @@ public class Atunonom_Adevraat extends LinearOpMode {
     private Servo loader2;
     private Servo grabber_left;
     private Servo grabber_right;
-
-    
     //private Servo //stopper_left;
     //private Servo //stopper_right;
 
@@ -169,64 +166,63 @@ public class Atunonom_Adevraat extends LinearOpMode {
 
             }
         });
-            if (pipeline.error) {
-                telemetry.addData("Exception: ", pipeline.debug.getStackTrace());
-            }
-            // Only use this line of the code when you want to find the lower and upper values, using Ftc Dashboard (https://acmerobotics.github.io/ftc-dashboard/gettingstarted)
-            // testing(pipeline);
+        if (pipeline.error) {
+            telemetry.addData("Exception: ", pipeline.debug.getStackTrace());
+        }
+        // Only use this line of the code when you want to find the lower and upper values, using Ftc Dashboard (https://acmerobotics.github.io/ftc-dashboard/gettingstarted)
+        // testing(pipeline);
 
-            // Watch our YouTube Tutorial for the better explanation
-            while(!isStarted()) {
-                try {
-                    double rectangleArea = pipeline.getRectArea();
+        // Watch our YouTube Tutorial for the better explanation
+        while(!isStarted()) {
+            try {
+                double rectangleArea = pipeline.getRectArea();
 
-                    //Print out the area of the rectangle that is found.
-                    telemetry.addData("Rectangle Area", rectangleArea);
-                    telemetry.addData("Position", "X = " + pipeline.getRectX() + "    Y = " + pipeline.getRectY());
-                    //Check to see if the rectangle has a large enough area to be a marker.
-                    if (rectangleArea > minRectangleArea) {
-                        //Then check the location of the rectangle to see which barcode it is in.
-                        if (pipeline.getRectMidpointX() > rightBarcodeRangeBoundary * pipeline.getRectWidth()) {
-                            telemetry.addData("Barcode Position", "Right");
-                        } else if (pipeline.getRectMidpointX() < leftBarcodeRangeBoundary * pipeline.getRectWidth()) {
-                            telemetry.addData("Barcode Position", "Left");
-                        } else {
-                            telemetry.addData("Barcode Position", "Center");
-                        }
+                //Print out the area of the rectangle that is found.
+                telemetry.addData("Rectangle Area", rectangleArea);
+                telemetry.addData("Position", "X = " + pipeline.getRectX() + "    Y = " + pipeline.getRectY());
+                //Check to see if the rectangle has a large enough area to be a marker.
+                if (rectangleArea > minRectangleArea) {
+                    //Then check the location of the rectangle to see which barcode it is in.
+                    if (pipeline.getRectMidpointX() > rightBarcodeRangeBoundary * pipeline.getRectWidth()) {
+                        telemetry.addData("Barcode Position", "Right");
+                    } else if (pipeline.getRectMidpointX() < leftBarcodeRangeBoundary * pipeline.getRectWidth()) {
+                        telemetry.addData("Barcode Position", "Left");
+                    } else {
+                        telemetry.addData("Barcode Position", "Center");
                     }
-                    if (pipeline.getRectX() < 150) {
-                        varrez = "Stanga";
-                    } else if (pipeline.getRectX() > 150 && pipeline.getRectX() < 350) {
-                        varrez = "Mijloc";
-                    } else if (pipeline.getRectX() > 350 && pipeline.getRectX() < 500) {
-                        varrez = "Dreapta";
-                    }
-                    telemetry.addData("var", varrez);
-                    telemetry.update();
-                } catch (Exception e) {
-                    telemetry.addData("E:", e.getMessage());
-                    telemetry.update();
                 }
-            }
-            if(a==true) {
-                a=false;
-                if(!isStopRequested()&&isStarted()) {
-                    Atunonom.start();
+                if (pipeline.getRectX() < 150) {
+                    varrez = "Stanga";
+                } else if (pipeline.getRectX() > 150 && pipeline.getRectX() < 350) {
+                    varrez = "Mijloc";
+                } else if (pipeline.getRectX() > 350 && pipeline.getRectX() < 500) {
+                    varrez = "Dreapta";
                 }
+                telemetry.addData("var", varrez);
+                telemetry.update();
+            } catch (Exception e) {
+                telemetry.addData("E:", e.getMessage());
+                telemetry.update();
             }
-            while(!isStopRequested()){
+        }
+        if(a==true) {
+            a=false;
+            if(!isStopRequested()&&isStarted()) {
+                Atunonom.start();
+            }
+        }
+        while(!isStopRequested()){
 
-            }
+        }
     }
     public Thread Atunonom = new Thread(new Runnable(){
         @Override
         public void run() {
             if(varrez=="Dreapta") {
-
                 loader1.setPosition(0);
-                loader2.setPosition(0.17);
+                loader2.setPosition(0.23);
 
-                arm.setTargetPosition(210);
+                arm.setTargetPosition(50);
                 arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 arm.setPower(1);
                 while (arm.isBusy()) ;
@@ -235,13 +231,16 @@ public class Atunonom_Adevraat extends LinearOpMode {
                 lastTime = System.currentTimeMillis();
                 while (lastTime + 100 > System.currentTimeMillis()) {
                 }
-                Translatare(0, 88,0.4);
-                lastTime = System.currentTimeMillis();
-                while (lastTime + 100 > System.currentTimeMillis()) {
-                }
-                loader1.setPosition(0.3);
+                arm.setTargetPosition(210);
+                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                arm.setPower(1);
+                while (arm.isBusy()) ;
+                arm.setPower(0);
+                arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                Translatare(0,74,0.6);
+                loader1.setPosition(0.15);
                 loader2.setPosition(0);
-                Translatare(0,-30 ,0.4 );
+                Translatare(0, -20,0.5);
                 arm.setTargetPosition(0);
                 arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 arm.setPower(1);
@@ -251,146 +250,233 @@ public class Atunonom_Adevraat extends LinearOpMode {
                 lastTime = System.currentTimeMillis();
                 while (lastTime + 100 > System.currentTimeMillis()) {
                 }
-
-                Translatare(-92,-108,0.4);
-                Translatare(0,-5,0.3);
+                Rotire(-210,0.5);
+                Translatare(85,0,0.5);
                 lastTime = System.currentTimeMillis();
                 while (lastTime + 200 > System.currentTimeMillis()) {
                 }
-
-                DJL.setPower(-0.35);
-                lastTime = System.currentTimeMillis();
-                while (lastTime + 2900 > System.currentTimeMillis()) {
-                }
-                DJL.setPower(0);
-                Translatare(0,46,0.5);
-                Rotire(-110,0.5);
-                Translatare(66,0,0.5);
-                Translatare(0,360,0.6);
-
-                // In warehouse
-
+                Translatare(0,180,0.4);
                 lastTime = System.currentTimeMillis();
                 while (lastTime + 200 > System.currentTimeMillis()) {
                 }
+                lastTime = System.currentTimeMillis();
+                while (lastTime + 4000 > System.currentTimeMillis()) {
+                }
+
+                loader1.setPosition(0);
+                loader2.setPosition(0.23);
+                lastTime = System.currentTimeMillis();
+                while (lastTime + 200 > System.currentTimeMillis()) {
+                }
+                Translatare(10,0,0.4);
+                Translatare(0,-140,0.5);
+                lastTime = System.currentTimeMillis();
+                while (lastTime + 200 > System.currentTimeMillis()) {
+                }
+                Rotire(-130,0.5);
+
+                Translatare(0,-80,0.7);
+                arm.setTargetPosition(450);
+                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                arm.setPower(1);
+                while (arm.isBusy()) ;
+                arm.setPower(0);
+                arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                lastTime = System.currentTimeMillis();
+                while (lastTime + 100 > System.currentTimeMillis()) {
+                }
+                loader1.setPosition(0.25);
+                loader2.setPosition(0);
+
+                arm.setTargetPosition(0);
+                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                arm.setPower(1);
+                while (arm.isBusy()) ;
+                arm.setPower(0);
+                arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                lastTime = System.currentTimeMillis();
+                while (lastTime + 100 > System.currentTimeMillis()) {
+                }
+                Rotire(100,0.5);
+                Translatare(100,0,0.5);
+                Translatare(0,140,0.6);
+               // Translatare(-100,0,0.6);
+
+
+
             }
 
+            if(varrez == "Mijloc")
+            {  loader1.setPosition(0);
+                loader2.setPosition(0.23);
 
-        if(varrez == "Mijloc")
-        {
+                arm.setTargetPosition(50);
+                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                arm.setPower(1);
+                while (arm.isBusy()) ;
+                arm.setPower(0);
+                arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                lastTime = System.currentTimeMillis();
+                while (lastTime + 100 > System.currentTimeMillis()) {
+                }
+                arm.setTargetPosition(135);
+                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                arm.setPower(1);
+                while (arm.isBusy()) ;
+                arm.setPower(0);
+                arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                Translatare(0,74,0.6);
+                loader1.setPosition(0.15);
+                loader2.setPosition(0);
+                Translatare(0, -20,0.5);
+                arm.setTargetPosition(0);
+                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                arm.setPower(1);
+                while (arm.isBusy()) ;
+                arm.setPower(0);
+                arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                lastTime = System.currentTimeMillis();
+                while (lastTime + 100 > System.currentTimeMillis()) {
+                }
+                Rotire(-210,0.5);
+                Translatare(85,0,0.5);
+                lastTime = System.currentTimeMillis();
+                while (lastTime + 200 > System.currentTimeMillis()) {
+                }
+                Translatare(0,180,0.4);
+                lastTime = System.currentTimeMillis();
+                while (lastTime + 200 > System.currentTimeMillis()) {
+                }
+                lastTime = System.currentTimeMillis();
+                while (lastTime + 4000 > System.currentTimeMillis()) {
+                }
+                loader1.setPosition(0);
+                loader2.setPosition(0.23);
+                lastTime = System.currentTimeMillis();
+                while (lastTime + 200 > System.currentTimeMillis()) {
+                }
+                Translatare(10,0,0.4);
+                Translatare(0,-140,0.5);
+                lastTime = System.currentTimeMillis();
+                while (lastTime + 200 > System.currentTimeMillis()) {
+                }
+                Rotire(-130,0.5);
 
-            loader1.setPosition(0);
-            loader2.setPosition(0.17);
+                Translatare(0,-80,0.7);
+                arm.setTargetPosition(450);
+                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                arm.setPower(1);
+                while (arm.isBusy()) ;
+                arm.setPower(0);
+                arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                lastTime = System.currentTimeMillis();
+                while (lastTime + 100 > System.currentTimeMillis()) {
+                }
+                loader1.setPosition(0.25);
+                loader2.setPosition(0);
 
-            arm.setTargetPosition(135 );
-            arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            arm.setPower(1);
-            while (arm.isBusy()) ;
-            arm.setPower(0);
-            arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            lastTime = System.currentTimeMillis();
-            while (lastTime + 100 > System.currentTimeMillis()) {
-            }
-            Translatare(0, 88,0.4);
-            lastTime = System.currentTimeMillis();
-            while (lastTime + 100 > System.currentTimeMillis()) {
-            }
-            loader1.setPosition(0.3);
-            loader2.setPosition(0);
-            Translatare(0,-30 ,0.4 );
-            arm.setTargetPosition(0);
-            arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            arm.setPower(1);
-            while (arm.isBusy()) ;
-            arm.setPower(0);
-            arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            lastTime = System.currentTimeMillis();
-            while (lastTime + 100 > System.currentTimeMillis()) {
-            }
+                arm.setTargetPosition(0);
+                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                arm.setPower(1);
+                while (arm.isBusy()) ;
+                arm.setPower(0);
+                arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                lastTime = System.currentTimeMillis();
+                while (lastTime + 100 > System.currentTimeMillis()) {
+                }
+                Rotire(100,0.5);
+                Translatare(100,0,0.5);
+                Translatare(0,170,0.6);
+                //Translatare(-100,0,0.6);
 
-            Translatare(-92,-108,0.4);
-            Translatare(0,-5,0.3);
-            lastTime = System.currentTimeMillis();
-            while (lastTime + 200 > System.currentTimeMillis()) {
-            }
-
-            DJL.setPower(-0.35);
-            lastTime = System.currentTimeMillis();
-            while (lastTime + 2900 > System.currentTimeMillis()) {
-            }
-            DJL.setPower(0);
-            Translatare(0,46,0.5);
-            Rotire(-110,0.5);
-            Translatare(66,0,0.5);
-            Translatare(0,360,0.6);
-
-            // In warehouse
-
-            lastTime = System.currentTimeMillis();
-            while (lastTime + 200 > System.currentTimeMillis()) {
-            }
-
-
-
-        }
-
-        if(varrez == "Stanga") {
-            loader1.setPosition(0);
-            loader2.setPosition(0.17);
-
-            arm.setTargetPosition(85 );
-            arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            arm.setPower(1);
-            while (arm.isBusy()) ;
-            arm.setPower(0);
-            arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            lastTime = System.currentTimeMillis();
-            while (lastTime + 100 > System.currentTimeMillis()) {
-            }
-            Translatare(0, 88,0.4);
-            lastTime = System.currentTimeMillis();
-            while (lastTime + 100 > System.currentTimeMillis()) {
-            }
-            loader1.setPosition(0.3);
-            loader2.setPosition(0);
-            Translatare(0,-30 ,0.4 );
-            arm.setTargetPosition(0);
-            arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            arm.setPower(1);
-            while (arm.isBusy()) ;
-            arm.setPower(0);
-            arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            lastTime = System.currentTimeMillis();
-            while (lastTime + 100 > System.currentTimeMillis()) {
             }
 
-            Translatare(-92,-108,0.4);
-            Translatare(0,-5,0.3);
-            lastTime = System.currentTimeMillis();
-            while (lastTime + 200 > System.currentTimeMillis()) {
+            if(varrez == "Stanga") {
+
+                loader1.setPosition(0);
+                loader2.setPosition(0.23);
+
+                arm.setTargetPosition(50);
+                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                arm.setPower(1);
+                while (arm.isBusy()) ;
+                arm.setPower(0);
+                arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                lastTime = System.currentTimeMillis();
+                while (lastTime + 100 > System.currentTimeMillis()) {
+                }
+                arm.setTargetPosition(85);
+                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                arm.setPower(1);
+                while (arm.isBusy()) ;
+                arm.setPower(0);
+                arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                Translatare(0,74,0.6);
+                loader1.setPosition(0.15);
+                loader2.setPosition(0);
+                Translatare(0, -20,0.5);
+                arm.setTargetPosition(0);
+                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                arm.setPower(1);
+                while (arm.isBusy()) ;
+                arm.setPower(0);
+                arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                lastTime = System.currentTimeMillis();
+                while (lastTime + 100 > System.currentTimeMillis()) {
+                }
+                Rotire(-210,0.5);
+                Translatare(85,0,0.5);
+                lastTime = System.currentTimeMillis();
+                while (lastTime + 200 > System.currentTimeMillis()) {
+                }
+                Translatare(0,180,0.4);
+                lastTime = System.currentTimeMillis();
+                while (lastTime + 200 > System.currentTimeMillis()) {
+                }
+                lastTime = System.currentTimeMillis();
+                while (lastTime + 4000 > System.currentTimeMillis()) {
+                }
+                loader1.setPosition(0);
+                loader2.setPosition(0.23);
+                lastTime = System.currentTimeMillis();
+                while (lastTime + 200 > System.currentTimeMillis()) {
+                }
+                Translatare(10,0,0.4);
+                Translatare(0,-140,0.5);
+                lastTime = System.currentTimeMillis();
+                while (lastTime + 200 > System.currentTimeMillis()) {
+                }
+                Rotire(-130,0.5);
+
+                Translatare(0,-80,0.7);
+                arm.setTargetPosition(450);
+                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                arm.setPower(1);
+                while (arm.isBusy()) ;
+                arm.setPower(0);
+                arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                lastTime = System.currentTimeMillis();
+                while (lastTime + 100 > System.currentTimeMillis()) {
+                }
+                loader1.setPosition(0.25);
+                loader2.setPosition(0);
+
+                arm.setTargetPosition(0);
+                arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                arm.setPower(1);
+                while (arm.isBusy()) ;
+                arm.setPower(0);
+                arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                lastTime = System.currentTimeMillis();
+                while (lastTime + 100 > System.currentTimeMillis()) {
+                }
+                Rotire(100,0.5);
+                Translatare(100,0,0.5);
+                Translatare(0,170,0.6);
+               // Translatare(-100,0,0.6);
+
+
             }
-
-            DJL.setPower(-0.35);
-            lastTime = System.currentTimeMillis();
-            while (lastTime + 2900 > System.currentTimeMillis()) {
-            }
-            DJL.setPower(0);
-            Translatare(0,46,0.5);
-            Rotire(-110,0.5);
-            Translatare(66,0,0.5);
-            Translatare(0,360,0.6);
-
-            // In warehouse
-
-            lastTime = System.currentTimeMillis();
-            while (lastTime + 200 > System.currentTimeMillis()) {
-            }
-        }
-
-
-
-
-
         }
     });
 
