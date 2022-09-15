@@ -35,9 +35,7 @@ FtcDashboard dashboard = FtcDashboard.getInstance();
 dashboard.sendTelemetryPacket(packet);
 ```
 
-Each telemetry packet overwrites the last, so **only send one packet per loop**. Violating this guideline often leads to flickering data in the client. If you have a modular subsystem architecture, consider having each subsystem produce a `Map<String, Object>` and aggregate them in the main loop with `TelemetryPacket#putAll()`. 
-
-For convenience, the dashboard offers a restricted implementation of `Telemetry`. 
+For convenience the dashboard offers a restricted implementation of `Telemetry`. 
 
 ```java
 FtcDashboard dashboard = FtcDashboard.getInstance();
