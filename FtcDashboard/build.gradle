@@ -1,5 +1,5 @@
 buildscript {
-    ext.dashboard_version = '0.4.4'
+    ext.dashboard_version = '0.4.5'
 }
 
 plugins {
@@ -13,7 +13,7 @@ android {
     compileSdkVersion 28
 
     defaultConfig {
-        minSdkVersion 19
+        minSdkVersion 23
         targetSdkVersion 26
     }
 
@@ -90,10 +90,10 @@ repositories {
 }
 
 dependencies {
-    api 'org.firstinspires.ftc:RobotCore:7.0.0'
-    api 'org.firstinspires.ftc:Hardware:7.0.0'
-    api 'org.firstinspires.ftc:RobotServer:7.0.0'
-    api 'org.firstinspires.ftc:FtcCommon:7.0.0'
+    api 'org.firstinspires.ftc:RobotCore:8.0.0'
+    api 'org.firstinspires.ftc:Hardware:8.0.0'
+    api 'org.firstinspires.ftc:RobotServer:8.0.0'
+    api 'org.firstinspires.ftc:FtcCommon:8.0.0'
 
     implementation 'androidx.annotation:annotation:1.1.0'
 

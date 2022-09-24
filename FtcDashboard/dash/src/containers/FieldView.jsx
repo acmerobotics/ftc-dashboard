@@ -13,6 +13,10 @@ class FieldView extends React.Component {
     this.canvasRef = React.createRef();
 
     this.renderField = this.renderField.bind(this);
+
+    this.overlay = {
+      ops: [],
+    };
   }
 
   componentDidMount() {
@@ -20,8 +24,16 @@ class FieldView extends React.Component {
     this.renderField();
   }
 
-  componentDidUpdate() {
-    this.field.setOverlay(this.props.overlay);
+  componentDidUpdate(prevProps) {
+    if (this.props.telemetry === prevProps.telemetry) return;
+
+    this.overlay = this.props.telemetry.reduce(
+      (acc, { fieldOverlay }) =>
+        fieldOverlay.ops.length === 0 ? acc : fieldOverlay,
+      this.overlay,
+    );
+
+    this.field.setOverlay(this.overlay);
     this.renderField();
   }
 
@@ -48,16 +60,13 @@ class FieldView extends React.Component {
 }
 
 FieldView.propTypes = {
-  overlay: PropTypes.shape({
-    ops: PropTypes.array.isRequired,
-  }).isRequired,
-
+  telemetry: PropTypes.arrayOf(PropTypes.object).isRequired,
   isDraggable: PropTypes.bool,
   isUnlocked: PropTypes.bool,
 };
 
 const mapStateToProps = ({ telemetry }) => ({
-  overlay: telemetry[telemetry.length - 1].fieldOverlay,
+  telemetry,
 });
 
 export default connect(mapStateToProps)(FieldView);

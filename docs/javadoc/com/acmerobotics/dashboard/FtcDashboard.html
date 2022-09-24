@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":9,"i3":9,"i4":42,"i5":10,"i6":9,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10,"i12":9,"i13":9,"i14":10,"i15":10,"i16":10,"i17":10,"i18":10,"i19":9,"i20":10,"i21":9,"i22":10,"i23":9,"i24":10,"i25":10};
+var methods = {"i0":10,"i1":10,"i2":9,"i3":9,"i4":10,"i5":42,"i6":10,"i7":9,"i8":10,"i9":10,"i10":10,"i11":10,"i12":10,"i13":9,"i14":9,"i15":10,"i16":10,"i17":10,"i18":10,"i19":10,"i20":9,"i21":10,"i22":9,"i23":10,"i24":9,"i25":10,"i26":10};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"],32:["t6","Deprecated Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -152,19 +152,25 @@ implements com.qualcomm.robotcore.eventloop.opmode.OpModeManagerNotifier.Notific
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#attachEventLoop-android.content.Context-com.qualcomm.ftccommon.FtcEventLoop-">attachEventLoop</a></span>(android.content.Context&nbsp;context,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#attachEventLoop-Context-com.qualcomm.ftccommon.FtcEventLoop-">attachEventLoop</a></span>(Context&nbsp;context,
                com.qualcomm.ftccommon.FtcEventLoop&nbsp;eventLoop)</code>
 <div class="block">Attaches the event loop to the instance for op mode management.</div>
 </td>
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code>static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#attachWebServer-android.content.Context-com.qualcomm.robotcore.util.WebHandlerManager-">attachWebServer</a></span>(android.content.Context&nbsp;context,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#attachWebServer-Context-com.qualcomm.robotcore.util.WebHandlerManager-">attachWebServer</a></span>(Context&nbsp;context,
                com.qualcomm.robotcore.util.WebHandlerManager&nbsp;manager)</code>
 <div class="block">Attaches a web server for accessing the dashboard through the phone (like OBJ/Blocks).</div>
 </td>
 </tr>
 <tr id="i4" class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#clearTelemetry--">clearTelemetry</a></span>()</code>
+<div class="block">Clears telemetry data from all clients.</div>
+</td>
+</tr>
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code><a href="../../../com/acmerobotics/dashboard/config/variable/CustomVariable.html" title="class in com.acmerobotics.dashboard.config.variable">CustomVariable</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#getConfigRoot--">getConfigRoot</a></span>()</code>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
@@ -172,124 +178,124 @@ implements com.qualcomm.robotcore.eventloop.opmode.OpModeManagerNotifier.Notific
 </div>
 </td>
 </tr>
-<tr id="i5" class="rowColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#getImageQuality--">getImageQuality</a></span>()</code>
-<div class="block">Returns the image quality used by <a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#sendImage-android.graphics.Bitmap-"><code>sendImage(Bitmap)</code></a> and
+<div class="block">Returns the image quality used by <a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#sendImage-Bitmap-"><code>sendImage(Bitmap)</code></a> and
  <a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#startCameraStream-org.firstinspires.ftc.robotcore.external.stream.CameraStreamSource-double-"><code>startCameraStream(CameraStreamSource, double)</code></a></div>
 </td>
 </tr>
-<tr id="i6" class="altColor">
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../com/acmerobotics/dashboard/FtcDashboard.html" title="class in com.acmerobotics.dashboard">FtcDashboard</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#getInstance--">getInstance</a></span>()</code>
 <div class="block">Returns the active instance instance.</div>
 </td>
 </tr>
-<tr id="i7" class="rowColor">
+<tr id="i8" class="altColor">
 <td class="colFirst"><code>org.firstinspires.ftc.robotcore.external.Telemetry</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#getTelemetry--">getTelemetry</a></span>()</code>
-<div class="block">Returns a telemetry object that proxies <a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#sendTelemetryPacket-com.acmerobotics.dashboard.telemetry.TelemetryPacket-"><code>sendTelemetryPacket(TelemetryPacket)</code></a>.</div>
+<div class="block">Returns a <code>Telemetry</code> object that delegates to the telemetry methods of this class.</div>
 </td>
 </tr>
-<tr id="i8" class="altColor">
+<tr id="i9" class="rowColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#getTelemetryTransmissionInterval--">getTelemetryTransmissionInterval</a></span>()</code>
 <div class="block">Returns the telemetry transmission interval in milliseconds.</div>
 </td>
 </tr>
-<tr id="i9" class="rowColor">
+<tr id="i10" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#onOpModePostStop-com.qualcomm.robotcore.eventloop.opmode.OpMode-">onOpModePostStop</a></span>(com.qualcomm.robotcore.eventloop.opmode.OpMode&nbsp;opMode)</code>&nbsp;</td>
 </tr>
-<tr id="i10" class="altColor">
+<tr id="i11" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#onOpModePreInit-com.qualcomm.robotcore.eventloop.opmode.OpMode-">onOpModePreInit</a></span>(com.qualcomm.robotcore.eventloop.opmode.OpMode&nbsp;opMode)</code>&nbsp;</td>
 </tr>
-<tr id="i11" class="rowColor">
+<tr id="i12" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#onOpModePreStart-com.qualcomm.robotcore.eventloop.opmode.OpMode-">onOpModePreStart</a></span>(com.qualcomm.robotcore.eventloop.opmode.OpMode&nbsp;opMode)</code>&nbsp;</td>
 </tr>
-<tr id="i12" class="altColor">
+<tr id="i13" class="rowColor">
 <td class="colFirst"><code>static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#populateMenu-android.content.Context-android.view.Menu-">populateMenu</a></span>(android.content.Context&nbsp;context,
-            android.view.Menu&nbsp;menu)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#populateMenu-Context-Menu-">populateMenu</a></span>(Context&nbsp;context,
+            Menu&nbsp;menu)</code>
 <div class="block">Populates the menu with dashboard enable/disable options.</div>
 </td>
 </tr>
-<tr id="i13" class="rowColor">
+<tr id="i14" class="altColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#registerOpMode-com.qualcomm.robotcore.eventloop.opmode.OpModeManager-">registerOpMode</a></span>(com.qualcomm.robotcore.eventloop.opmode.OpModeManager&nbsp;manager)</code>&nbsp;</td>
 </tr>
-<tr id="i14" class="altColor">
+<tr id="i15" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#removeConfigVariable-java.lang.String-java.lang.String-">removeConfigVariable</a></span>(java.lang.String&nbsp;category,
                     java.lang.String&nbsp;name)</code>
 <div class="block">Remove a config variable.</div>
 </td>
 </tr>
-<tr id="i15" class="rowColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#sendImage-android.graphics.Bitmap-">sendImage</a></span>(android.graphics.Bitmap&nbsp;bitmap)</code>
-<div class="block">Sends an image to the dashboard for display (MJPEG style).</div>
-</td>
-</tr>
 <tr id="i16" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#sendTelemetryPacket-com.acmerobotics.dashboard.telemetry.TelemetryPacket-">sendTelemetryPacket</a></span>(<a href="../../../com/acmerobotics/dashboard/telemetry/TelemetryPacket.html" title="class in com.acmerobotics.dashboard.telemetry">TelemetryPacket</a>&nbsp;telemetryPacket)</code>
-<div class="block">Sends telemetry information to all instance clients.</div>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#sendImage-Bitmap-">sendImage</a></span>(Bitmap&nbsp;bitmap)</code>
+<div class="block">Sends an image to the dashboard for display (MJPEG style).</div>
 </td>
 </tr>
 <tr id="i17" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#setImageQuality-int-">setImageQuality</a></span>(int&nbsp;quality)</code>
-<div class="block">Sets the image quality used by <a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#sendImage-android.graphics.Bitmap-"><code>sendImage(Bitmap)</code></a> and
- <a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#startCameraStream-org.firstinspires.ftc.robotcore.external.stream.CameraStreamSource-double-"><code>startCameraStream(CameraStreamSource, double)</code></a></div>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#sendTelemetryPacket-com.acmerobotics.dashboard.telemetry.TelemetryPacket-">sendTelemetryPacket</a></span>(<a href="../../../com/acmerobotics/dashboard/telemetry/TelemetryPacket.html" title="class in com.acmerobotics.dashboard.telemetry">TelemetryPacket</a>&nbsp;telemetryPacket)</code>
+<div class="block">Queues a telemetry packet to be sent to all clients.</div>
 </td>
 </tr>
 <tr id="i18" class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#setImageQuality-int-">setImageQuality</a></span>(int&nbsp;quality)</code>
+<div class="block">Sets the image quality used by <a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#sendImage-Bitmap-"><code>sendImage(Bitmap)</code></a> and
+ <a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#startCameraStream-org.firstinspires.ftc.robotcore.external.stream.CameraStreamSource-double-"><code>startCameraStream(CameraStreamSource, double)</code></a></div>
+</td>
+</tr>
+<tr id="i19" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#setTelemetryTransmissionInterval-int-">setTelemetryTransmissionInterval</a></span>(int&nbsp;newTransmissionInterval)</code>
 <div class="block">Sets the telemetry transmission interval.</div>
 </td>
 </tr>
-<tr id="i19" class="rowColor">
+<tr id="i20" class="altColor">
 <td class="colFirst"><code>static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#start-android.content.Context-">start</a></span>(android.content.Context&nbsp;context)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#start-Context-">start</a></span>(Context&nbsp;context)</code>
 <div class="block">Starts the dashboard.</div>
 </td>
 </tr>
-<tr id="i20" class="altColor">
+<tr id="i21" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#startCameraStream-org.firstinspires.ftc.robotcore.external.stream.CameraStreamSource-double-">startCameraStream</a></span>(org.firstinspires.ftc.robotcore.external.stream.CameraStreamSource&nbsp;source,
                  double&nbsp;maxFps)</code>
 <div class="block">Sends a stream of camera frames at a regular interval.</div>
 </td>
 </tr>
-<tr id="i21" class="rowColor">
+<tr id="i22" class="altColor">
 <td class="colFirst"><code>static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#stop-android.content.Context-">stop</a></span>(android.content.Context&nbsp;context)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#stop-Context-">stop</a></span>(Context&nbsp;context)</code>
 <div class="block">Stops the instance and the underlying WebSocket server.</div>
 </td>
 </tr>
-<tr id="i22" class="altColor">
+<tr id="i23" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#stopCameraStream--">stopCameraStream</a></span>()</code>
 <div class="block">Stops the camera frame stream.</div>
 </td>
 </tr>
-<tr id="i23" class="rowColor">
+<tr id="i24" class="altColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#suppressOpMode--">suppressOpMode</a></span>()</code>
 <div class="block">Call before start to suppress the enable/disable op mode.</div>
 </td>
 </tr>
-<tr id="i24" class="altColor">
+<tr id="i25" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#updateConfig--">updateConfig</a></span>()</code>
 <div class="block">Sends updated configuration data to all instance clients.</div>
 </td>
 </tr>
-<tr id="i25" class="rowColor">
+<tr id="i26" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#withConfigRoot-org.firstinspires.ftc.robotcore.external.function.Consumer-">withConfigRoot</a></span>(org.firstinspires.ftc.robotcore.external.function.Consumer&lt;<a href="../../../com/acmerobotics/dashboard/config/variable/CustomVariable.html" title="class in com.acmerobotics.dashboard.config.variable">CustomVariable</a>&gt;&nbsp;function)</code>
 <div class="block">Executes function in an exclusive context for config tree modification.</div>
@@ -337,50 +343,50 @@ public static&nbsp;void&nbsp;registerOpMode(com.qualcomm.robotcore.eventloop.opm
 <div class="block">Call before start to suppress the enable/disable op mode.</div>
 </li>
 </ul>
-<a name="start-android.content.Context-">
+<a name="start-Context-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>start</h4>
 <pre>@OnCreate
-public static&nbsp;void&nbsp;start(android.content.Context&nbsp;context)</pre>
+public static&nbsp;void&nbsp;start(Context&nbsp;context)</pre>
 <div class="block">Starts the dashboard.</div>
 </li>
 </ul>
-<a name="attachWebServer-android.content.Context-com.qualcomm.robotcore.util.WebHandlerManager-">
+<a name="attachWebServer-Context-com.qualcomm.robotcore.util.WebHandlerManager-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>attachWebServer</h4>
 <pre>@WebHandlerRegistrar
-public static&nbsp;void&nbsp;attachWebServer(android.content.Context&nbsp;context,
+public static&nbsp;void&nbsp;attachWebServer(Context&nbsp;context,
                                                         com.qualcomm.robotcore.util.WebHandlerManager&nbsp;manager)</pre>
 <div class="block">Attaches a web server for accessing the dashboard through the phone (like OBJ/Blocks).</div>
 </li>
 </ul>
-<a name="attachEventLoop-android.content.Context-com.qualcomm.ftccommon.FtcEventLoop-">
+<a name="attachEventLoop-Context-com.qualcomm.ftccommon.FtcEventLoop-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>attachEventLoop</h4>
 <pre>@OnCreateEventLoop
-public static&nbsp;void&nbsp;attachEventLoop(android.content.Context&nbsp;context,
+public static&nbsp;void&nbsp;attachEventLoop(Context&nbsp;context,
                                                       com.qualcomm.ftccommon.FtcEventLoop&nbsp;eventLoop)</pre>
 <div class="block">Attaches the event loop to the instance for op mode management.</div>
 </li>
 </ul>
-<a name="populateMenu-android.content.Context-android.view.Menu-">
+<a name="populateMenu-Context-Menu-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>populateMenu</h4>
 <pre>@OnCreateMenu
-public static&nbsp;void&nbsp;populateMenu(android.content.Context&nbsp;context,
-                                              android.view.Menu&nbsp;menu)</pre>
+public static&nbsp;void&nbsp;populateMenu(Context&nbsp;context,
+                                              Menu&nbsp;menu)</pre>
 <div class="block">Populates the menu with dashboard enable/disable options.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
@@ -388,14 +394,14 @@ public static&nbsp;void&nbsp;populateMenu(android.content.Context&nbsp;context,
 </dl>
 </li>
 </ul>
-<a name="stop-android.content.Context-">
+<a name="stop-Context-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>stop</h4>
 <pre>@OnDestroy
-public static&nbsp;void&nbsp;stop(android.content.Context&nbsp;context)</pre>
+public static&nbsp;void&nbsp;stop(Context&nbsp;context)</pre>
 <div class="block">Stops the instance and the underlying WebSocket server.</div>
 </li>
 </ul>
@@ -406,7 +412,7 @@ public static&nbsp;void&nbsp;stop(android.content.Context&nbsp;context)</pre>
 <li class="blockList">
 <h4>getInstance</h4>
 <pre>public static&nbsp;<a href="../../../com/acmerobotics/dashboard/FtcDashboard.html" title="class in com.acmerobotics.dashboard">FtcDashboard</a>&nbsp;getInstance()</pre>
-<div class="block">Returns the active instance instance. This should be called after <a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#start-android.content.Context-"><code>start(Context)</code></a>.</div>
+<div class="block">Returns the active instance instance. This should be called after <a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#start-Context-"><code>start(Context)</code></a>.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>active instance instance or null outside of its lifecycle</dd>
@@ -420,11 +426,24 @@ public static&nbsp;void&nbsp;stop(android.content.Context&nbsp;context)</pre>
 <li class="blockList">
 <h4>sendTelemetryPacket</h4>
 <pre>public&nbsp;void&nbsp;sendTelemetryPacket(<a href="../../../com/acmerobotics/dashboard/telemetry/TelemetryPacket.html" title="class in com.acmerobotics.dashboard.telemetry">TelemetryPacket</a>&nbsp;telemetryPacket)</pre>
-<div class="block">Sends telemetry information to all instance clients.</div>
+<div class="block">Queues a telemetry packet to be sent to all clients. Packets are sent in batches of
+ approximate period <a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#getTelemetryTransmissionInterval--"><code>getTelemetryTransmissionInterval()</code></a>. Clients display the most
+ recent value received for each key, and the data is cleared upon op mode init or a call to
+ <a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#clearTelemetry--"><code>clearTelemetry()</code></a>.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>telemetryPacket</code> - packet to send</dd>
 </dl>
+</li>
+</ul>
+<a name="clearTelemetry--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>clearTelemetry</h4>
+<pre>public&nbsp;void&nbsp;clearTelemetry()</pre>
+<div class="block">Clears telemetry data from all clients.</div>
 </li>
 </ul>
 <a name="getTelemetry--">
@@ -434,7 +453,9 @@ public static&nbsp;void&nbsp;stop(android.content.Context&nbsp;context)</pre>
 <li class="blockList">
 <h4>getTelemetry</h4>
 <pre>public&nbsp;org.firstinspires.ftc.robotcore.external.Telemetry&nbsp;getTelemetry()</pre>
-<div class="block">Returns a telemetry object that proxies <a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#sendTelemetryPacket-com.acmerobotics.dashboard.telemetry.TelemetryPacket-"><code>sendTelemetryPacket(TelemetryPacket)</code></a>.</div>
+<div class="block">Returns a <code>Telemetry</code> object that delegates to the telemetry methods of this class.
+ Beware that the implementation of the interface is incomplete, and users should test each
+ method they intend to use.</div>
 </li>
 </ul>
 <a name="getTelemetryTransmissionInterval--">
@@ -556,13 +577,13 @@ public&nbsp;<a href="../../../com/acmerobotics/dashboard/config/variable/CustomV
 </dl>
 </li>
 </ul>
-<a name="sendImage-android.graphics.Bitmap-">
+<a name="sendImage-Bitmap-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>sendImage</h4>
-<pre>public&nbsp;void&nbsp;sendImage(android.graphics.Bitmap&nbsp;bitmap)</pre>
+<pre>public&nbsp;void&nbsp;sendImage(Bitmap&nbsp;bitmap)</pre>
 <div class="block">Sends an image to the dashboard for display (MJPEG style). Note that the encoding process is
  synchronous. Stops the active stream if running.</div>
 <dl>
@@ -604,7 +625,7 @@ public&nbsp;<a href="../../../com/acmerobotics/dashboard/config/variable/CustomV
 <li class="blockList">
 <h4>getImageQuality</h4>
 <pre>public&nbsp;int&nbsp;getImageQuality()</pre>
-<div class="block">Returns the image quality used by <a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#sendImage-android.graphics.Bitmap-"><code>sendImage(Bitmap)</code></a> and
+<div class="block">Returns the image quality used by <a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#sendImage-Bitmap-"><code>sendImage(Bitmap)</code></a> and
  <a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#startCameraStream-org.firstinspires.ftc.robotcore.external.stream.CameraStreamSource-double-"><code>startCameraStream(CameraStreamSource, double)</code></a></div>
 </li>
 </ul>
@@ -615,7 +636,7 @@ public&nbsp;<a href="../../../com/acmerobotics/dashboard/config/variable/CustomV
 <li class="blockList">
 <h4>setImageQuality</h4>
 <pre>public&nbsp;void&nbsp;setImageQuality(int&nbsp;quality)</pre>
-<div class="block">Sets the image quality used by <a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#sendImage-android.graphics.Bitmap-"><code>sendImage(Bitmap)</code></a> and
+<div class="block">Sets the image quality used by <a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#sendImage-Bitmap-"><code>sendImage(Bitmap)</code></a> and
  <a href="../../../com/acmerobotics/dashboard/FtcDashboard.html#startCameraStream-org.firstinspires.ftc.robotcore.external.stream.CameraStreamSource-double-"><code>startCameraStream(CameraStreamSource, double)</code></a></div>
 </li>
 </ul>
