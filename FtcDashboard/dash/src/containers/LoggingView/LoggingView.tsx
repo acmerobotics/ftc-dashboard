@@ -1,4 +1,4 @@
-import React, {
+import {
   useState,
   useEffect,
   useReducer,
@@ -119,7 +119,7 @@ const MenuItemSwitch = ({
     | (FormEventHandler<HTMLButtonElement> & ((checked: boolean) => void));
   children: JSX.Element | string;
 }) => (
-  <Switch.Group as="div" className="flex items-center space-x-4 py-1 px-3">
+  <Switch.Group as="div" className="flex items-center px-3 py-1 space-x-4">
     <Switch
       as="button"
       checked={checked}
@@ -295,9 +295,11 @@ const LoggingView = ({
     return `Download logs for ${currentOpModeName}`;
   };
 
+  // Note: Heading Wrapper Div must have higher z-index set than BaseViewBody
   return (
     <BaseView isUnlocked={isUnlocked}>
-      <div className="flex-center">
+      {/* Heading Wrapper Div */}
+      <div className="z-10 flex-center">
         <BaseViewHeading isDraggable={isDraggable}>Logging</BaseViewHeading>
         <div className="flex items-center mr-3 space-x-1">
           <button
@@ -322,7 +324,7 @@ const LoggingView = ({
           <div className="relative inline-block">
             <button
               ref={keyShowingMenuButtonRef}
-              className="icon-btn w-8 h-8"
+              className="w-8 h-8 icon-btn"
               onClick={() =>
                 setIsKeyShowingMenuVisible(!isKeyShowingMenuVisible)
               }
@@ -340,10 +342,10 @@ const LoggingView = ({
             >
               <div
                 ref={keyShowingMenuRef}
-                className="absolute right-0 mt-2 py-2 origin-top-right bg-white border border-gray-200 rounded-md shadow-lg outline-none"
+                className="absolute right-0 py-2 mt-2 origin-top-right bg-white border border-gray-200 rounded-md shadow-lg outline-none"
                 style={{ zIndex: 99 }}
               >
-                <p className="text-sm leading-5 border-b border-gray-100 pl-3 pb-1 mb-1 text-gray-500">
+                <p className="pb-1 pl-3 mb-1 text-sm leading-5 text-gray-500 border-b border-gray-100">
                   Toggle Items
                 </p>
                 <MenuItemSwitch
@@ -374,7 +376,7 @@ const LoggingView = ({
           </div>
         </div>
       </div>
-      <BaseViewBody>
+      <BaseViewBody className="z-0">
         <CustomVirtualGrid
           header={
             telemetryStore.keys.length !== 0
