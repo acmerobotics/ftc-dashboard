@@ -514,7 +514,7 @@ export default function ConfigurableLayout() {
           }`}
         >
           <h3 className="text-2xl">Your custom layout is empty!</h3>
-          <p className="text-gray-600 mt-3">
+          <p className="mt-3 text-gray-600">
             Press the floating pencil icon near the bottom right
             <br />
             and then click the green plus button to create your own layouts!
@@ -549,13 +549,13 @@ export default function ConfigurableLayout() {
                 }`}
               >
                 <button
-                  className="p-4 border-4 border-yellow-600 rounded-full bg-opacity-50 opacity-50 focus:outline-none focus:ring focus:ring-yellow-800"
+                  className="p-4 bg-opacity-50 border-4 border-yellow-600 rounded-full opacity-50 focus:outline-none focus:ring focus:ring-yellow-800"
                   onClick={() => {
                     removeItem(item.id);
                   }}
                   disabled={!isInDeleteMode}
                 >
-                  <DeleteXIcon className="text-yellow-600 w-20 h-20" />
+                  <DeleteXIcon className="w-20 h-20 text-yellow-600" />
                 </button>
               </div>
             </div>
@@ -573,12 +573,12 @@ export default function ConfigurableLayout() {
         icon={!isLayoutLocked ? LockIconURL : CreateIconURL}
         customClassName={`${
           !isLayoutLocked
-            ? `bg-gray-500 focus:ring-4 focus:ring-gray-600 shadow-gray-900-md-prominent hover:shadow-gray-900-lg-prominent`
-            : `bg-red-500 focus:ring-4 focus:ring-red-600 shadow-red-500-md-prominent hover:shadow-red-500-lg-prominent`
+            ? `bg-gray-500 focus:ring-4 focus:ring-gray-600 shadow-md shadow-gray-900/30 hover:shadow-lg hover:shadow-gray-900/50`
+            : `bg-red-500 focus:ring-4 focus:ring-red-600 shadow-md shadow-red-500/40 hover:shadow-lg hover:shadow-red-500/60`
         }`}
       >
         <RadialFabChild
-          customClass="w-12 h-12 bg-green-500 border border-green-600 shadow-green-500-md-prominent hover:shadow-green-500-lg-prominent focus:ring focus:ring-green-600"
+          customClass="w-12 h-12 bg-green-500 border border-green-600 shadow-md shadow-green-500/30 hover:shadow-lg hover:shadow-green-500/50 focus:ring focus:ring-green-600"
           angle={(-80 * Math.PI) / 180}
           openMargin="5em"
           fineAdjustIconX="2%"
@@ -586,13 +586,13 @@ export default function ConfigurableLayout() {
           toolTipText="Add Item"
           clickEvent={() => setIsShowingViewPicker(!isShowingViewPicker)}
         >
-          <AddIcon className="text-white w-6 h-6" />
+          <AddIcon className="w-6 h-6 text-white" />
         </RadialFabChild>
         <RadialFabChild
-          customClass={`w-12 h-12 border shadow-orange-500-md-prominent hover:shadow-orange-500-lg-prominent focus:ring ${
+          customClass={`w-12 h-12 border shadow-md shadow-orange-500/30 hover:shadow-lg hover:shadow-orange-500/50 focus:ring ${
             isInDeleteMode
-              ? 'bg-orange-500 border-yellow-600 focus:ring-yellow-300'
-              : 'bg-yellow-500 border-yellow-600 focus:ring-orange-300'
+              ? 'bg-orange-500 border-yellow-600 focus:ring-amber-300'
+              : 'bg-amber-500 border-amber-600 focus:ring-orange-300'
           }`}
           angle={(-135 * Math.PI) / 180}
           openMargin="5em"
@@ -608,7 +608,7 @@ export default function ConfigurableLayout() {
           )}
         </RadialFabChild>
         <RadialFabChild
-          customClass="w-12 h-12 bg-indigo-500 border border-indigo-600 shadow-indigo-500-md-prominent hover:shadow-indigo-500-lg-prominent focus:ring focus:ring-indigo-300"
+          customClass="w-12 h-12 bg-indigo-500 border border-indigo-600 shadow-md shadow-indigo-500/30 hover:shadow-lg hover:shadow-indigo-500/50 focus:ring focus:ring-indigo-300"
           angle={(170 * Math.PI) / 180}
           openMargin="5em"
           fineAdjustIconX="8%"
