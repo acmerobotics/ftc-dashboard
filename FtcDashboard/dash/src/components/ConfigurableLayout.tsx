@@ -549,13 +549,13 @@ export default function ConfigurableLayout() {
                 }`}
               >
                 <button
-                  className="p-4 bg-opacity-50 border-4 border-yellow-600 rounded-full opacity-50 focus:outline-none focus:ring focus:ring-yellow-800"
+                  className="p-4 transition bg-opacity-50 border-4 border-yellow-600 rounded-full opacity-50 group focus:outline-none focus:ring focus:ring-yellow-800 hover:border-yellow-800"
                   onClick={() => {
                     removeItem(item.id);
                   }}
                   disabled={!isInDeleteMode}
                 >
-                  <DeleteXIcon className="w-20 h-20 text-yellow-600" />
+                  <DeleteXIcon className="w-20 h-20 text-yellow-600 transition group-hover:text-yellow-800" />
                 </button>
               </div>
             </div>
