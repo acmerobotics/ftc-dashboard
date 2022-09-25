@@ -28,7 +28,7 @@ const configureStore = () => {
     storageMiddleware,
   ];
 
-  if (import.meta.env.NODE_ENV === 'development') {
+  if (import.meta.env.DEV) {
     const logger = createLogger({
       predicate: (getState, action) =>
         HIDDEN_ACTIONS.indexOf(action.type) === -1,
