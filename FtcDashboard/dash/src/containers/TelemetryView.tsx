@@ -48,7 +48,7 @@ const TelemetryView = ({
   const telemetryLines = Object.keys(data).map((key) => (
     <span
       key={key}
-      dangerouslySetInnerHTML={{ __html: `${data[key]}<br />` }}
+      dangerouslySetInnerHTML={{ __html: `${key}: ${data[key]}<br />` }}
     />
   ));
 
