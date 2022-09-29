@@ -237,6 +237,12 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                         pendingTelemetry.clear();
                     }
 
+                    // only the latest packet field overlay is used
+                    // this helps save bandwidth, especially for more complex overlays
+                    for (TelemetryPacket packet : telemetryToSend.subList(0, telemetryToSend.size() - 1)) {
+                        packet.fieldOverlay().clear();
+                    }
+
                     sendAll(new ReceiveTelemetry(telemetryToSend));
 
                     Thread.sleep(telemetryTransmissionInterval);
