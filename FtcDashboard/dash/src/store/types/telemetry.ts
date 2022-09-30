@@ -53,7 +53,7 @@ type Spline = {
   fy: number;
 };
 
-type DrawOp =
+export type DrawOp =
   | Fill
   | Stroke
   | StrokeWidth
