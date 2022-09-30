@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 
 import BaseView, {
@@ -26,11 +26,16 @@ const FieldView = ({
     }
   };
 
-  const canvasRef = useCallback((node: typeof AutoFitCanvas) => {
-    if (node) {
-      fieldRef.current = new Field(node);
-      renderField();
-    }
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  // Not the most reliable method. Does not guarantee that canvasRef.current is defined at time of call.
+  // Currently, this is only okay because refs are guaranteed to be defined on mount.
+  // Behavior is implicit and not under contract.
+  // Ideally, this be solved by setting the field in a useCallback passed into the component ref.
+  // However, this does not work without a rewrite of AutoFitCanvas due to forwardRef.
+  // Would require changes to all components using AutoFitCanvas
+  useEffect(() => {
+    fieldRef.current = new Field(canvasRef.current);
+    renderField();
   }, []);
 
   const telemetry = useSelector((state: RootState) => state.telemetry);
@@ -53,11 +58,11 @@ const FieldView = ({
       <BaseViewHeading isDraggable={isDraggable}>Field</BaseViewHeading>
       <AutoFitCanvas
         ref={canvasRef}
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         onResize={renderField}
         containerHeight="calc(100% - 3em)"
       />
     </BaseView>
   );
 };
+
+export default FieldView;
