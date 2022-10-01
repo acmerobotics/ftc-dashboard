@@ -1,17 +1,6 @@
 import { cloneDeep } from 'lodash';
 import './canvas';
-import fieldImageName from '../assets/field.png';
-
-// this is a bit of a hack bit it'll have to do
-// it's much better than sticking field renders in requestAnimationFrame()
-const fieldImage = new Image();
-const fieldsToRender = [];
-let fieldLoaded = false;
-fieldImage.onload = function () {
-  fieldLoaded = true;
-  fieldsToRender.forEach((field) => field.render());
-};
-fieldImage.src = fieldImageName;
+import DEFAULT_FIELD_IMAGE_NAME from '../assets/field.png';
 
 // all dimensions in this file are *CSS* pixels unless otherwise stated
 const DEFAULT_OPTIONS = {
@@ -34,6 +23,17 @@ export default class Field {
     this.overlay = {
       ops: [],
     };
+
+    // this is a bit of a hack bit it'll have to do
+    // it's much better than sticking field renders in requestAnimationFrame()
+    this.fieldImage = new Image();
+    this.fieldsToRender = [];
+    this.fieldLoaded = false;
+    this.fieldImage.onload = () => {
+      this.fieldLoaded = true;
+      this.fieldsToRender.forEach((field) => field.render());
+    };
+    this.fieldImage.src = DEFAULT_FIELD_IMAGE_NAME;
   }
 
   setOverlay(overlay) {
@@ -52,8 +52,8 @@ export default class Field {
     const smallerDim = width < height ? width : height;
     const fieldSize = smallerDim - 2 * this.options.padding;
 
-    if (!fieldLoaded && fieldsToRender.indexOf(this) === -1) {
-      fieldsToRender.push(this);
+    if (!this.fieldLoaded && this.fieldsToRender.indexOf(this) === -1) {
+      this.fieldsToRender.push(this);
     }
 
     this.renderField(
@@ -67,7 +67,7 @@ export default class Field {
   renderField(x, y, width, height) {
     this.ctx.save();
     this.ctx.globalAlpha = this.options.alpha;
-    this.ctx.drawImage(fieldImage, x, y, width, height);
+    this.ctx.drawImage(this.fieldImage, x, y, width, height);
     this.ctx.restore();
 
     this.renderGridLines(x, y, width, height, 7, 7);
