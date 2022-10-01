@@ -2,6 +2,7 @@ import styled from 'styled-components';
 
 type BaseViewProps = {
   isUnlocked?: boolean;
+  viewId?: string;
 };
 
 const BaseView = styled.div.attrs<BaseViewProps>((props) => ({

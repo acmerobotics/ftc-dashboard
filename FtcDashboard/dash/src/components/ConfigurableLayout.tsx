@@ -329,6 +329,8 @@ export default function ConfigurableLayout() {
     };
   }, []);
 
+  // TODO: This should move out of an effect
+  // Not-noticeable but grid isn't actually initialized on mount
   useEffect(() => {
     const initialLayoutStorageValue = window.localStorage.getItem(
       LOCAL_STORAGE_LAYOUT_KEY,
@@ -540,6 +542,7 @@ export default function ConfigurableLayout() {
               {React.cloneElement(VIEW_MAP[item.view], {
                 isDraggable: item.layout.isDraggable,
                 isUnlocked: !isLayoutLocked,
+                viewId: item.id,
               })}
               <div
                 className={`absolute top-0 left-0 w-full h-full bg-yellow-300 bg-opacity-50 flex-center rounded transition ${
