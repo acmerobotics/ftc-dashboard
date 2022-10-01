@@ -21,6 +21,7 @@ type FieldViewProps = BaseViewProps & BaseViewHeadingProps;
 const FieldView = ({
   isDraggable = false,
   isUnlocked = false,
+  viewId,
 }: FieldViewProps) => {
   const fieldRef = useRef<Field | null>(null);
 
@@ -71,19 +72,27 @@ const FieldView = ({
   );
 
   const [customFieldImageSrc, setCustomFieldImageSrc] = useState<string | null>(
-    null,
+    () => {
+      const settings = localStorage.getItem(`view-settings-image-${viewId}`);
+      return settings;
+    },
   );
 
   const imageUploadInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (customFieldImageSrc === null) {
+    if (customFieldImageSrc === null || !customFieldImageSrc.length) {
       fieldRef.current?.resetFieldImageSrc();
       if (imageUploadInputRef.current) imageUploadInputRef.current.value = '';
     } else {
       fieldRef.current?.setFieldImageSrc(customFieldImageSrc);
     }
-  }, [customFieldImageSrc]);
+
+    localStorage.setItem(
+      `view-settings-image-${viewId}`,
+      customFieldImageSrc ?? '',
+    );
+  }, [customFieldImageSrc, viewId]);
 
   // TODO: Provide better error feedback
   const onImageInputChange = (evt: Event) => {
