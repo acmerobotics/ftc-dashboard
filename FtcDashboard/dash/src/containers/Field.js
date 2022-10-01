@@ -40,6 +40,16 @@ export default class Field {
     this.overlay = overlay;
   }
 
+  setFieldImageSrc(src) {
+    this.fieldImage.src = src;
+    this.render();
+  }
+
+  resetFieldImageSrc() {
+    this.fieldImage.src = DEFAULT_FIELD_IMAGE_NAME;
+    this.render();
+  }
+
   render() {
     // eslint-disable-next-line
     this.canvas.width = this.canvas.width; // clears the canvas
