@@ -22,7 +22,6 @@ class GraphCanvas extends React.PureComponent {
 
   componentDidMount() {
     this.graph = new Graph(this.canvasRef.current, this.props.options);
-    this.renderGraph();
   }
 
   componentWillUnmount() {
@@ -35,10 +34,16 @@ class GraphCanvas extends React.PureComponent {
     if (this.props.data === prevProps.data) return;
 
     this.graph.add(this.props.data);
+
+    if (!this.props.paused && !this.requestId) {
+      this.renderGraph();
+    }
   }
 
   renderGraph() {
-    if (!this.props.paused && this.graph) {
+    if (this.props.paused) {
+      this.requestId = 0;
+    } else {
       this.setState(() => ({
         graphEmpty: !this.graph.render(),
       }));
