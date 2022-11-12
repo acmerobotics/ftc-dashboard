@@ -412,6 +412,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             sockets.clear();
         }
 
+        stopCameraStream();
+
         enabled = false;
 
         updateStatusView();
@@ -683,9 +685,18 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * @param telemetryPacket packet to send
      */
     public void sendTelemetryPacket(TelemetryPacket telemetryPacket) {
+        if (!enabled) {
+            return;
+        }
+
         telemetryPacket.addTimestamp();
 
         synchronized (pendingTelemetry) {
+            // TODO: a circular buffer is probably a better idea, but this will work for now
+            if (pendingTelemetry.size() > 100) {
+                return;
+            }
+
             pendingTelemetry.add(telemetryPacket);
 
             pendingTelemetry.notifyAll();
@@ -816,7 +827,9 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * @param bitmap bitmap to send
      */
     public void sendImage(Bitmap bitmap) {
-        if (sockets.isEmpty()) return;
+        if (!enabled) {
+            return;
+        }
 
         stopCameraStream();
 
@@ -829,6 +842,10 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * @param maxFps maximum frames per second; 0 indicates unlimited
      */
     public void startCameraStream(CameraStreamSource source, double maxFps) {
+        if (!enabled) {
+            return;
+        }
+
         stopCameraStream();
 
         cameraStreamExecutor = ThreadPool.newSingleThreadExecutor("camera stream");
