@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { connect as reduxConnect } from 'react-redux';
 import PropTypes from 'prop-types';
 
@@ -8,6 +8,7 @@ import { saveLayoutPreset, getLayoutPreset } from '../store/actions/settings';
 
 import { ReactComponent as ConnectedIcon } from '../assets/icons/wifi.svg';
 import { ReactComponent as DisconnectedIcon } from '../assets/icons/wifi_off.svg';
+import { ReactComponent as DeveloperModeIcon } from '../assets/icons/developer_mode.svg';
 
 class Dashboard extends Component {
   componentDidMount() {
@@ -30,11 +31,11 @@ class Dashboard extends Component {
         className="flex flex-col"
         style={{ width: '100vw', height: '100vh' }}
       >
-        <header className="flex justify-between items-center bg-blue-600 px-3 py-1 text-white">
+        <header className="flex items-center justify-between px-3 py-2 text-white bg-blue-600">
           <h1 className="text-2xl font-medium">FTC Dashboard</h1>
           <div className="flex-center">
             <select
-              className="text-black text-sm rounded mx-2 py-1 bg-blue-100 border-blue-300 focus:border-blue-100 focus:ring-2 focus:ring-white focus:ring-opacity-40"
+              className="py-1 mx-2 text-sm text-black bg-blue-100 border-blue-300 rounded focus:border-blue-100 focus:ring-2 focus:ring-white focus:ring-opacity-40"
               value={this.props.layoutPreset}
               onChange={(evt) =>
                 this.props.dispatch(saveLayoutPreset(evt.target.value))
@@ -60,9 +61,14 @@ class Dashboard extends Component {
               </p>
             )}
             {this.props.isConnected ? (
-              <ConnectedIcon className="ml-4 w-10 h-10" />
+              <ConnectedIcon className="w-8 h-8 py-0.5 ml-4" />
             ) : (
-              <DisconnectedIcon className="ml-4 w-10 h-10" />
+              <DisconnectedIcon className="w-8 h-8 py-0.5 ml-4" />
+            )}
+            {import.meta.env.DEV && (
+              <button class="icon-btn w-8 h-8 ml-4 focus:ring-blue-100/60 hover:border-blue-100">
+                <DeveloperModeIcon viewBox="0 0 50 50" className="w-6 h-6" />
+              </button>
             )}
           </div>
         </header>
