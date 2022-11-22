@@ -2,11 +2,7 @@ import { Middleware } from 'redux';
 
 import { RootState, AppThunkAction, AppThunkDispatch } from './../reducers';
 import { getRobotStatus } from '../actions/status';
-import {
-  connect,
-  receiveConnectionStatus,
-  receivePingTime,
-} from '../actions/socket';
+import { receiveConnectionStatus, receivePingTime } from '../actions/socket';
 import {
   CONNECT,
   DISCONNECT,
@@ -19,6 +15,7 @@ import {
   START_OP_MODE,
   STOP_OP_MODE,
 } from '../types';
+import MockSocket from './MockSocket';
 
 let socket: WebSocket;
 let statusSentTime: number;
@@ -29,26 +26,24 @@ const robotStatusLoop =
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   (dispatch: AppThunkDispatch, getState: () => RootState) => {
-    const { isConnected } = getState().socket;
-
-    if (!isConnected) {
-      return;
-    }
+    if (!getState().socket.isConnected) return;
 
     statusSentTime = Date.now();
 
     dispatch(getRobotStatus());
-
-    setTimeout(() => {
-      dispatch(robotStatusLoop());
-    }, 1000);
+    setTimeout(() => dispatch(robotStatusLoop()), 1000);
   };
 
 const socketMiddleware: Middleware<Record<string, unknown>, RootState> =
   (store) => (next) => (action) => {
     switch (action.type) {
       case CONNECT:
-        socket = new WebSocket(`ws://${action.host}:${action.port}`);
+        const host =
+          import.meta.env['VITE_REACT_APP_HOST']?.toString() ??
+          window.location.hostname;
+        const port =
+          import.meta.env['VITE_REACT_APP_PORT']?.toString() ?? '8000';
+        socket = action.socket ?? new WebSocket(`ws://${host}:${port}`);
 
         socket.onmessage = (evt) => {
           const msg = JSON.parse(evt.data);
@@ -57,22 +52,21 @@ const socketMiddleware: Middleware<Record<string, unknown>, RootState> =
 
         socket.onopen = () => {
           (store.dispatch as AppThunkDispatch)(receiveConnectionStatus(true));
-
           (store.dispatch as AppThunkDispatch)(robotStatusLoop());
         };
 
         socket.onclose = () => {
           (store.dispatch as AppThunkDispatch)(receiveConnectionStatus(false));
-
-          setTimeout(
-            () => store.dispatch(connect(action.host, action.port)),
-            500,
-          );
+          // TODO: Move reconnect to its own loop. Causes race conditions for socket connection
+          // setTimeout(() => store.dispatch(connect()), 500);
         };
 
+        // Force open after setup of the onX() hooks
+        // @ts-ignore
+        if (socket.IS_MOCK_SOCKET) (socket as MockSocket).DEV_OPEN();
         break;
       case DISCONNECT:
-        socket.close();
+        socket?.close();
         break;
       case RECEIVE_ROBOT_STATUS: {
         const pingTime = Date.now() - statusSentTime;
@@ -89,21 +83,15 @@ const socketMiddleware: Middleware<Record<string, unknown>, RootState> =
       case INIT_OP_MODE:
       case START_OP_MODE:
       case STOP_OP_MODE: {
-        const { isConnected } = store.getState().socket;
-
-        if (isConnected) {
+        if (store.getState().socket.isConnected)
           socket.send(JSON.stringify(action));
-        }
-
         next(action);
-
         break;
       }
       default:
         next(action);
-
         break;
     }
   };
 
-export default socketMiddleware;
+export { socketMiddleware as default };

@@ -13,10 +13,9 @@ import {
 } from '../types';
 import { receiveOpModeList } from './status';
 
-export const connect = (host: string, port: string): ConnectAction => ({
+export const connect = (socket?: WebSocket): ConnectAction => ({
   type: CONNECT,
-  host,
-  port,
+  socket,
 });
 
 export const disconnect = (): DisconnectAction => ({
@@ -28,15 +27,17 @@ export const receivePingTime = (pingTime: number): ReceivePingTimeAction => ({
   pingTime,
 });
 
-export const receiveConnectionStatus = (isConnected: boolean) => (
-  dispatch: Dispatch<ReceiveConnectionStatusAction | ReceiveOpModeListAction>,
-) => {
-  dispatch({
-    type: RECEIVE_CONNECTION_STATUS,
-    isConnected,
-  });
+export const receiveConnectionStatus =
+  (isConnected: boolean) =>
+  (
+    dispatch: Dispatch<ReceiveConnectionStatusAction | ReceiveOpModeListAction>,
+  ) => {
+    dispatch({
+      type: RECEIVE_CONNECTION_STATUS,
+      isConnected,
+    });
 
-  if (!isConnected) {
-    dispatch(receiveOpModeList([]));
-  }
-};
+    if (!isConnected) {
+      dispatch(receiveOpModeList([]));
+    }
+  };

@@ -1,6 +1,9 @@
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { Dialog, Switch, Transition } from '@headlessui/react';
 import { clsx as cx } from 'clsx';
+import { useDispatch } from 'react-redux';
+import { connect, disconnect } from '@/store/actions/socket';
+import MockSocket from '@/store/middleware/MockSocket';
 
 export default function DeveloperModeDialog({
   isOpen,
@@ -9,7 +12,14 @@ export default function DeveloperModeDialog({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const [mockSocketEnabled, setMockSocketEnabled] = useState(false);
+  const dispatch = useDispatch();
+
+  const [isMockSocketEnabled, setIsMockSocketEnabled] = useState(false);
+
+  useEffect(() => {
+    dispatch(disconnect());
+    dispatch(connect(isMockSocketEnabled ? new MockSocket() : undefined));
+  }, [isMockSocketEnabled]);
 
   return (
     <Transition as={Fragment} show={isOpen}>
@@ -45,18 +55,21 @@ export default function DeveloperModeDialog({
                 </Dialog.Title>
                 <ul>
                   <li
-                    className={cx('px-4', !mockSocketEnabled && 'bg-gray-100')}
+                    className={cx(
+                      'px-4',
+                      !isMockSocketEnabled && 'bg-gray-100',
+                    )}
                   >
                     {/* Mock Socket section */}
                     <section className="px-2 border-t border-b border-gray-300">
                       <div className="flex flex-row items-center justify-between">
                         <h4 className="py-4 font-medium">Mock Socket</h4>
                         <Switch
-                          checked={mockSocketEnabled}
-                          onChange={setMockSocketEnabled}
+                          checked={isMockSocketEnabled}
+                          onChange={setIsMockSocketEnabled}
                           className={cx(
                             'relative inline-flex h-6 w-11 items-center rounded-full border',
-                            mockSocketEnabled
+                            isMockSocketEnabled
                               ? 'bg-blue-600 border-blue-700'
                               : 'bg-gray-300 border-gray-400',
                           )}
@@ -64,7 +77,7 @@ export default function DeveloperModeDialog({
                           <span
                             className={cx(
                               'inline-block h-4 w-4 transform rounded-full bg-white transition',
-                              mockSocketEnabled
+                              isMockSocketEnabled
                                 ? 'translate-x-[1.35rem]'
                                 : 'translate-x-1',
                             )}

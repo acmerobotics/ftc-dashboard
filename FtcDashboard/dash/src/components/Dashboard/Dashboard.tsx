@@ -30,14 +30,7 @@ export default function Dashboard() {
   const [isDevDialogOpen, setIsDevDialogOpen] = useState(false);
 
   useEffect(() => {
-    dispatch(
-      connect(
-        import.meta.env['VITE_REACT_APP_HOST']?.toString() ??
-          window.location.hostname,
-        import.meta.env['VITE_REACT_APP_PORT']?.toString() ?? '8000',
-      ),
-    );
-
+    dispatch(connect());
     dispatch(getLayoutPreset());
 
     return () => {

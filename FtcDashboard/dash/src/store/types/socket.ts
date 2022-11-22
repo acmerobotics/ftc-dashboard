@@ -11,8 +11,7 @@ export type SocketState = {
 
 export type ConnectAction = {
   type: typeof CONNECT;
-  host: string;
-  port: string;
+  socket?: WebSocket;
 };
 
 export type DisconnectAction = {
