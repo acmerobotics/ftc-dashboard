@@ -9,7 +9,7 @@ import 'react-resizable/css/styles.css';
 import { ConfigurableView } from '../enums/ConfigurableView';
 import GraphView from '../containers/GraphView/GraphView';
 import FieldView from '../containers/FieldView/FieldView';
-import ConfigView from '../containers/ConfigView';
+import ConfigView from '../containers/ConfigView/ConfigView';
 import TelemetryView from '../containers/TelemetryView';
 import CameraView from '../containers/CameraView';
 import OpModeView from '../containers/OpModeView';
