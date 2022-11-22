@@ -9,7 +9,7 @@ import BaseView, {
   BaseViewProps,
   BaseViewHeadingProps,
 } from '../BaseView';
-import MultipleCheckbox from '../../components/MultipleCheckbox';
+import MultipleCheckbox from './MultipleCheckbox';
 import GraphCanvas from './GraphCanvas';
 import TextInput from '../ConfigView/inputs/TextInput';
 
