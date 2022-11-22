@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash';
-import '../../components/canvas';
+import '../../components/Canvas/canvas';
 import fieldImageName from '../../assets/field.png';
 
 // this is a bit of a hack bit it'll have to do

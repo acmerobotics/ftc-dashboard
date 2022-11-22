@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 
 import BaseView, { BaseViewHeading } from '../BaseView';
 import Field from './Field';
-import AutoFitCanvas from '../../components/AutoFitCanvas';
+import AutoFitCanvas from '../../components/Canvas/AutoFitCanvas';
 
 class FieldView extends React.Component {
   constructor(props) {
