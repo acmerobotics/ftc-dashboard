@@ -22,12 +22,14 @@ interface ToolTipProps {
   children: ReactNode;
   hoverRef: RefObject<HTMLElement | null>;
   isShowing: boolean;
+  posAdjustment?: { x?: string; y?: string };
 }
 
 const ToolTip: FunctionComponent<ToolTipProps> = ({
   children,
   hoverRef,
   isShowing,
+  posAdjustment = { x: '0px', y: '0px' },
 }: ToolTipProps) => {
   const tooltipRef = useRef<HTMLSpanElement | null>(null);
 
@@ -35,12 +37,14 @@ const ToolTip: FunctionComponent<ToolTipProps> = ({
     <ToolTipEl
       ref={tooltipRef}
       isShowing={isShowing}
-      top={`${hoverRef.current?.getBoundingClientRect().top}px`}
-      left={`${
+      left={`calc(${
         (hoverRef.current?.getBoundingClientRect().left ?? 0) +
         (hoverRef.current?.clientWidth ?? 0) / 2 -
         (tooltipRef.current?.clientWidth ?? 0) / 2
-      }px`}
+      }px + ${posAdjustment.x ?? '0px'})`}
+      top={`calc(${hoverRef.current?.getBoundingClientRect().top}px + ${
+        posAdjustment.y ?? '0px'
+      })`}
     >
       {children}
     </ToolTipEl>,
