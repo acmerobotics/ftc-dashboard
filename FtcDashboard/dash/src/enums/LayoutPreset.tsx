@@ -3,7 +3,7 @@ import { Values } from '../typeHelpers';
 
 import TileGrid from '../components/TileGrid';
 import Tile from '../components/Tile';
-import ConfigurableLayout from '../components/ConfigurableLayout';
+import ConfigurableLayout from '../components/ConfigurableLayout/ConfigurableLayout';
 
 import OpModeView from '../containers/OpModeView';
 import CameraView from '../containers/CameraView';

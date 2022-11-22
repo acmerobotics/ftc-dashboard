@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react';
 import styled from 'styled-components';
 
-import { WithChildren } from '../../typeHelpers';
+import { WithChildren } from '../../../typeHelpers';
 
 type RadialFabProps = {
   isOpen: boolean;

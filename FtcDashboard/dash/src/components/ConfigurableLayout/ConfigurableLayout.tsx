@@ -6,29 +6,29 @@ import styled from 'styled-components';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
-import { ConfigurableView } from '../enums/ConfigurableView';
-import GraphView from '../containers/GraphView/GraphView';
-import FieldView from '../containers/FieldView/FieldView';
-import ConfigView from '../containers/ConfigView/ConfigView';
-import TelemetryView from '../containers/TelemetryView';
-import CameraView from '../containers/CameraView';
-import OpModeView from '../containers/OpModeView';
+import { ConfigurableView } from '../../enums/ConfigurableView';
+import GraphView from '../../containers/GraphView/GraphView';
+import FieldView from '../../containers/FieldView/FieldView';
+import ConfigView from '../../containers/ConfigView/ConfigView';
+import TelemetryView from '../../containers/TelemetryView';
+import CameraView from '../../containers/CameraView';
+import OpModeView from '../../containers/OpModeView';
 
 import RadialFab from './RadialFab/RadialFab';
 import RadialFabChild from './RadialFab/RadialFabChild';
 import ViewPicker from './ViewPicker';
 
-import useMouseIdleListener from '../hooks/useMouseIdleListener';
-import useUndoHistory from '../hooks/useUndoHistory';
+import useMouseIdleListener from '../../hooks/useMouseIdleListener';
+import useUndoHistory from '../../hooks/useUndoHistory';
 
-import { ReactComponent as AddIcon } from '../assets/icons/add.svg';
-import { ReactComponent as DeleteSweepIcon } from '../assets/icons/delete_sweep.svg';
-import { ReactComponent as DeleteXIcon } from '../assets/icons/delete_x.svg';
-import LockIconURL from '../assets/icons/lock.svg';
-import { ReactComponent as RemoveCircleIcon } from '../assets/icons/remove_circle.svg';
-import { ReactComponent as RemoveCircleOutlineIcon } from '../assets/icons/remove_circle_outline.svg';
-import CreateIconURL from '../assets/icons/create.svg';
-import LoggingView from '../containers/LoggingView/LoggingView';
+import { ReactComponent as AddIcon } from '../../assets/icons/add.svg';
+import { ReactComponent as DeleteSweepIcon } from '../../assets/icons/delete_sweep.svg';
+import { ReactComponent as DeleteXIcon } from '../../assets/icons/delete_x.svg';
+import LockIconURL from '../../assets/icons/lock.svg';
+import { ReactComponent as RemoveCircleIcon } from '../../assets/icons/remove_circle.svg';
+import { ReactComponent as RemoveCircleOutlineIcon } from '../../assets/icons/remove_circle_outline.svg';
+import CreateIconURL from '../../assets/icons/create.svg';
+import LoggingView from '../../containers/LoggingView/LoggingView';
 
 function maxArray(a: number[], b: number[]) {
   if (a.length !== b.length) {
