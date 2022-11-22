@@ -7,7 +7,7 @@ import BaseView, {
   BaseViewProps,
   BaseViewHeadingProps,
 } from './BaseView';
-import { RootState } from '../store/reducers';
+import { RootState } from '../../store/reducers';
 
 type TelemetryViewProps = BaseViewProps & BaseViewHeadingProps;
 

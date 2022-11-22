@@ -1,19 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import LayoutPreset, { LayoutPresetType } from '../../enums/LayoutPreset';
-import { connect, disconnect } from '../../store/actions/socket';
-import {
-  saveLayoutPreset,
-  getLayoutPreset,
-} from '../../store/actions/settings';
-import { RootState } from '../../store/reducers';
+import LayoutPreset, { LayoutPresetType } from '@/enums/LayoutPreset';
+import { connect, disconnect } from '@/store/actions/socket';
+import { saveLayoutPreset, getLayoutPreset } from '@/store/actions/settings';
+import { RootState } from '@/store/reducers';
 
-import { ReactComponent as ConnectedIcon } from '../../assets/icons/wifi.svg';
-import { ReactComponent as DisconnectedIcon } from '../../assets/icons/wifi_off.svg';
-import { ReactComponent as DeveloperModeIcon } from '../../assets/icons/developer_mode.svg';
+import { ReactComponent as ConnectedIcon } from '@/assets/icons/wifi.svg';
+import { ReactComponent as DisconnectedIcon } from '@/assets/icons/wifi_off.svg';
+import { ReactComponent as DeveloperModeIcon } from '@/assets/icons/developer_mode.svg';
 
-import useDelayedTooltip from '../../hooks/useDelayedTooltip';
+import useDelayedTooltip from '@/hooks/useDelayedTooltip';
 import ToolTip from '../ToolTip';
 
 import DeveloperModeDialog from './DeveloperModeDialog';

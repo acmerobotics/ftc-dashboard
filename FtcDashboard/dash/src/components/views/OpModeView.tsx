@@ -3,9 +3,11 @@ import { connect, ConnectedProps } from 'react-redux';
 
 import styled from 'styled-components';
 
-import { RootState } from '../store/reducers';
-import { initOpMode, startOpMode, stopOpMode } from '../store/actions/opmode';
-import OpModeStatus from '../enums/OpModeStatus';
+import { RootState } from '@/store/reducers';
+import { initOpMode, startOpMode, stopOpMode } from '@/store/actions/opmode';
+import { STOP_OP_MODE_TAG } from '@/store/types/opmode';
+
+import OpModeStatus from '@/enums/OpModeStatus';
 import BaseView, {
   BaseViewHeading,
   BaseViewBody,
@@ -15,10 +17,9 @@ import BaseView, {
   BaseViewHeadingProps,
 } from './BaseView';
 
-import { ReactComponent as GamepadIcon } from '../assets/icons/gamepad.svg';
-import { ReactComponent as GamepadNotSupportedIcon } from '../assets/icons/gamepad_not_supported.svg';
-import { STOP_OP_MODE_TAG } from '../store/types/opmode';
-import ToolTip from '../components/ToolTip';
+import { ReactComponent as GamepadIcon } from '@/assets/icons/gamepad.svg';
+import { ReactComponent as GamepadNotSupportedIcon } from '@/assets/icons/gamepad_not_supported.svg';
+import ToolTip from '../ToolTip';
 
 type OpModeViewState = {
   selectedOpMode: string;

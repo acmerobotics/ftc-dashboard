@@ -1,15 +1,15 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { ConfigurableView } from '../../enums/ConfigurableView';
+import { ConfigurableView } from '@/enums/ConfigurableView';
 
-import { ReactComponent as CameraIcon } from '../../assets/icons/camera.svg';
-import { ReactComponent as SettingsIcon } from '../../assets/icons/settings.svg';
-import { ReactComponent as ChartIcon } from '../../assets/icons/chart.svg';
-import { ReactComponent as ApiIcon } from '../../assets/icons/api.svg';
-import { ReactComponent as SubjectIcon } from '../../assets/icons/subject.svg';
-import { ReactComponent as WidgetIcon } from '../../assets/icons/widgets.svg';
-import { ReactComponent as ListIcon } from '../../assets/icons/list.svg';
+import { ReactComponent as CameraIcon } from '@/assets/icons/camera.svg';
+import { ReactComponent as SettingsIcon } from '@/assets/icons/settings.svg';
+import { ReactComponent as ChartIcon } from '@/assets/icons/chart.svg';
+import { ReactComponent as ApiIcon } from '@/assets/icons/api.svg';
+import { ReactComponent as SubjectIcon } from '@/assets/icons/subject.svg';
+import { ReactComponent as WidgetIcon } from '@/assets/icons/widgets.svg';
+import { ReactComponent as ListIcon } from '@/assets/icons/list.svg';
 
 type ViewPickerProps = {
   isOpen: boolean;

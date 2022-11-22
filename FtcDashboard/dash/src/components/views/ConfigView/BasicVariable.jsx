@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import BooleanInput from './inputs/BooleanInput';
 import EnumInput from './inputs/EnumInput';
 import TextInput from './inputs/TextInput';
-import VariableType from '../../enums/VariableType';
+import VariableType from '../../../enums/VariableType';
 import {
   validateDouble,
   validateInt,

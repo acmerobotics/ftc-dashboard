@@ -13,12 +13,12 @@ import MultipleCheckbox from './MultipleCheckbox';
 import GraphCanvas from './GraphCanvas';
 import TextInput from '../ConfigView/inputs/TextInput';
 
-import { ReactComponent as ChartIcon } from '../../assets/icons/chart.svg';
-import { ReactComponent as CloseIcon } from '../../assets/icons/close.svg';
-import { ReactComponent as PlayIcon } from '../../assets/icons/play_arrow.svg';
-import { ReactComponent as PauseIcon } from '../../assets/icons/pause.svg';
+import { ReactComponent as ChartIcon } from '@/assets/icons/chart.svg';
+import { ReactComponent as CloseIcon } from '@/assets/icons/close.svg';
+import { ReactComponent as PlayIcon } from '@/assets/icons/play_arrow.svg';
+import { ReactComponent as PauseIcon } from '@/assets/icons/pause.svg';
 
-import { RootState } from '../../store/reducers';
+import { RootState } from '@/store/reducers';
 import { validateInt } from '../ConfigView/inputs/validation';
 import { DEFAULT_OPTIONS } from './Graph';
 

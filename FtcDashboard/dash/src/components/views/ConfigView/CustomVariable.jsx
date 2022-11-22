@@ -2,9 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import BasicVariable from './BasicVariable';
-import VariableType from '../../enums/VariableType';
+import VariableType from '@/enums/VariableType';
 
-import { ReactComponent as ExpandedMoreIcon } from '../../assets/icons/expand_more.svg';
+import { ReactComponent as ExpandedMoreIcon } from '@/assets/icons/expand_more.svg';
 
 class CustomVariable extends React.Component {
   constructor(props) {

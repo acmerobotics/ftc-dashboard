@@ -10,18 +10,18 @@ import BaseView, {
   BaseViewIconButton,
 } from '../BaseView';
 
-import { ReactComponent as SaveIcon } from '../../assets/icons/save.svg';
-import { ReactComponent as RefreshIcon } from '../../assets/icons/refresh.svg';
+import { ReactComponent as SaveIcon } from '@/assets/icons/save.svg';
+import { ReactComponent as RefreshIcon } from '@/assets/icons/refresh.svg';
 
 import {
   updateConfig,
   saveConfig,
   refreshConfig,
   getModifiedDiff,
-} from '../../store/actions/config';
-import VariableType from '../../enums/VariableType';
-import { RootState } from '../../store/reducers';
-import { Config, ConfigCustom } from '../../store/types';
+} from '@/store/actions/config';
+import VariableType from '@/enums/VariableType';
+import { RootState } from '@/store/reducers';
+import { Config, ConfigCustom } from '@/store/types';
 
 type ConfigViewProps = BaseViewProps & BaseViewHeadingProps;
 

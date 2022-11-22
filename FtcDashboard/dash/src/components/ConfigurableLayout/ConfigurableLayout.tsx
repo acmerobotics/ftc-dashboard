@@ -7,12 +7,12 @@ import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
 import { ConfigurableView } from '../../enums/ConfigurableView';
-import GraphView from '../../containers/GraphView/GraphView';
-import FieldView from '../../containers/FieldView/FieldView';
-import ConfigView from '../../containers/ConfigView/ConfigView';
-import TelemetryView from '../../containers/TelemetryView';
-import CameraView from '../../containers/CameraView';
-import OpModeView from '../../containers/OpModeView';
+import GraphView from '../views/GraphView/GraphView';
+import FieldView from '../views/FieldView/FieldView';
+import ConfigView from '../views/ConfigView/ConfigView';
+import TelemetryView from '../views/TelemetryView';
+import CameraView from '../views/CameraView';
+import OpModeView from '../views/OpModeView';
 
 import RadialFab from './RadialFab/RadialFab';
 import RadialFabChild from './RadialFab/RadialFabChild';
@@ -28,7 +28,7 @@ import LockIconURL from '../../assets/icons/lock.svg';
 import { ReactComponent as RemoveCircleIcon } from '../../assets/icons/remove_circle.svg';
 import { ReactComponent as RemoveCircleOutlineIcon } from '../../assets/icons/remove_circle_outline.svg';
 import CreateIconURL from '../../assets/icons/create.svg';
-import LoggingView from '../../containers/LoggingView/LoggingView';
+import LoggingView from '../views/LoggingView/LoggingView';
 
 function maxArray(a: number[], b: number[]) {
   if (a.length !== b.length) {
