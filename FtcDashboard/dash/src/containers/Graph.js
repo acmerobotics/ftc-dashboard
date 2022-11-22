@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash';
-import './canvas';
+import '../components/canvas';
 
 // all dimensions in this file are *CSS* pixels unless otherwise stated
 export const DEFAULT_OPTIONS = {

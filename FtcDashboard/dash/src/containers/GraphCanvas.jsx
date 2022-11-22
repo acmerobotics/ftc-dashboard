@@ -60,7 +60,7 @@ class GraphCanvas extends React.PureComponent {
         >
           <AutoFitCanvas ref={this.canvasRef} />
         </div>
-        <div className="absolute top-0 left-0 w-full h-full flex-center pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-full pointer-events-none flex-center">
           {this.state.graphEmpty && (
             <p className="text-center">No content to graph</p>
           )}

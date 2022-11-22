@@ -10,7 +10,7 @@ import CameraView from '../containers/CameraView';
 import GraphView from '../containers/GraphView';
 import ConfigView from '../containers/ConfigView';
 import TelemetryView from '../containers/TelemetryView';
-import FieldView from '../containers/FieldView';
+import FieldView from '../containers/FieldView/FieldView';
 
 const LayoutPreset = {
   DEFAULT: 'DEFAULT',
