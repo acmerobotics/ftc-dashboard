@@ -1,5 +1,6 @@
-import { Dialog, Switch, Transition } from '@headlessui/react';
 import { Fragment, useState } from 'react';
+import { Dialog, Switch, Transition } from '@headlessui/react';
+import { clsx as cx } from 'clsx';
 
 export default function DeveloperModeDialog({
   isOpen,
@@ -26,6 +27,7 @@ export default function DeveloperModeDialog({
           <div className="fixed inset-0 bg-black/30" />
         </Transition.Child>
 
+        {/* Dialog body */}
         <div className="fixed inset-0 overflow-y-auto">
           <div className="flex items-center justify-center min-h-full p-4 text-center">
             <Transition.Child
@@ -43,28 +45,29 @@ export default function DeveloperModeDialog({
                 </Dialog.Title>
                 <ul>
                   <li
-                    className={`px-4 ${
-                      !mockSocketEnabled ? 'bg-gray-100' : ''
-                    }`}
+                    className={cx('px-4', !mockSocketEnabled && 'bg-gray-100')}
                   >
+                    {/* Mock Socket section */}
                     <section className="px-2 border-t border-b border-gray-300">
                       <div className="flex flex-row items-center justify-between">
                         <h4 className="py-4 font-medium">Mock Socket</h4>
                         <Switch
                           checked={mockSocketEnabled}
                           onChange={setMockSocketEnabled}
-                          className={`${
+                          className={cx(
+                            'relative inline-flex h-6 w-11 items-center rounded-full border',
                             mockSocketEnabled
                               ? 'bg-blue-600 border-blue-700'
-                              : 'bg-gray-300 border-gray-400'
-                          } relative inline-flex h-6 w-11 items-center rounded-full border`}
+                              : 'bg-gray-300 border-gray-400',
+                          )}
                         >
                           <span
-                            className={`${
+                            className={cx(
+                              'inline-block h-4 w-4 transform rounded-full bg-white transition',
                               mockSocketEnabled
                                 ? 'translate-x-[1.35rem]'
-                                : 'translate-x-1'
-                            } inline-block h-4 w-4 transform rounded-full bg-white transition`}
+                                : 'translate-x-1',
+                            )}
                           />
                         </Switch>
                       </div>
