@@ -1,8 +1,8 @@
 import React from 'react';
 import { Values } from '../typeHelpers';
 
-import TileGrid from '../components/TileGrid';
-import Tile from '../components/Tile';
+import TileGrid from '../components/Layout/TileGrid';
+import Tile from '../components/Layout/Tile';
 import ConfigurableLayout from '../components/ConfigurableLayout/ConfigurableLayout';
 
 import OpModeView from '../containers/OpModeView';
