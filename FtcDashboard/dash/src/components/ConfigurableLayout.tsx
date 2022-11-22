@@ -7,7 +7,7 @@ import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
 import { ConfigurableView } from '../enums/ConfigurableView';
-import GraphView from '../containers/GraphView';
+import GraphView from '../containers/GraphView/GraphView';
 import FieldView from '../containers/FieldView/FieldView';
 import ConfigView from '../containers/ConfigView';
 import TelemetryView from '../containers/TelemetryView';

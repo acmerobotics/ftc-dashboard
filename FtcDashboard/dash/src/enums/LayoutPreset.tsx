@@ -7,7 +7,7 @@ import ConfigurableLayout from '../components/ConfigurableLayout';
 
 import OpModeView from '../containers/OpModeView';
 import CameraView from '../containers/CameraView';
-import GraphView from '../containers/GraphView';
+import GraphView from '../containers/GraphView/GraphView';
 import ConfigView from '../containers/ConfigView';
 import TelemetryView from '../containers/TelemetryView';
 import FieldView from '../containers/FieldView/FieldView';

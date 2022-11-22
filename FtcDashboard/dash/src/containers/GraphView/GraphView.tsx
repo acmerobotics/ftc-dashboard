@@ -8,18 +8,18 @@ import BaseView, {
   BaseViewIconButton,
   BaseViewProps,
   BaseViewHeadingProps,
-} from './BaseView';
-import MultipleCheckbox from '../components/MultipleCheckbox';
+} from '../BaseView';
+import MultipleCheckbox from '../../components/MultipleCheckbox';
 import GraphCanvas from './GraphCanvas';
-import TextInput from '../components/inputs/TextInput';
+import TextInput from '../../components/inputs/TextInput';
 
-import { ReactComponent as ChartIcon } from '../assets/icons/chart.svg';
-import { ReactComponent as CloseIcon } from '../assets/icons/close.svg';
-import { ReactComponent as PlayIcon } from '../assets/icons/play_arrow.svg';
-import { ReactComponent as PauseIcon } from '../assets/icons/pause.svg';
+import { ReactComponent as ChartIcon } from '../../assets/icons/chart.svg';
+import { ReactComponent as CloseIcon } from '../../assets/icons/close.svg';
+import { ReactComponent as PlayIcon } from '../../assets/icons/play_arrow.svg';
+import { ReactComponent as PauseIcon } from '../../assets/icons/pause.svg';
 
-import { RootState } from '../store/reducers';
-import { validateInt } from '../components/inputs/validation';
+import { RootState } from '../../store/reducers';
+import { validateInt } from '../../components/inputs/validation';
 import { DEFAULT_OPTIONS } from './Graph';
 
 type GraphViewState = {
@@ -209,7 +209,7 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
         <BaseViewBody className={showText ? 'flex-center' : ''}>
           {!this.state.graphing ? (
             showNoNumeric ? (
-              <p className="justify-self-center text-center">
+              <p className="text-center justify-self-center">
                 Send number-valued telemetry data to graph them over time
               </p>
             ) : (
@@ -228,7 +228,7 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
                   />
                 </div>
                 <div className="mt-4">
-                  <div className="flex justify-between items-center">
+                  <div className="flex items-center justify-between">
                     <h3 className="font-medium">Options:</h3>
                   </div>
                   <div className="ml-3">
@@ -265,7 +265,7 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
               </>
             )
           ) : showEmpty ? (
-            <p className="justify-self-center text-center">
+            <p className="text-center justify-self-center">
               No telemetry selected to graph
             </p>
           ) : (
