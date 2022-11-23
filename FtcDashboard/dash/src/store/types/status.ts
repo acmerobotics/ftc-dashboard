@@ -6,13 +6,16 @@ export const RECEIVE_ROBOT_STATUS = 'RECEIVE_ROBOT_STATUS';
 export const RECEIVE_OP_MODE_LIST = 'RECEIVE_OP_MODE_LIST';
 export const GAMEPAD_SUPPORTED_STATUS = 'GAMEPAD_SUPPORTED_STATUS';
 
-export type StatusState = {
+export type RobotStatus = {
   available: boolean;
   activeOpMode: string;
   activeOpModeStatus: Values<typeof OpModeStatus>;
-  opModeList: string[];
   warningMessage: string;
   errorMessage: string;
+};
+
+export type StatusState = RobotStatus & {
+  opModeList: string[];
   gamepadsSupported: boolean;
 };
 
@@ -22,7 +25,7 @@ export type GetRobotStatusAction = {
 
 export type ReceiveRobotStatusAction = {
   type: typeof RECEIVE_ROBOT_STATUS;
-  status: StatusState;
+  status: RobotStatus;
 };
 
 export type ReceiveOpModeListAction = {
@@ -31,6 +34,6 @@ export type ReceiveOpModeListAction = {
 };
 
 export type GamepadSupportedStatus = {
-    type: typeof GAMEPAD_SUPPORTED_STATUS;
-    gamepadsSupported: boolean;
-}
+  type: typeof GAMEPAD_SUPPORTED_STATUS;
+  gamepadsSupported: boolean;
+};

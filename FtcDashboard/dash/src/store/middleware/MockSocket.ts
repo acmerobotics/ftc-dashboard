@@ -1,4 +1,6 @@
-import { GetRobotStatusAction, GET_ROBOT_STATUS } from './../types/status';
+import { receiveRobotStatus, receiveOpModeList } from './../actions/status';
+import { store } from '@/index';
+import { GET_ROBOT_STATUS } from './../types/status';
 
 class MockSocket implements WebSocket {
   // @ts-ignore
@@ -19,6 +21,11 @@ class MockSocket implements WebSocket {
   readyState = this.CLOSED;
   url = 'ws://mocksocket:0000';
 
+  latencyBase = 5;
+  latencyVariance = 10;
+  messageQueue: { data: any; time: number }[] = [];
+  lastConsumeQueueAnimationFrame = 0;
+
   onclose: ((this: WebSocket, ev: CloseEvent) => any) | null = () => {};
   onerror: ((this: WebSocket, ev: Event) => any) | null = () => {};
   onmessage: ((this: WebSocket, ev: MessageEvent<any>) => any) | null =
@@ -34,24 +41,65 @@ class MockSocket implements WebSocket {
   DEV_OPEN() {
     this.readyState = this.OPEN;
     this.onopen?.(new Event('open'));
+    this.consumeMessageQueue();
+
+    store.dispatch(
+      receiveOpModeList([
+        'Enable/Disable Dashboard',
+        'GamepadTestOpMode',
+        'OrbitOpMode',
+        'SineWaveOpMode',
+        'VuforiaStreamOpMode',
+      ]),
+    );
   }
 
   close(code?: number | undefined, reason?: string | undefined): void {
     this.readyState = this.CLOSED;
+    cancelAnimationFrame(this.lastConsumeQueueAnimationFrame);
     this.onclose?.(new CloseEvent('close'));
   }
 
-  send(data: string | ArrayBufferLike | Blob | ArrayBufferView): void {
+  processSend(data: string) {
     if (typeof data !== 'string') return;
     const obj = JSON.parse(data);
 
     switch (obj.type) {
       case GET_ROBOT_STATUS:
-        console.log('MockSocket: GET_ROBOT_STATUS');
+        store.dispatch(
+          receiveRobotStatus({
+            activeOpMode: '$Stop$Robot$',
+            activeOpModeStatus: 'INIT',
+            available: true,
+            errorMessage: '',
+            warningMessage: '',
+          }),
+        );
         break;
       default:
         break;
     }
+  }
+
+  send(data: string | ArrayBufferLike | Blob | ArrayBufferView): void {
+    this.messageQueue.push({
+      data,
+      time:
+        Date.now() + this.latencyBase + this.latencyVariance * Math.random(),
+    });
+  }
+
+  consumeMessageQueue() {
+    const now = Date.now();
+    while (this.messageQueue.length > 0 && this.messageQueue[0].time < now) {
+      const msg = this.messageQueue.shift();
+      this.processSend(msg?.data);
+    }
+
+    if (this.readyState === this.OPEN)
+      this.lastConsumeQueueAnimationFrame = requestAnimationFrame(
+        this.consumeMessageQueue.bind(this),
+      );
   }
 
   addEventListener<K extends keyof WebSocketEventMap>(

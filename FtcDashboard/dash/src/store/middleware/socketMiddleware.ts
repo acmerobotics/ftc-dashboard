@@ -38,6 +38,13 @@ const socketMiddleware: Middleware<Record<string, unknown>, RootState> =
   (store) => (next) => (action) => {
     switch (action.type) {
       case CONNECT:
+        if (socket) {
+          socket.onclose = null;
+          socket.onopen = null;
+          socket.onmessage = null;
+          if (socket.CONNECTING || socket.OPEN) socket.close();
+        }
+
         const host =
           import.meta.env['VITE_REACT_APP_HOST']?.toString() ??
           window.location.hostname;
