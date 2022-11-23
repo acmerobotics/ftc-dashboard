@@ -2,7 +2,11 @@ import { Middleware } from 'redux';
 
 import { RootState, AppThunkAction, AppThunkDispatch } from './../reducers';
 import { getRobotStatus } from '../actions/status';
-import { receiveConnectionStatus, receivePingTime } from '../actions/socket';
+import {
+  connect,
+  receiveConnectionStatus,
+  receivePingTime,
+} from '../actions/socket';
 import {
   CONNECT,
   DISCONNECT,
@@ -15,7 +19,7 @@ import {
   START_OP_MODE,
   STOP_OP_MODE,
 } from '../types';
-import MockSocket from './mock/MockSocket';
+import MockSocket, { isMockSocket } from './mock/MockSocket';
 
 let socket: WebSocket;
 let statusSentTime: number;
@@ -42,7 +46,13 @@ const socketMiddleware: Middleware<Record<string, unknown>, RootState> =
           socket.onclose = null;
           socket.onopen = null;
           socket.onmessage = null;
-          if (socket.CONNECTING || socket.OPEN) socket.close();
+
+          if (socket.CONNECTING || socket.OPEN) {
+            socket.close();
+            (store.dispatch as AppThunkDispatch)(
+              receiveConnectionStatus(false),
+            );
+          }
         }
 
         const host =
@@ -64,13 +74,11 @@ const socketMiddleware: Middleware<Record<string, unknown>, RootState> =
 
         socket.onclose = () => {
           (store.dispatch as AppThunkDispatch)(receiveConnectionStatus(false));
-          // TODO: Move reconnect to its own loop. Causes race conditions for socket connection
-          // setTimeout(() => store.dispatch(connect()), 500);
+          setTimeout(() => store.dispatch(connect()), 500);
         };
 
         // Force open after setup of the onX() hooks
-        // @ts-ignore
-        if (socket.IS_MOCK_SOCKET) (socket as MockSocket).DEV_OPEN();
+        if (isMockSocket(socket)) socket.DEV_OPEN();
         break;
       case DISCONNECT:
         socket?.close();

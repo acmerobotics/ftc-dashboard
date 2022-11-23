@@ -147,4 +147,12 @@ class MockSocket implements WebSocket {
   }
 }
 
+// Type predicate
+export function isMockSocket(socket: WebSocket): socket is MockSocket {
+  return (
+    socket.hasOwnProperty('IS_MOCK_SOCKET') &&
+    (socket as MockSocket).IS_MOCK_SOCKET === true
+  );
+}
+
 export default MockSocket;
