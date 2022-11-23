@@ -11,3 +11,5 @@ root.render(
     <Dashboard />
   </Provider>,
 );
+
+export { store };
