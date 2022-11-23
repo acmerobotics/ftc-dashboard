@@ -3,7 +3,7 @@ import { Dialog, Switch, Transition } from '@headlessui/react';
 import { clsx as cx } from 'clsx';
 import { useDispatch } from 'react-redux';
 import { connect, disconnect } from '@/store/actions/socket';
-import MockSocket from '@/store/middleware/MockSocket';
+import MockSocket from '@/store/middleware/mock/MockSocket';
 
 export default function DeveloperModeDialog({
   isOpen,

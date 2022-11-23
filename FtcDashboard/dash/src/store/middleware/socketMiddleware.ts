@@ -15,7 +15,7 @@ import {
   START_OP_MODE,
   STOP_OP_MODE,
 } from '../types';
-import MockSocket from './MockSocket';
+import MockSocket from './mock/MockSocket';
 
 let socket: WebSocket;
 let statusSentTime: number;

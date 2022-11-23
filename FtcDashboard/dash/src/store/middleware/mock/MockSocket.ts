@@ -1,6 +1,6 @@
-import { receiveRobotStatus, receiveOpModeList } from './../actions/status';
+import { receiveRobotStatus, receiveOpModeList } from '../../actions/status';
 import { store } from '@/index';
-import { GET_ROBOT_STATUS } from './../types/status';
+import { GET_ROBOT_STATUS } from '../../types/status';
 
 class MockSocket implements WebSocket {
   // @ts-ignore
