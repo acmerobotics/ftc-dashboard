@@ -1,7 +1,16 @@
+import {
+  INIT_OP_MODE,
+  START_OP_MODE,
+  STOP_OP_MODE,
+} from './../../types/opmode';
 import { receiveRobotStatus, receiveOpModeList } from '../../actions/status';
-import { store } from '@/index';
 import { GET_ROBOT_STATUS } from '../../types/status';
+import opModeManager from './MockOpModeManager';
 
+// @ts-ignore
+import { store } from '@/index';
+
+// TODO RECEIVE_CONFIG
 class MockSocket implements WebSocket {
   // @ts-ignore
   binaryType: BinaryType;
@@ -43,15 +52,7 @@ class MockSocket implements WebSocket {
     this.onopen?.(new Event('open'));
     this.consumeMessageQueue();
 
-    store.dispatch(
-      receiveOpModeList([
-        'Enable/Disable Dashboard',
-        'GamepadTestOpMode',
-        'OrbitOpMode',
-        'SineWaveOpMode',
-        'VuforiaStreamOpMode',
-      ]),
-    );
+    store.dispatch(receiveOpModeList(opModeManager.getOpModeNames()));
   }
 
   close(code?: number | undefined, reason?: string | undefined): void {
@@ -68,13 +69,21 @@ class MockSocket implements WebSocket {
       case GET_ROBOT_STATUS:
         store.dispatch(
           receiveRobotStatus({
-            activeOpMode: '$Stop$Robot$',
-            activeOpModeStatus: 'INIT',
+            ...opModeManager.getOpModeStatus(),
             available: true,
             errorMessage: '',
             warningMessage: '',
           }),
         );
+        break;
+      case INIT_OP_MODE:
+        opModeManager.initOpMode(obj.opModeName);
+        break;
+      case START_OP_MODE:
+        opModeManager.startOpMode();
+        break;
+      case STOP_OP_MODE:
+        opModeManager.stopOpMode();
         break;
       default:
         break;
