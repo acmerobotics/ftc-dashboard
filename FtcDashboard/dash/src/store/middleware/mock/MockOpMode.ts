@@ -1,3 +1,4 @@
+import { MockOpModeManager } from './MockOpModeManager';
 export type MockOpModeState = 'INIT' | 'RUNNING' | 'STOPPED';
 
 export abstract class MockOpMode {
@@ -9,12 +10,10 @@ export abstract class MockOpMode {
   abstract loop(): void;
 
   state: MockOpModeState = 'INIT';
-  getState() {
-    return this.state;
-  }
+  constructor(protected readonly opModeManager: MockOpModeManager) {}
 }
 
-class EnableDashOp extends MockOpMode {
+export class EnableDashOp extends MockOpMode {
   name = 'Enable/Disable Dashboard';
   getConfig() {
     return {};
@@ -23,7 +22,7 @@ class EnableDashOp extends MockOpMode {
   loop(): void {}
 }
 
-class GamepadTestOpMode extends MockOpMode {
+export class GamepadTestOpMode extends MockOpMode {
   name = 'GamepadTestOpMode';
   getConfig() {
     return {};
@@ -32,7 +31,7 @@ class GamepadTestOpMode extends MockOpMode {
   loop(): void {}
 }
 
-class OrbitOpMode extends MockOpMode {
+export class OrbitOpMode extends MockOpMode {
   name = 'OrbitOpMode';
   getConfig() {
     return {};
@@ -41,16 +40,18 @@ class OrbitOpMode extends MockOpMode {
   loop(): void {}
 }
 
-class SinveWaveOpMode extends MockOpMode {
+export class SineWaveOpMode extends MockOpMode {
   name = 'SineWaveOpMode';
   getConfig() {
     return {};
   }
   init(): void {}
-  loop(): void {}
+  loop(): void {
+    this.opModeManager.addData('x', Math.sin(Date.now() / 1000));
+  }
 }
 
-class VuforiaStreamOpMode extends MockOpMode {
+export class VuforiaStreamOpMode extends MockOpMode {
   name = 'VuforiaStreamOpMode';
   getConfig() {
     return {};
@@ -58,13 +59,3 @@ class VuforiaStreamOpMode extends MockOpMode {
   init(): void {}
   loop(): void {}
 }
-
-const mockOpModes: MockOpMode[] = [
-  new EnableDashOp(),
-  new GamepadTestOpMode(),
-  new OrbitOpMode(),
-  new SinveWaveOpMode(),
-  new VuforiaStreamOpMode(),
-];
-
-export { mockOpModes };
