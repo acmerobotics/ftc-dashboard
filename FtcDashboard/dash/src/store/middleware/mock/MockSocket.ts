@@ -57,6 +57,7 @@ class MockSocket implements WebSocket {
 
   close(code?: number | undefined, reason?: string | undefined): void {
     this.readyState = this.CLOSED;
+    opModeManager.stopOpMode();
     cancelAnimationFrame(this.lastConsumeQueueAnimationFrame);
     this.onclose?.(new CloseEvent('close'));
   }
