@@ -1,4 +1,4 @@
-import { Middleware } from 'redux';
+import { AnyAction, Middleware } from 'redux';
 
 import { RootState, AppThunkAction, AppThunkDispatch } from './../reducers';
 import { getRobotStatus } from '../actions/status';
@@ -19,7 +19,7 @@ import {
   START_OP_MODE,
   STOP_OP_MODE,
 } from '../types';
-import MockSocket, { isMockSocket } from './mock/MockSocket';
+import { isMockSocket } from './mock/MockSocket';
 
 let socket: WebSocket;
 let statusSentTime: number;
@@ -74,7 +74,10 @@ const socketMiddleware: Middleware<Record<string, unknown>, RootState> =
 
         socket.onclose = () => {
           (store.dispatch as AppThunkDispatch)(receiveConnectionStatus(false));
-          setTimeout(() => store.dispatch(connect()), 500);
+          setTimeout(() => {
+            if (socket === undefined || socket.readyState === socket.CLOSED)
+              store.dispatch(connect());
+          }, 500);
         };
 
         // Force open after setup of the onX() hooks
