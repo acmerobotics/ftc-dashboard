@@ -16,10 +16,12 @@ export default function DeveloperModeDialog({
 
   const [isMockSocketEnabled, setIsMockSocketEnabled] = useState(false);
 
-  useEffect(() => {
+  // Prefer to do this in an event listener rather than useEffect to avoid disconnect call on render
+  const onToggleMockSocket = (isMockSocketChecked: boolean) => {
+    setIsMockSocketEnabled(isMockSocketChecked);
     dispatch(disconnect());
-    dispatch(connect(isMockSocketEnabled ? new MockSocket() : undefined));
-  }, [isMockSocketEnabled]);
+    dispatch(connect(isMockSocketChecked ? new MockSocket() : undefined));
+  };
 
   return (
     <Transition as={Fragment} show={isOpen}>
@@ -66,7 +68,7 @@ export default function DeveloperModeDialog({
                         <h4 className="py-4 font-medium">Mock Socket</h4>
                         <Switch
                           checked={isMockSocketEnabled}
-                          onChange={setIsMockSocketEnabled}
+                          onChange={onToggleMockSocket}
                           className={cx(
                             'relative inline-flex h-6 w-11 items-center rounded-full border',
                             isMockSocketEnabled
