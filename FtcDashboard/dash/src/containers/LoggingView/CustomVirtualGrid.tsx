@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 import {
   GridChildComponentProps,
@@ -109,7 +109,7 @@ const CustomVirtualGrid = ({ header, data, columnsShowing }: Props) => {
   );
 
   return (
-    <div className="w-full h-full flex flex-col overflow-x-hidden">
+    <div className="flex flex-col w-full h-full overflow-x-hidden">
       <div
         className="mb-1"
         style={{
@@ -127,9 +127,9 @@ const CustomVirtualGrid = ({ header, data, columnsShowing }: Props) => {
             }`}
             style={{ width: colWidth[i], minWidth: '3em' }}
           >
-            <span className="font-semibold flex-grow truncate">{e}</span>
+            <span className="flex-grow font-semibold truncate">{e}</span>
             <DraggableCore onDrag={(_, { deltaX }) => resizeCol(e, deltaX)}>
-              <div className="cursor-col-resize hover:bg-gray-200 px-2 mr-2 rounded absolute right-1 hover:bg-opacity-75 transition-colors">
+              <div className="absolute px-2 mr-2 transition-colors rounded cursor-col-resize hover:bg-gray-200 right-1 hover:bg-opacity-75">
                 ⋮
               </div>
             </DraggableCore>
@@ -159,7 +159,7 @@ const CustomVirtualGrid = ({ header, data, columnsShowing }: Props) => {
             ) : (
               <div
                 style={{ width, height }}
-                className="flex-center text-center"
+                className="text-center flex-center"
               >
                 Logs will be recorded as an opmode starts streaming telemetry
                 data

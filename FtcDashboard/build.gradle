@@ -28,7 +28,7 @@ android {
 }
 
 node {
-    version = '12.13.0'
+    version = '18.12.1'
     download = true
     nodeModulesDir = file("${project.projectDir}/dash")
 }

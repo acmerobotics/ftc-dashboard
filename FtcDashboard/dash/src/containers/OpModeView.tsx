@@ -1,4 +1,4 @@
-import React, { Component, ChangeEvent, createRef, MutableRefObject, PointerEvent } from 'react';
+import { Component, ChangeEvent, createRef, MutableRefObject } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
 import styled from 'styled-components';
@@ -48,7 +48,7 @@ const ActionButton = styled.button.attrs<{ className: string }>((props) => ({
 
 class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
   gamepadUnsupportedTooltipRef: MutableRefObject<HTMLDivElement | null>;
-  gamepadUnsupportedTooltipTimeout: NodeJS.Timeout | null = null;
+  gamepadUnsupportedTooltipTimeout: ReturnType<typeof setTimeout> | null = null;
 
   constructor(props: OpModeViewProps) {
     super(props);
@@ -57,21 +57,29 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
       selectedOpMode: '',
       shouldShowGamepadUnsupportedTooltip: false,
     };
-  this.gamepadUnsupportedTooltipRef = createRef();
+    this.gamepadUnsupportedTooltipRef = createRef();
 
     this.onChange = this.onChange.bind(this);
   }
 
-  gamepadIconsHover(_e: PointerEvent<HTMLDivElement>) {
-    let myTimeout: NodeJS.Timeout;
+  gamepadIconsHover() {
+    let myTimeout: ReturnType<typeof setTimeout> | null = null;
+
     this.gamepadUnsupportedTooltipTimeout = setTimeout(() => {
-      if (this.gamepadUnsupportedTooltipTimeout === myTimeout) this.setState(_prevState => ({ shouldShowGamepadUnsupportedTooltip: true }));
+      if (this.gamepadUnsupportedTooltipTimeout === myTimeout)
+        this.setState((prev) => ({
+          ...prev,
+          shouldShowGamepadUnsupportedTooltip: true,
+        }));
     }, 500);
     myTimeout = this.gamepadUnsupportedTooltipTimeout;
   }
   gamepadIconsUnhover() {
     this.gamepadUnsupportedTooltipTimeout = null;
-    this.setState(_prevState => ({ shouldShowGamepadUnsupportedTooltip: false }));
+    this.setState((prev) => ({
+      ...prev,
+      shouldShowGamepadUnsupportedTooltip: false,
+    }));
   }
 
   static getDerivedStateFromProps(
@@ -175,7 +183,7 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
             Op Mode
           </BaseViewHeading>
           <BaseViewBody className="flex-center">
-            <h3 className="text-md text-center">
+            <h3 className="text-center text-md">
               Op mode controls have not initialized
             </h3>
           </BaseViewBody>
@@ -183,7 +191,8 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
       );
     }
 
-    const isShowingGamepadUnsupportedTooltip = !gamepadsSupported && this.state.shouldShowGamepadUnsupportedTooltip;
+    const isShowingGamepadUnsupportedTooltip =
+      !gamepadsSupported && this.state.shouldShowGamepadUnsupportedTooltip;
 
     return (
       <BaseView isUnlocked={this.props.isUnlocked}>
@@ -191,45 +200,49 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
           <BaseViewHeading isDraggable={this.props.isDraggable}>
             Op Mode
           </BaseViewHeading>
-          <div onPointerEnter={this.gamepadIconsHover.bind(this)} onPointerLeave={this.gamepadIconsUnhover.bind(this)} ref={this.gamepadUnsupportedTooltipRef}>
+          <div
+            onPointerEnter={this.gamepadIconsHover.bind(this)}
+            onPointerLeave={this.gamepadIconsUnhover.bind(this)}
+            ref={this.gamepadUnsupportedTooltipRef}
+          >
             <BaseViewIcons>
               <BaseViewIcon>
-                  { gamepadsSupported ? 
-                    <GamepadIcon
-                      className="w-6 h-6"
-                      style={{
-                        opacity: gamepad1Connected ? 1.0 : 0.3,
-                      }}
-                    />
-                  :
-                    <GamepadNotSupportedIcon
-                      className="w-6 h-6"
-                      />
-                  }
+                {gamepadsSupported ? (
+                  <GamepadIcon
+                    className="w-6 h-6"
+                    style={{
+                      opacity: gamepad1Connected ? 1.0 : 0.3,
+                    }}
+                  />
+                ) : (
+                  <GamepadNotSupportedIcon className="w-6 h-6" />
+                )}
               </BaseViewIcon>
               <BaseViewIcon>
-                  { gamepadsSupported ? 
-                    <GamepadIcon
-                      className="w-6 h-6"
-                      style={{
-                        opacity: gamepad2Connected ? 1.0 : 0.3,
-                      }}
-                    />
-                  :
-                    <GamepadNotSupportedIcon
-                      className="w-6 h-6"
-                      />
-                  }
+                {gamepadsSupported ? (
+                  <GamepadIcon
+                    className="w-6 h-6"
+                    style={{
+                      opacity: gamepad2Connected ? 1.0 : 0.3,
+                    }}
+                  />
+                ) : (
+                  <GamepadNotSupportedIcon className="w-6 h-6" />
+                )}
               </BaseViewIcon>
             </BaseViewIcons>
-            <ToolTip isShowing={isShowingGamepadUnsupportedTooltip} hoverRef={this.gamepadUnsupportedTooltipRef} >
-              Due to changes to JavaScript, gamepads are no longer supported in your browser.
+            <ToolTip
+              isShowing={isShowingGamepadUnsupportedTooltip}
+              hoverRef={this.gamepadUnsupportedTooltipRef}
+            >
+              Due to changes to JavaScript, gamepads are no longer supported in
+              your browser.
             </ToolTip>
           </div>
         </div>
         <BaseViewBody>
           <select
-            className="bg-gray-200 rounded p-1 pr-6 m-1 mr-2 border border-gray-300 shadow-md disabled:shadow-none disabled:text-gray-600 transition"
+            className="p-1 pr-6 m-1 mr-2 transition bg-gray-200 border border-gray-300 rounded shadow-md disabled:shadow-none disabled:text-gray-600"
             value={this.state.selectedOpMode}
             disabled={
               activeOpMode !== STOP_OP_MODE_TAG || opModeList.length === 0
@@ -246,10 +259,10 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
           </select>
           {this.renderButtons()}
           {errorMessage !== '' && (
-            <p className="error mt-5 ml-1">Error: {errorMessage}</p>
+            <p className="mt-5 ml-1 error">Error: {errorMessage}</p>
           )}
           {warningMessage !== '' && (
-            <p className="warning mt-5 ml-1">Warning: {warningMessage}</p>
+            <p className="mt-5 ml-1 warning">Warning: {warningMessage}</p>
           )}
         </BaseViewBody>
       </BaseView>

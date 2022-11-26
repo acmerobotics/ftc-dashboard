@@ -1,15 +1,13 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import Dashboard from './containers/Dashboard';
 import configureStore from './store/configureStore';
 import './index.css';
 
 const store = configureStore();
-
-ReactDOM.render(
+const root = createRoot(document.getElementById('root'));
+root.render(
   <Provider store={store}>
     <Dashboard />
   </Provider>,
-  document.getElementById('root'),
 );

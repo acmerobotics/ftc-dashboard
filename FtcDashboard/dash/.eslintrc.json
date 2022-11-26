@@ -34,6 +34,7 @@
       }
     ],
     "react/jsx-one-expression-per-line": "off",
+    "react/react-in-jsx-scope": "off",
     "import/prefer-default-export": "off",
     "import/extensions": [
       "error",
