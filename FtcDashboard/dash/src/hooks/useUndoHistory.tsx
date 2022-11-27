@@ -8,9 +8,7 @@ enum StateHistoryCommand {
   REDO,
 }
 
-export default function useUndoHistory<T>(
-  initialHead: T,
-): [
+export default function useUndoHistory<T>(initialHead: T): [
   T,
   {
     initialize: (payload: T) => void;

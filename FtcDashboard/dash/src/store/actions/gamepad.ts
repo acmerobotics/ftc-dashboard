@@ -42,20 +42,19 @@ let lastGamepad1: GamepadState;
 let lastGamepad2: GamepadState;
 let lastGamepadTimestamp: number;
 
-export const sendGamepadState = (
-  gamepad1: GamepadState,
-  gamepad2: GamepadState,
-) => (dispatch: Dispatch<ReceiveGamepadStateAction>) => {
-  const timestamp = Date.now();
-  if (
-    !isEqual(lastGamepad1, gamepad1) ||
-    !isEqual(lastGamepad2, gamepad2) ||
-    timestamp - lastGamepadTimestamp < MAX_GAMEPAD_MS
-  ) {
-    dispatch(receiveGamepadState(gamepad1, gamepad2));
+export const sendGamepadState =
+  (gamepad1: GamepadState, gamepad2: GamepadState) =>
+  (dispatch: Dispatch<ReceiveGamepadStateAction>) => {
+    const timestamp = Date.now();
+    if (
+      !isEqual(lastGamepad1, gamepad1) ||
+      !isEqual(lastGamepad2, gamepad2) ||
+      timestamp - lastGamepadTimestamp < MAX_GAMEPAD_MS
+    ) {
+      dispatch(receiveGamepadState(gamepad1, gamepad2));
 
-    lastGamepad1 = gamepad1;
-    lastGamepad2 = gamepad2;
-    lastGamepadTimestamp = timestamp;
-  }
-};
+      lastGamepad1 = gamepad1;
+      lastGamepad2 = gamepad2;
+      lastGamepadTimestamp = timestamp;
+    }
+  };

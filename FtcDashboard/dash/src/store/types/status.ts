@@ -31,6 +31,6 @@ export type ReceiveOpModeListAction = {
 };
 
 export type GamepadSupportedStatus = {
-    type: typeof GAMEPAD_SUPPORTED_STATUS;
-    gamepadsSupported: boolean;
-}
+  type: typeof GAMEPAD_SUPPORTED_STATUS;
+  gamepadsSupported: boolean;
+};

@@ -28,15 +28,17 @@ export const receivePingTime = (pingTime: number): ReceivePingTimeAction => ({
   pingTime,
 });
 
-export const receiveConnectionStatus = (isConnected: boolean) => (
-  dispatch: Dispatch<ReceiveConnectionStatusAction | ReceiveOpModeListAction>,
-) => {
-  dispatch({
-    type: RECEIVE_CONNECTION_STATUS,
-    isConnected,
-  });
+export const receiveConnectionStatus =
+  (isConnected: boolean) =>
+  (
+    dispatch: Dispatch<ReceiveConnectionStatusAction | ReceiveOpModeListAction>,
+  ) => {
+    dispatch({
+      type: RECEIVE_CONNECTION_STATUS,
+      isConnected,
+    });
 
-  if (!isConnected) {
-    dispatch(receiveOpModeList([]));
-  }
-};
+    if (!isConnected) {
+      dispatch(receiveOpModeList([]));
+    }
+  };

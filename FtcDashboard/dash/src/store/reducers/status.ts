@@ -21,7 +21,10 @@ const initialState: StatusState = {
 
 const statusReducer = (
   state = initialState,
-  action: ReceiveRobotStatusAction | ReceiveOpModeListAction | GamepadSupportedStatus,
+  action:
+    | ReceiveRobotStatusAction
+    | ReceiveOpModeListAction
+    | GamepadSupportedStatus,
 ) => {
   switch (action.type) {
     case RECEIVE_ROBOT_STATUS:
