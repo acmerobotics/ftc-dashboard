@@ -18,8 +18,14 @@ public class ConfigVariableSerializer implements JsonSerializer<ConfigVariable<?
         JsonObject obj = new JsonObject();
         obj.add(ConfigVariable.TYPE_KEY,
                 jsonSerializationContext.serialize(configVariable.getType()));
-        obj.add(ConfigVariable.VALUE_KEY,
-                jsonSerializationContext.serialize(value));
+
+        if (configVariable.getType() == VariableType.DOUBLE && !Double.isFinite((double) value)) {
+            obj.add(ConfigVariable.VALUE_KEY, new JsonPrimitive(String.valueOf(value)));
+        } else {
+            obj.add(ConfigVariable.VALUE_KEY,
+                    jsonSerializationContext.serialize(value));
+        }
+
         if (configVariable.getType() == VariableType.ENUM) {
             obj.add(ConfigVariable.ENUM_CLASS_KEY, new JsonPrimitive(
                     value.getClass().getName()));
@@ -29,6 +35,7 @@ public class ConfigVariableSerializer implements JsonSerializer<ConfigVariable<?
             }
             obj.add(ConfigVariable.ENUM_VALUES_KEY, values);
         }
+
         return obj;
     }
 }

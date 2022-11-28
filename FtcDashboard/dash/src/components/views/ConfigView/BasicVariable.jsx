@@ -59,15 +59,19 @@ class BasicVariable extends React.Component {
         );
         break;
       case VariableType.DOUBLE:
-        input = (
-          <TextInput
-            value={value}
-            valid={valid}
-            validate={validateDouble}
-            onChange={optionOnChange}
-            onSave={optionOnSave}
-          />
-        );
+        if (typeof value === 'string') {
+          input = <p>{value}</p>;
+        } else {
+          input = (
+            <TextInput
+              value={value}
+              valid={valid}
+              validate={validateDouble}
+              onChange={optionOnChange}
+              onSave={optionOnSave}
+            />
+          );
+        }
         break;
       case VariableType.STRING:
         input = (
