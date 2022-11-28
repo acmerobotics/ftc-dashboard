@@ -66,7 +66,29 @@ class Dashboard extends Component {
             )}
           </div>
         </header>
-        {LayoutPreset.getContent(this.props.layoutPreset)}
+        {this.props.isConnected && !this.props.enabled ? (
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '100%',
+            }}
+          >
+            <div
+              className="justify-self-center text-center"
+              style={{ maxWidth: '600px' }}
+            >
+              <h1 className="text-xl font-medium">FTC Dashboard is Disabled</h1>
+              <p>
+                To re-enable, run the &quot;Enable/Disable Dashboard&quot; op
+                mode or select &quot;Enable Dashboard&quot; from the RC menu
+              </p>
+            </div>
+          </div>
+        ) : (
+          LayoutPreset.getContent(this.props.layoutPreset)
+        )}
       </div>
     );
   }
@@ -76,13 +98,15 @@ Dashboard.propTypes = {
   isConnected: PropTypes.bool.isRequired,
   pingTime: PropTypes.number.isRequired,
   layoutPreset: PropTypes.oneOf(Object.keys(LayoutPreset)).isRequired,
+  enabled: PropTypes.bool.isRequired,
   dispatch: PropTypes.func.isRequired,
 };
 
-const mapStateToProps = ({ socket, settings }) => ({
+const mapStateToProps = ({ socket, settings, status }) => ({
   isConnected: socket.isConnected,
   pingTime: socket.pingTime,
   layoutPreset: settings.layoutPreset,
+  enabled: status.enabled,
 });
 
 export default reduxConnect(mapStateToProps)(Dashboard);

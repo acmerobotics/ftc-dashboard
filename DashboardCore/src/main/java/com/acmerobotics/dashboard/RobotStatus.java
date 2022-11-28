@@ -14,6 +14,7 @@ public class RobotStatus {
         STOPPED
     }
 
+    private boolean enabled;
     private boolean available;
     private String activeOpMode;
     private OpModeStatus activeOpModeStatus;
@@ -23,7 +24,8 @@ public class RobotStatus {
     /**
      * Creates a status object with the default values.
      */
-    public RobotStatus(boolean available, String activeOpMode, OpModeStatus activeOpModeStatus, String warningMessage, String errorMessage) {
+    public RobotStatus(boolean enabled, boolean available, String activeOpMode, OpModeStatus activeOpModeStatus, String warningMessage, String errorMessage) {
+        this.enabled = enabled;
         this.available = available;
         this.activeOpMode = activeOpMode;
         this.activeOpModeStatus = activeOpModeStatus;

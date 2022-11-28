@@ -7,6 +7,7 @@ import com.acmerobotics.dashboard.config.variable.ConfigVariableSerializer;
 import com.acmerobotics.dashboard.config.variable.CustomVariable;
 import com.acmerobotics.dashboard.message.Message;
 import com.acmerobotics.dashboard.message.MessageDeserializer;
+import com.acmerobotics.dashboard.message.MessageType;
 import com.acmerobotics.dashboard.message.redux.ReceiveConfig;
 import com.acmerobotics.dashboard.message.redux.ReceiveTelemetry;
 import com.acmerobotics.dashboard.message.redux.SaveConfig;
@@ -35,8 +36,7 @@ public class DashboardCore {
      */
     private static final int DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL = 100; // ms
 
-    // TODO: figure out what to do about enabled state
-    public boolean enabled = true;
+    public boolean enabled;
 
     private NanoWSD server;
     private final List<SocketHandlerFactory.SendFun> sockets = new ArrayList<>();
@@ -46,7 +46,7 @@ public class DashboardCore {
     private volatile int telemetryTransmissionInterval = DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL;
 
     private final Object configLock = new Object();
-    private CustomVariable configRoot; // guarded by configLock
+    private CustomVariable configRoot = new CustomVariable(); // guarded by configLock
 
     private Gson gson;
 
@@ -91,8 +91,6 @@ public class DashboardCore {
                 .registerTypeAdapter(CustomVariable.class, new ConfigVariableDeserializer())
                 .create();
 
-        configRoot = new CustomVariable();
-
         server = new NanoWSD(PORT) {
             @Override
             protected NanoWSD.WebSocket openWebSocket(NanoHTTPD.IHTTPSession handshake) {
@@ -125,6 +123,10 @@ public class DashboardCore {
 
                                 @Override
                                 public void onMessage(Message message) {
+                                    if (!enabled && message.getType() != MessageType.GET_ROBOT_STATUS) {
+                                        return;
+                                    }
+
                                     switch (message.getType()) {
                                         case GET_CONFIG: {
                                             updateConfig();

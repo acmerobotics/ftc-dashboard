@@ -10,12 +10,13 @@ import {
 } from '@/store/types';
 
 const initialState: StatusState = {
+  enabled: true,
   available: false,
   activeOpMode: '',
   activeOpModeStatus: OpModeStatus.STOPPED,
-  opModeList: [],
   warningMessage: '',
   errorMessage: '',
+  opModeList: [],
   gamepadsSupported: true,
 };
 

@@ -24,7 +24,6 @@ import com.acmerobotics.dashboard.message.redux.ReceiveGamepadState;
 import com.acmerobotics.dashboard.message.redux.ReceiveImage;
 import com.acmerobotics.dashboard.message.redux.ReceiveOpModeList;
 import com.acmerobotics.dashboard.message.redux.ReceiveRobotStatus;
-import com.acmerobotics.dashboard.message.redux.SaveConfig;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.ftccommon.FtcEventLoop;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -222,7 +221,6 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         }
     });
 
-    private boolean enabled;
     private SharedPreferences prefs;
     private final List<MenuItem> enableMenuItems, disableMenuItems;
 
@@ -617,20 +615,20 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     private void enable() {
-        if (enabled) return;
+        if (core.enabled) return;
 
         setAutoEnable(true);
 
         gamepadWatchdogExecutor = ThreadPool.newSingleThreadExecutor("gamepad watchdog");
         gamepadWatchdogExecutor.submit(new GamepadWatchdogRunnable());
 
-        enabled = true;
+        core.enabled = true;
 
         updateStatusView();
     }
 
     private void disable() {
-        if (!enabled) return;
+        if (!core.enabled) return;
 
         setAutoEnable(false);
 
@@ -638,7 +636,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
         stopCameraStream();
 
-        enabled = false;
+        core.enabled = false;
 
         updateStatusView();
     }
@@ -702,7 +700,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 @SuppressLint("SetTextI18n")
                 @Override
                 public void run() {
-                    if (!enabled) {
+                    if (!core.enabled) {
                         connectionStatusTextView.setText("Dashboard: disabled");
                         return;
                     }
@@ -807,8 +805,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         MenuItem enable = menu.add(Menu.NONE, Menu.NONE, 700, "Enable Dashboard");
         MenuItem disable = menu.add(Menu.NONE, Menu.NONE, 700, "Disable Dashboard");
 
-        enable.setVisible(!enabled);
-        disable.setVisible(enabled);
+        enable.setVisible(!core.enabled);
+        disable.setVisible(core.enabled);
 
         synchronized (enableMenuItems) {
             enableMenuItems.add(enable);
@@ -872,7 +870,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                     @Override
                     public void runOpMode() throws InterruptedException {
                         telemetry.log().add(Misc.formatInvariant("Dashboard is currently %s. Press Start to %s it.",
-                                enabled ? "enabled" : "disabled", enabled ? "disable" : "enable"));
+                                core.enabled ? "enabled" : "disabled", core.enabled ? "disable" : "enable"));
                         telemetry.update();
 
                         waitForStart();
@@ -881,7 +879,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                             return;
                         }
                         
-                        if (enabled) {
+                        if (core.enabled) {
                             disable();
                         } else {
                             enable();
@@ -1007,7 +1005,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * @param bitmap bitmap to send
      */
     public void sendImage(Bitmap bitmap) {
-        if (!enabled) {
+        if (!core.enabled) {
             return;
         }
 
@@ -1022,7 +1020,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * @param maxFps maximum frames per second; 0 indicates unlimited
      */
     public void startCameraStream(CameraStreamSource source, double maxFps) {
-        if (!enabled) {
+        if (!core.enabled) {
             return;
         }
 
@@ -1110,9 +1108,9 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     private RobotStatus getRobotStatus() {
         if (opModeManager == null) {
-            return new RobotStatus(false, "", RobotStatus.OpModeStatus.STOPPED, "", "");
+            return new RobotStatus(core.enabled, false, "", RobotStatus.OpModeStatus.STOPPED, "", "");
         } else {
-            return new RobotStatus(true, opModeManager.getActiveOpModeName(), activeOpModeStatus, RobotLog.getGlobalWarningMessage().message, RobotLog.getGlobalErrorMsg());
+            return new RobotStatus(core.enabled, true, opModeManager.getActiveOpModeName(), activeOpModeStatus, RobotLog.getGlobalWarningMessage().message, RobotLog.getGlobalErrorMsg());
         }
     }
 

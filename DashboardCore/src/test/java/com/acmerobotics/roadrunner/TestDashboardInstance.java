@@ -54,7 +54,7 @@ public class TestDashboardInstance {
                     }
 
                     sendFun.send(new ReceiveRobotStatus(
-                            new RobotStatus(true, opModeName, opModeStatus, "", "")
+                            new RobotStatus(core.enabled, true, opModeName, opModeStatus, "", "")
                     ));
                     break;
                 }
@@ -80,6 +80,8 @@ public class TestDashboardInstance {
 
     public void start() throws InterruptedException {
         System.out.println("Starting Dashboard instance");
+
+        core.enabled = true;
 
         core.addConfigVariable("Test", "LATERAL_MULTIPLIER", new ValueProvider<Double>() {
             private double x;
