@@ -1,7 +1,7 @@
 package com.acmerobotics.dashboard.config;
 
 public class ConstantProvider<T> implements ValueProvider<T> {
-    private T value;
+    private final T value;
 
     public ConstantProvider(T value) {
         this.value = value;

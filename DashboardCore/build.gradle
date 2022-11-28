@@ -1,0 +1,92 @@
+buildscript {
+    ext.dashboard_version = '0.4.6'
+}
+
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+apply plugin: 'checkstyle'
+
+// adapted from https://github.com/Genymobile/gnirehtet/blob/master/config/android-checkstyle.gradle
+check.dependsOn 'checkstyle'
+
+checkstyle {
+    toolVersion = checkstyle_version
+}
+
+//task checkstyle(type: Checkstyle) {
+//    description = "Check Java style with Checkstyle"
+//    configFile = rootProject.file("config/checkstyle/checkstyle.xml")
+//    source = javaSources()
+//    classpath = files()
+//    ignoreFailures = true
+//}
+//
+//def javaSources() {
+//    def files = []
+//    android.sourceSets.each { sourceSet ->
+//        sourceSet.java.each { javaSource ->
+//            javaSource.getSrcDirs().each {
+//                if (it.exists()) {
+//                    files.add(it)
+//                }
+//            }
+//        }
+//    }
+//    return files
+//}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.google.code.gson:gson:2.8.6'
+
+    implementation('org.nanohttpd:nanohttpd-websocket:2.3.1')
+}
+
+
+//project.afterEvaluate {
+//    publishing {
+//        publications {
+//            maven(MavenPublication) {
+//                artifact bundleReleaseAar
+//                artifact androidSourcesJar
+//                artifact androidJavadocsJar
+//                groupId = 'com.acmerobotics.dashboard'
+//                artifactId = 'core'
+//                version dashboard_version
+//                pom.withXml {
+//                    def root = asNode()
+//                    root.appendNode('description', 'React-based web dashboard designed for FTC')
+//                    root.appendNode('name', 'FTC Dashboard')
+//                    root.appendNode('url', 'https://github.com/acmerobotics/ftc-dashboard')
+//                    root.children().last() + pomConfig
+//                }
+//
+//                pom.withXml {
+//                    def dependenciesNode = asNode().appendNode('dependencies')
+//                    // Iterate over the implementation dependencies (we don't want the test ones), adding a <dependency> node for each
+//                    configurations.implementation.allDependencies.each { dep ->
+//                        // Ensure dependencies such as fileTree are not included.
+//                        if (dep instanceof ModuleDependency) {
+//                            def moduleDep = (ModuleDependency) dep
+//                            def dependencyNode = dependenciesNode.appendNode('dependency')
+//                            dependencyNode.appendNode('groupId', moduleDep.group)
+//                            dependencyNode.appendNode('artifactId', moduleDep.name)
+//                            dependencyNode.appendNode('version', moduleDep.version)
+//                            if (dep.excludeRules.size() > 0) {
+//                                def exclusionsNode = dependencyNode.appendNode('exclusions')
+//                                dep.excludeRules.every { excludedDep ->
+//                                    def exclusionNode = exclusionsNode.appendNode('exclusion')
+//                                    exclusionNode.appendNode('groupId', moduleDep.group)
+//                                    exclusionNode.appendNode('artifactId', excludedDep.module)
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}

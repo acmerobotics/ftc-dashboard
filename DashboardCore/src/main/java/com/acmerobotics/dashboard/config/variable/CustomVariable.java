@@ -15,7 +15,7 @@ public class CustomVariable extends ConfigVariable<Object> {
     }
 
     public void putVariable(String name, ConfigVariable variable) {
-        if (ConfigVariable.isReserved(name)) {
+        if (isReserved(name)) {
             throw new RuntimeException();
         }
         variables.put(name, variable);

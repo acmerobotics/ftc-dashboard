@@ -90,6 +90,10 @@ repositories {
 }
 
 dependencies {
+    api(project(':DashboardCore')) {
+        transitive = false
+    }
+
     api 'org.firstinspires.ftc:RobotCore:8.0.0'
     api 'org.firstinspires.ftc:Hardware:8.0.0'
     api 'org.firstinspires.ftc:RobotServer:8.0.0'

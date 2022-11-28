@@ -14,27 +14,20 @@ import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.config.ValueProvider;
 import com.acmerobotics.dashboard.config.reflection.ReflectionConfig;
-import com.acmerobotics.dashboard.config.variable.BasicVariable;
-import com.acmerobotics.dashboard.config.variable.ConfigVariableDeserializer;
-import com.acmerobotics.dashboard.config.variable.ConfigVariableSerializer;
 import com.acmerobotics.dashboard.config.variable.CustomVariable;
 import com.acmerobotics.dashboard.message.Message;
-import com.acmerobotics.dashboard.message.MessageDeserializer;
 import com.acmerobotics.dashboard.message.redux.InitOpMode;
-import com.acmerobotics.dashboard.message.redux.ReceiveConfig;
 import com.acmerobotics.dashboard.message.redux.ReceiveGamepadState;
 import com.acmerobotics.dashboard.message.redux.ReceiveImage;
 import com.acmerobotics.dashboard.message.redux.ReceiveOpModeList;
 import com.acmerobotics.dashboard.message.redux.ReceiveRobotStatus;
-import com.acmerobotics.dashboard.message.redux.ReceiveTelemetry;
 import com.acmerobotics.dashboard.message.redux.SaveConfig;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
 import com.qualcomm.ftccommon.FtcEventLoop;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeManager;
@@ -42,6 +35,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpModeManagerImpl;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeRegistrar;
 import com.qualcomm.robotcore.exception.RobotCoreException;
 import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.util.RobotLog;
 import com.qualcomm.robotcore.util.ThreadPool;
 import com.qualcomm.robotcore.util.WebHandlerManager;
 import com.qualcomm.robotcore.util.WebServer;
@@ -52,6 +46,7 @@ import org.firstinspires.ftc.ftccommon.external.OnCreateMenu;
 import org.firstinspires.ftc.ftccommon.external.OnDestroy;
 import org.firstinspires.ftc.ftccommon.external.WebHandlerRegistrar;
 import org.firstinspires.ftc.ftccommon.internal.FtcRobotControllerWatchdogService;
+import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.function.Consumer;
 import org.firstinspires.ftc.robotcore.external.function.Continuation;
@@ -74,6 +69,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 
+import dalvik.system.DexFile;
 import fi.iki.elonen.NanoHTTPD;
 
 /**
@@ -82,11 +78,6 @@ import fi.iki.elonen.NanoHTTPD;
 public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private static final String TAG = "FtcDashboard";
 
-    /*
-     * Telemetry packets are batched for transmission and sent at this interval.
-     */
-    private static final int DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL = 100; // ms
-
     private static final int DEFAULT_IMAGE_QUALITY = 50; // 0-100
     private static final int GAMEPAD_WATCHDOG_INTERVAL = 500; // ms
 
@@ -94,15 +85,6 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     private static final String PREFS_NAME = "FtcDashboard";
     private static final String PREFS_AUTO_ENABLE_KEY = "autoEnable";
-
-    private static final Set<String> IGNORED_PACKAGES = new HashSet<>(Arrays.asList(
-            "java",
-            "android",
-            "com.sun",
-            "com.vuforia",
-            "com.google",
-            "kotlin"
-    ));
 
     private static FtcDashboard instance;
 
@@ -185,24 +167,71 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         return instance;
     }
 
+    private DashboardCore core = new DashboardCore(new SocketHandlerFactory() {
+        @Override
+        public SocketHandler accept(final SendFun sendFun) {
+            return new SocketHandler() {
+                @Override
+                public void onOpen() {
+                    synchronized (opModeList) {
+                        if (opModeList.size() > 0) {
+                            sendFun.send(new ReceiveOpModeList(opModeList));
+                        }
+                    }
+
+                    updateStatusView();
+                }
+
+                @Override
+                public void onClose() {
+                    updateStatusView();
+                }
+
+                @Override
+                public void onMessage(final Message message) {
+                    switch (message.getType()) {
+                        case GET_ROBOT_STATUS: {
+                            sendFun.send(new ReceiveRobotStatus(getRobotStatus()));
+                            break;
+                        }
+                        case INIT_OP_MODE: {
+                            String opModeName = ((InitOpMode) message).getOpModeName();
+                            opModeManager.initActiveOpMode(opModeName);
+                            break;
+                        }
+                        case START_OP_MODE: {
+                            opModeManager.startActiveOpMode();
+                            break;
+                        }
+                        case STOP_OP_MODE: {
+                            eventLoop.requestOpModeStop(opModeManager.getActiveOpMode());
+                            break;
+                        }
+                        case RECEIVE_GAMEPAD_STATE: {
+                            ReceiveGamepadState castMsg = (ReceiveGamepadState) message;
+                            updateGamepads(castMsg.getGamepad1(), castMsg.getGamepad2());
+                            break;
+                        }
+                        default:
+                            Log.w(TAG, "Received unknown message of type " + message.getType());
+                            Log.w(TAG, message.toString());
+                            break;
+                    }
+                }
+            };
+        }
+    });
+
     private boolean enabled;
     private SharedPreferences prefs;
     private final List<MenuItem> enableMenuItems, disableMenuItems;
 
-    private DashboardWebSocketServer server;
-    private final List<DashboardWebSocket> sockets = new ArrayList<>();
-
-    private TelemetryPacket.Adapter telemetry;
-    private ExecutorService telemetryExecutorService;
-    private final List<TelemetryPacket> pendingTelemetry = new ArrayList<>(); // guarded by itself
-    private volatile int telemetryTransmissionInterval = DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL;
-
-    private final Object configLock = new Object();
-    private CustomVariable configRoot; // guarded by configLock
-    private final List<String[]> varsToRemove = new ArrayList<>(); // guarded by configLock
+    private Telemetry telemetry = new TelemetryAdapter();
 
     private ExecutorService cameraStreamExecutor;
     private int imageQuality = DEFAULT_IMAGE_QUALITY;
+
+    private final List<String[]> varsToRemove = new ArrayList<>(); // only modified inside withConfigRoot
 
     private FtcEventLoop eventLoop;
     private OpModeManagerImpl opModeManager;
@@ -219,40 +248,6 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private TextView connectionStatusTextView;
     private LinearLayout parentLayout;
 
-    private Gson gson;
-
-    private class TelemetryUpdateRunnable implements Runnable {
-        @Override
-        public void run() {
-            while (!Thread.currentThread().isInterrupted()) {
-                try {
-                    List<TelemetryPacket> telemetryToSend;
-
-                    synchronized (pendingTelemetry) {
-                        while (pendingTelemetry.isEmpty()) {
-                            pendingTelemetry.wait();
-                        }
-
-                        telemetryToSend = new ArrayList<>(pendingTelemetry);
-                        pendingTelemetry.clear();
-                    }
-
-                    // only the latest packet field overlay is used
-                    // this helps save bandwidth, especially for more complex overlays
-                    for (TelemetryPacket packet : telemetryToSend.subList(0, telemetryToSend.size() - 1)) {
-                        packet.fieldOverlay().clear();
-                    }
-
-                    sendAll(new ReceiveTelemetry(telemetryToSend));
-
-                    Thread.sleep(telemetryTransmissionInterval);
-                } catch (InterruptedException e) {
-                    return;
-                }
-            }
-        }
-    }
-
     private class GamepadWatchdogRunnable implements Runnable {
         @Override
         public void run() {
@@ -262,8 +257,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                     if (lastGamepadTimestamp == 0) {
                         Thread.sleep(GAMEPAD_WATCHDOG_INTERVAL);
                     } else if ((timestamp - lastGamepadTimestamp) > GAMEPAD_WATCHDOG_INTERVAL) {
-                        updateGamepads(new Gamepad(), new Gamepad());
-
+                        activeOpMode.gamepad1.copy(new Gamepad());
+                        activeOpMode.gamepad2.copy(new Gamepad());
                         lastGamepadTimestamp = 0;
                     } else {
                         Thread.sleep(GAMEPAD_WATCHDOG_INTERVAL -
@@ -271,6 +266,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                     }
                 } catch (InterruptedException e) {
                     break;
+                } catch (RobotCoreException e) {
+                    throw new RuntimeException(e);
                 }
             }
         }
@@ -287,6 +284,198 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 Collections.sort(opModeList);
                 sendAll(new ReceiveOpModeList(opModeList));
             }
+        }
+    }
+
+    /**
+     * Adapter to use dashboard telemetry like normal SDK telemetry. Note that this doesn't support
+     * all of the operations yet.
+     */
+    private class TelemetryAdapter implements Telemetry {
+        private TelemetryPacket currentPacket;
+        private LogAdapter log;
+
+        public TelemetryAdapter() {
+            currentPacket = new TelemetryPacket();
+            log = new LogAdapter(currentPacket);
+        }
+
+        @Override
+        public Item addData(String caption, String format, Object... args) {
+            return addData(caption, String.format(format, args));
+        }
+
+        @Override
+        public Item addData(String caption, Object value) {
+            currentPacket.put(caption, value);
+            return null;
+        }
+
+        @Override
+        public <T> Item addData(String caption, Func<T> valueProducer) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public <T> Item addData(String caption, String format, Func<T> valueProducer) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean removeItem(Item item) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void clear() {
+            clearTelemetry();
+
+            currentPacket = new TelemetryPacket();
+            log = new LogAdapter(currentPacket);
+        }
+
+        @Override
+        public void clearAll() {
+            clear();
+        }
+
+        @Override
+        public Object addAction(Runnable action) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean removeAction(Object token) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void speak(String text) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void speak(String text, String languageCode, String countryCode) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean update() {
+            sendTelemetryPacket(currentPacket);
+
+            currentPacket = new TelemetryPacket();
+            log = new LogAdapter(currentPacket);
+
+            return true;
+        }
+
+        @Override
+        public Line addLine() {
+            return null;
+        }
+
+        @Override
+        public Line addLine(String lineCaption) {
+            currentPacket.addLine(lineCaption);
+            return null;
+        }
+
+        @Override
+        public boolean removeLine(Line line) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean isAutoClear() {
+            return false;
+        }
+
+        @Override
+        public void setAutoClear(boolean autoClear) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public int getMsTransmissionInterval() {
+            return getTelemetryTransmissionInterval();
+        }
+
+        @Override
+        public void setMsTransmissionInterval(int msTransmissionInterval) {
+            setTelemetryTransmissionInterval(msTransmissionInterval);
+        }
+
+        @Override
+        public String getItemSeparator() {
+            return null;
+        }
+
+        @Override
+        public void setItemSeparator(String itemSeparator) {
+
+        }
+
+        @Override
+        public String getCaptionValueSeparator() {
+            return null;
+        }
+
+        @Override
+        public void setCaptionValueSeparator(String captionValueSeparator) {
+
+        }
+
+        @Override
+        public void setDisplayFormat(DisplayFormat displayFormat) {
+
+        }
+
+        @Override
+        public Log log() {
+            return log;
+        }
+    }
+
+    private static class LogAdapter implements Telemetry.Log {
+        private TelemetryPacket telemetryPacket;
+
+        private LogAdapter(TelemetryPacket packet) {
+            telemetryPacket = packet;
+        }
+
+        @Override
+        public int getCapacity() {
+            return 0;
+        }
+
+        @Override
+        public void setCapacity(int capacity) {
+
+        }
+
+        @Override
+        public DisplayOrder getDisplayOrder() {
+            return DisplayOrder.OLDEST_FIRST;
+        }
+
+        @Override
+        public void setDisplayOrder(DisplayOrder displayOrder) {
+
+        }
+
+        @Override
+        public void add(String entry) {
+            telemetryPacket.addLine(entry);
+        }
+
+        @Override
+        public void add(String format, Object... args) {
+            telemetryPacket.addLine(String.format(format, args));
+        }
+
+        @Override
+        public void clear() {
+            telemetryPacket.clearLines();
         }
     }
 
@@ -311,7 +500,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 try {
                     long timestamp = System.currentTimeMillis();
 
-                    if (sockets.isEmpty()) {
+                    if (core.clientCount() == 0) {
                         Thread.sleep(250);
                         continue;
                     }
@@ -341,18 +530,69 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         }
     }
 
+    private static final Set<String> IGNORED_PACKAGES = new HashSet<>(Arrays.asList(
+            "java",
+            "android",
+            "com.sun",
+            "com.vuforia",
+            "com.google",
+            "kotlin"
+    ));
+
+    private static void addConfigClasses(CustomVariable customVariable) {
+        ClassLoader classLoader = FtcDashboard.class.getClassLoader();
+
+        Context context = AppUtil.getInstance().getApplication();
+        try {
+            DexFile dexFile = new DexFile(context.getPackageCodePath());
+
+            List<String> classNames = Collections.list(dexFile.entries());
+
+            for (String className : classNames) {
+                boolean skip = false;
+                for (String prefix : IGNORED_PACKAGES) {
+                    if (className.startsWith(prefix)) {
+                        skip = true;
+                        break;
+                    }
+                }
+
+                if (skip) {
+                    continue;
+                }
+
+                try {
+                    Class<?> configClass = Class.forName(className, false, classLoader);
+
+                    if (!configClass.isAnnotationPresent(Config.class)
+                            || configClass.isAnnotationPresent(Disabled.class)) {
+                        continue;
+                    }
+
+                    String name = configClass.getSimpleName();
+                    String altName = configClass.getAnnotation(Config.class).value();
+                    if (!altName.isEmpty()) {
+                        name = altName;
+                    }
+
+                    customVariable.putVariable(name, ReflectionConfig.createVariableFromClass(configClass));
+                } catch (ClassNotFoundException | NoClassDefFoundError ignored) {
+                    // dash is unable to access many classes and reporting every instance
+                    // only clutters the logs
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private FtcDashboard() {
-        telemetry = new TelemetryPacket.Adapter(this);
-
-        gson = new GsonBuilder()
-                .registerTypeAdapter(Message.class, new MessageDeserializer())
-                .registerTypeAdapter(BasicVariable.class, new ConfigVariableSerializer())
-                .registerTypeAdapter(BasicVariable.class, new ConfigVariableDeserializer())
-                .registerTypeAdapter(CustomVariable.class, new ConfigVariableSerializer())
-                .registerTypeAdapter(CustomVariable.class, new ConfigVariableDeserializer())
-                .create();
-
-        configRoot = ReflectionConfig.scanForClasses(IGNORED_PACKAGES);
+        core.withConfigRoot(new CustomVariableConsumer() {
+            @Override
+            public void accept(CustomVariable configRoot) {
+                addConfigClasses(configRoot);
+            }
+        });
 
         enableMenuItems = new ArrayList<>();
         disableMenuItems = new ArrayList<>();
@@ -381,16 +621,6 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
         setAutoEnable(true);
 
-        server = new DashboardWebSocketServer(this);
-        try {
-            server.start();
-        } catch (IOException e) {
-            Log.w(TAG, e);
-        }
-
-        telemetryExecutorService = ThreadPool.newSingleThreadExecutor("dash telemetry");
-        telemetryExecutorService.submit(new TelemetryUpdateRunnable());
-
         gamepadWatchdogExecutor = ThreadPool.newSingleThreadExecutor("gamepad watchdog");
         gamepadWatchdogExecutor.submit(new GamepadWatchdogRunnable());
 
@@ -404,13 +634,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
         setAutoEnable(false);
 
-        telemetryExecutorService.shutdownNow();
         gamepadWatchdogExecutor.shutdownNow();
-        server.stop();
-
-        synchronized (sockets) {
-            sockets.clear();
-        }
 
         stopCameraStream();
 
@@ -486,15 +710,13 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                     String serverStatus = webServerAttached ? "server attached" : "server detached";
 
                     String connStatus;
-                    synchronized (sockets) {
-                        int connections = sockets.size();
-                        if (connections == 0) {
-                            connStatus = "no connections";
-                        } else if (connections == 1) {
-                            connStatus = "1 connection";
-                        } else {
-                            connStatus = connections + " connections";
-                        }
+                    int connections = core.clientCount();
+                    if (connections == 0) {
+                        connStatus = "no connections";
+                    } else if (connections == 1) {
+                        connStatus = "1 connection";
+                    } else {
+                        connStatus = connections + " connections";
                     }
 
                     connectionStatusTextView.setText("Dashboard: " + serverStatus + ", " + connStatus);
@@ -668,14 +890,6 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 });
     }
 
-    <T> T fromJson(String json, Class<T> classOfT) throws JsonSyntaxException {
-        return gson.fromJson(json, classOfT);
-    }
-
-    String toJson(Object src) {
-        return gson.toJson(src);
-    }
-
     /**
      * Queues a telemetry packet to be sent to all clients. Packets are sent in batches of
      * approximate period {@link #getTelemetryTransmissionInterval()}. Clients display the most
@@ -685,33 +899,14 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * @param telemetryPacket packet to send
      */
     public void sendTelemetryPacket(TelemetryPacket telemetryPacket) {
-        if (!enabled) {
-            return;
-        }
-
-        telemetryPacket.addTimestamp();
-
-        synchronized (pendingTelemetry) {
-            // TODO: a circular buffer is probably a better idea, but this will work for now
-            if (pendingTelemetry.size() > 100) {
-                return;
-            }
-
-            pendingTelemetry.add(telemetryPacket);
-
-            pendingTelemetry.notifyAll();
-        }
+        core.sendTelemetryPacket(telemetryPacket);
     }
 
     /**
      * Clears telemetry data from all clients.
      */
     public void clearTelemetry() {
-        synchronized (pendingTelemetry) {
-            pendingTelemetry.clear();
-
-            sendAll(new ReceiveTelemetry(Collections.<TelemetryPacket>emptyList()));
-        }
+        core.clearTelemetry();
     }
 
     /**
@@ -727,7 +922,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * Returns the telemetry transmission interval in milliseconds.
      */
     public int getTelemetryTransmissionInterval() {
-        return telemetryTransmissionInterval;
+        return core.getTelemetryTransmissionInterval();
     }
 
     /**
@@ -735,26 +930,24 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * @param newTransmissionInterval transmission interval in milliseconds
      */
     public void setTelemetryTransmissionInterval(int newTransmissionInterval) {
-        telemetryTransmissionInterval = newTransmissionInterval;
+        core.setTelemetryTransmissionInterval(newTransmissionInterval);
     }
 
     /**
      * Sends updated configuration data to all instance clients.
      */
     public void updateConfig() {
-        synchronized (configLock) {
-            sendAll(new ReceiveConfig(configRoot));
-        }
+        core.updateConfig();
     }
 
     /**
      * Returns the configuration root for on-the-fly modifications.
      *
-     * @deprecated Use {@link #withConfigRoot(Consumer)} for thread safety
+     * @deprecated Use {@link #withConfigRoot(CustomVariableConsumer)} for thread safety
      */
     @Deprecated
     public CustomVariable getConfigRoot() {
-        return configRoot;
+        return core.getConfigRoot();
     }
 
     /**
@@ -762,10 +955,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * config tree outside the function.
      * @param function
      */
-    public void withConfigRoot(Consumer<CustomVariable> function) {
-        synchronized (configLock) {
-            function.accept(configRoot);
-        }
+    public void withConfigRoot(CustomVariableConsumer function) {
+        core.withConfigRoot(function);
     }
 
     /**
@@ -776,7 +967,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * @param <T> variable type
      */
     public <T> void addConfigVariable(String category, String name, ValueProvider<T> provider) {
-        addConfigVariable(category, name, provider, true);
+        core.addConfigVariable(category, name, provider);
     }
 
     /**
@@ -787,22 +978,18 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * @param autoRemove if true, the variable is removed on op mode termination
      * @param <T> variable type
      */
-    public <T> void addConfigVariable(String category, String name, ValueProvider<T> provider,
-                                      boolean autoRemove) {
-        synchronized (configLock) {
-            CustomVariable catVar = (CustomVariable) configRoot.getVariable(category);
-            if (catVar != null) {
-                catVar.putVariable(name, new BasicVariable<>(provider));
-            } else {
-                catVar = new CustomVariable();
-                catVar.putVariable(name, new BasicVariable<>(provider));
-                configRoot.putVariable(category, catVar);
+    public <T> void addConfigVariable(final String category, final String name, final ValueProvider<T> provider,
+                                      final boolean autoRemove) {
+        withConfigRoot(new CustomVariableConsumer() {
+            @Override
+            public void accept(CustomVariable configRoot) {
+                core.addConfigVariable(category, name, provider);
+
+                if (autoRemove) {
+                    varsToRemove.add(new String[]{category, name});
+                }
             }
-            if (autoRemove) {
-                varsToRemove.add(new String[]{category, name});
-            }
-            updateConfig();
-        }
+        });
     }
 
     /**
@@ -811,14 +998,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * @param name variable name
      */
     public void removeConfigVariable(String category, String name) {
-        synchronized (configLock) {
-            CustomVariable catVar = (CustomVariable) configRoot.getVariable(category);
-            catVar.removeVariable(name);
-            if (catVar.size() == 0) {
-                configRoot.removeVariable(category);
-            }
-            updateConfig();
-        }
+        core.removeConfigVariable(category, name);
     }
 
     /**
@@ -878,7 +1058,39 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         imageQuality = quality;
     }
 
-    private void updateGamepads(Gamepad gamepad1, Gamepad gamepad2) {
+    public static void copyIntoSdkGamepad(ReceiveGamepadState.Gamepad src, Gamepad dst) {
+        dst.left_stick_x = src.left_stick_x;
+        dst.left_stick_y = src.left_stick_y;
+        dst.right_stick_x = src.right_stick_x;
+        dst.right_stick_y = src.right_stick_y;
+
+        dst.dpad_up = src.dpad_up;
+        dst.dpad_down = src.dpad_down;
+        dst.dpad_left = src.dpad_left;
+        dst.dpad_right = src.dpad_right;
+
+        dst.a = src.a;
+        dst.b = src.b;
+        dst.x = src.x;
+        dst.y = src.y;
+
+        dst.guide = src.guide;
+        dst.start = src.start;
+        dst.back = src.back;
+
+        dst.left_bumper = src.left_bumper;
+        dst.right_bumper = src.right_bumper;
+
+        dst.left_stick_button = src.left_stick_button;
+        dst.right_stick_button = src.right_stick_button;
+
+        dst.left_trigger = src.left_trigger;
+        dst.right_trigger = src.right_trigger;
+
+        dst.touchpad = src.touchpad;
+    }
+
+    private void updateGamepads(ReceiveGamepadState.Gamepad gamepad1, ReceiveGamepadState.Gamepad gamepad2) {
         synchronized (opModeLock) {
             // for now, the dashboard only overrides synthetic gamepads
             if (activeOpModeStatus == RobotStatus.OpModeStatus.STOPPED) {
@@ -890,99 +1102,27 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 return;
             }
 
-            try {
-                activeOpMode.gamepad1.copy(gamepad1);
-                activeOpMode.gamepad2.copy(gamepad2);
-            } catch (RobotCoreException e) {
-                Log.w(TAG, e);
-            }
+            copyIntoSdkGamepad(gamepad1, activeOpMode.gamepad1);
+            copyIntoSdkGamepad(gamepad2, activeOpMode.gamepad2);
             lastGamepadTimestamp = System.currentTimeMillis();
         }
     }
 
     private RobotStatus getRobotStatus() {
         if (opModeManager == null) {
-            return new RobotStatus();
+            return new RobotStatus(false, "", RobotStatus.OpModeStatus.STOPPED, "", "");
         } else {
-            return new RobotStatus(opModeManager.getActiveOpModeName(), activeOpModeStatus);
+            return new RobotStatus(true, opModeManager.getActiveOpModeName(), activeOpModeStatus, RobotLog.getGlobalWarningMessage().message, RobotLog.getGlobalErrorMsg());
         }
     }
 
     private void sendAll(Message message) {
-        synchronized (sockets) {
-            for (DashboardWebSocket ws : sockets) {
-                ws.send(message);
-            }
-        }
-    }
-
-    void addSocket(DashboardWebSocket socket) {
-        synchronized (sockets) {
-            sockets.add(socket);
-        }
-
-        updateConfig();
-
-        synchronized (opModeList) {
-            if (opModeList.size() > 0) {
-                socket.send(new ReceiveOpModeList(opModeList));
-            }
-        }
-
-        updateStatusView();
-    }
-
-    void removeSocket(DashboardWebSocket socket) {
-        synchronized (sockets) {
-            sockets.remove(socket);
-        }
-
-        updateStatusView();
-    }
-
-    void onMessage(DashboardWebSocket socket, Message msg) {
-        switch (msg.getType()) {
-            case GET_ROBOT_STATUS: {
-                socket.send(new ReceiveRobotStatus(getRobotStatus()));
-                break;
-            }
-            case GET_CONFIG: {
-                updateConfig();
-                break;
-            }
-            case INIT_OP_MODE: {
-                String opModeName = ((InitOpMode) msg).getOpModeName();
-                opModeManager.initActiveOpMode(opModeName);
-                break;
-            }
-            case START_OP_MODE: {
-                opModeManager.startActiveOpMode();
-                break;
-            }
-            case STOP_OP_MODE: {
-                eventLoop.requestOpModeStop(opModeManager.getActiveOpMode());
-                break;
-            }
-            case SAVE_CONFIG: {
-                synchronized (configLock) {
-                    configRoot.update(((SaveConfig) msg).getConfigDiff());
-                    updateConfig();
-                }
-                break;
-            }
-            case RECEIVE_GAMEPAD_STATE: {
-                ReceiveGamepadState castMsg = (ReceiveGamepadState) msg;
-                updateGamepads(castMsg.getGamepad1(), castMsg.getGamepad2());
-                break;
-            }
-            default:
-                Log.w(TAG, "Received unknown message of type " + msg.getType());
-                Log.w(TAG, msg.toString());
-                break;
-        }
+        core.sendAll(message);
     }
 
     private void close() {
+        core.close();
+
         if (opModeManager != null) {
             opModeManager.unregisterListener(this);
         }
@@ -1018,18 +1158,21 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             activeOpMode = opMode;
         }
 
-        synchronized (configLock) {
-            for (String[] var : varsToRemove) {
-                String category = var[0];
-                String name = var[1];
-                CustomVariable catVar = (CustomVariable) configRoot.getVariable(category);
-                catVar.removeVariable(name);
-                if (catVar.size() == 0) {
-                    configRoot.removeVariable(category);
+        withConfigRoot(new CustomVariableConsumer() {
+            @Override
+            public void accept(CustomVariable configRoot) {
+                for (String[] var : varsToRemove) {
+                    String category = var[0];
+                    String name = var[1];
+                    CustomVariable catVar = (CustomVariable) configRoot.getVariable(category);
+                    catVar.removeVariable(name);
+                    if (catVar.size() == 0) {
+                        configRoot.removeVariable(category);
+                    }
                 }
+                varsToRemove.clear();
             }
-            varsToRemove.clear();
-        }
+        });
 
         // this callback is sometimes called from the UI thread
         (new Thread() {

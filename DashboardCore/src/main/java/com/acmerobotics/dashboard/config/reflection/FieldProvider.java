@@ -1,7 +1,5 @@
 package com.acmerobotics.dashboard.config.reflection;
 
-import android.util.Log;
-
 import com.acmerobotics.dashboard.config.ValueProvider;
 
 import java.lang.reflect.Field;
@@ -11,10 +9,8 @@ import java.lang.reflect.Field;
  * @param <T> type of the class field
  */
 public class FieldProvider<T> implements ValueProvider<T> {
-    private static final String TAG = "FieldProvider";
-
-    private Field field;
-    private Object parent;
+    private final Field field;
+    private final Object parent;
 
     public FieldProvider(Field field, Object parent) {
         this.field = field;
@@ -27,9 +23,8 @@ public class FieldProvider<T> implements ValueProvider<T> {
         try {
             return (T) field.get(parent);
         } catch (IllegalAccessException e) {
-            Log.w(TAG, e);
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
     @Override
@@ -37,7 +32,7 @@ public class FieldProvider<T> implements ValueProvider<T> {
         try {
             field.set(parent, value);
         } catch (IllegalAccessException e) {
-            Log.w(TAG, e);
+            throw new RuntimeException(e);
         }
     }
 }
