@@ -1,15 +1,15 @@
-import React from 'react';
+import { cloneElement } from 'react';
 import styled from 'styled-components';
 
-import { ConfigurableView } from '../enums/ConfigurableView';
+import { ConfigurableView } from '@/enums/ConfigurableView';
 
-import { ReactComponent as CameraIcon } from '../assets/icons/camera.svg';
-import { ReactComponent as SettingsIcon } from '../assets/icons/settings.svg';
-import { ReactComponent as ChartIcon } from '../assets/icons/chart.svg';
-import { ReactComponent as ApiIcon } from '../assets/icons/api.svg';
-import { ReactComponent as SubjectIcon } from '../assets/icons/subject.svg';
-import { ReactComponent as WidgetIcon } from '../assets/icons/widgets.svg';
-import { ReactComponent as ListIcon } from '../assets/icons/list.svg';
+import { ReactComponent as CameraIcon } from '@/assets/icons/camera.svg';
+import { ReactComponent as SettingsIcon } from '@/assets/icons/settings.svg';
+import { ReactComponent as ChartIcon } from '@/assets/icons/chart.svg';
+import { ReactComponent as ApiIcon } from '@/assets/icons/api.svg';
+import { ReactComponent as SubjectIcon } from '@/assets/icons/subject.svg';
+import { ReactComponent as WidgetIcon } from '@/assets/icons/widgets.svg';
+import { ReactComponent as ListIcon } from '@/assets/icons/list.svg';
 
 type ViewPickerProps = {
   isOpen: boolean;
@@ -57,14 +57,14 @@ const listContent = [
   {
     title: 'Field View',
     view: ConfigurableView.FIELD_VIEW,
-    icon: <ApiIcon className="w-7 h-7 transform rotate-45" />,
+    icon: <ApiIcon className="transform rotate-45 w-7 h-7" />,
     customStyles: 'focus:ring-blue-600',
     iconBg: 'bg-blue-500',
   },
   {
     title: 'Graph View',
     view: ConfigurableView.GRAPH_VIEW,
-    icon: <ChartIcon className="text-white w-6 h-6" />,
+    icon: <ChartIcon className="w-6 h-6 text-white" />,
     customStyles: 'focus:ring-green-600',
     iconBg: 'bg-green-500',
   },
@@ -111,10 +111,10 @@ const ViewPicker = (props: ViewPickerProps) => {
           disabled={!props.isOpen}
         >
           <div className={`w-8 h-8  rounded mr-3 flex-center ${item.iconBg}`}>
-            {React.cloneElement(item.icon)}
+            {cloneElement(item.icon)}
           </div>
           <div className="flex flex-col items-start">
-            <h3 className="text-lg mt-0 leading-4 font-medium">{item.title}</h3>
+            <h3 className="mt-0 text-lg font-medium leading-4">{item.title}</h3>
           </div>
         </CardButton>
       ))}

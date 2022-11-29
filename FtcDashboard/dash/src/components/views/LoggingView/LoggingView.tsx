@@ -1,4 +1,4 @@
-import React, {
+import {
   useState,
   useEffect,
   useReducer,
@@ -9,9 +9,9 @@ import { useSelector } from 'react-redux';
 
 import { Transition, Switch } from '@headlessui/react';
 
-import { RootState } from '../../store/reducers';
-import { TelemetryItem, STOP_OP_MODE_TAG } from '../../store/types';
-import { OpModeStatus } from '../../enums/OpModeStatus';
+import { RootState } from '@/store/reducers';
+import { TelemetryItem, STOP_OP_MODE_TAG } from '@/store/types';
+import { OpModeStatus } from '@/enums/OpModeStatus';
 
 import BaseView, {
   BaseViewHeading,
@@ -21,14 +21,14 @@ import BaseView, {
 } from '../BaseView';
 import CustomVirtualGrid from './CustomVirtualGrid';
 import { DateToHHMMSS } from './DateFormatting';
-import ToolTip from '../../components/ToolTip';
+import ToolTip from '../../ToolTip';
 
-import useDelayedTooltip from '../../hooks/useDelayedTooltip';
-import useOnClickOutside from '../../hooks/useOnClickOutside';
+import useDelayedTooltip from '@/hooks/useDelayedTooltip';
+import useOnClickOutside from '@/hooks/useOnClickOutside';
 
-import { ReactComponent as DownloadSVG } from '../../assets/icons/file_download.svg';
-import { ReactComponent as DownloadOffSVG } from '../../assets/icons/file_download_off.svg';
-import { ReactComponent as MoreVertSVG } from '../../assets/icons/more_vert.svg';
+import { ReactComponent as DownloadSVG } from '@/assets/icons/file_download.svg';
+import { ReactComponent as DownloadOffSVG } from '@/assets/icons/file_download_off.svg';
+import { ReactComponent as MoreVertSVG } from '@/assets/icons/more_vert.svg';
 
 type LoggingViewProps = BaseViewProps & BaseViewHeadingProps;
 
@@ -119,7 +119,7 @@ const MenuItemSwitch = ({
     | (FormEventHandler<HTMLButtonElement> & ((checked: boolean) => void));
   children: JSX.Element | string;
 }) => (
-  <Switch.Group as="div" className="flex items-center space-x-4 py-1 px-3">
+  <Switch.Group as="div" className="flex items-center px-3 py-1 space-x-4">
     <Switch
       as="button"
       checked={checked}
@@ -322,7 +322,7 @@ const LoggingView = ({
           <div className="relative inline-block">
             <button
               ref={keyShowingMenuButtonRef}
-              className="icon-btn w-8 h-8"
+              className="w-8 h-8 icon-btn"
               onClick={() =>
                 setIsKeyShowingMenuVisible(!isKeyShowingMenuVisible)
               }
@@ -340,10 +340,10 @@ const LoggingView = ({
             >
               <div
                 ref={keyShowingMenuRef}
-                className="absolute right-0 mt-2 py-2 origin-top-right bg-white border border-gray-200 rounded-md shadow-lg outline-none"
+                className="absolute right-0 py-2 mt-2 origin-top-right bg-white border border-gray-200 rounded-md shadow-lg outline-none"
                 style={{ zIndex: 99 }}
               >
-                <p className="text-sm leading-5 border-b border-gray-100 pl-3 pb-1 mb-1 text-gray-500">
+                <p className="pb-1 pl-3 mb-1 text-sm leading-5 text-gray-500 border-b border-gray-100">
                   Toggle Items
                 </p>
                 <MenuItemSwitch

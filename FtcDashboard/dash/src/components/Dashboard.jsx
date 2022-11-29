@@ -1,13 +1,13 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { connect as reduxConnect } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import LayoutPreset from '../enums/LayoutPreset';
-import { connect, disconnect } from '../store/actions/socket';
-import { saveLayoutPreset, getLayoutPreset } from '../store/actions/settings';
+import LayoutPreset from '@/enums/LayoutPreset';
+import { connect, disconnect } from '@/store/actions/socket';
+import { saveLayoutPreset, getLayoutPreset } from '@/store/actions/settings';
 
-import { ReactComponent as ConnectedIcon } from '../assets/icons/wifi.svg';
-import { ReactComponent as DisconnectedIcon } from '../assets/icons/wifi_off.svg';
+import { ReactComponent as ConnectedIcon } from '@/assets/icons/wifi.svg';
+import { ReactComponent as DisconnectedIcon } from '@/assets/icons/wifi_off.svg';
 
 class Dashboard extends Component {
   componentDidMount() {
@@ -30,11 +30,11 @@ class Dashboard extends Component {
         className="flex flex-col"
         style={{ width: '100vw', height: '100vh' }}
       >
-        <header className="flex justify-between items-center bg-blue-600 px-3 py-1 text-white">
+        <header className="flex items-center justify-between px-3 py-1 text-white bg-blue-600">
           <h1 className="text-2xl font-medium">FTC Dashboard</h1>
           <div className="flex-center">
             <select
-              className="text-black text-sm rounded mx-2 py-1 bg-blue-100 border-blue-300 focus:border-blue-100 focus:ring-2 focus:ring-white focus:ring-opacity-40"
+              className="py-1 mx-2 text-sm text-black bg-blue-100 border-blue-300 rounded focus:border-blue-100 focus:ring-2 focus:ring-white focus:ring-opacity-40"
               value={this.props.layoutPreset}
               onChange={(evt) =>
                 this.props.dispatch(saveLayoutPreset(evt.target.value))
@@ -60,9 +60,9 @@ class Dashboard extends Component {
               </p>
             )}
             {this.props.isConnected ? (
-              <ConnectedIcon className="ml-4 w-10 h-10" />
+              <ConnectedIcon className="w-10 h-10 ml-4" />
             ) : (
-              <DisconnectedIcon className="ml-4 w-10 h-10" />
+              <DisconnectedIcon className="w-10 h-10 ml-4" />
             )}
           </div>
         </header>

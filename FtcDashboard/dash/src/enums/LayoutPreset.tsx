@@ -1,16 +1,15 @@
-import React from 'react';
-import { Values } from '../typeHelpers';
+import { Values } from '@/typeHelpers';
 
-import TileGrid from '../components/TileGrid';
-import Tile from '../components/Tile';
-import ConfigurableLayout from '../components/ConfigurableLayout';
+import TileGrid from '@/components/Layout/TileGrid';
+import Tile from '@/components/Layout/Tile';
+import ConfigurableLayout from '@/components/ConfigurableLayout/ConfigurableLayout';
 
-import OpModeView from '../containers/OpModeView';
-import CameraView from '../containers/CameraView';
-import GraphView from '../containers/GraphView';
-import ConfigView from '../containers/ConfigView';
-import TelemetryView from '../containers/TelemetryView';
-import FieldView from '../containers/FieldView';
+import OpModeView from '@/components/views/OpModeView';
+import CameraView from '@/components/views/CameraView';
+import GraphView from '@/components/views/GraphView/GraphView';
+import ConfigView from '@/components/views/ConfigView/ConfigView';
+import TelemetryView from '@/components/views/TelemetryView';
+import FieldView from '@/components/views/FieldView/FieldView';
 
 const LayoutPreset = {
   DEFAULT: 'DEFAULT',

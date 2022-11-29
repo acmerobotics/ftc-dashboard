@@ -2,9 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import BasicVariable from './BasicVariable';
-import VariableType from '../enums/VariableType';
+import VariableType from '@/enums/VariableType';
 
-import { ReactComponent as ExpandedMoreIcon } from '../assets/icons/expand_more.svg';
+import { ReactComponent as ExpandedMoreIcon } from '@/assets/icons/expand_more.svg';
 
 class CustomVariable extends React.Component {
   constructor(props) {
@@ -83,7 +83,7 @@ class CustomVariable extends React.Component {
       <tr>
         <td>
           <div
-            className="option-header py-1 cursor-pointer"
+            className="py-1 cursor-pointer option-header"
             onClick={this.toggleVisibility}
           >
             <div
@@ -94,7 +94,7 @@ class CustomVariable extends React.Component {
             >
               <ExpandedMoreIcon className="w-6 h-6" />
             </div>
-            <div className="flex justify-between items-center">
+            <div className="flex items-center justify-between">
               <h3 className="text-lg select-none">{name}</h3>
             </div>
           </div>

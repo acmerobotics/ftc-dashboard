@@ -2,8 +2,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import AutoFitCanvas from '../components/AutoFitCanvas';
-import { ReactComponent as RefreshIcon } from '../assets/icons/refresh.svg';
+import AutoFitCanvas from '../Canvas/AutoFitCanvas';
+import { ReactComponent as RefreshIcon } from '@/assets/icons/refresh.svg';
 import BaseView, {
   BaseViewHeading,
   BaseViewBody,

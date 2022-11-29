@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import Graph from './Graph';
-import AutoFitCanvas from '../components/AutoFitCanvas';
+import AutoFitCanvas from '../../Canvas/AutoFitCanvas';
 
 // PureComponent implements shouldComponentUpdate()
 class GraphCanvas extends React.PureComponent {

@@ -1,4 +1,3 @@
-import React from 'react';
 import PropTypes from 'prop-types';
 
 const BooleanInput = ({ value, onChange, onSave }) => (
@@ -15,7 +14,7 @@ const BooleanInput = ({ value, onChange, onSave }) => (
       }
     />
     <button
-      className="bg-gray-100 px-2 rounded border border-gray-200"
+      className="px-2 bg-gray-100 border border-gray-200 rounded"
       onClick={onSave}
     >
       Save
