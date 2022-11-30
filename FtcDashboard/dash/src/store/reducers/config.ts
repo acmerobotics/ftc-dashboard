@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash';
-import VariableType from '../../enums/VariableType';
+import VariableType from '@/enums/VariableType';
 import {
   Config,
   ConfigCustom,
@@ -13,7 +13,7 @@ import {
   REFRESH_CONFIG,
   SAVE_CONFIG,
   UPDATE_CONFIG,
-} from '../types';
+} from '@/store/types';
 
 const receiveConfig = (baseConfig: Config, newConfig: Config) => {
   if (newConfig.__type === VariableType.CUSTOM) {

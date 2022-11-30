@@ -1,5 +1,5 @@
 import { isEmpty } from 'lodash';
-import VariableType from '../../enums/VariableType';
+import VariableType from '@/enums/VariableType';
 import {
   Config,
   ConfigCustom,
@@ -13,7 +13,7 @@ import {
   SAVE_CONFIG,
   UPDATE_CONFIG,
   ConfigVariable,
-} from '../types';
+} from '@/store/types';
 
 export const receiveConfig = (config: Config): ReceiveConfigAction => ({
   type: 'RECEIVE_CONFIG',

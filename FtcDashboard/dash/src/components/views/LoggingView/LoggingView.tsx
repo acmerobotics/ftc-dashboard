@@ -18,10 +18,10 @@ import BaseView, {
   BaseViewBody,
   BaseViewProps,
   BaseViewHeadingProps,
-} from '../BaseView';
+} from '@/components/views/BaseView';
+import ToolTip from '@/components/ToolTip';
 import CustomVirtualGrid from './CustomVirtualGrid';
 import { DateToHHMMSS } from './DateFormatting';
-import ToolTip from '../../ToolTip';
 
 import useDelayedTooltip from '@/hooks/useDelayedTooltip';
 import useOnClickOutside from '@/hooks/useOnClickOutside';

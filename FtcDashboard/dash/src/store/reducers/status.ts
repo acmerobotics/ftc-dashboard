@@ -1,4 +1,4 @@
-import OpModeStatus from '../../enums/OpModeStatus';
+import OpModeStatus from '@/enums/OpModeStatus';
 import {
   ReceiveOpModeListAction,
   ReceiveRobotStatusAction,
@@ -7,7 +7,7 @@ import {
   RECEIVE_ROBOT_STATUS,
   GAMEPAD_SUPPORTED_STATUS,
   StatusState,
-} from '../types';
+} from '@/store/types';
 
 const initialState: StatusState = {
   available: false,

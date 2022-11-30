@@ -8,7 +8,7 @@ import {
   GAMEPAD_DISCONNECTED,
   RECEIVE_GAMEPAD_STATE,
   GamepadState,
-} from '../types';
+} from '@/store/types';
 
 export const gamepadConnected = (user: number): GamepadConnectedAction => ({
   type: GAMEPAD_CONNECTED,

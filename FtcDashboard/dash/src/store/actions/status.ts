@@ -6,7 +6,7 @@ import {
   GET_ROBOT_STATUS,
   RECEIVE_OP_MODE_LIST,
   RECEIVE_ROBOT_STATUS,
-} from '../types';
+} from '@/store/types';
 
 export const getRobotStatus = (): GetRobotStatusAction => ({
   type: GET_ROBOT_STATUS,

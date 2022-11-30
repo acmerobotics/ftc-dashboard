@@ -10,7 +10,7 @@
  * So it's probably best to identify by checking if PID/VID is in the gamepad.id
  */
 
-import { Values } from '../typeHelpers';
+import { Values } from '@/typeHelpers';
 
 const GamepadType = {
   LOGITECH_DUAL_ACTION: 'LOGITECH_DUAL_ACTION',

@@ -1,12 +1,12 @@
 import { Middleware } from 'redux';
 
-import { RootState, AppThunkAction, AppThunkDispatch } from './../reducers';
-import { getRobotStatus } from '../actions/status';
+import { RootState, AppThunkAction, AppThunkDispatch } from '@/store/reducers';
+import { getRobotStatus } from '@/store/actions/status';
 import {
   connect,
   receiveConnectionStatus,
   receivePingTime,
-} from '../actions/socket';
+} from '@/store/actions/socket';
 import {
   CONNECT,
   DISCONNECT,
@@ -18,7 +18,7 @@ import {
   SAVE_CONFIG,
   START_OP_MODE,
   STOP_OP_MODE,
-} from '../types';
+} from '@/store/types';
 
 let socket: WebSocket;
 let statusSentTime: number;

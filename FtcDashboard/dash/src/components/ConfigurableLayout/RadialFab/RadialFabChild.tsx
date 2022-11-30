@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 import { WithChildren } from '@/typeHelpers';
 import useDelayedTooltip from '@/hooks/useDelayedTooltip';
-import ToolTip from '../../ToolTip';
+import ToolTip from '@/components/ToolTip';
 
 type RadialFabChildProps = {
   customClass?: string;

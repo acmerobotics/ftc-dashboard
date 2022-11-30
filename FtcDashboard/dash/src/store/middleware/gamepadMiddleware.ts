@@ -9,10 +9,10 @@ import {
   gamepadConnected,
   gamepadDisconnected,
   sendGamepadState,
-} from '../actions/gamepad';
-import GamepadType from '../../enums/GamepadType';
-import { GamepadState, GAMEPAD_SUPPORTED_STATUS } from '../types';
-import { AppThunkDispatch, RootState } from '../reducers';
+} from '@/store/actions/gamepad';
+import { GamepadState, GAMEPAD_SUPPORTED_STATUS } from '@/store/types';
+import { AppThunkDispatch, RootState } from '@/store/reducers';
+import GamepadType from '@/enums/GamepadType';
 
 const scale = (
   value: number,

@@ -18,7 +18,7 @@ import BaseView, {
 import { ReactComponent as GamepadIcon } from '@/assets/icons/gamepad.svg';
 import { ReactComponent as GamepadNotSupportedIcon } from '@/assets/icons/gamepad_not_supported.svg';
 import { STOP_OP_MODE_TAG } from '@/store/types/opmode';
-import ToolTip from '../ToolTip';
+import ToolTip from '@/components/ToolTip';
 
 type OpModeViewState = {
   selectedOpMode: string;

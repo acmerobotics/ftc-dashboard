@@ -8,7 +8,7 @@ import BaseView, {
   BaseViewBody,
   BaseViewIcons,
   BaseViewIconButton,
-} from '../BaseView';
+} from '@/components/views/BaseView';
 
 import { ReactComponent as SaveIcon } from '@/assets/icons/save.svg';
 import { ReactComponent as RefreshIcon } from '@/assets/icons/refresh.svg';

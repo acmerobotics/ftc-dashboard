@@ -1,10 +1,10 @@
-import LayoutPreset from '../../enums/LayoutPreset';
+import LayoutPreset from '@/enums/LayoutPreset';
 
 import {
   SettingState,
   ReceiveLayoutPresetAction,
   RECEIVE_LAYOUT_PRESET,
-} from '../types';
+} from '@/store/types';
 
 const initialState: SettingState = {
   layoutPreset: LayoutPreset.DEFAULT,

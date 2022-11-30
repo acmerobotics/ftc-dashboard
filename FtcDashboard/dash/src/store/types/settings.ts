@@ -1,6 +1,6 @@
-import { Values } from '../../typeHelpers';
+import { Values } from '@/typeHelpers';
 
-import LayoutPreset from '../../enums/LayoutPreset';
+import LayoutPreset from '@/enums/LayoutPreset';
 
 export const SAVE_LAYOUT_PRESET = 'SAVE_LAYOUT_PRESET';
 export const RECEIVE_LAYOUT_PRESET = 'RECEIVE_LAYOUT_PRESET';

@@ -1,5 +1,5 @@
-import OpModeStatus from './../../enums/OpModeStatus';
-import { Values } from '../../typeHelpers';
+import OpModeStatus from '@/enums/OpModeStatus';
+import { Values } from '@/typeHelpers';
 
 export const GET_ROBOT_STATUS = 'GET_ROBOT_STATUS';
 export const RECEIVE_ROBOT_STATUS = 'RECEIVE_ROBOT_STATUS';

@@ -4,7 +4,7 @@ import {
   GamepadDisonnectedAction,
   GAMEPAD_CONNECTED,
   GAMEPAD_DISCONNECTED,
-} from '../types';
+} from '@/store/types';
 
 const initialState: GamepadConnectionState = {
   gamepad1Connected: false,
