@@ -41,9 +41,9 @@ class TextInput extends React.Component {
   render() {
     return (
       <input
-        className={`bg-gray-100 rounded border border-gray-200 px-3 py-1 ${
+        className={`rounded border border-gray-200 bg-gray-100 px-3 py-1 ${
           !this.props.valid
-            ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+            ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
             : ''
         }`}
         ref={this.inputRef}

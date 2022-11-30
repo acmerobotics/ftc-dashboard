@@ -188,20 +188,20 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
           </BaseViewHeading>
           <BaseViewIcons>
             {this.state.graphing && this.state.selectedKeys.length !== 0 && (
-              <BaseViewIconButton className="w-8 h-8 icon-btn">
+              <BaseViewIconButton className="icon-btn h-8 w-8">
                 {this.state.paused ? (
-                  <PlayIcon className="w-6 h-6" onClick={this.play} />
+                  <PlayIcon className="h-6 w-6" onClick={this.play} />
                 ) : (
-                  <PauseIcon className="w-6 h-6" onClick={this.pause} />
+                  <PauseIcon className="h-6 w-6" onClick={this.pause} />
                 )}
               </BaseViewIconButton>
             )}
 
             <BaseViewIconButton>
               {this.state.graphing ? (
-                <CloseIcon className="w-6 h-6 text-black" onClick={this.stop} />
+                <CloseIcon className="h-6 w-6 text-black" onClick={this.stop} />
               ) : (
-                <ChartIcon className="w-6 h-6" onClick={this.start} />
+                <ChartIcon className="h-6 w-6" onClick={this.start} />
               )}
             </BaseViewIconButton>
           </BaseViewIcons>
@@ -209,7 +209,7 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
         <BaseViewBody className={showText ? 'flex-center' : ''}>
           {!this.state.graphing ? (
             showNoNumeric ? (
-              <p className="text-center justify-self-center">
+              <p className="justify-self-center text-center">
                 Send number-valued telemetry data to graph them over time
               </p>
             ) : (
@@ -265,7 +265,7 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
               </>
             )
           ) : showEmpty ? (
-            <p className="text-center justify-self-center">
+            <p className="justify-self-center text-center">
               No telemetry selected to graph
             </p>
           ) : (

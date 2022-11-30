@@ -24,7 +24,7 @@ const Cell = ({
 
   return dataTyped.visibleColumns[columnIndex] ? (
     <div
-      className={`px-2 truncate ${
+      className={`truncate px-2 ${
         columnIndex === 0 ? 'text-neutral-gray-400' : ''
       }`}
       style={style}
@@ -109,7 +109,7 @@ const CustomVirtualGrid = ({ header, data, columnsShowing }: Props) => {
   );
 
   return (
-    <div className="flex flex-col w-full h-full overflow-x-hidden">
+    <div className="flex h-full w-full flex-col overflow-x-hidden">
       <div
         className="mb-1"
         style={{
@@ -122,14 +122,14 @@ const CustomVirtualGrid = ({ header, data, columnsShowing }: Props) => {
         {header.map((e, i) => (
           <div
             key={e}
-            className={`inline-flex flex-row relative pr-8 ${
+            className={`relative inline-flex flex-row pr-8 ${
               derivedColWidth[i] === 0 ? 'hidden' : ''
             }`}
             style={{ width: colWidth[i], minWidth: '3em' }}
           >
-            <span className="flex-grow font-semibold truncate">{e}</span>
+            <span className="flex-grow truncate font-semibold">{e}</span>
             <DraggableCore onDrag={(_, { deltaX }) => resizeCol(e, deltaX)}>
-              <div className="absolute px-2 mr-2 transition-colors rounded cursor-col-resize hover:bg-gray-200 right-1 hover:bg-opacity-75">
+              <div className="absolute right-1 mr-2 cursor-col-resize rounded px-2 transition-colors hover:bg-gray-200 hover:bg-opacity-75">
                 ⋮
               </div>
             </DraggableCore>
@@ -159,7 +159,7 @@ const CustomVirtualGrid = ({ header, data, columnsShowing }: Props) => {
             ) : (
               <div
                 style={{ width, height }}
-                className="text-center flex-center"
+                className="flex-center text-center"
               >
                 Logs will be recorded as an opmode starts streaming telemetry
                 data

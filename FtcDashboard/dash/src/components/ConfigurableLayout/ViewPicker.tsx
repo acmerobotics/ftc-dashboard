@@ -50,49 +50,49 @@ const listContent = [
   {
     title: 'OpMode View',
     view: ConfigurableView.OPMODE_VIEW,
-    icon: <WidgetIcon className="w-6 h-6" />,
+    icon: <WidgetIcon className="h-6 w-6" />,
     customStyles: 'focus:ring-red-600',
     iconBg: 'bg-red-500',
   },
   {
     title: 'Field View',
     view: ConfigurableView.FIELD_VIEW,
-    icon: <ApiIcon className="transform rotate-45 w-7 h-7" />,
+    icon: <ApiIcon className="h-7 w-7 rotate-45 transform" />,
     customStyles: 'focus:ring-blue-600',
     iconBg: 'bg-blue-500',
   },
   {
     title: 'Graph View',
     view: ConfigurableView.GRAPH_VIEW,
-    icon: <ChartIcon className="w-6 h-6 text-white" />,
+    icon: <ChartIcon className="h-6 w-6 text-white" />,
     customStyles: 'focus:ring-green-600',
     iconBg: 'bg-green-500',
   },
   {
     title: 'Config View',
     view: ConfigurableView.CONFIG_VIEW,
-    icon: <SettingsIcon className="w-6 h-6" />,
+    icon: <SettingsIcon className="h-6 w-6" />,
     customStyles: 'focus:ring-orange-600',
     iconBg: 'bg-orange-500',
   },
   {
     title: 'Telemetry View',
     view: ConfigurableView.TELEMETRY_VIEW,
-    icon: <ListIcon className="w-7 h-7" />,
+    icon: <ListIcon className="h-7 w-7" />,
     customStyles: 'focus:ring-yellow-600',
     iconBg: 'bg-yellow-500',
   },
   {
     title: 'Logging View',
     view: ConfigurableView.LOGGING_VIEW,
-    icon: <SubjectIcon className="w-6 h-6" />,
+    icon: <SubjectIcon className="h-6 w-6" />,
     customStyles: 'focus:ring-ping-600',
     iconBg: 'bg-pink-500',
   },
   {
     title: 'Camera View',
     view: ConfigurableView.CAMERA_VIEW,
-    icon: <CameraIcon className="w-5 h-5" />,
+    icon: <CameraIcon className="h-5 w-5" />,
     customStyles: 'focus:ring-purple-600',
     iconBg: 'bg-purple-500',
   },
@@ -110,7 +110,7 @@ const ViewPicker = (props: ViewPickerProps) => {
           onClick={() => props.clickEvent(item.view)}
           disabled={!props.isOpen}
         >
-          <div className={`w-8 h-8  rounded mr-3 flex-center ${item.iconBg}`}>
+          <div className={`flex-center mr-3  h-8 w-8 rounded ${item.iconBg}`}>
             {cloneElement(item.icon)}
           </div>
           <div className="flex flex-col items-start">

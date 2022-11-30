@@ -30,11 +30,11 @@ class Dashboard extends Component {
         className="flex flex-col"
         style={{ width: '100vw', height: '100vh' }}
       >
-        <header className="flex items-center justify-between px-3 py-1 text-white bg-blue-600">
+        <header className="flex items-center justify-between bg-blue-600 px-3 py-1 text-white">
           <h1 className="text-2xl font-medium">FTC Dashboard</h1>
           <div className="flex-center">
             <select
-              className="py-1 mx-2 text-sm text-black bg-blue-100 border-blue-300 rounded focus:border-blue-100 focus:ring-2 focus:ring-white focus:ring-opacity-40"
+              className="mx-2 rounded border-blue-300 bg-blue-100 py-1 text-sm text-black focus:border-blue-100 focus:ring-2 focus:ring-white focus:ring-opacity-40"
               value={this.props.layoutPreset}
               onChange={(evt) =>
                 this.props.dispatch(saveLayoutPreset(evt.target.value))
@@ -60,9 +60,9 @@ class Dashboard extends Component {
               </p>
             )}
             {this.props.isConnected ? (
-              <ConnectedIcon className="w-10 h-10 ml-4" />
+              <ConnectedIcon className="ml-4 h-10 w-10" />
             ) : (
-              <DisconnectedIcon className="w-10 h-10 ml-4" />
+              <DisconnectedIcon className="ml-4 h-10 w-10" />
             )}
           </div>
         </header>

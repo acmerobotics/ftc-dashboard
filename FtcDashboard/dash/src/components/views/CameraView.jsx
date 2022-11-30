@@ -76,7 +76,7 @@ class CameraView extends React.Component {
           <BaseViewIcons>
             <BaseViewIconButton>
               <RefreshIcon
-                className="w-6 h-6"
+                className="h-6 w-6"
                 onClick={() =>
                   this.setState({ rotation: (this.state.rotation + 1) % 4 })
                 }

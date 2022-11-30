@@ -117,9 +117,9 @@ input {
 }
 
 .icon-btn {
-  @apply rounded-md flex justify-center items-center;
-  @apply border border-transparent hover:border-gray-400 focus:border-blue-500 transition-colors;
-  @apply focus:outline-none focus:ring-2 focus:ring-opacity-30 focus:ring-blue-500;
+  @apply flex items-center justify-center rounded-md;
+  @apply border border-transparent transition-colors hover:border-gray-400 focus:border-blue-500;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-30;
 }
 
 .error {
@@ -135,7 +135,7 @@ input {
 }
 
 .flex-center {
-  @apply flex justify-center items-center;
+  @apply flex items-center justify-center;
 }
 
 select {

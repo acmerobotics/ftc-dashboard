@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 const EnumInput = ({ value, enumValues, onChange, onSave }) => (
   <span>
     <select
-      className="py-0 mr-4 rounded valid"
+      className="valid mr-4 rounded py-0"
       value={value}
       onChange={(evt) =>
         onChange({
@@ -19,7 +19,7 @@ const EnumInput = ({ value, enumValues, onChange, onSave }) => (
       ))}
     </select>
     <button
-      className="px-2 bg-gray-100 border border-gray-200 rounded"
+      className="rounded border border-gray-200 bg-gray-100 px-2"
       onClick={onSave}
     >
       Save
