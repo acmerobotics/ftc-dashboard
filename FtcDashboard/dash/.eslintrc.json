@@ -47,6 +47,7 @@
         "tsx": "never"
       }
     ],
+    "import/no-relative-parent-imports": "error",
     "prettier/prettier": [
       "error",
       {
