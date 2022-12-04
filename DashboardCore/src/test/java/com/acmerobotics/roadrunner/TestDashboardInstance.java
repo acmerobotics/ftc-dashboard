@@ -2,17 +2,23 @@ package com.acmerobotics.roadrunner;
 
 import com.acmerobotics.dashboard.DashboardCore;
 import com.acmerobotics.dashboard.RobotStatus;
+import com.acmerobotics.dashboard.SendFun;
 import com.acmerobotics.dashboard.SocketHandler;
 import com.acmerobotics.dashboard.config.ValueProvider;
 import com.acmerobotics.dashboard.message.Message;
 import com.acmerobotics.dashboard.message.redux.InitOpMode;
+import com.acmerobotics.dashboard.message.redux.ReceiveGamepadState;
 import com.acmerobotics.dashboard.message.redux.ReceiveOpModeList;
 import com.acmerobotics.dashboard.message.redux.ReceiveRobotStatus;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.testopmode.TestOpMode;
 import com.acmerobotics.roadrunner.testopmode.TestOpModeManager;
 
+import java.io.IOException;
 import java.util.stream.Collectors;
+
+import fi.iki.elonen.NanoHTTPD;
+import fi.iki.elonen.NanoWSD;
 
 public class TestDashboardInstance {
     private static TestDashboardInstance instance = new TestDashboardInstance();
@@ -22,11 +28,38 @@ public class TestDashboardInstance {
 
     private TelemetryPacket currentPacket;
 
-    DashboardCore core = new DashboardCore(sendFun -> new SocketHandler() {
+    DashboardCore core = new DashboardCore();
+
+    private NanoWSD server = new NanoWSD(8000) {
         @Override
-        public void onOpen() {
-            opModeManager.setSendFun(sendFun);
-            sendFun.send(new ReceiveOpModeList(
+        protected NanoWSD.WebSocket openWebSocket (NanoHTTPD.IHTTPSession handshake){
+            return new DashWebSocket(handshake);
+        }
+    };
+
+    private class DashWebSocket extends NanoWSD.WebSocket implements SendFun {
+        final SocketHandler sh = core.newSocket(this);
+
+        public DashWebSocket(NanoHTTPD.IHTTPSession handshakeRequest) {
+            super(handshakeRequest);
+        }
+
+        @Override
+        public void send(Message message) {
+            try {
+                String messageStr = DashboardCore.GSON.toJson(message);
+                send(messageStr);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        protected void onOpen() {
+            sh.onOpen();
+
+            opModeManager.setSendFun(this);
+            send(new ReceiveOpModeList(
                     opModeManager
                             .getTestOpModes()
                             .stream().map(TestOpMode::getName)
@@ -35,13 +68,22 @@ public class TestDashboardInstance {
         }
 
         @Override
-        public void onClose() {
+        protected void onClose(NanoWSD.WebSocketFrame.CloseCode code, String reason, boolean initiatedByRemote) {
+            sh.onClose();
+
             opModeManager.clearSendFun();
         }
 
         @Override
-        public void onMessage(Message message) {
-            switch (message.getType()) {
+        protected void onMessage(NanoWSD.WebSocketFrame message) {
+            String payload = message.getTextPayload();
+            Message msg = DashboardCore.GSON.fromJson(payload, Message.class);
+
+            if (sh.onMessage(msg)) {
+                return;
+            }
+
+            switch (msg.getType()) {
                 case GET_ROBOT_STATUS: {
                     String opModeName;
                     RobotStatus.OpModeStatus opModeStatus;
@@ -53,13 +95,13 @@ public class TestDashboardInstance {
                         opModeStatus = opModeManager.getActiveOpMode().getOpModeStatus();
                     }
 
-                    sendFun.send(new ReceiveRobotStatus(
+                    send(new ReceiveRobotStatus(
                             new RobotStatus(core.enabled, true, opModeName, opModeStatus, "", "")
                     ));
                     break;
                 }
                 case INIT_OP_MODE: {
-                    InitOpMode initOpMode = (InitOpMode) message;
+                    InitOpMode initOpMode = (InitOpMode) msg;
                     opModeManager.initOpMode(initOpMode.getOpModeName());
                     break;
                 }
@@ -68,11 +110,22 @@ public class TestDashboardInstance {
                     break;
                 case STOP_OP_MODE:
                     opModeManager.stopOpMode();
+                    break;
                 default:
-                    System.out.println(message.getType());
+                    System.out.println(msg.getType());
             }
         }
-    });
+
+        @Override
+        protected void onPong(NanoWSD.WebSocketFrame pong) {
+
+        }
+
+        @Override
+        protected void onException(IOException exception) {
+
+        }
+    }
 
     public static TestDashboardInstance getInstance() {
         return instance;
@@ -96,6 +149,12 @@ public class TestDashboardInstance {
                 x = value;
             }
         });
+
+        try {
+            server.start();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         while (true) {
             opModeManager.loop();

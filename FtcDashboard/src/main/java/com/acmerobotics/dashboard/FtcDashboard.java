@@ -19,11 +19,14 @@ import com.acmerobotics.dashboard.config.ValueProvider;
 import com.acmerobotics.dashboard.config.reflection.ReflectionConfig;
 import com.acmerobotics.dashboard.config.variable.CustomVariable;
 import com.acmerobotics.dashboard.message.Message;
+import com.acmerobotics.dashboard.message.MessageType;
 import com.acmerobotics.dashboard.message.redux.InitOpMode;
+import com.acmerobotics.dashboard.message.redux.ReceiveConfig;
 import com.acmerobotics.dashboard.message.redux.ReceiveGamepadState;
 import com.acmerobotics.dashboard.message.redux.ReceiveImage;
 import com.acmerobotics.dashboard.message.redux.ReceiveOpModeList;
 import com.acmerobotics.dashboard.message.redux.ReceiveRobotStatus;
+import com.acmerobotics.dashboard.message.redux.SaveConfig;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.ftccommon.FtcEventLoop;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -70,6 +73,7 @@ import java.util.concurrent.ExecutorService;
 
 import dalvik.system.DexFile;
 import fi.iki.elonen.NanoHTTPD;
+import fi.iki.elonen.NanoWSD;
 
 /**
  * Main class for interacting with the instance.
@@ -166,60 +170,14 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         return instance;
     }
 
-    private DashboardCore core = new DashboardCore(new SocketHandlerFactory() {
+    private DashboardCore core = new DashboardCore();
+
+    private NanoWSD server = new NanoWSD(8000) {
         @Override
-        public SocketHandler accept(final SendFun sendFun) {
-            return new SocketHandler() {
-                @Override
-                public void onOpen() {
-                    synchronized (opModeList) {
-                        if (opModeList.size() > 0) {
-                            sendFun.send(new ReceiveOpModeList(opModeList));
-                        }
-                    }
-
-                    updateStatusView();
-                }
-
-                @Override
-                public void onClose() {
-                    updateStatusView();
-                }
-
-                @Override
-                public void onMessage(final Message message) {
-                    switch (message.getType()) {
-                        case GET_ROBOT_STATUS: {
-                            sendFun.send(new ReceiveRobotStatus(getRobotStatus()));
-                            break;
-                        }
-                        case INIT_OP_MODE: {
-                            String opModeName = ((InitOpMode) message).getOpModeName();
-                            opModeManager.initActiveOpMode(opModeName);
-                            break;
-                        }
-                        case START_OP_MODE: {
-                            opModeManager.startActiveOpMode();
-                            break;
-                        }
-                        case STOP_OP_MODE: {
-                            eventLoop.requestOpModeStop(opModeManager.getActiveOpMode());
-                            break;
-                        }
-                        case RECEIVE_GAMEPAD_STATE: {
-                            ReceiveGamepadState castMsg = (ReceiveGamepadState) message;
-                            updateGamepads(castMsg.getGamepad1(), castMsg.getGamepad2());
-                            break;
-                        }
-                        default:
-                            Log.w(TAG, "Received unknown message of type " + message.getType());
-                            Log.w(TAG, message.toString());
-                            break;
-                    }
-                }
-            };
+        protected NanoWSD.WebSocket openWebSocket (NanoHTTPD.IHTTPSession handshake){
+            return new DashWebSocket(handshake);
         }
-    });
+    };
 
     private SharedPreferences prefs;
     private final List<MenuItem> enableMenuItems, disableMenuItems;
@@ -584,6 +542,92 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         }
     }
 
+    private class DashWebSocket extends NanoWSD.WebSocket implements SendFun {
+        final SocketHandler sh = core.newSocket(this);
+
+        public DashWebSocket(NanoHTTPD.IHTTPSession handshakeRequest) {
+            super(handshakeRequest);
+        }
+
+        @Override
+        public void send(Message message) {
+            try {
+                String messageStr = DashboardCore.GSON.toJson(message);
+                send(messageStr);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        protected void onOpen() {
+            sh.onOpen();
+
+            synchronized (opModeList) {
+                if (opModeList.size() > 0) {
+                    send(new ReceiveOpModeList(opModeList));
+                }
+            }
+
+            updateStatusView();
+        }
+
+        @Override
+        protected void onClose(NanoWSD.WebSocketFrame.CloseCode code, String reason, boolean initiatedByRemote) {
+            sh.onClose();
+        }
+
+        @Override
+        protected void onMessage(NanoWSD.WebSocketFrame message) {
+            String payload = message.getTextPayload();
+            Message msg = DashboardCore.GSON.fromJson(payload, Message.class);
+
+            if (sh.onMessage(msg)) {
+                return;
+            }
+
+            switch (msg.getType()) {
+                case GET_ROBOT_STATUS: {
+                    send(new ReceiveRobotStatus(getRobotStatus()));
+                    break;
+                }
+                case INIT_OP_MODE: {
+                    String opModeName = ((InitOpMode) msg).getOpModeName();
+                    opModeManager.initActiveOpMode(opModeName);
+                    break;
+                }
+                case START_OP_MODE: {
+                    opModeManager.startActiveOpMode();
+                    break;
+                }
+                case STOP_OP_MODE: {
+                    eventLoop.requestOpModeStop(opModeManager.getActiveOpMode());
+                    break;
+                }
+                case RECEIVE_GAMEPAD_STATE: {
+                    ReceiveGamepadState castMsg = (ReceiveGamepadState) msg;
+                    updateGamepads(castMsg.getGamepad1(), castMsg.getGamepad2());
+                    break;
+                }
+                default: {
+                    Log.w(TAG, "Received unknown message of type " + msg.getType());
+                    Log.w(TAG, msg.toString());
+                    break;
+                }
+            }
+        }
+
+        @Override
+        protected void onPong(NanoWSD.WebSocketFrame pong) {
+
+        }
+
+        @Override
+        protected void onException(IOException exception) {
+
+        }
+    }
+
     private FtcDashboard() {
         core.withConfigRoot(new CustomVariableConsumer() {
             @Override
@@ -591,6 +635,12 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 addConfigClasses(configRoot);
             }
         });
+
+        try {
+            server.start();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         enableMenuItems = new ArrayList<>();
         disableMenuItems = new ArrayList<>();
@@ -1112,7 +1162,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     private void close() {
-        core.close();
+        server.stop();
 
         if (opModeManager != null) {
             opModeManager.unregisterListener(this);

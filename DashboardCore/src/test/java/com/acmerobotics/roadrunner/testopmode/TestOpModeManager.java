@@ -1,6 +1,6 @@
 package com.acmerobotics.roadrunner.testopmode;
 
-import com.acmerobotics.dashboard.SocketHandlerFactory;
+import com.acmerobotics.dashboard.SendFun;
 import com.acmerobotics.roadrunner.TestSineWaveOpMode;
 
 import java.util.List;
@@ -9,7 +9,7 @@ public class TestOpModeManager {
     private final List<TestOpMode> testOpModes = List.of(new TestSineWaveOpMode());
     private TestOpMode activeOpMode = null;
 
-    SocketHandlerFactory.SendFun sendFun;
+    SendFun sendFun;
 
     public List<TestOpMode> getTestOpModes() {
         return testOpModes;
@@ -62,7 +62,7 @@ public class TestOpModeManager {
         }
     }
 
-    public void setSendFun(SocketHandlerFactory.SendFun sendFun) {
+    public void setSendFun(SendFun sendFun) {
         this.sendFun = sendFun;
     }
 

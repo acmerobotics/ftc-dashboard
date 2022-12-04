@@ -15,22 +15,16 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import fi.iki.elonen.NanoHTTPD;
-import fi.iki.elonen.NanoWSD;
-
 /**
  * Main class for interacting with the instance.
  */
 public class DashboardCore {
-    private static final int PORT = 8000;
-
     /*
      * Telemetry packets are batched for transmission and sent at this interval.
      */
@@ -38,8 +32,7 @@ public class DashboardCore {
 
     public boolean enabled;
 
-    private NanoWSD server;
-    private final List<SocketHandlerFactory.SendFun> sockets = new ArrayList<>();
+    private final List<SendFun> sockets = new ArrayList<>();
 
     private ExecutorService telemetryExecutorService;
     private final List<TelemetryPacket> pendingTelemetry = new ArrayList<>(); // guarded by itself
@@ -48,7 +41,14 @@ public class DashboardCore {
     private final Object configLock = new Object();
     private CustomVariable configRoot = new CustomVariable(); // guarded by configLock
 
-    private Gson gson;
+    // TODO: this doensn't make a ton of sense here, though it needs to go in this module for testing
+    public static final Gson GSON = new GsonBuilder()
+            .registerTypeAdapter(Message.class, new MessageDeserializer())
+            .registerTypeAdapter(BasicVariable.class, new ConfigVariableSerializer())
+            .registerTypeAdapter(BasicVariable.class, new ConfigVariableDeserializer())
+            .registerTypeAdapter(CustomVariable.class, new ConfigVariableSerializer())
+            .registerTypeAdapter(CustomVariable.class, new ConfigVariableDeserializer())
+            .create();
 
     private class TelemetryUpdateRunnable implements Runnable {
         @Override
@@ -82,128 +82,61 @@ public class DashboardCore {
         }
     }
 
-    public DashboardCore(final SocketHandlerFactory shf) {
-        gson = new GsonBuilder()
-                .registerTypeAdapter(Message.class, new MessageDeserializer())
-                .registerTypeAdapter(BasicVariable.class, new ConfigVariableSerializer())
-                .registerTypeAdapter(BasicVariable.class, new ConfigVariableDeserializer())
-                .registerTypeAdapter(CustomVariable.class, new ConfigVariableSerializer())
-                .registerTypeAdapter(CustomVariable.class, new ConfigVariableDeserializer())
-                .create();
+    public DashboardCore() {
+        // TODO: name the thread? it used to be "dash telemetry"
+        telemetryExecutorService = Executors.newSingleThreadExecutor();
+        telemetryExecutorService.submit(new TelemetryUpdateRunnable());
+    }
 
-        server = new NanoWSD(PORT) {
+    public SocketHandler newSocket(final SendFun sendFun) {
+        return new SocketHandler() {
             @Override
-            protected NanoWSD.WebSocket openWebSocket(NanoHTTPD.IHTTPSession handshake) {
-                return new NanoWSD.WebSocket(handshake) {
-                    final NanoWSD.WebSocket ws = this;
-                    final SocketHandler sh = new SocketHandlerFactory() {
-                        @Override
-                        public SocketHandler accept(final SendFun sendFun) {
-                            final SocketHandler sh = shf.accept(sendFun);
-                            return new SocketHandler() {
-                                @Override
-                                public void onOpen() {
-                                    synchronized (configLock) {
-                                        sendFun.send(new ReceiveConfig(configRoot));
-                                    }
+            public void onOpen() {
+                synchronized (configLock) {
+                    sendFun.send(new ReceiveConfig(configRoot));
+                }
 
-                                    synchronized (sockets) {
-                                        sockets.add(sendFun);
-                                    }
+                synchronized (sockets) {
+                    sockets.add(sendFun);
+                }
+            }
 
-                                    sh.onOpen();
-                                }
+            @Override
+            public void onClose() {
+                synchronized (sockets) {
+                    sockets.remove(sendFun);
+                }
+            }
 
-                                @Override
-                                public void onClose() {
-                                    sockets.remove(sendFun);
+            @Override
+            public boolean onMessage(Message message) {
+                // Swallow any messages when the server is disabled.
+                if (!enabled && message.getType() != MessageType.GET_ROBOT_STATUS) {
+                    return true;
+                }
 
-                                    sh.onClose();
-                                }
-
-                                @Override
-                                public void onMessage(Message message) {
-                                    if (!enabled && message.getType() != MessageType.GET_ROBOT_STATUS) {
-                                        return;
-                                    }
-
-                                    switch (message.getType()) {
-                                        case GET_CONFIG: {
-                                            synchronized (configLock) {
-                                                sendFun.send(new ReceiveConfig(configRoot));
-                                            }
-                                            break;
-                                        }
-                                        case SAVE_CONFIG: {
-                                            withConfigRoot(new CustomVariableConsumer() {
-                                                @Override
-                                                public void accept(CustomVariable configRoot) {
-                                                    configRoot.update(((SaveConfig) message).getConfigDiff());
-                                                }
-                                            });
-
-                                            updateConfig();
-
-                                            break;
-                                        }
-                                        default:
-                                            sh.onMessage(message);
-                                    }
-                                }
-                            };
+                switch (message.getType()) {
+                    case GET_CONFIG: {
+                        synchronized (configLock) {
+                            sendFun.send(new ReceiveConfig(configRoot));
                         }
-                    }.accept(new SocketHandlerFactory.SendFun() {
-                        @Override
-                        public void send(Message message) {
-                            try {
-                                String messageStr = gson.toJson(message);
-                                ws.send(messageStr);
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
+                        return true;
+                    }
+                    case SAVE_CONFIG: {
+                        withConfigRoot(new CustomVariableConsumer() {
+                            @Override
+                            public void accept(CustomVariable configRoot) {
+                                configRoot.update(((SaveConfig) message).getConfigDiff());
                             }
-                        }
-                    });
+                        });
 
-                    @Override
-                    protected void onOpen() {
-                        sh.onOpen();
+                        return true;
                     }
-
-                    @Override
-                    protected void onClose(NanoWSD.WebSocketFrame.CloseCode code,
-                                           String reason, boolean initiatedByRemote) {
-                        sh.onClose();
-                    }
-
-                    @Override
-                    protected void onMessage(NanoWSD.WebSocketFrame message) {
-                        String payload = message.getTextPayload();
-                        Message msg = gson.fromJson(payload, Message.class);
-                        sh.onMessage(msg);
-                    }
-
-                    @Override
-                    protected void onPong(NanoWSD.WebSocketFrame pong) {
-
-                    }
-
-                    @Override
-                    protected void onException(IOException exception) {
-
-                    }
-                };
+                    default:
+                        return false;
+                }
             }
         };
-
-        try {
-            server.start();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        telemetryExecutorService = Executors.newSingleThreadExecutor();
-//                Executors.newSingleThreadExecutor("dash telemetry");
-        telemetryExecutorService.submit(new TelemetryUpdateRunnable());
     }
 
     /**
@@ -323,7 +256,7 @@ public class DashboardCore {
 
     public void sendAll(Message message) {
         synchronized (sockets) {
-            for (SocketHandlerFactory.SendFun sf : sockets) {
+            for (SendFun sf : sockets) {
                 sf.send(message);
             }
         }
@@ -333,11 +266,5 @@ public class DashboardCore {
         synchronized (sockets) {
             return sockets.size();
         }
-    }
-
-    // should we implement autocloseable?
-    // what's the protocol there for closed objects (are we just left in an undefined state like an object that has been moved out of?)
-    public void close() {
-        server.stop();
     }
 }

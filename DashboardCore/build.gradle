@@ -42,7 +42,7 @@ repositories {
 dependencies {
     implementation 'com.google.code.gson:gson:2.8.6'
 
-    implementation('org.nanohttpd:nanohttpd-websocket:2.3.1')
+    testImplementation 'org.nanohttpd:nanohttpd-websocket:2.3.1'
 }
 
 

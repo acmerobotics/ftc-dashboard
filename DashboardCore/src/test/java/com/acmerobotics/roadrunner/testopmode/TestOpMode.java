@@ -1,13 +1,13 @@
 package com.acmerobotics.roadrunner.testopmode;
 
 import com.acmerobotics.dashboard.RobotStatus;
-import com.acmerobotics.dashboard.SocketHandlerFactory;
+import com.acmerobotics.dashboard.SendFun;
 
 public abstract class TestOpMode {
     private final String name;
     private RobotStatus.OpModeStatus status = RobotStatus.OpModeStatus.STOPPED;
 
-    SocketHandlerFactory.SendFun sendFun;
+    SendFun sendFun;
 
     protected TestOpMode(String name) {
         this.name = name;

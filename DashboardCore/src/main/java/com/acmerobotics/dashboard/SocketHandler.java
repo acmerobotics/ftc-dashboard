@@ -7,5 +7,6 @@ public interface SocketHandler {
 
     void onClose();
 
-    void onMessage(Message message);
+    // Returns true iff the message was handled
+    boolean onMessage(Message message);
 }
