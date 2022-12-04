@@ -10,12 +10,10 @@ import {
 import {
   CONNECT,
   DISCONNECT,
-  GET_CONFIG,
   GET_ROBOT_STATUS,
   INIT_OP_MODE,
   RECEIVE_GAMEPAD_STATE,
   RECEIVE_ROBOT_STATUS,
-  SAVE_CONFIG,
   START_OP_MODE,
   STOP_OP_MODE,
 } from '@/store/types';
@@ -84,8 +82,8 @@ const socketMiddleware: Middleware<Record<string, unknown>, RootState> =
       // messages forwarded to the server
       case RECEIVE_GAMEPAD_STATE:
       case GET_ROBOT_STATUS:
-      case SAVE_CONFIG:
-      case GET_CONFIG:
+      case 'SAVE_CONFIG':
+      case 'GET_CONFIG':
       case INIT_OP_MODE:
       case START_OP_MODE:
       case STOP_OP_MODE: {

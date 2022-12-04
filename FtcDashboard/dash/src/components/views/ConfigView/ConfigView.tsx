@@ -1,4 +1,5 @@
-import { useDispatch, useSelector } from 'react-redux';
+import React from 'react';
+import { useSelector } from 'react-redux';
 
 import CustomVariable from './CustomVariable';
 import BaseView, {
@@ -13,15 +14,56 @@ import BaseView, {
 import { ReactComponent as SaveIcon } from '@/assets/icons/save.svg';
 import { ReactComponent as RefreshIcon } from '@/assets/icons/refresh.svg';
 
+import { RootState, useAppDispatch } from '@/store/reducers';
 import {
-  updateConfig,
-  saveConfig,
-  refreshConfig,
-  getModifiedDiff,
-} from '@/store/actions/config';
-import VariableType from '@/enums/VariableType';
-import { RootState } from '@/store/reducers';
-import { Config, ConfigCustom } from '@/store/types';
+  ConfigVar,
+  ConfigVarState,
+  CustomVarState,
+} from '@/store/types/config';
+
+function validAndModified(state: ConfigVarState): ConfigVar | null {
+  if (state.__type === 'custom') {
+    const value = Object.keys(state.__value).reduce((acc, key) => {
+      const value = validAndModified(state.__value[key]);
+      if (value === null) {
+        return acc;
+      }
+
+      return {
+        ...acc,
+        [key]: value,
+      };
+    }, {});
+
+    if (Object.keys(value).length === 0) {
+      return null;
+    }
+
+    return {
+      __type: 'custom',
+      __value: value,
+    };
+  } else {
+    // TODO: keep in sync with the corresponding check in BasicVariable
+    if (!state.__valid || state.__value === state.__newValue) {
+      return null;
+    }
+
+    if (state.__type === 'enum') {
+      return {
+        __type: state.__type,
+        __value: state.__newValue,
+        __enumClass: state.__enumClass,
+        __enumValues: state.__enumValues,
+      };
+    } else {
+      return {
+        __type: state.__type,
+        __value: state.__newValue,
+      };
+    }
+  }
+}
 
 type ConfigViewProps = BaseViewProps & BaseViewHeadingProps;
 
@@ -29,15 +71,13 @@ const ConfigView = ({
   isDraggable = false,
   isUnlocked = false,
 }: ConfigViewProps) => {
-  const dispatch = useDispatch();
-  const configRoot = useSelector((state: RootState) => state.config.configRoot);
+  const dispatch = useAppDispatch();
 
-  const onRefresh = () => dispatch(refreshConfig());
-  const onSave = (configDiff: Config) => dispatch(saveConfig(configDiff));
-  const onChange = (configDiff: Config) => dispatch(updateConfig(configDiff));
+  const configRoot = useSelector(
+    (state: RootState) => state.config.configRoot,
+  ) as CustomVarState;
 
-  const sortedKeys = Object.keys(configRoot.__value || {});
-
+  const sortedKeys = Object.keys(configRoot.__value);
   sortedKeys.sort();
 
   return (
@@ -48,12 +88,26 @@ const ConfigView = ({
         </BaseViewHeading>
         <BaseViewIcons>
           <BaseViewIconButton
-            onClick={() => onSave(getModifiedDiff(configRoot))}
+            onClick={() => {
+              const configDiff = validAndModified(configRoot);
+              if (configDiff != null) {
+                dispatch({
+                  type: 'SAVE_CONFIG',
+                  configDiff,
+                });
+              }
+            }}
           >
             <SaveIcon className="h-6 w-6" />
           </BaseViewIconButton>
-          <BaseViewIconButton onClick={onRefresh}>
-            <RefreshIcon className="h-6 w-6" />
+          <BaseViewIconButton
+            onClick={() =>
+              dispatch({
+                type: 'REFRESH_CONFIG',
+              })
+            }
+          >
+            <RefreshIcon className="w-6 h-6" />
           </BaseViewIconButton>
         </BaseViewIcons>
       </div>
@@ -64,23 +118,35 @@ const ConfigView = ({
               <CustomVariable
                 key={key}
                 name={key}
-                value={(configRoot as ConfigCustom).__value[key].__value || {}}
-                onChange={(newValue: Config) => {
-                  onChange({
-                    __type: VariableType.CUSTOM,
-                    __value: {
-                      [key]: newValue,
+                // invariant 2: children of the root are custom
+                state={configRoot.__value[key] as CustomVarState}
+                onChange={(newState) =>
+                  dispatch({
+                    type: 'UPDATE_CONFIG',
+                    configRoot: {
+                      __type: 'custom',
+                      __value: sortedKeys.reduce(
+                        (acc, key2) => ({
+                          ...acc,
+                          [key2]:
+                            key === key2 ? newState : configRoot.__value[key2],
+                        }),
+                        {},
+                      ),
                     },
-                  } as ConfigCustom);
-                }}
-                onSave={(newValue: Config) => {
-                  onSave({
-                    __type: VariableType.CUSTOM,
-                    __value: {
-                      [key]: newValue,
+                  })
+                }
+                onSave={(variable) =>
+                  dispatch({
+                    type: 'SAVE_CONFIG',
+                    configDiff: {
+                      __type: 'custom',
+                      __value: {
+                        [key]: variable,
+                      },
                     },
-                  });
-                }}
+                  })
+                }
               />
             ))}
           </tbody>

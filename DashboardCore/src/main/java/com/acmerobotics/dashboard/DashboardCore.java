@@ -129,7 +129,9 @@ public class DashboardCore {
 
                                     switch (message.getType()) {
                                         case GET_CONFIG: {
-                                            updateConfig();
+                                            synchronized (configLock) {
+                                                sendFun.send(new ReceiveConfig(configRoot));
+                                            }
                                             break;
                                         }
                                         case SAVE_CONFIG: {
@@ -285,6 +287,8 @@ public class DashboardCore {
         synchronized (configLock) {
             function.accept(configRoot);
         }
+
+        updateConfig();
     }
 
     /**

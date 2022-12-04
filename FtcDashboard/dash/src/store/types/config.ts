@@ -1,53 +1,68 @@
-import { Values, Extends } from '@/typeHelpers';
+export type ConfigVar = CustomVar | BasicVar;
+export type ConfigVarState = CustomVarState | BasicVarState;
 
-import VariableType, {
-  VariableBasic,
-  VariableCustom,
-} from '@/enums/VariableType';
-
-export const RECEIVE_CONFIG = 'RECEIVE_CONFIG';
-export const GET_CONFIG = 'GET_CONFIG';
-export const UPDATE_CONFIG = 'UPDATE_CONFIG';
-export const SAVE_CONFIG = 'SAVE_CONFIG';
-export const REFRESH_CONFIG = 'REFRESH_CONFIG';
-
-export type Config = ConfigCustom | ConfigVariable;
-
-export type ConfigCustom = {
-  __type: Extends<Values<typeof VariableType>, VariableCustom>;
-  __value: Record<string, Config>;
+export type CustomVar = {
+  __type: 'custom';
+  __value: Record<string, ConfigVar>;
 };
 
-export type ConfigVariable = {
-  __type: Extends<Values<typeof VariableType>, VariableBasic>;
-  __value: number | boolean | string;
-  __newValue: number | boolean | string;
+export type CustomVarState = {
+  __type: 'custom';
+  __value: Record<string, ConfigVarState>;
+};
+
+export type BasicVar =
+  | {
+      __type: 'enum';
+      // only string is actualy present, but this helps treat vars uniformly
+      __value: boolean | number | string;
+      __enumClass: string;
+      __enumValues: string[];
+    }
+  | {
+      __type: 'boolean' | 'int' | 'double' | 'string';
+      __value: boolean | number | string;
+    };
+
+export type BasicVarState = (
+  | {
+      __type: 'enum';
+      __value: boolean | number | string;
+      __newValue: boolean | number | string;
+      __enumClass: string;
+      __enumValues: string[];
+    }
+  | {
+      __type: 'boolean' | 'int' | 'double' | 'string';
+      __value: boolean | number | string;
+      __newValue: boolean | number | string;
+    }
+) & {
   __valid: boolean;
-  __modified: boolean;
-  __enumClass: string;
-  __enumValues: string[];
 };
 
 export type ConfigState = {
-  configRoot: Config;
+  configRoot: ConfigVarState;
 };
 
 export type ReceiveConfigAction = {
-  type: typeof RECEIVE_CONFIG;
-  configRoot: Config;
+  type: 'RECEIVE_CONFIG';
+  configRoot: ConfigVar;
 };
 
 export type GetConfigAction = {
-  type: typeof GET_CONFIG;
+  type: 'GET_CONFIG';
 };
+
 export type UpdateConfigAction = {
-  type: typeof UPDATE_CONFIG;
-  configDiff: Config;
+  type: 'UPDATE_CONFIG';
+  configRoot: ConfigVarState;
 };
+
 export type SaveConfigAction = {
-  type: typeof SAVE_CONFIG;
-  configDiff: Config;
+  type: 'SAVE_CONFIG';
+  configDiff: ConfigVar;
 };
 export type RefreshConfigAction = {
-  type: typeof REFRESH_CONFIG;
+  type: 'REFRESH_CONFIG';
 };

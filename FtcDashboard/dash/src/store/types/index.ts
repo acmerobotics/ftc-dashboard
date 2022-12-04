@@ -1,17 +1,7 @@
 export { RECEIVE_IMAGE } from './camera';
 export type { CameraState, ReceiveImageAction } from './camera';
 
-export {
-  RECEIVE_CONFIG,
-  GET_CONFIG,
-  UPDATE_CONFIG,
-  SAVE_CONFIG,
-  REFRESH_CONFIG,
-} from './config';
 export type {
-  Config,
-  ConfigCustom,
-  ConfigVariable,
   ConfigState,
   ReceiveConfigAction,
   GetConfigAction,

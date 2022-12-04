@@ -7,7 +7,10 @@ import {
 } from '@/store/types';
 
 const initialState: SettingState = {
-  layoutPreset: LayoutPreset.DEFAULT,
+  // TODO: this seems to be necessary to prevent
+  // ReferenceError: can't access lexical declaration 'LayoutPreset' before initialization
+  // perhaps due to the root reducer type shenanigans?
+  layoutPreset: 'DEFAULT',
 };
 
 const settingsReducer = (
