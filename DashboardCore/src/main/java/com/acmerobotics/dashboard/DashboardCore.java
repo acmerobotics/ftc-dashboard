@@ -269,18 +269,11 @@ public class DashboardCore {
     }
 
     /**
-     * Returns the configuration root for on-the-fly modifications.
+     * Executes {@param function} in an exclusive context for thread-safe config tree modification
+     * and calls {@link #updateConfig()} to keep clients up to date.
      *
-     * @deprecated Use {@link #withConfigRoot(CustomVariableConsumer)} for thread safety
-     */
-    @Deprecated
-    public CustomVariable getConfigRoot() {
-        return configRoot;
-    }
-
-    /**
-     * Executes function in an exclusive context for config tree modification. Do not leak the
-     * config tree outside the function.
+     * Do not leak the config tree outside the function.
+     *
      * @param function
      */
     public void withConfigRoot(CustomVariableConsumer function) {
