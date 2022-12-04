@@ -1,4 +1,4 @@
-import { LayoutPresetType } from '../../enums/LayoutPreset';
+import { LayoutPresetType } from '@/enums/LayoutPreset';
 import {
   GetLayoutPresetAction,
   ReceiveLayoutPresetAction,
@@ -6,7 +6,7 @@ import {
   GET_LAYOUT_PRESET,
   RECEIVE_LAYOUT_PRESET,
   SAVE_LAYOUT_PRESET,
-} from '../types';
+} from '@/store/types';
 
 export const saveLayoutPreset = (
   preset: LayoutPresetType,

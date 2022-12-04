@@ -2,9 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import BasicVariable from './BasicVariable';
-import VariableType from '../enums/VariableType';
+import VariableType from '@/enums/VariableType';
 
-import { ReactComponent as ExpandedMoreIcon } from '../assets/icons/expand_more.svg';
+import { ReactComponent as ExpandedMoreIcon } from '@/assets/icons/expand_more.svg';
 
 class CustomVariable extends React.Component {
   constructor(props) {
@@ -83,19 +83,19 @@ class CustomVariable extends React.Component {
       <tr>
         <td>
           <div
-            className="option-header py-1 cursor-pointer"
+            className="option-header cursor-pointer py-1"
             onClick={this.toggleVisibility}
           >
             <div
-              className={`w-7 h-7 mr-2 bg-gray-100 flex-center rounded-full border border-gray-200 hover:border-gray-400 hover:bg-gray-200
-                          transition transform ${
+              className={`flex-center mr-2 h-7 w-7 transform rounded-full border border-gray-200 bg-gray-100 transition
+                          hover:border-gray-400 hover:bg-gray-200 ${
                             this.state.expanded ? `` : '-rotate-90'
                           }`}
             >
-              <ExpandedMoreIcon className="w-6 h-6" />
+              <ExpandedMoreIcon className="h-6 w-6" />
             </div>
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg select-none">{name}</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="select-none text-lg">{name}</h3>
             </div>
           </div>
           {this.state.expanded && (

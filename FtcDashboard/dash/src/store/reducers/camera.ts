@@ -1,4 +1,4 @@
-import { CameraState, ReceiveImageAction, RECEIVE_IMAGE } from '../types';
+import { CameraState, ReceiveImageAction, RECEIVE_IMAGE } from '@/store/types';
 
 const initialState: CameraState = {
   imageStr: '',

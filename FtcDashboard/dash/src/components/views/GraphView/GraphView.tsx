@@ -8,18 +8,18 @@ import BaseView, {
   BaseViewIconButton,
   BaseViewProps,
   BaseViewHeadingProps,
-} from './BaseView';
-import MultipleCheckbox from '../components/MultipleCheckbox';
+} from '@/components/views/BaseView';
+import MultipleCheckbox from './MultipleCheckbox';
 import GraphCanvas from './GraphCanvas';
-import TextInput from '../components/inputs/TextInput';
+import TextInput from '@/components/views/ConfigView/inputs/TextInput';
 
-import { ReactComponent as ChartIcon } from '../assets/icons/chart.svg';
-import { ReactComponent as CloseIcon } from '../assets/icons/close.svg';
-import { ReactComponent as PlayIcon } from '../assets/icons/play_arrow.svg';
-import { ReactComponent as PauseIcon } from '../assets/icons/pause.svg';
+import { ReactComponent as ChartIcon } from '@/assets/icons/chart.svg';
+import { ReactComponent as CloseIcon } from '@/assets/icons/close.svg';
+import { ReactComponent as PlayIcon } from '@/assets/icons/play_arrow.svg';
+import { ReactComponent as PauseIcon } from '@/assets/icons/pause.svg';
 
-import { RootState } from '../store/reducers';
-import { validateInt } from '../components/inputs/validation';
+import { RootState } from '@/store/reducers';
+import { validateInt } from '@/components/views/ConfigView/inputs/validation';
 import { DEFAULT_OPTIONS } from './Graph';
 
 type GraphViewState = {
@@ -188,20 +188,20 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
           </BaseViewHeading>
           <BaseViewIcons>
             {this.state.graphing && this.state.selectedKeys.length !== 0 && (
-              <BaseViewIconButton className="w-8 h-8 icon-btn">
+              <BaseViewIconButton className="icon-btn h-8 w-8">
                 {this.state.paused ? (
-                  <PlayIcon className="w-6 h-6" onClick={this.play} />
+                  <PlayIcon className="h-6 w-6" onClick={this.play} />
                 ) : (
-                  <PauseIcon className="w-6 h-6" onClick={this.pause} />
+                  <PauseIcon className="h-6 w-6" onClick={this.pause} />
                 )}
               </BaseViewIconButton>
             )}
 
             <BaseViewIconButton>
               {this.state.graphing ? (
-                <CloseIcon className="w-6 h-6 text-black" onClick={this.stop} />
+                <CloseIcon className="h-6 w-6 text-black" onClick={this.stop} />
               ) : (
-                <ChartIcon className="w-6 h-6" onClick={this.start} />
+                <ChartIcon className="h-6 w-6" onClick={this.start} />
               )}
             </BaseViewIconButton>
           </BaseViewIcons>
@@ -228,7 +228,7 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
                   />
                 </div>
                 <div className="mt-4">
-                  <div className="flex justify-between items-center">
+                  <div className="flex items-center justify-between">
                     <h3 className="font-medium">Options:</h3>
                   </div>
                   <div className="ml-3">

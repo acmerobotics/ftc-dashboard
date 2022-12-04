@@ -10,7 +10,7 @@ import {
   ReceivePingTimeAction,
   RECEIVE_CONNECTION_STATUS,
   RECEIVE_PING_TIME,
-} from '../types';
+} from '@/store/types';
 import { receiveOpModeList } from './status';
 
 export const connect = (host: string, port: string): ConnectAction => ({

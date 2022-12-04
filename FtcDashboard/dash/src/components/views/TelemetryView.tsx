@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import BaseView, {
@@ -7,7 +7,7 @@ import BaseView, {
   BaseViewProps,
   BaseViewHeadingProps,
 } from './BaseView';
-import { RootState } from '../store/reducers';
+import { RootState } from '@/store/reducers';
 
 type TelemetryViewProps = BaseViewProps & BaseViewHeadingProps;
 

@@ -1,4 +1,4 @@
-import React, { ReactElement, useState, useEffect, useRef } from 'react';
+import { ReactElement, useState, useEffect, useRef, cloneElement } from 'react';
 import RGL, { WidthProvider, Layout } from 'react-grid-layout';
 import { v4 as uuidv4 } from 'uuid';
 import styled from 'styled-components';
@@ -6,29 +6,29 @@ import styled from 'styled-components';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
-import { ConfigurableView } from '../enums/ConfigurableView';
-import GraphView from '../containers/GraphView';
-import FieldView from '../containers/FieldView';
-import ConfigView from '../containers/ConfigView';
-import TelemetryView from '../containers/TelemetryView';
-import CameraView from '../containers/CameraView';
-import OpModeView from '../containers/OpModeView';
+import { ConfigurableView } from '@/enums/ConfigurableView';
+import GraphView from '@/components/views/GraphView/GraphView';
+import FieldView from '@/components/views/FieldView/FieldView';
+import ConfigView from '@/components/views/ConfigView/ConfigView';
+import TelemetryView from '@/components/views/TelemetryView';
+import CameraView from '@/components/views/CameraView';
+import OpModeView from '@/components/views/OpModeView';
+import LoggingView from '@/components/views/LoggingView/LoggingView';
 
 import RadialFab from './RadialFab/RadialFab';
 import RadialFabChild from './RadialFab/RadialFabChild';
 import ViewPicker from './ViewPicker';
 
-import useMouseIdleListener from '../hooks/useMouseIdleListener';
-import useUndoHistory from '../hooks/useUndoHistory';
+import useMouseIdleListener from '@/hooks/useMouseIdleListener';
+import useUndoHistory from '@/hooks/useUndoHistory';
 
-import { ReactComponent as AddIcon } from '../assets/icons/add.svg';
-import { ReactComponent as DeleteSweepIcon } from '../assets/icons/delete_sweep.svg';
-import { ReactComponent as DeleteXIcon } from '../assets/icons/delete_x.svg';
-import LockIconURL from '../assets/icons/lock.svg';
-import { ReactComponent as RemoveCircleIcon } from '../assets/icons/remove_circle.svg';
-import { ReactComponent as RemoveCircleOutlineIcon } from '../assets/icons/remove_circle_outline.svg';
-import CreateIconURL from '../assets/icons/create.svg';
-import LoggingView from '../containers/LoggingView/LoggingView';
+import { ReactComponent as AddIcon } from '@/assets/icons/add.svg';
+import { ReactComponent as DeleteSweepIcon } from '@/assets/icons/delete_sweep.svg';
+import { ReactComponent as DeleteXIcon } from '@/assets/icons/delete_x.svg';
+import LockIconURL from '@/assets/icons/lock.svg';
+import { ReactComponent as RemoveCircleIcon } from '@/assets/icons/remove_circle.svg';
+import { ReactComponent as RemoveCircleOutlineIcon } from '@/assets/icons/remove_circle_outline.svg';
+import CreateIconURL from '@/assets/icons/create.svg';
 
 function maxArray(a: number[], b: number[]) {
   if (a.length !== b.length) {
@@ -509,7 +509,7 @@ export default function ConfigurableLayout() {
     >
       {gridItems.length === 0 && (
         <div
-          className={`text-center mt-16 p-12 transition-colors ${
+          className={`mt-16 p-12 text-center transition-colors ${
             isLayoutLocked ? 'bg-white' : 'bg-gray-100'
           }`}
         >
@@ -537,25 +537,25 @@ export default function ConfigurableLayout() {
         >
           {gridItems.map((item) => (
             <div key={item.id}>
-              {React.cloneElement(VIEW_MAP[item.view], {
+              {cloneElement(VIEW_MAP[item.view], {
                 isDraggable: item.layout.isDraggable,
                 isUnlocked: !isLayoutLocked,
               })}
               <div
-                className={`absolute top-0 left-0 w-full h-full bg-yellow-300 bg-opacity-50 flex-center rounded transition ${
+                className={`flex-center absolute top-0 left-0 h-full w-full rounded bg-yellow-300 bg-opacity-50 transition ${
                   isInDeleteMode
                     ? 'pointer-events opacity-100'
                     : 'pointer-events-none opacity-0'
                 }`}
               >
                 <button
-                  className="p-4 bg-opacity-50 border-4 border-yellow-600 rounded-full opacity-50 focus:outline-none focus:ring focus:ring-yellow-800"
+                  className="rounded-full border-4 border-yellow-600 bg-opacity-50 p-4 opacity-50 focus:outline-none focus:ring focus:ring-yellow-800"
                   onClick={() => {
                     removeItem(item.id);
                   }}
                   disabled={!isInDeleteMode}
                 >
-                  <DeleteXIcon className="w-20 h-20 text-yellow-600" />
+                  <DeleteXIcon className="h-20 w-20 text-yellow-600" />
                 </button>
               </div>
             </div>
@@ -586,7 +586,7 @@ export default function ConfigurableLayout() {
           toolTipText="Add Item"
           clickEvent={() => setIsShowingViewPicker(!isShowingViewPicker)}
         >
-          <AddIcon className="w-6 h-6 text-white" />
+          <AddIcon className="h-6 w-6 text-white" />
         </RadialFabChild>
         <RadialFabChild
           customClass={`w-12 h-12 border shadow-md shadow-orange-500/30 hover:shadow-lg hover:shadow-orange-500/50 focus:ring ${
@@ -602,9 +602,9 @@ export default function ConfigurableLayout() {
           clickEvent={() => setIsInDeleteMode(!isInDeleteMode)}
         >
           {isInDeleteMode ? (
-            <RemoveCircleOutlineIcon className="w-5 h-5" />
+            <RemoveCircleOutlineIcon className="h-5 w-5" />
           ) : (
-            <RemoveCircleIcon className="w-5 h-5" />
+            <RemoveCircleIcon className="h-5 w-5" />
           )}
         </RadialFabChild>
         <RadialFabChild
@@ -616,7 +616,7 @@ export default function ConfigurableLayout() {
           toolTipText="Clear Layout"
           clickEvent={() => setGrid([])}
         >
-          <DeleteSweepIcon className="w-5 h-5" />
+          <DeleteSweepIcon className="h-5 w-5" />
         </RadialFabChild>
       </RadialFab>
       <ViewPicker

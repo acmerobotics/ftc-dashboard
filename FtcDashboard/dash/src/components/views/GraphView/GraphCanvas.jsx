@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import Graph from './Graph';
-import AutoFitCanvas from '../components/AutoFitCanvas';
+import AutoFitCanvas from '@/components/Canvas/AutoFitCanvas';
 
 // PureComponent implements shouldComponentUpdate()
 class GraphCanvas extends React.PureComponent {
@@ -54,13 +54,13 @@ class GraphCanvas extends React.PureComponent {
 
   render() {
     return (
-      <div className="h-full flex-center">
+      <div className="flex-center h-full">
         <div
-          className={`${this.state.graphEmpty ? 'hidden' : ''} w-full h-full`}
+          className={`${this.state.graphEmpty ? 'hidden' : ''} h-full w-full`}
         >
           <AutoFitCanvas ref={this.canvasRef} />
         </div>
-        <div className="absolute top-0 left-0 w-full h-full flex-center pointer-events-none">
+        <div className="flex-center pointer-events-none absolute top-0 left-0 h-full w-full">
           {this.state.graphEmpty && (
             <p className="text-center">No content to graph</p>
           )}

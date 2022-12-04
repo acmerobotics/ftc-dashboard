@@ -2,9 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
-import BaseView, { BaseViewHeading } from './BaseView';
+import BaseView, { BaseViewHeading } from '@/components/views/BaseView';
 import Field from './Field';
-import AutoFitCanvas from '../components/AutoFitCanvas';
+import AutoFitCanvas from '@/components/Canvas/AutoFitCanvas';
 
 class FieldView extends React.Component {
   constructor(props) {

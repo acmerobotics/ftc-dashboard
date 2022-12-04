@@ -1,4 +1,3 @@
-import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import CustomVariable from './CustomVariable';
@@ -9,20 +8,20 @@ import BaseView, {
   BaseViewBody,
   BaseViewIcons,
   BaseViewIconButton,
-} from './BaseView';
+} from '@/components/views/BaseView';
 
-import { ReactComponent as SaveIcon } from '../assets/icons/save.svg';
-import { ReactComponent as RefreshIcon } from '../assets/icons/refresh.svg';
+import { ReactComponent as SaveIcon } from '@/assets/icons/save.svg';
+import { ReactComponent as RefreshIcon } from '@/assets/icons/refresh.svg';
 
 import {
   updateConfig,
   saveConfig,
   refreshConfig,
   getModifiedDiff,
-} from '../store/actions/config';
-import VariableType from '../enums/VariableType';
-import { RootState } from '../store/reducers';
-import { Config, ConfigCustom } from '../store/types';
+} from '@/store/actions/config';
+import VariableType from '@/enums/VariableType';
+import { RootState } from '@/store/reducers';
+import { Config, ConfigCustom } from '@/store/types';
 
 type ConfigViewProps = BaseViewProps & BaseViewHeadingProps;
 
@@ -51,10 +50,10 @@ const ConfigView = ({
           <BaseViewIconButton
             onClick={() => onSave(getModifiedDiff(configRoot))}
           >
-            <SaveIcon className="w-6 h-6" />
+            <SaveIcon className="h-6 w-6" />
           </BaseViewIconButton>
           <BaseViewIconButton onClick={onRefresh}>
-            <RefreshIcon className="w-6 h-6" />
+            <RefreshIcon className="h-6 w-6" />
           </BaseViewIconButton>
         </BaseViewIcons>
       </div>

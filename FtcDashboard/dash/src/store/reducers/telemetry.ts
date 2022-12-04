@@ -1,4 +1,8 @@
-import { ReceiveTelemetryAction, RECEIVE_TELEMETRY, Telemetry } from '../types';
+import {
+  ReceiveTelemetryAction,
+  RECEIVE_TELEMETRY,
+  Telemetry,
+} from '@/store/types';
 
 const initialState: Telemetry = [
   {

@@ -1,6 +1,6 @@
 import { cloneDeep } from 'lodash';
-import './canvas';
-import fieldImageName from '../assets/field.png';
+import '@/components/Canvas/canvas';
+import fieldImageName from '@/assets/field.png';
 
 // this is a bit of a hack bit it'll have to do
 // it's much better than sticking field renders in requestAnimationFrame()

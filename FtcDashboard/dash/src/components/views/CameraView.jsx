@@ -2,8 +2,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import AutoFitCanvas from '../components/AutoFitCanvas';
-import { ReactComponent as RefreshIcon } from '../assets/icons/refresh.svg';
+import AutoFitCanvas from '@/components/Canvas/AutoFitCanvas';
+import { ReactComponent as RefreshIcon } from '@/assets/icons/refresh.svg';
 import BaseView, {
   BaseViewHeading,
   BaseViewBody,
@@ -76,7 +76,7 @@ class CameraView extends React.Component {
           <BaseViewIcons>
             <BaseViewIconButton>
               <RefreshIcon
-                className="w-6 h-6"
+                className="h-6 w-6"
                 onClick={() =>
                   this.setState({ rotation: (this.state.rotation + 1) % 4 })
                 }

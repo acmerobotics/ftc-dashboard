@@ -4,7 +4,7 @@ import {
   ReceivePingTimeAction,
   RECEIVE_CONNECTION_STATUS,
   RECEIVE_PING_TIME,
-} from '../types';
+} from '@/store/types';
 
 const initialState: SocketState = {
   isConnected: false,

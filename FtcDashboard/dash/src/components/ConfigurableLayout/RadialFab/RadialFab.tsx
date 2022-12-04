@@ -1,7 +1,7 @@
-import React, { ReactElement } from 'react';
+import { ReactElement, cloneElement, Children } from 'react';
 import styled from 'styled-components';
 
-import { WithChildren } from '../../typeHelpers';
+import { WithChildren } from '@/typeHelpers';
 
 type RadialFabProps = {
   isOpen: boolean;
@@ -58,8 +58,8 @@ const RadialFab = (props: WithChildren<RadialFabProps>) => {
       <FloatingButton {...props} onClick={props.clickEvent}>
         <CreateIcon src={props.icon} />
       </FloatingButton>
-      {React.Children.map(props.children, (e) =>
-        React.cloneElement(e as ReactElement, { isOpen: props.isOpen }),
+      {Children.map(props.children, (e) =>
+        cloneElement(e as ReactElement, { isOpen: props.isOpen }),
       )}
     </FixedContainer>
   );

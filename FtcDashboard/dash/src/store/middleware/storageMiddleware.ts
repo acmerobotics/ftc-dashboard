@@ -1,9 +1,9 @@
 import { Middleware } from 'redux';
 
-import LayoutPreset, { LayoutPresetType } from '../../enums/LayoutPreset';
-import { GET_LAYOUT_PRESET, SAVE_LAYOUT_PRESET } from '../types';
-import { receiveLayoutPreset } from '../actions/settings';
-import { RootState } from '../reducers';
+import LayoutPreset, { LayoutPresetType } from '@/enums/LayoutPreset';
+import { GET_LAYOUT_PRESET, SAVE_LAYOUT_PRESET } from '@/store/types';
+import { receiveLayoutPreset } from '@/store/actions/settings';
+import { RootState } from '@/store/reducers';
 
 const LAYOUT_PRESET_KEY = 'layoutPreset';
 
