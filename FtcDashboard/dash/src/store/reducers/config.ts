@@ -8,22 +8,30 @@ import {
   UpdateConfigAction,
 } from '@/store/types/config';
 
-function inflate(root: ConfigVar): ConfigVarState {
-  if (root.__type === 'custom') {
-    return {
-      __type: 'custom',
-      __value: Object.keys(root.__value).reduce(
-        (acc, key) => ({
-          ...acc,
-          [key]: inflate(root.__value[key]),
-        }),
-        {},
-      ),
-    };
+function inflate(v: ConfigVar): ConfigVarState {
+  if (v.__type === 'custom') {
+    const value = v.__value;
+    if (value === null) {
+      return {
+        __type: 'custom',
+        __value: null,
+      };
+    } else {
+      return {
+        __type: 'custom',
+        __value: Object.keys(value).reduce(
+          (acc, key) => ({
+            ...acc,
+            [key]: inflate(value[key]),
+          }),
+          {},
+        ),
+      };
+    }
   } else {
     return {
-      ...root,
-      __newValue: root.__value,
+      ...v,
+      __newValue: v.__value,
       __valid: true,
     };
   }
@@ -35,22 +43,30 @@ function mergeModified(
   latest: ConfigVar,
 ): ConfigVarState {
   if (base.__type === 'custom' && latest.__type === 'custom') {
-    return {
-      __type: 'custom',
-      __value: Object.keys(latest.__value).reduce(
-        (acc, key) =>
-          key in base.__value
-            ? {
-                ...acc,
-                [key]: mergeModified(base.__value[key], latest.__value[key]),
-              }
-            : {
-                ...acc,
-                [key]: inflate(latest.__value[key]),
-              },
-        {},
-      ),
-    };
+    const latestValue = latest.__value;
+    if (latestValue === null) {
+      return {
+        __type: 'custom',
+        __value: null,
+      };
+    } else {
+      return {
+        __type: 'custom',
+        __value: Object.keys(latestValue).reduce(
+          (acc, key) =>
+            base.__value !== null && key in base.__value
+              ? {
+                  ...acc,
+                  [key]: mergeModified(base.__value[key], latestValue[key]),
+                }
+              : {
+                  ...acc,
+                  [key]: inflate(latestValue[key]),
+                },
+          {},
+        ),
+      };
+    }
   } else if (
     base.__type === 'enum' &&
     latest.__type === 'enum' &&
@@ -76,16 +92,24 @@ function mergeModified(
 
 function revertModified(state: ConfigVarState): ConfigVarState {
   if (state.__type === 'custom') {
-    return {
-      __type: 'custom',
-      __value: Object.keys(state.__value).reduce(
-        (acc, key) => ({
-          ...acc,
-          [key]: inflate(state.__value[key]),
-        }),
-        {},
-      ),
-    };
+    const value = state.__value;
+    if (value === null) {
+      return {
+        __type: 'custom',
+        __value: null,
+      };
+    } else {
+      return {
+        __type: 'custom',
+        __value: Object.keys(value).reduce(
+          (acc, key) => ({
+            ...acc,
+            [key]: inflate(value[key]),
+          }),
+          {},
+        ),
+      };
+    }
   } else {
     return {
       ...state,

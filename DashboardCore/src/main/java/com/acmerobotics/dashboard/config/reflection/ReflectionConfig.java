@@ -36,22 +36,27 @@ public class ReflectionConfig {
             case ENUM:
                 return new BasicVariable<>(type, new FieldProvider<Boolean>(field, parent));
             case CUSTOM:
-                CustomVariable customVariable = new CustomVariable();
-                for (Field nestedField : fieldClass.getFields()) {
-                    if (Modifier.isFinal(field.getModifiers())) {
-                        continue;
+                try {
+                    Object value = field.get(parent);
+                    if (value == null) {
+                        return new CustomVariable(null);
                     }
 
-                    String name = nestedField.getName();
-                    try {
+                    CustomVariable customVariable = new CustomVariable();
+                    for (Field nestedField : fieldClass.getFields()) {
+                        if (Modifier.isFinal(field.getModifiers())) {
+                            continue;
+                        }
+
+                        String name = nestedField.getName();
                         customVariable.putVariable(name,
-                                createVariableFromField(nestedField, field.get(parent)));
-                    } catch (IllegalAccessException e) {
-                        throw new RuntimeException(e);
+                                createVariableFromField(nestedField, value));
                     }
-                }
 
-                return customVariable;
+                    return customVariable;
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
             default:
                 throw new RuntimeException("Unsupported field type: " +
                         fieldClass.getName());

@@ -19,6 +19,11 @@ public class ConfigVariableSerializer implements JsonSerializer<ConfigVariable<?
         obj.add(ConfigVariable.TYPE_KEY,
                 jsonSerializationContext.serialize(configVariable.getType()));
 
+        if (value == null) {
+            obj.add(ConfigVariable.VALUE_KEY, null);
+            return obj;
+        }
+
         if (configVariable.getType() == VariableType.DOUBLE && !Double.isFinite((double) value)) {
             obj.add(ConfigVariable.VALUE_KEY, new JsonPrimitive(String.valueOf(value)));
         } else {

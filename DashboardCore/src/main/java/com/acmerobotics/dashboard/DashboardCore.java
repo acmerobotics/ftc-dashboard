@@ -48,6 +48,7 @@ public class DashboardCore {
             .registerTypeAdapter(BasicVariable.class, new ConfigVariableDeserializer())
             .registerTypeAdapter(CustomVariable.class, new ConfigVariableSerializer())
             .registerTypeAdapter(CustomVariable.class, new ConfigVariableDeserializer())
+            .serializeNulls()
             .create();
 
     private class TelemetryUpdateRunnable implements Runnable {

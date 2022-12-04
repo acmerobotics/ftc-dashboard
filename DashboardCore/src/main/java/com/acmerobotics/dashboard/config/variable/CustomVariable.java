@@ -10,8 +10,12 @@ import java.util.Set;
 public class CustomVariable extends ConfigVariable<Object> {
     private Map<String, ConfigVariable> variables;
 
+    public CustomVariable(Map<String, ConfigVariable> variables) {
+        this.variables = variables;
+    }
+
     public CustomVariable() {
-        this.variables = new HashMap<>();
+        this(new HashMap<>());
     }
 
     public void putVariable(String name, ConfigVariable variable) {

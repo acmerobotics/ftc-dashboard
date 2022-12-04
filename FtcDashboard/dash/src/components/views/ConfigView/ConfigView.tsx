@@ -23,26 +23,31 @@ import {
 
 function validAndModified(state: ConfigVarState): ConfigVar | null {
   if (state.__type === 'custom') {
-    const value = Object.keys(state.__value).reduce((acc, key) => {
-      const value = validAndModified(state.__value[key]);
-      if (value === null) {
-        return acc;
+    const value = state.__value;
+    if (value === null) {
+      return null;
+    } else {
+      const filteredValue = Object.keys(value).reduce((acc, key) => {
+        const child = validAndModified(value[key]);
+        if (child === null) {
+          return acc;
+        }
+
+        return {
+          ...acc,
+          [key]: child,
+        };
+      }, {});
+
+      if (Object.keys(filteredValue).length === 0) {
+        return null;
       }
 
       return {
-        ...acc,
-        [key]: value,
+        __type: 'custom',
+        __value: filteredValue,
       };
-    }, {});
-
-    if (Object.keys(value).length === 0) {
-      return null;
     }
-
-    return {
-      __type: 'custom',
-      __value: value,
-    };
   } else {
     // TODO: keep in sync with the corresponding check in BasicVariable
     if (!state.__valid || state.__value === state.__newValue) {
@@ -77,7 +82,12 @@ const ConfigView = ({
     (state: RootState) => state.config.configRoot,
   ) as CustomVarState;
 
-  const sortedKeys = Object.keys(configRoot.__value);
+  const rootValue = configRoot.__value;
+  if (rootValue === null) {
+    return null;
+  }
+
+  const sortedKeys = Object.keys(rootValue);
   sortedKeys.sort();
 
   return (
@@ -107,7 +117,7 @@ const ConfigView = ({
               })
             }
           >
-            <RefreshIcon className="w-6 h-6" />
+            <RefreshIcon className="h-6 w-6" />
           </BaseViewIconButton>
         </BaseViewIcons>
       </div>
@@ -119,7 +129,7 @@ const ConfigView = ({
                 key={key}
                 name={key}
                 // invariant 2: children of the root are custom
-                state={configRoot.__value[key] as CustomVarState}
+                state={rootValue[key] as CustomVarState}
                 onChange={(newState) =>
                   dispatch({
                     type: 'UPDATE_CONFIG',
@@ -128,8 +138,7 @@ const ConfigView = ({
                       __value: sortedKeys.reduce(
                         (acc, key2) => ({
                           ...acc,
-                          [key2]:
-                            key === key2 ? newState : configRoot.__value[key2],
+                          [key2]: key === key2 ? newState : rootValue[key2],
                         }),
                         {},
                       ),

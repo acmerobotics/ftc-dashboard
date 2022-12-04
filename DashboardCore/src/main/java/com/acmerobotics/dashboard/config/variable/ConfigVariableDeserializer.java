@@ -21,14 +21,18 @@ public class ConfigVariableDeserializer implements JsonDeserializer<ConfigVariab
         JsonElement valueEl = obj.get(ConfigVariable.VALUE_KEY);
         switch (varType) {
             case BOOLEAN:
-                return new BasicVariable<>(varType, new ConstantProvider<>(valueEl.getAsBoolean()));
+                return new BasicVariable<>(varType, new ConstantProvider<>(valueEl.isJsonNull() ? null : valueEl.getAsBoolean()));
             case INT:
-                return new BasicVariable<>(varType, new ConstantProvider<>(valueEl.getAsInt()));
+                return new BasicVariable<>(varType, new ConstantProvider<>(valueEl.isJsonNull() ? null : valueEl.getAsInt()));
             case DOUBLE:
-                return new BasicVariable<>(varType, new ConstantProvider<>(valueEl.getAsDouble()));
+                return new BasicVariable<>(varType, new ConstantProvider<>(valueEl.isJsonNull() ? null : valueEl.getAsDouble()));
             case STRING:
-                return new BasicVariable<>(varType, new ConstantProvider<>(valueEl.getAsString()));
+                return new BasicVariable<>(varType, new ConstantProvider<>(valueEl.isJsonNull() ? null : valueEl.getAsString()));
             case ENUM:
+                if (valueEl.isJsonNull()) {
+                    return new BasicVariable<>(varType, new ConstantProvider<>(null));
+                }
+
                 try {
                     Class<?> enumClass = Class.forName(
                             obj.get(ConfigVariable.ENUM_CLASS_KEY).getAsString());
@@ -39,6 +43,10 @@ public class ConfigVariableDeserializer implements JsonDeserializer<ConfigVariab
                     throw new RuntimeException();
                 }
             case CUSTOM:
+                if (valueEl.isJsonNull()) {
+                    return new CustomVariable(null);
+                }
+
                 CustomVariable customVariable = new CustomVariable();
                 JsonObject valueObj = valueEl.getAsJsonObject();
                 for (Map.Entry<String, JsonElement> entry : valueObj.entrySet()) {

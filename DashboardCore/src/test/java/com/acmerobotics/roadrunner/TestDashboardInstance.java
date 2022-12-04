@@ -7,7 +7,6 @@ import com.acmerobotics.dashboard.SocketHandler;
 import com.acmerobotics.dashboard.config.ValueProvider;
 import com.acmerobotics.dashboard.message.Message;
 import com.acmerobotics.dashboard.message.redux.InitOpMode;
-import com.acmerobotics.dashboard.message.redux.ReceiveGamepadState;
 import com.acmerobotics.dashboard.message.redux.ReceiveOpModeList;
 import com.acmerobotics.dashboard.message.redux.ReceiveRobotStatus;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
