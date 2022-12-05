@@ -70,7 +70,8 @@ function mergeModified(
   } else if (
     base.__type === 'enum' &&
     latest.__type === 'enum' &&
-    base.__enumClass === latest.__enumClass
+    base.__enumClass === latest.__enumClass &&
+    base.__value !== base.__newValue
   ) {
     return {
       ...base,
@@ -79,7 +80,8 @@ function mergeModified(
   } else if (
     base.__type === latest.__type &&
     /* type checker reminder */ base.__type !== 'custom' &&
-    latest.__type !== 'custom'
+    latest.__type !== 'custom' &&
+    base.__value !== base.__newValue
   ) {
     return {
       ...base,
