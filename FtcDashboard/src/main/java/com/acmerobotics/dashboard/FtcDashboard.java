@@ -575,6 +575,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         @Override
         protected void onClose(NanoWSD.WebSocketFrame.CloseCode code, String reason, boolean initiatedByRemote) {
             sh.onClose();
+
+            updateStatusView();
         }
 
         @Override
