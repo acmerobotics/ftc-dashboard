@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 
 import Graph from './Graph';
 import AutoFitCanvas from '@/components/Canvas/AutoFitCanvas';
+import { isEqual } from 'lodash';
 
-// PureComponent implements shouldComponentUpdate()
-class GraphCanvas extends React.PureComponent {
+class GraphCanvas extends React.Component {
   constructor(props) {
     super(props);
 
@@ -30,8 +30,12 @@ class GraphCanvas extends React.PureComponent {
     }
   }
 
+  // TODO: Regretably, the current design requires that this.graph.add() only be called
+  // once for each batch of telemetry. Violations of this contract cause artifacts in the
+  // graph from out-of-order samples. (The graph code could be made more robust here, but
+  // mitigating the issue here works just as well.)
   componentDidUpdate(prevProps) {
-    if (this.props.data === prevProps.data) return;
+    if (isEqual(this.props.data, prevProps.data)) return;
 
     this.graph.add(this.props.data);
 
