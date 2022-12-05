@@ -71,17 +71,34 @@ class BasicVariable extends React.Component<Props> {
           );
           break;
         case 'double':
-          if (typeof state.__newValue === 'string') {
-            input = <p>{state.__newValue}</p>;
+          if (typeof state.__value === 'string') {
+            input = <p>{state.__value}</p>;
           } else {
             input = (
-              <TextInput
-                value={state.__newValue}
-                valid={state.__valid}
-                validate={validateDouble}
-                onChange={onChange}
-                onSave={onSave}
-              />
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                <TextInput
+                  value={state.__newValue}
+                  valid={state.__valid}
+                  validate={validateDouble}
+                  onChange={onChange}
+                  onSave={onSave}
+                />
+                {state.__valid && (
+                  <p
+                    className="mx-3"
+                    style={{
+                      opacity: 0.5,
+                    }}
+                  >
+                    ({Number(state.__newValue)})
+                  </p>
+                )}
+              </div>
             );
           }
           break;

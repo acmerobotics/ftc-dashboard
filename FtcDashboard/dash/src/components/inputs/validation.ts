@@ -9,11 +9,9 @@ type ValResult<T> =
     };
 
 export function validateDouble(value: string): ValResult<number> {
-  // TODO: fix this validation - seems like neither isFinite nor parseFloat is enough in isolation
-  // https://camchenry.com/blog/parsefloat-vs-number
-  if (isFinite(Number(value)) && value !== '') {
+  if (isFinite(Number(value)) && !/^\s*$/.test(value)) {
     return {
-      value: parseFloat(value),
+      value: Number(value),
       valid: true,
     };
   } else {
