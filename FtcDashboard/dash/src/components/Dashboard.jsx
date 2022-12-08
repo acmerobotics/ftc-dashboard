@@ -27,7 +27,7 @@ class Dashboard extends Component {
   render() {
     return (
       <div
-        className="set-theme-blue flex flex-col text-black dark:text-white"
+        className="set-theme-pink flex flex-col text-black dark:text-white"
         style={{ width: '100vw', height: '100vh' }}
       >
         <header className="flex items-center justify-between bg-primary-600 px-3 py-1 text-white">

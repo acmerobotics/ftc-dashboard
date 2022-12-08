@@ -261,7 +261,12 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
         </div>
         <BaseViewBody>
           <select
-            className="m-1 mr-2 rounded border border-gray-300 bg-gray-200 p-1 pr-6 shadow-md transition disabled:text-gray-600 disabled:shadow-none dark:border-slate-500/80 dark:bg-slate-700 dark:text-slate-200"
+            className={`
+              m-1 mr-2 rounded border border-gray-300 bg-gray-200 p-1 pr-6 
+              shadow-md transition focus:border-primary-500
+              focus:ring-primary-500 disabled:text-gray-600 disabled:shadow-none
+              dark:border-slate-500/80 dark:bg-slate-700 dark:text-slate-200
+            `}
             value={this.state.selectedOpMode}
             disabled={
               activeOpMode !== STOP_OP_MODE_TAG || opModeList.length === 0
