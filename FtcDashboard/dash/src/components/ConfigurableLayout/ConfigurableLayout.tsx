@@ -39,6 +39,8 @@ import { ReactComponent as RemoveCircleIcon } from '@/assets/icons/remove_circle
 import { ReactComponent as RemoveCircleOutlineIcon } from '@/assets/icons/remove_circle_outline.svg';
 import CreateIconURL from '@/assets/icons/create.svg';
 
+import colors from 'tailwindcss/colors';
+
 function maxArray(a: number[], b: number[]) {
   if (a.length !== b.length) {
     throw new Error('cannot compare arrays with different lengths');
@@ -83,18 +85,23 @@ const Container = forwardRef<
     children: ReactNode;
     isLayoutLocked: boolean;
     bgGridSize: number;
+    isDarkMode: boolean;
   }
 >((props, ref) => (
   <div
     ref={ref}
     className={clsx(
-      !props.isLayoutLocked ? 'bg-gray-100 ' : 'bg-white ',
+      !props.isLayoutLocked
+        ? 'bg-gray-100 dark:bg-slate-900'
+        : 'bg-white dark:bg-slate-900',
       'relative overflow-x-hidden overflow-y-scroll p-2 pb-4 transition-colors dark:bg-slate-900',
     )}
     style={{
       height: 'calc(100vh - 52px)',
-      backgroundImage: props.isLayoutLocked
-        ? 'radial-gradient(#94a3b8 calc((0.5rem + ${GRID_DOT_PADDING}px) - 17px), transparent 0)'
+      backgroundImage: !props.isLayoutLocked
+        ? `radial-gradient(${
+            props.isDarkMode ? colors.slate['600'] : colors.gray['400']
+          } calc((0.5rem + ${GRID_DOT_PADDING}px) - 17px), transparent 0)`
         : '',
       backgroundSize: `${props.bgGridSize}px  ${props.bgGridSize}px`,
       backgroundPosition: `calc(0.5rem + ${GRID_DOT_PADDING}px) calc(0.5rem + ${GRID_DOT_PADDING}px - 5px)`,
@@ -520,15 +527,18 @@ export default function ConfigurableLayout() {
       ref={containerRef}
       isLayoutLocked={isLayoutLocked}
       bgGridSize={gridBgSize}
+      isDarkMode={false}
     >
       {gridItems.length === 0 && (
         <div
           className={`mt-16 p-12 text-center transition-colors ${
-            isLayoutLocked ? 'bg-white' : 'bg-gray-100'
+            isLayoutLocked
+              ? 'bg-white dark:bg-slate-900'
+              : 'bg-gray-100 dark:bg-slate-900'
           }`}
         >
           <h3 className="text-2xl">Your custom layout is empty!</h3>
-          <p className="mt-3 text-gray-600">
+          <p className="mt-3 text-gray-600 dark:text-slate-400">
             Press the floating pencil icon near the bottom right
             <br />
             and then click the green plus button to create your own layouts!
@@ -585,14 +595,14 @@ export default function ConfigurableLayout() {
         isShowing={!(isFabIdle && isLayoutLocked)}
         onClick={clickFAB}
         icon={!isLayoutLocked ? LockIconURL : CreateIconURL}
-        customClassName={`${
+        className={`${
           !isLayoutLocked
-            ? `bg-gray-500 focus:ring-4 focus:ring-gray-600 shadow-md shadow-gray-900/30 hover:shadow-lg hover:shadow-gray-900/50`
-            : `bg-red-500 focus:ring-4 focus:ring-red-600 shadow-md shadow-red-500/40 hover:shadow-lg hover:shadow-red-500/60`
+            ? `bg-gray-500 shadow-md shadow-gray-900/30 hover:shadow-lg hover:shadow-gray-900/50 focus:ring-4 focus:ring-gray-600`
+            : `bg-red-500 shadow-md shadow-red-500/40 hover:shadow-lg hover:shadow-red-500/60 focus:ring-4 focus:ring-red-600`
         }`}
       >
         <RadialFabChild
-          customClass="w-12 h-12 bg-green-500 border border-green-600 shadow-md shadow-green-500/30 hover:shadow-lg hover:shadow-green-500/50 focus:ring focus:ring-green-600"
+          className="h-12 w-12 border border-green-600 bg-green-500 shadow-md shadow-green-500/30 hover:shadow-lg hover:shadow-green-500/50 focus:ring focus:ring-green-600"
           angle={(-80 * Math.PI) / 180}
           openMargin="5em"
           fineAdjustIconX="2%"
@@ -603,10 +613,10 @@ export default function ConfigurableLayout() {
           <AddIcon className="h-6 w-6 text-white" />
         </RadialFabChild>
         <RadialFabChild
-          customClass={`w-12 h-12 border shadow-md shadow-orange-500/30 hover:shadow-lg hover:shadow-orange-500/50 focus:ring ${
+          className={`h-12 w-12 border shadow-md shadow-orange-500/30 hover:shadow-lg hover:shadow-orange-500/50 focus:ring ${
             isInDeleteMode
-              ? 'bg-orange-500 border-yellow-600 focus:ring-amber-300'
-              : 'bg-amber-500 border-amber-600 focus:ring-orange-300'
+              ? 'border-yellow-600 bg-orange-500 focus:ring-amber-300'
+              : 'border-amber-600 bg-amber-500 focus:ring-orange-300'
           }`}
           angle={(-135 * Math.PI) / 180}
           openMargin="5em"
@@ -622,7 +632,7 @@ export default function ConfigurableLayout() {
           )}
         </RadialFabChild>
         <RadialFabChild
-          customClass="w-12 h-12 bg-indigo-500 border border-indigo-600 shadow-md shadow-indigo-500/30 hover:shadow-lg hover:shadow-indigo-500/50 focus:ring focus:ring-indigo-300"
+          className="h-12 w-12 border border-indigo-600 bg-indigo-500 shadow-md shadow-indigo-500/30 hover:shadow-lg hover:shadow-indigo-500/50 focus:ring focus:ring-indigo-300"
           angle={(170 * Math.PI) / 180}
           openMargin="5em"
           fineAdjustIconX="8%"

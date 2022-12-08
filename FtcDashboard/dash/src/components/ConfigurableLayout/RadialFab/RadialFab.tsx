@@ -6,7 +6,7 @@ type RadialFabProps = PropsWithChildren<{
 
   icon: string;
 
-  customClassName: string;
+  className: string;
 
   width?: string;
   height?: string;
@@ -40,11 +40,12 @@ const FloatingButton = ({
   children,
   width,
   height,
-  customClassName,
+  className,
   ...props
-}: RadialFabProps & JSX.IntrinsicElements['button']) => (
+}: Pick<RadialFabProps, 'children' | 'width' | 'height'> &
+  JSX.IntrinsicElements['button']) => (
   <button
-    className={`flex-center rounded-full border-none p-0 !outline-none transition duration-300 focus:outline-none focus:ring-2 focus:ring-opacity-50 ${customClassName}`}
+    className={`flex-center rounded-full border-none p-0 !outline-none transition duration-300 focus:outline-none focus:ring-2 focus:ring-opacity-50 ${className}`}
     style={{ width, height }}
     {...props}
   >
@@ -55,7 +56,12 @@ const FloatingButton = ({
 const RadialFab = (props: RadialFabProps) => {
   return (
     <FixedContainer {...props}>
-      <FloatingButton {...props} onClick={props.onClick}>
+      <FloatingButton
+        width={props.width}
+        height={props.height}
+        onClick={props.onClick}
+        className={props.className}
+      >
         <img src={props.icon} className="w-[1.95em] text-white" />
       </FloatingButton>
       {Children.map(props.children, (e) =>

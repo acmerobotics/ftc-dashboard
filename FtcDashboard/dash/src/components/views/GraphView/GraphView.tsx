@@ -199,7 +199,7 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
 
             <BaseViewIconButton>
               {this.state.graphing ? (
-                <CloseIcon className="h-6 w-6 text-black" onClick={this.stop} />
+                <CloseIcon className="h-6 w-6" onClick={this.stop} />
               ) : (
                 <ChartIcon className="h-6 w-6" onClick={this.start} />
               )}

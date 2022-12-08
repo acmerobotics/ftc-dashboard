@@ -118,7 +118,11 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
   renderInitButton() {
     return (
       <ActionButton
-        className="border-blue-300 bg-blue-200"
+        className={`
+          border-blue-300 bg-blue-200 transition-colors
+          dark:border-transparent dark:bg-blue-600 dark:text-blue-50 dark:highlight-white/30
+          dark:hover:border-blue-400/80 dark:focus:bg-blue-700
+        `}
         onClick={() => this.props.initOpMode(this.state.selectedOpMode)}
       >
         Init
@@ -129,7 +133,11 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
   renderStartButton() {
     return (
       <ActionButton
-        className="border-green-300 bg-green-200"
+        className={`
+          border-green-200 bg-green-100 transition-colors
+          dark:border-transparent dark:bg-green-500 dark:text-green-50 dark:highlight-white/30
+          dark:hover:border-green-300/80 dark:focus:bg-green-600
+        `}
         onClick={() => this.props.startOpMode()}
       >
         Start
@@ -140,7 +148,11 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
   renderStopButton() {
     return (
       <ActionButton
-        className="border-red-300 bg-red-200"
+        className={`
+          border-red-200 bg-red-100 transition-colors
+          dark:border-transparent dark:bg-red-500 dark:text-red-50 dark:highlight-white/30
+          dark:hover:border-red-300/80 dark:focus:bg-red-600
+        `}
         onClick={() => this.props.stopOpMode()}
       >
         Stop
@@ -249,7 +261,7 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
         </div>
         <BaseViewBody>
           <select
-            className="m-1 mr-2 rounded border border-gray-300 bg-gray-200 p-1 pr-6 shadow-md transition disabled:text-gray-600 disabled:shadow-none"
+            className="m-1 mr-2 rounded border border-gray-300 bg-gray-200 p-1 pr-6 shadow-md transition disabled:text-gray-600 disabled:shadow-none dark:border-slate-500/80 dark:bg-slate-700 dark:text-slate-200"
             value={this.state.selectedOpMode}
             disabled={
               activeOpMode !== STOP_OP_MODE_TAG || opModeList.length === 0

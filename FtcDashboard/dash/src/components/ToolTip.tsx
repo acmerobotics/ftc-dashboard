@@ -23,7 +23,9 @@ export const ToolTipEl = forwardRef<
       top: props.top,
       left: props.left,
     }}
-  ></span>
+  >
+    {props.children}
+  </span>
 ));
 ToolTipEl.displayName = 'ToolTipEl';
 

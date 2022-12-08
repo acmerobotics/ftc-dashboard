@@ -1,27 +1,29 @@
 import clsx from 'clsx';
-import { PropsWithChildren } from 'react';
+import { forwardRef, PropsWithChildren } from 'react';
 
 type BaseViewProps = PropsWithChildren<{
   isUnlocked?: boolean;
 }>;
 
-const BaseView = ({
-  className,
-  isUnlocked,
-  children,
-  ...props
-}: BaseViewProps & JSX.IntrinsicElements['div']) => (
+const BaseView = forwardRef<
+  HTMLDivElement,
+  BaseViewProps & JSX.IntrinsicElements['div']
+>(({ className, isUnlocked, children, ...props }, ref) => (
   <div
+    ref={ref}
     className={clsx(
       'flex h-full flex-col overflow-hidden bg-white bg-opacity-75 transition-shadow',
-      isUnlocked && 'select-none rounded-md shadow-md',
+      isUnlocked
+        ? 'select-none rounded-md bg-opacity-75 shadow-md dark:bg-slate-800'
+        : 'dark:bg-slate-900',
       className,
     )}
     {...props}
   >
     {children}
   </div>
-);
+));
+BaseView.displayName = 'BaseView';
 
 type BaseViewHeadingProps = {
   isDraggable?: boolean;
@@ -30,12 +32,13 @@ type BaseViewHeadingProps = {
 const BaseViewHeading = ({
   className,
   children,
+  isDraggable,
   ...props
 }: BaseViewHeadingProps & JSX.IntrinsicElements['h2']) => (
   <h2
     className={clsx(
       'w-full px-4 py-2 text-xl font-medium',
-      props.isDraggable && 'grab-handle',
+      isDraggable && 'grab-handle',
       className,
     )}
     {...props}

@@ -43,10 +43,13 @@ const CardButton = ({
   JSX.IntrinsicElements['button']) => (
   <button
     className={clsx(
-      'flex transform items-center justify-start rounded px-4 py-4 shadow-md',
-      'border border-gray-300 bg-white transition hover:border-gray-400 hover:shadow-lg',
+      'flex transform items-center justify-start',
+      'rounded bg-white px-4 py-4 shadow-md',
+      'border border-gray-300 transition hover:border-gray-500 hover:shadow-lg',
       'ring-2 ring-transparent hover:-translate-y-0.5',
       'focus:-translate-y-0.5 focus:border-0 focus:outline-none',
+      'dark:border-slate-500/70 dark:bg-slate-700 dark:hover:border-slate-300',
+      'dark:shadow-slate-400/10 dark:hover:shadow-slate-400/20',
       isOpen
         ? 'pointer-events-auto scale-100 opacity-100'
         : 'pointer-events-none scale-75 opacity-0',

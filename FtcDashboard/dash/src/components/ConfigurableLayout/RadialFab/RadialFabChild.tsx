@@ -1,10 +1,10 @@
-import { PropsWithChildren, useRef } from 'react';
+import { forwardRef, PropsWithChildren, useRef } from 'react';
 
 import useDelayedTooltip from '@/hooks/useDelayedTooltip';
 import ToolTip from '@/components/ToolTip';
 
 type RadialFabChildProps = {
-  customClass?: string;
+  className?: string;
 
   fineAdjustIconX?: string;
   fineAdjustIconY?: string;
@@ -17,32 +17,36 @@ type RadialFabChildProps = {
   toolTipText?: string;
 };
 
-const ButtonContainer = ({
-  angle,
-  openMargin = '0',
-  isOpen = false,
-  children,
-  ...props
-}: RadialFabChildProps & JSX.IntrinsicElements['button']) => {
-  const displacementX = `calc(${
-    isOpen ? Math.cos(angle) : 0
-  } * ${openMargin} - 50%)`;
-  const displacementY = `calc(${
-    isOpen ? Math.sin(angle) : 0
-  } * ${openMargin} - 50%)`;
+const ButtonContainer = forwardRef<
+  HTMLButtonElement,
+  RadialFabChildProps & JSX.IntrinsicElements['button']
+>(
+  (
+    { angle, openMargin = '0', isOpen = false, className, children, ...props },
+    ref,
+  ) => {
+    const displacementX = `calc(${
+      isOpen ? Math.cos(angle) : 0
+    } * ${openMargin} - 50%)`;
+    const displacementY = `calc(${
+      isOpen ? Math.sin(angle) : 0
+    } * ${openMargin} - 50%)`;
 
-  return (
-    <button
-      className={`flex-center absolute top-1/2 left-1/2 z-[-1] rounded-full outline-none transition focus:outline-none ${props.customClass}`}
-      style={{
-        transform: `translate(${displacementX}, ${displacementY})`,
-      }}
-      {...props}
-    >
-      {children}
-    </button>
-  );
-};
+    return (
+      <button
+        ref={ref}
+        className={`flex-center absolute top-1/2 left-1/2 z-[-1] rounded-full outline-none transition focus:outline-none ${className}`}
+        style={{
+          transform: `translate(${displacementX}, ${displacementY})`,
+        }}
+        {...props}
+      >
+        {children}
+      </button>
+    );
+  },
+);
+ButtonContainer.displayName = 'ButtonContainer';
 
 const Icon = ({
   fineAdjustIconX = '0',
@@ -50,7 +54,9 @@ const Icon = ({
   isOpen,
   children,
   ...props
-}: PropsWithChildren<RadialFabChildProps>) => (
+}: PropsWithChildren<
+  Pick<RadialFabChildProps, 'fineAdjustIconX' | 'fineAdjustIconY' | 'isOpen'>
+>) => (
   <div
     className="transition-transform duration-300"
     style={{
@@ -66,6 +72,8 @@ const Icon = ({
 
 const RadialFabChild = ({
   toolTipText = '',
+  fineAdjustIconX,
+  fineAdjustIconY,
   ...props
 }: PropsWithChildren<RadialFabChildProps> &
   JSX.IntrinsicElements['button']) => {
@@ -74,7 +82,13 @@ const RadialFabChild = ({
 
   return (
     <ButtonContainer {...props} ref={buttonRef}>
-      <Icon {...props}>{props.children}</Icon>
+      <Icon
+        fineAdjustIconX={fineAdjustIconX}
+        fineAdjustIconY={fineAdjustIconY}
+        isOpen={props.isOpen}
+      >
+        {props.children}
+      </Icon>
       {toolTipText !== '' && (
         <ToolTip isShowing={isShowingTooltip} hoverRef={buttonRef}>
           {toolTipText}

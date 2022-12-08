@@ -27,14 +27,14 @@ class Dashboard extends Component {
   render() {
     return (
       <div
-        className="flex flex-col"
+        className="set-theme-blue flex flex-col text-black dark:text-white"
         style={{ width: '100vw', height: '100vh' }}
       >
-        <header className="flex items-center justify-between bg-blue-600 px-3 py-1 text-white">
+        <header className="flex items-center justify-between bg-primary-600 px-3 py-1 text-white">
           <h1 className="text-2xl font-medium">FTC Dashboard</h1>
           <div className="flex-center">
             <select
-              className="mx-2 rounded border-blue-300 bg-blue-100 py-1 text-sm text-black focus:border-blue-100 focus:ring-2 focus:ring-white focus:ring-opacity-40"
+              className="mx-2 rounded border-primary-300 bg-primary-100 py-1 text-sm text-black focus:border-primary-100 focus:ring-2 focus:ring-white focus:ring-opacity-40"
               value={this.props.layoutPreset}
               onChange={(evt) =>
                 this.props.dispatch(saveLayoutPreset(evt.target.value))
