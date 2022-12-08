@@ -6,8 +6,10 @@ import LayoutPreset from '@/enums/LayoutPreset';
 import { connect, disconnect } from '@/store/actions/socket';
 import { saveLayoutPreset, getLayoutPreset } from '@/store/actions/settings';
 
+import { BaseViewIconButton } from '@/components/views/BaseView';
 import { ReactComponent as ConnectedIcon } from '@/assets/icons/wifi.svg';
 import { ReactComponent as DisconnectedIcon } from '@/assets/icons/wifi_off.svg';
+import { ReactComponent as SettingsIcon } from '@/assets/icons/settings.svg';
 
 class Dashboard extends Component {
   componentDidMount() {
@@ -60,10 +62,13 @@ class Dashboard extends Component {
               </p>
             )}
             {this.props.isConnected ? (
-              <ConnectedIcon className="ml-4 h-10 w-10" />
+              <ConnectedIcon className="ml-4 h-10 w-10 py-1" />
             ) : (
-              <DisconnectedIcon className="ml-4 h-10 w-10" />
+              <DisconnectedIcon className="ml-4 h-10 w-10 py-1" />
             )}
+            <BaseViewIconButton className="icon-btn group ml-3 h-8 w-8 hover:border-white/50">
+              <SettingsIcon className="h-7 w-7 transition group-hover:rotate-[15deg]" />
+            </BaseViewIconButton>
           </div>
         </header>
         {this.props.isConnected && !this.props.enabled ? (
