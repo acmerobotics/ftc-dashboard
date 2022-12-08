@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import clsx from 'clsx';
 
 class TextInput extends React.Component {
   constructor(props) {
@@ -41,11 +42,12 @@ class TextInput extends React.Component {
   render() {
     return (
       <input
-        className={`rounded border border-gray-200 bg-gray-100 px-3 py-1 ${
-          !this.props.valid
-            ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-            : ''
-        }`}
+        className={clsx(
+          'rounded border border-gray-200 bg-gray-100 px-3 py-1 transition',
+          'dark:border-slate-500/80 dark:bg-slate-700 dark:text-slate-200',
+          !this.props.valid &&
+            'border-red-500 focus:border-red-500 focus:ring-red-500',
+        )}
         ref={this.inputRef}
         type="text"
         size={15}
