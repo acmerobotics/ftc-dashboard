@@ -123,7 +123,7 @@ const ConfigView = ({
       </div>
       <BaseViewBody>
         <table className="block h-full">
-          <tbody>
+          <tbody className="block">
             {sortedKeys.map((key) => (
               <CustomVariable
                 key={key}

@@ -41,8 +41,8 @@ class CustomVariable extends Component<Props, State> {
 
   renderHelper(name: string, children: ReactNode) {
     return (
-      <tr>
-        <td>
+      <tr className="block">
+        <td className="block">
           <div
             className="option-header cursor-pointer py-1"
             onClick={this.toggleVisibility}
