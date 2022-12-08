@@ -1,25 +1,27 @@
+//noinspection GradleDependency
 buildscript {
-    ext.dashboard_version = '0.4.6'
+    ext.min_sdk_version = "8.0.0"
 }
 
 plugins {
     id "com.github.node-gradle.node" version "2.2.4"
 }
-apply plugin: 'com.android.library'
-apply plugin: 'maven-publish'
-apply plugin: 'checkstyle'
+apply plugin: "com.android.library"
+apply plugin: "maven-publish"
+apply plugin: "checkstyle"
 
 android {
     compileSdkVersion 28
 
     defaultConfig {
         minSdkVersion 23
+        //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 26
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     lintOptions {
@@ -28,7 +30,7 @@ android {
 }
 
 node {
-    version = '18.12.1'
+    version = "18.12.1"
     download = true
     nodeModulesDir = file("${project.projectDir}/dash")
 }
@@ -36,14 +38,14 @@ node {
 yarn_build.dependsOn yarn_install
 
 task cleanDashAssets(type: Delete) {
-    delete "${android.sourceSets.getByName('main').assets.srcDirs[0]}/dash"
+    delete "${android.sourceSets.getByName("main").assets.srcDirs[0]}/dash"
 }
 
 clean.dependsOn cleanDashAssets
 
 task copyDashAssets(type: Copy) {
     from "${project.projectDir}/dash/dist"
-    into "${android.sourceSets.getByName('main').assets.srcDirs[0]}/dash"
+    into "${android.sourceSets.getByName("main").assets.srcDirs[0]}/dash"
 }
 
 copyDashAssets.dependsOn cleanDashAssets
@@ -54,7 +56,7 @@ android.libraryVariants.all { variant ->
 }
 
 // adapted from https://github.com/Genymobile/gnirehtet/blob/master/config/android-checkstyle.gradle
-check.dependsOn 'checkstyle'
+check.dependsOn "checkstyle"
 
 checkstyle {
     toolVersion = checkstyle_version
@@ -68,6 +70,8 @@ task checkstyle(type: Checkstyle) {
     ignoreFailures = true
 }
 
+// I"d like to replace each() with collectMany() if only I knew how
+// Also, the static suggestion here is wrong but I lack the incantation to suppress it
 def javaSources() {
     def files = []
     android.sourceSets.each { sourceSet ->
@@ -84,30 +88,61 @@ def javaSources() {
 
 repositories {
     flatDir {
-        dirs '../libs'
+        dirs "../libs"
     }
     mavenCentral()
 }
 
+// Probably not worth combining with addPomDependencies()
+// Keep them in sync manually
 dependencies {
-    api(project(':DashboardCore')) {
+    api(project(":DashboardCore")) {
         transitive = false
     }
 
-    api 'org.firstinspires.ftc:RobotCore:8.0.0'
-    api 'org.firstinspires.ftc:Hardware:8.0.0'
-    api 'org.firstinspires.ftc:RobotServer:8.0.0'
-    api 'org.firstinspires.ftc:FtcCommon:8.0.0'
+    api "org.firstinspires.ftc:RobotCore:$min_sdk_version"
+    api "org.firstinspires.ftc:Hardware:$min_sdk_version"
+    api "org.firstinspires.ftc:RobotServer:$min_sdk_version"
+    api "org.firstinspires.ftc:FtcCommon:$min_sdk_version"
 
-    implementation 'androidx.annotation:annotation:1.1.0'
+    implementation "androidx.annotation:annotation:1.1.0"
 
-    implementation('org.nanohttpd:nanohttpd-websocket:2.3.1') {
-        exclude module: 'nanohttpd'
+    implementation("org.nanohttpd:nanohttpd-websocket:2.3.1") {
+        exclude module: "nanohttpd"
     }
 }
 
+def addPomDependencies(root) {
+    def depsNode = root.appendNode("dependencies")
+
+    // Apparently you can make closures but not "inner methods"
+    def addDep = { groupId, artifactId, version ->
+        def n = depsNode.appendNode("dependency")
+        n.appendNode("groupId", groupId)
+        n.appendNode("artifactId", artifactId)
+        n.appendNode("version", version)
+        return n
+    }
+
+    addDep("com.acmerobotics.dashboard", "core", dashboard_version)
+
+    ["RobotCore", "Hardware", "RobotServer", "FtcCommon"].forEach {
+        addDep("org.firstinspires.ftc", it, min_sdk_version)
+    }
+
+    addDep("androidx.annotation", "annotation", "1.1.0")
+
+    addDep("org.nanohttpd", "nanohttpd-websocket", "2.3.1")
+            .appendNode("exclusions")
+            .appendNode("exclusion")
+            .with {
+                appendNode("groupId", "org.nanohttpd")
+                appendNode("artifactId", "nanohttpd")
+            }
+}
+
 task androidSourcesJar(type: Jar) {
-    classifier = 'sources'
+    classifier = "sources"
     from android.sourceSets.main.java.srcDirs
 }
 
@@ -119,29 +154,8 @@ task androidJavadocs(type: Javadoc) {
 }
 
 task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
-    classifier = 'javadoc'
+    classifier = "javadoc"
     from androidJavadocs.destinationDir
-}
-
-def pomConfig = {
-    licenses {
-        license {
-            name "The MIT License"
-            url "https://opensource.org/licenses/MIT"
-            distribution "repo"
-        }
-    }
-    developers {
-        developer {
-            id "rbrott"
-            name "Ryan Brott"
-            email "rcbrott@gmail.com"
-        }
-    }
-
-    scm {
-        url "https://github.com/acmerobotics/ftc-dashboard"
-    }
 }
 
 project.afterEvaluate {
@@ -151,38 +165,44 @@ project.afterEvaluate {
                 artifact bundleReleaseAar
                 artifact androidSourcesJar
                 artifact androidJavadocsJar
-                groupId = 'com.acmerobotics.dashboard'
-                artifactId = 'dashboard'
-                version dashboard_version
-                pom.withXml {
-                    def root = asNode()
-                    root.appendNode('description', 'React-based web dashboard designed for FTC')
-                    root.appendNode('name', 'FTC Dashboard')
-                    root.appendNode('url', 'https://github.com/acmerobotics/ftc-dashboard')
-                    root.children().last() + pomConfig
-                }
 
-                pom.withXml {
-                    def dependenciesNode = asNode().appendNode('dependencies')
-                    // Iterate over the implementation dependencies (we don't want the test ones), adding a <dependency> node for each
-                    configurations.implementation.allDependencies.each { dep ->
-                        // Ensure dependencies such as fileTree are not included.
-                        if (dep instanceof ModuleDependency) {
-                            def moduleDep = (ModuleDependency) dep
-                            def dependencyNode = dependenciesNode.appendNode('dependency')
-                            dependencyNode.appendNode('groupId', moduleDep.group)
-                            dependencyNode.appendNode('artifactId', moduleDep.name)
-                            dependencyNode.appendNode('version', moduleDep.version)
-                            if (dep.excludeRules.size() > 0) {
-                                def exclusionsNode = dependencyNode.appendNode('exclusions')
-                                dep.excludeRules.every { excludedDep ->
-                                    def exclusionNode = exclusionsNode.appendNode('exclusion')
-                                    exclusionNode.appendNode('groupId', moduleDep.group)
-                                    exclusionNode.appendNode('artifactId', excludedDep.module)
-                                }
-                            }
+                groupId = "com.acmerobotics.dashboard"
+                artifactId = "dashboard"
+                version dashboard_version
+
+                pom {
+                    description = "Web dashboard designed for FTC"
+                    name = "FTC Dashboard"
+                    url = "https://github.com/acmerobotics/ftc-dashboard"
+
+                    licenses {
+                        license {
+                            name = "The MIT License"
+                            url = "https://opensource.org/licenses/MIT"
+                            distribution = "repo"
                         }
                     }
+
+                    developers {
+                        developer {
+                            id = "rbrott"
+                            name = "Ryan Brott"
+                            email = "rcbrott@gmail.com"
+                        }
+                    }
+
+                    scm {
+                        url = "https://github.com/acmerobotics/ftc-dashboard"
+                    }
+                }
+
+                // Seems like you can"t define ad hoc software components without a plugin.
+                // Remind me never to read the Gradle docs again.
+                pom.withXml {
+                    // Android Studio complains here, but passing null straight up doesn't work
+                    //noinspection GroovyImplicitNullArgumentCall
+                    def root = asNode()
+                    addPomDependencies(root)
                 }
             }
         }

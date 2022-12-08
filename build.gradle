@@ -5,6 +5,7 @@
  */
 
 buildscript {
+    ext.dashboard_version = '0.4.7'
     ext.checkstyle_version = '8.18'
 
     repositories {
