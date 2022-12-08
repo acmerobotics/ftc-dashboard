@@ -19,6 +19,12 @@ import java.util.stream.Collectors;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoWSD;
 
+enum TestEnum {
+    Value1,
+    Value2,
+    Value3
+};
+
 public class TestDashboardInstance {
     private static TestDashboardInstance instance = new TestDashboardInstance();
 
@@ -31,7 +37,7 @@ public class TestDashboardInstance {
 
     private NanoWSD server = new NanoWSD(8000) {
         @Override
-        protected NanoWSD.WebSocket openWebSocket (NanoHTTPD.IHTTPSession handshake){
+        protected NanoWSD.WebSocket openWebSocket(NanoHTTPD.IHTTPSession handshake) {
             return new DashWebSocket(handshake);
         }
     };
@@ -148,6 +154,33 @@ public class TestDashboardInstance {
                 x = value;
             }
         });
+        core.addConfigVariable("Test", "RUN_USING_ENCODER", new ValueProvider<Boolean>() {
+            private boolean b;
+
+            @Override
+            public Boolean get() {
+                return b;
+            }
+
+            @Override
+            public void set(Boolean value) {
+                b = value;
+            }
+        });
+        core.addConfigVariable("Test", "SomeEnum", new ValueProvider<TestEnum>() {
+            private TestEnum te = TestEnum.Value1;
+
+            @Override
+            public TestEnum get() {
+                return te;
+            }
+
+            @Override
+            public void set(TestEnum value) {
+                te = value;
+            }
+        });
+
 
         try {
             server.start();
