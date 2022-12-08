@@ -143,14 +143,13 @@ extends java.lang.Object</pre>
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/RobotStatus.html#RobotStatus--">RobotStatus</a></span>()</code>
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/RobotStatus.html#RobotStatus-boolean-boolean-java.lang.String-com.acmerobotics.dashboard.RobotStatus.OpModeStatus-java.lang.String-java.lang.String-">RobotStatus</a></span>(boolean&nbsp;enabled,
+           boolean&nbsp;available,
+           java.lang.String&nbsp;activeOpMode,
+           <a href="../../../com/acmerobotics/dashboard/RobotStatus.OpModeStatus.html" title="enum in com.acmerobotics.dashboard">RobotStatus.OpModeStatus</a>&nbsp;activeOpModeStatus,
+           java.lang.String&nbsp;warningMessage,
+           java.lang.String&nbsp;errorMessage)</code>
 <div class="block">Creates a status object with the default values.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../com/acmerobotics/dashboard/RobotStatus.html#RobotStatus-java.lang.String-com.acmerobotics.dashboard.RobotStatus.OpModeStatus-">RobotStatus</a></span>(java.lang.String&nbsp;activeOpMode,
-           <a href="../../../com/acmerobotics/dashboard/RobotStatus.OpModeStatus.html" title="enum in com.acmerobotics.dashboard">RobotStatus.OpModeStatus</a>&nbsp;activeOpModeStatus)</code>
-<div class="block">Creates a status object from the active op mode and it status.</div>
 </td>
 </tr>
 </table>
@@ -183,30 +182,19 @@ extends java.lang.Object</pre>
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a name="RobotStatus--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>RobotStatus</h4>
-<pre>public&nbsp;RobotStatus()</pre>
-<div class="block">Creates a status object with the default values.</div>
-</li>
-</ul>
-<a name="RobotStatus-java.lang.String-com.acmerobotics.dashboard.RobotStatus.OpModeStatus-">
+<a name="RobotStatus-boolean-boolean-java.lang.String-com.acmerobotics.dashboard.RobotStatus.OpModeStatus-java.lang.String-java.lang.String-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>RobotStatus</h4>
-<pre>public&nbsp;RobotStatus(java.lang.String&nbsp;activeOpMode,
-                   <a href="../../../com/acmerobotics/dashboard/RobotStatus.OpModeStatus.html" title="enum in com.acmerobotics.dashboard">RobotStatus.OpModeStatus</a>&nbsp;activeOpModeStatus)</pre>
-<div class="block">Creates a status object from the active op mode and it status.</div>
-<dl>
-<dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>activeOpMode</code> - active op mode</dd>
-<dd><code>activeOpModeStatus</code> - active op mode status</dd>
-</dl>
+<pre>public&nbsp;RobotStatus(boolean&nbsp;enabled,
+                   boolean&nbsp;available,
+                   java.lang.String&nbsp;activeOpMode,
+                   <a href="../../../com/acmerobotics/dashboard/RobotStatus.OpModeStatus.html" title="enum in com.acmerobotics.dashboard">RobotStatus.OpModeStatus</a>&nbsp;activeOpModeStatus,
+                   java.lang.String&nbsp;warningMessage,
+                   java.lang.String&nbsp;errorMessage)</pre>
+<div class="block">Creates a status object with the default values.</div>
 </li>
 </ul>
 </li>
