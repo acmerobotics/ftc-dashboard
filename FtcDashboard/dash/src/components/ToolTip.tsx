@@ -1,34 +1,38 @@
-import { useRef, FunctionComponent, RefObject, ReactNode } from 'react';
+import { useRef, RefObject, forwardRef, PropsWithChildren } from 'react';
 import { createPortal } from 'react-dom';
+import clsx from 'clsx';
 
-import styled from 'styled-components';
+export const ToolTipEl = forwardRef<
+  HTMLSpanElement,
+  PropsWithChildren<{
+    isShowing: boolean;
+    top: string;
+    left: string;
+  }>
+>((props, ref) => (
+  <span
+    ref={ref}
+    className={clsx(
+      'pointer-events-none fixed w-max transform rounded-md px-3 py-1 transition',
+      'bg-gray-800 bg-opacity-80 text-sm text-white',
+      props.isShowing
+        ? '-translate-y-11 opacity-100'
+        : '-translate-y-9 opacity-0',
+    )}
+    style={{
+      top: props.top,
+      left: props.left,
+    }}
+  ></span>
+));
+ToolTipEl.displayName = 'ToolTipEl';
 
-interface ToolTipElProps {
-  isShowing: boolean;
-  top: string;
-  left: string;
-}
-
-export const ToolTipEl = styled.span.attrs<ToolTipElProps>((props) => ({
-  className: `fixed rounded-md px-3 py-1 w-max bg-gray-800 bg-opacity-80 text-white text-sm pointer-events-none transform transition ${
-    props.isShowing ? '-translate-y-11 opacity-100' : '-translate-y-9 opacity-0'
-  }`,
-}))<ToolTipElProps>`
-  top: ${(props) => props.top};
-  left: ${(props) => props.left};
-`;
-
-interface ToolTipProps {
-  children: ReactNode;
+type ToolTipProps = PropsWithChildren<{
   hoverRef: RefObject<HTMLElement | null>;
   isShowing: boolean;
-}
+}>;
 
-const ToolTip: FunctionComponent<ToolTipProps> = ({
-  children,
-  hoverRef,
-  isShowing,
-}: ToolTipProps) => {
+const ToolTip = ({ children, hoverRef, isShowing }: ToolTipProps) => {
   const tooltipRef = useRef<HTMLSpanElement | null>(null);
 
   return createPortal(

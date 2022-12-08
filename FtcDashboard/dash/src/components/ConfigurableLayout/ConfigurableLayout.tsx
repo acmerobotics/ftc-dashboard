@@ -1,7 +1,16 @@
-import { ReactElement, useState, useEffect, useRef, cloneElement } from 'react';
+import {
+  ReactElement,
+  useState,
+  useEffect,
+  useRef,
+  cloneElement,
+  ReactNode,
+  forwardRef,
+} from 'react';
 import RGL, { WidthProvider, Layout } from 'react-grid-layout';
 import { v4 as uuidv4 } from 'uuid';
-import styled from 'styled-components';
+
+import clsx from 'clsx';
 
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
@@ -68,28 +77,33 @@ const GRID_DOT_PADDING = 10;
 
 const ReactGridLayout = WidthProvider(RGL);
 
-const Container = styled.div.attrs<{ isLayoutLocked: boolean }>(
-  ({ isLayoutLocked }) => ({
-    className: `${
-      !isLayoutLocked ? 'bg-gray-100' : 'bg-white'
-    } p-2 transition-colors`,
-  }),
-)<{ isLayoutLocked: boolean; bgGridSize: number }>`
-  position: relative;
-
-  height: calc(100vh - 52px);
-
-  overflow-x: hidden;
-  overflow-y: scroll;
-  padding-bottom: 1em;
-
-  background-image: ${(props) =>
-    !props.isLayoutLocked
-      ? `radial-gradient(#94a3b8 calc((0.5rem + ${GRID_DOT_PADDING}px) - 17px), transparent 0)`
-      : ''};
-  background-size: ${(props) => `${props.bgGridSize}px  ${props.bgGridSize}px`};
-  background-position: ${`calc(0.5rem + ${GRID_DOT_PADDING}px) calc(0.5rem + ${GRID_DOT_PADDING}px - 5px)`};
-`;
+const Container = forwardRef<
+  HTMLDivElement,
+  {
+    children: ReactNode;
+    isLayoutLocked: boolean;
+    bgGridSize: number;
+  }
+>((props, ref) => (
+  <div
+    ref={ref}
+    className={clsx(
+      !props.isLayoutLocked ? 'bg-gray-100 ' : 'bg-white ',
+      'relative overflow-x-hidden overflow-y-scroll p-2 pb-4 transition-colors dark:bg-slate-900',
+    )}
+    style={{
+      height: 'calc(100vh - 52px)',
+      backgroundImage: props.isLayoutLocked
+        ? 'radial-gradient(#94a3b8 calc((0.5rem + ${GRID_DOT_PADDING}px) - 17px), transparent 0)'
+        : '',
+      backgroundSize: `${props.bgGridSize}px  ${props.bgGridSize}px`,
+      backgroundPosition: `calc(0.5rem + ${GRID_DOT_PADDING}px) calc(0.5rem + ${GRID_DOT_PADDING}px - 5px)`,
+    }}
+  >
+    {props.children}
+  </div>
+));
+Container.displayName = 'Container';
 
 type GridItem = {
   id: string;
@@ -569,7 +583,7 @@ export default function ConfigurableLayout() {
         right="3.5em"
         isOpen={!isLayoutLocked}
         isShowing={!(isFabIdle && isLayoutLocked)}
-        clickEvent={clickFAB}
+        onClick={clickFAB}
         icon={!isLayoutLocked ? LockIconURL : CreateIconURL}
         customClassName={`${
           !isLayoutLocked
@@ -584,7 +598,7 @@ export default function ConfigurableLayout() {
           fineAdjustIconX="2%"
           fineAdjustIconY="2%"
           toolTipText="Add Item"
-          clickEvent={() => setIsShowingViewPicker(!isShowingViewPicker)}
+          onClick={() => setIsShowingViewPicker(!isShowingViewPicker)}
         >
           <AddIcon className="h-6 w-6 text-white" />
         </RadialFabChild>
@@ -599,7 +613,7 @@ export default function ConfigurableLayout() {
           fineAdjustIconX="0"
           fineAdjustIconY="0"
           toolTipText="Delete Item"
-          clickEvent={() => setIsInDeleteMode(!isInDeleteMode)}
+          onClick={() => setIsInDeleteMode(!isInDeleteMode)}
         >
           {isInDeleteMode ? (
             <RemoveCircleOutlineIcon className="h-5 w-5" />
@@ -614,7 +628,7 @@ export default function ConfigurableLayout() {
           fineAdjustIconX="8%"
           fineAdjustIconY="-2%"
           toolTipText="Clear Layout"
-          clickEvent={() => setGrid([])}
+          onClick={() => setGrid([])}
         >
           <DeleteSweepIcon className="h-5 w-5" />
         </RadialFabChild>
@@ -623,7 +637,7 @@ export default function ConfigurableLayout() {
         isOpen={isShowingViewPicker}
         bottom="13em"
         right="1.5em"
-        clickEvent={addItem}
+        onClick={addItem}
       />
     </Container>
   );

@@ -1,8 +1,6 @@
 import { Component, ChangeEvent, createRef, MutableRefObject } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
-import styled from 'styled-components';
-
 import { RootState } from '@/store/reducers';
 import { initOpMode, startOpMode, stopOpMode } from '@/store/actions/opmode';
 import OpModeStatus from '@/enums/OpModeStatus';
@@ -42,9 +40,18 @@ type OpModeViewProps = ConnectedProps<typeof connector> &
   BaseViewProps &
   BaseViewHeadingProps;
 
-const ActionButton = styled.button.attrs<{ className: string }>((props) => ({
-  className: `ml-2 py-1 px-3 border rounded-md shadow-md ${props.className}`,
-}))``;
+const ActionButton = ({
+  children,
+  className,
+  ...props
+}: JSX.IntrinsicElements['button']) => (
+  <button
+    className={`ml-2 rounded-md border py-1 px-3 shadow-md ${className}`}
+    {...props}
+  >
+    {children}
+  </button>
+);
 
 class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
   gamepadUnsupportedTooltipRef: MutableRefObject<HTMLDivElement | null>;

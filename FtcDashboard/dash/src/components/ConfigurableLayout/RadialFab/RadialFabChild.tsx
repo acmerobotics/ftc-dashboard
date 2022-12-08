@@ -1,7 +1,5 @@
-import React, { useRef } from 'react';
-import styled from 'styled-components';
+import { PropsWithChildren, useRef } from 'react';
 
-import { WithChildren } from '@/typeHelpers';
 import useDelayedTooltip from '@/hooks/useDelayedTooltip';
 import ToolTip from '@/components/ToolTip';
 
@@ -17,66 +15,73 @@ type RadialFabChildProps = {
   isOpen?: boolean;
 
   toolTipText?: string;
-
-  clickEvent?: (e: React.MouseEvent) => void;
 };
 
-const ButtonContainer = styled.button.attrs<RadialFabChildProps>(
-  ({ customClass }) => ({
-    className: `top-1/2 left-1/2 rounded-full outline-none focus:outline-none relative flex-center transition ${customClass}`,
-  }),
-)<RadialFabChildProps>`
-  /* Not sure why but removing this and replacing it with the tailwind absolute class breaks the button */
-  position: absolute;
+const ButtonContainer = ({
+  angle,
+  openMargin = '0',
+  isOpen = false,
+  children,
+  ...props
+}: RadialFabChildProps & JSX.IntrinsicElements['button']) => {
+  const displacementX = `calc(${
+    isOpen ? Math.cos(angle) : 0
+  } * ${openMargin} - 50%)`;
+  const displacementY = `calc(${
+    isOpen ? Math.sin(angle) : 0
+  } * ${openMargin} - 50%)`;
 
-  transform: ${({ angle, openMargin, isOpen }) => {
-    const displacementX = `calc(${
-      isOpen ? Math.cos(angle) : 0
-    } * ${openMargin} - 50%)`;
-    const displacementY = `calc(${
-      isOpen ? Math.sin(angle) : 0
-    } * ${openMargin} - 50%)`;
+  return (
+    <button
+      className={`flex-center absolute top-1/2 left-1/2 z-[-1] rounded-full outline-none transition focus:outline-none ${props.customClass}`}
+      style={{
+        transform: `translate(${displacementX}, ${displacementY})`,
+      }}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+};
 
-    return `translate(${displacementX}, ${displacementY})`;
-  }};
+const Icon = ({
+  fineAdjustIconX = '0',
+  fineAdjustIconY = '0',
+  isOpen,
+  children,
+  ...props
+}: PropsWithChildren<RadialFabChildProps>) => (
+  <div
+    className="transition-transform duration-300"
+    style={{
+      transform: `translate(${fineAdjustIconX}, ${fineAdjustIconY}) rotate(${
+        isOpen ? 0 : 90
+      }deg)`,
+    }}
+    {...props}
+  >
+    {children}
+  </div>
+);
 
-  z-index: -1;
-`;
-
-const Icon = styled.div<RadialFabChildProps>`
-  transition: transform 300ms ease;
-
-  transform: ${({ fineAdjustIconX, fineAdjustIconY, isOpen }) =>
-    `translate(${fineAdjustIconX}, ${fineAdjustIconY}) rotate(${
-      isOpen ? 0 : 90
-    }deg)`};
-`;
-
-const RadialFabChild = (props: WithChildren<RadialFabChildProps>) => {
+const RadialFabChild = ({
+  toolTipText = '',
+  ...props
+}: PropsWithChildren<RadialFabChildProps> &
+  JSX.IntrinsicElements['button']) => {
   const buttonRef = useRef(null);
   const isShowingTooltip = useDelayedTooltip(0.5, buttonRef);
 
   return (
-    <ButtonContainer {...props} onClick={props.clickEvent} ref={buttonRef}>
+    <ButtonContainer {...props} ref={buttonRef}>
       <Icon {...props}>{props.children}</Icon>
-      {props.toolTipText !== '' && (
+      {toolTipText !== '' && (
         <ToolTip isShowing={isShowingTooltip} hoverRef={buttonRef}>
-          {props.toolTipText}
+          {toolTipText}
         </ToolTip>
       )}
     </ButtonContainer>
   );
-};
-
-RadialFabChild.defaultProps = {
-  fineAdjustIconX: '0',
-  fineAdjustIconY: '0',
-
-  openMargin: '0',
-
-  toolTipText: '',
-
-  isOpen: false,
 };
 
 export default RadialFabChild;
