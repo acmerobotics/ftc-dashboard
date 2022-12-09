@@ -1,4 +1,4 @@
-import { CSSProperties, Fragment, useEffect, useId, useState } from 'react';
+import { CSSProperties, Fragment, useId } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import clsx from 'clsx';
 
@@ -6,21 +6,7 @@ import { ReactComponent as PaletteIcon } from '@/assets/icons/palette.svg';
 import { ReactComponent as DarkIcon } from '@/assets/icons/dark_mode.svg';
 import { ReactComponent as LightIcon } from '@/assets/icons/light_mode.svg';
 
-import colors from 'tailwindcss/colors';
-import { KeysMatching } from '@/typeHelpers';
-
-const BLACK_LIST_COLORS = [
-  'lightBlue',
-  'warmGray',
-  'trueGray',
-  'coolGray',
-  'blueGray',
-];
-const colorChoices = Object.entries(colors).filter(
-  ([name, c]) => typeof c !== 'string' && !BLACK_LIST_COLORS.includes(name),
-);
-
-type Colors = KeysMatching<typeof colors, Record<string, unknown>>;
+import { colors, Colors, useTheme, useThemeDispatch } from '@/hooks/useTheme';
 
 export default function SettingsModal({
   isOpen,
@@ -30,21 +16,9 @@ export default function SettingsModal({
   onClose: () => void;
 }) {
   const id = useId();
-  const [selectedColor, setSelectedColor] = useState<Colors>('blue');
-  const [isDarkMode, setIsDarkMode] = useState(false);
 
-  useEffect(() => {
-    const target = document.body;
-    const currentColor = [...target.classList].find((e) =>
-      e.startsWith('set-theme-'),
-    );
-    if (currentColor) target.classList.remove(currentColor);
-
-    target.classList.add(`set-theme-${selectedColor}`);
-  }, [selectedColor]);
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', isDarkMode);
-  }, [isDarkMode]);
+  const theme = useTheme();
+  const themeDispatch = useThemeDispatch();
 
   return (
     <Transition as={Fragment} show={isOpen}>
@@ -89,10 +63,17 @@ export default function SettingsModal({
                   </h3>
                   <button
                     className="group flex flex-row items-center transition-opacity hover:opacity-40"
-                    onClick={() => setIsDarkMode(!isDarkMode)}
+                    onClick={() =>
+                      themeDispatch({
+                        type: 'setDarkMode',
+                        payload: !theme.isDarkMode,
+                      })
+                    }
                   >
-                    <h3 className="mr-2">{isDarkMode ? 'Dark' : 'Light'}</h3>
-                    {isDarkMode ? (
+                    <h3 className="mr-2">
+                      {theme.isDarkMode ? 'Dark' : 'Light'}
+                    </h3>
+                    {theme.isDarkMode ? (
                       <DarkIcon
                         viewBox="0 0 50 50"
                         className="h-5 w-5 transition-transform group-hover:rotate-[20deg] dark:text-slate-200"
@@ -111,7 +92,7 @@ export default function SettingsModal({
                   className="mt-3 grid grid-flow-col grid-rows-5 gap-4 px-6"
                   name="color-theme"
                 >
-                  {colorChoices.map(([name, color]) => (
+                  {colors.map(([name, color]) => (
                     <div key={name} className="flex flex-row items-center">
                       {/* <input /> */}
                       <input
@@ -129,24 +110,29 @@ export default function SettingsModal({
                           {
                             color: color['500'],
                             background:
-                              selectedColor === name ? 'white' : color['500'],
+                              theme.theme === name ? 'white' : color['500'],
                             borderColor: color['300'],
-                            '--tw-ring-color': isDarkMode
+                            '--tw-ring-color': theme.isDarkMode
                               ? color['400']
                               : color['600'],
                           } as CSSProperties
                         }
                         id={id + name}
-                        onChange={() => setSelectedColor(name as Colors)}
-                        checked={selectedColor === name}
+                        onChange={() =>
+                          themeDispatch({
+                            type: 'setTheme',
+                            payload: name as Colors,
+                          })
+                        }
+                        checked={theme.theme === name}
                       ></input>
                       <label
                         className={clsx(
                           'ml-1.5',
-                          selectedColor === name && 'underline',
+                          theme.theme === name && 'underline',
                         )}
                         style={{
-                          color: isDarkMode ? color['300'] : color['800'],
+                          color: theme.isDarkMode ? color['300'] : color['800'],
                         }}
                         htmlFor={id + name}
                       >
