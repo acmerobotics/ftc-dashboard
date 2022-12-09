@@ -35,6 +35,13 @@ class GraphCanvas extends React.Component {
   // graph from out-of-order samples. (The graph code could be made more robust here, but
   // mitigating the issue here works just as well.)
   componentDidUpdate(prevProps) {
+    if (this.props.options !== prevProps.options) {
+      this.graph.setOptions({
+        ...this.graph.getOptions(),
+        ...this.props.options,
+      });
+    }
+
     if (isEqual(this.props.data, prevProps.data)) return;
 
     this.graph.add(this.props.data);

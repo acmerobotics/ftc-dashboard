@@ -92,7 +92,7 @@ export default function SettingsModal({
                   className="mt-3 grid grid-flow-col grid-rows-5 gap-4 px-6"
                   name="color-theme"
                 >
-                  {colors.map(([name, color]) => (
+                  {Object.entries(colors).map(([name, color]) => (
                     <div key={name} className="flex flex-row items-center">
                       {/* <input /> */}
                       <input

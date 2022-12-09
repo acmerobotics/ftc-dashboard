@@ -220,9 +220,6 @@ export default class Graph {
     const width = this.canvas.width / devicePixelRatio;
     const height = this.canvas.height / devicePixelRatio;
 
-    this.ctx.fillStyle = '#fff';
-    this.ctx.fillRect(0, 0, width, height);
-
     const keyHeight = this.renderKey(0, 0, width);
     this.renderGraph(0, keyHeight, width, height - keyHeight, graphNowMs);
 
@@ -324,6 +321,7 @@ export default class Graph {
   renderGridLines(x, y, width, height, numTicksX, numTicksY) {
     this.ctx.save();
 
+    console.log(this.options.gridLineColor);
     this.ctx.strokeStyle = this.options.gridLineColor;
     this.ctx.lineWidth = this.options.gridLineWidth / devicePixelRatio;
 
@@ -385,5 +383,14 @@ export default class Graph {
     });
 
     this.ctx.restore();
+  }
+
+  getOptions() {
+    return this.options;
+  }
+
+  setOptions(options) {
+    console.log('called', options);
+    Object.assign(this.options, options);
   }
 }

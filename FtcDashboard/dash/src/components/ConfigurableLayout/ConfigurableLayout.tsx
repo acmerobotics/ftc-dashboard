@@ -39,7 +39,8 @@ import { ReactComponent as RemoveCircleIcon } from '@/assets/icons/remove_circle
 import { ReactComponent as RemoveCircleOutlineIcon } from '@/assets/icons/remove_circle_outline.svg';
 import CreateIconURL from '@/assets/icons/create.svg';
 
-import colors from 'tailwindcss/colors';
+import { colors } from '@/hooks/useTheme';
+import { useTheme } from '@/hooks/useTheme';
 
 function maxArray(a: number[], b: number[]) {
   if (a.length !== b.length) {
@@ -302,6 +303,8 @@ export default function ConfigurableLayout() {
   const containerRef = useRef<HTMLDivElement>(null);
   const gridWrapperRef = useRef<HTMLDivElement>(null);
 
+  const theme = useTheme();
+
   const [isLayoutLocked, setIsLayoutLocked] = useState(true);
   const [isInDeleteMode, setIsInDeleteMode] = useState(false);
   const [isShowingViewPicker, setIsShowingViewPicker] = useState(false);
@@ -527,7 +530,7 @@ export default function ConfigurableLayout() {
       ref={containerRef}
       isLayoutLocked={isLayoutLocked}
       bgGridSize={gridBgSize}
-      isDarkMode={false}
+      isDarkMode={theme.isDarkMode}
     >
       {gridItems.length === 0 && (
         <div

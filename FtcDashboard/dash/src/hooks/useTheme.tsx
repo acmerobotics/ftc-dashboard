@@ -17,10 +17,12 @@ const BLACK_LIST_COLORS = [
   'coolGray',
   'blueGray',
 ] as const;
-export const colors = Object.entries(twColors).filter(
-  ([name, c]) =>
-    typeof c !== 'string' &&
-    !(BLACK_LIST_COLORS as unknown as string[]).includes(name),
+export const colors = Object.fromEntries(
+  Object.entries(twColors).filter(
+    ([name, c]) =>
+      typeof c !== 'string' &&
+      !(BLACK_LIST_COLORS as unknown as string[]).includes(name),
+  ),
 );
 
 export type Colors = KeysMatching<
@@ -70,6 +72,8 @@ const ThemeDispatchContext = createContext<Dispatch<ThemeAction>>(
   () => initialState,
 );
 
+export const ThemeConsumer = ThemeContext.Consumer;
+
 export const ThemeProvider = (props: PropsWithChildren) => {
   const [theme, dispatch] = useReducer(themeReducer, initialState);
 
@@ -88,10 +92,9 @@ export const ThemeProvider = (props: PropsWithChildren) => {
     target.classList.add(`set-theme-${theme.theme}`);
 
     // Sync theme color with theme-color meta tag (for Safari tab color)
-    const themeColor = colors.find(([name]) => name === theme.theme);
     document
       .querySelector('meta[name="theme-color"]')
-      ?.setAttribute('content', themeColor ? themeColor[1][600] : '');
+      ?.setAttribute('content', colors[theme.theme][600]);
 
     // Sync to local storage
     localStorage.setItem('themeColor', theme.theme);
