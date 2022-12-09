@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import LayoutPreset, { LayoutPresetType } from '@/enums/LayoutPreset';
@@ -10,6 +10,7 @@ import { BaseViewIconButton } from '@/components/views/BaseView';
 import { ReactComponent as ConnectedIcon } from '@/assets/icons/wifi.svg';
 import { ReactComponent as DisconnectedIcon } from '@/assets/icons/wifi_off.svg';
 import { ReactComponent as SettingsIcon } from '@/assets/icons/settings.svg';
+import SettingsModal from './SettingsModal';
 
 export default function Dashboard() {
   const socket = useSelector((state: RootState) => state.socket);
@@ -17,8 +18,9 @@ export default function Dashboard() {
     (state: RootState) => state.settings.layoutPreset,
   );
   const enabled = useSelector((state: RootState) => state.status.enabled);
-
   const dispatch = useDispatch();
+
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
   useEffect(() => {
     dispatch(
@@ -36,7 +38,7 @@ export default function Dashboard() {
 
   return (
     <div
-      className="set-theme-pink flex flex-col text-black dark:text-white"
+      className="flex flex-col text-black dark:text-white"
       style={{ width: '100vw', height: '100vh' }}
     >
       <header className="flex items-center justify-between bg-primary-600 px-3 py-1 text-white">
@@ -76,8 +78,11 @@ export default function Dashboard() {
           ) : (
             <DisconnectedIcon className="ml-4 h-10 w-10 py-1" />
           )}
-          <BaseViewIconButton className="icon-btn group ml-3 h-8 w-8 hover:border-white/50">
-            <SettingsIcon className="h-7 w-7 transition group-hover:rotate-[15deg]" />
+          <BaseViewIconButton
+            className="icon-btn group ml-3 h-8 w-8 hover:border-white/50"
+            onClick={() => setIsSettingsModalOpen(true)}
+          >
+            <SettingsIcon className="h-7 w-7 transition group-hover:rotate-[15deg] group-focus:rotate-[15deg]" />
           </BaseViewIconButton>
         </div>
       </header>
@@ -104,6 +109,16 @@ export default function Dashboard() {
       ) : (
         LayoutPreset.getContent(layoutPreset as LayoutPresetType)
       )}
+      <SettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+      />
+      {/* Insert a headless-ui portal so the .set-theme-x styles apply to the headless ui dialogs. */}
+      {/* They are rendered as siblings to the root by default, outside of our scope */}
+      <div id="headlessui-portal-root">
+        {/* Leave an empty div here. Otherwise, headless-ui will remove this container on dialog close */}
+        <div />
+      </div>
     </div>
   );
 }

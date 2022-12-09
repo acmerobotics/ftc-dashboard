@@ -1,6 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
-import Dashboard from './components/Dashboard';
+import Dashboard from './components/Dashboard/Dashboard';
 import configureStore from './store/configureStore';
 import './index.css';
 
