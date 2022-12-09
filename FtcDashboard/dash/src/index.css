@@ -99,8 +99,8 @@ input {
 
 .icon-btn {
   @apply flex items-center justify-center rounded-md;
-  @apply transition-colors border border-transparent hover:border-gray-400 focus:border-primary-500;
-  @apply focus:outline-none focus:ring-2 focus:ring-opacity-30 focus:ring-primary-500;
+  @apply border border-transparent transition-colors hover:border-gray-400 focus:border-primary-500;
+  @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-opacity-30;
 }
 
 .error {
