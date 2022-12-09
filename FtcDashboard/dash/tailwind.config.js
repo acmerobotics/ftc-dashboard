@@ -4,6 +4,7 @@ const plugin = require('tailwindcss/plugin');
 const {
   default: flattenColorPalette,
 } = require('tailwindcss/lib/util/flattenColorPalette');
+const colors = require('tailwindcss/colors');
 
 function hex2rgb(hex) {
   const bigint = parseInt(hex.replace('#', ''), 16);
@@ -33,6 +34,11 @@ module.exports = {
       },
     },
   },
+
+  // Prevent '.set-theme-color' classes from being pruned
+  safelist: Object.entries(colors)
+    .filter(([k, v]) => typeof v !== 'string' && k !== 'primary')
+    .map(([k, _]) => `set-theme-${k}`),
   plugins: [
     require('@tailwindcss/forms'),
     plugin(function ({ theme, addComponents }) {
