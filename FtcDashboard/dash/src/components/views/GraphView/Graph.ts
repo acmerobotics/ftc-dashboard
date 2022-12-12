@@ -1,5 +1,4 @@
 import { cloneDeep } from 'lodash';
-import '@/components/Canvas/canvas';
 
 type Options = {
   windowMs: number;
@@ -135,14 +134,63 @@ type Sample = {
   value: number;
 };
 
-type ExtendedCanvasRenderingContext2D = CanvasRenderingContext2D & {
-  fineMoveTo: (x: number, y: number) => void;
-  fineLineTo: (x: number, y: number) => void;
+// align coordinate to the nearest pixel, offset by a half pixel
+// this helps with drawing thin lines; e.g., if a line of width 1px
+// is drawn on an integer coordinate, it will be 2px wide
+// x is assumed to be in *device* pixels
+function alignCoord(x: number, scaling: number) {
+  const roundX = Math.round(x * scaling);
+  return (roundX + 0.5 * Math.sign(x - roundX)) / scaling;
+}
+
+type Scaling = {
+  scalingX: number;
+  scalingY: number;
 };
+
+function getScalingFactors(ctx: CanvasRenderingContext2D): Scaling {
+  let transform;
+  if (typeof ctx.getTransform === 'function') {
+    transform = ctx.getTransform();
+  } else if (typeof (ctx as any).mozCurrentTransform !== 'undefined') {
+    transform = window.DOMMatrix.fromFloat64Array(
+      Float64Array.from((ctx as any).mozCurrentTransform),
+    );
+  } else {
+    throw new Error('unable to find canvas transform');
+  }
+
+  const { a, b, c, d } = transform;
+  const scalingX = Math.sqrt(a * a + c * c);
+  const scalingY = Math.sqrt(b * b + d * d);
+
+  return {
+    scalingX,
+    scalingY,
+  };
+}
+
+function fineMoveTo(
+  ctx: CanvasRenderingContext2D,
+  s: Scaling,
+  x: number,
+  y: number,
+) {
+  ctx.moveTo(alignCoord(x, s.scalingX), alignCoord(y, s.scalingY));
+}
+
+function fineLineTo(
+  ctx: CanvasRenderingContext2D,
+  s: Scaling,
+  x: number,
+  y: number,
+) {
+  ctx.lineTo(alignCoord(x, s.scalingX), alignCoord(y, s.scalingY));
+}
 
 export default class Graph {
   canvas: HTMLCanvasElement;
-  ctx: ExtendedCanvasRenderingContext2D;
+  ctx: CanvasRenderingContext2D;
   options: Options;
 
   data: { [key: string]: { ts: number[]; vs: number[]; color: string } };
@@ -150,14 +198,21 @@ export default class Graph {
   beginGraphNowMs = Number.NaN; // in telemetry time
   beginRenderTimeMs = Number.NaN; // in browser time
 
+  scaling: Scaling;
+
   constructor(canvas: HTMLCanvasElement, options: Options) {
     this.canvas = canvas;
-    this.ctx = canvas.getContext('2d') as ExtendedCanvasRenderingContext2D;
+    this.ctx = canvas.getContext('2d')!;
 
     this.options = cloneDeep(DEFAULT_OPTIONS);
     Object.assign(this.options, options || {});
 
     this.data = {};
+
+    this.scaling = {
+      scalingX: 1,
+      scalingY: 1,
+    };
 
     this.reset();
   }
@@ -258,6 +313,8 @@ export default class Graph {
     // scale the canvas to facilitate the use of CSS pixels
     this.ctx.scale(devicePixelRatio, devicePixelRatio);
 
+    this.scaling = getScalingFactors(this.ctx);
+
     this.ctx.font = `${o.fontSize}px "Roboto", sans-serif`;
     this.ctx.textBaseline = 'middle';
     this.ctx.textAlign = 'left';
@@ -293,8 +350,8 @@ export default class Graph {
 
       this.ctx.strokeStyle = color;
       this.ctx.beginPath();
-      this.ctx.fineMoveTo(lineX, lineY);
-      this.ctx.fineLineTo(lineX + o.keyLineLength, lineY);
+      fineMoveTo(this.ctx, this.scaling, lineX, lineY);
+      fineLineTo(this.ctx, this.scaling, lineX + o.keyLineLength, lineY);
       this.ctx.stroke();
 
       this.ctx.fillStyle = o.textColor;
@@ -392,16 +449,16 @@ export default class Graph {
     for (let i = 0; i < numTicksX; i++) {
       const lineX = x + horSpacing * i;
       this.ctx.beginPath();
-      this.ctx.fineMoveTo(lineX, y);
-      this.ctx.fineLineTo(lineX, y + height);
+      fineMoveTo(this.ctx, this.scaling, lineX, y);
+      fineLineTo(this.ctx, this.scaling, lineX, y + height);
       this.ctx.stroke();
     }
 
     for (let i = 0; i < numTicksY; i++) {
       const lineY = y + vertSpacing * i;
       this.ctx.beginPath();
-      this.ctx.fineMoveTo(x, lineY);
-      this.ctx.fineLineTo(x + width, lineY);
+      fineLineTo(this.ctx, this.scaling, x, lineY);
+      fineLineTo(this.ctx, this.scaling, x + width, lineY);
       this.ctx.stroke();
     }
 
@@ -437,12 +494,16 @@ export default class Graph {
 
       this.ctx.beginPath();
       this.ctx.strokeStyle = color;
-      this.ctx.fineMoveTo(
+      fineMoveTo(
+        this.ctx,
+        this.scaling,
         scale(ts[0] - graphNowMs + o.windowMs, 0, o.windowMs, 0, width),
         scale(vs[0], axis.min, axis.max, height, 0),
       );
       for (let j = 1; j < ts.length; j++) {
-        this.ctx.fineLineTo(
+        fineLineTo(
+          this.ctx,
+          this.scaling,
           scale(ts[j] - graphNowMs + o.windowMs, 0, o.windowMs, 0, width),
           scale(vs[j], axis.min, axis.max, height, 0),
         );
