@@ -1,8 +1,22 @@
 import { cloneDeep } from 'lodash';
 import '@/components/Canvas/canvas';
 
+type Options = {
+  windowMs: number;
+  colors: string[];
+  lineWidth: number;
+  padding: number;
+  keySpacing: number;
+  keyLineLength: number;
+  gridLineWidth: number; // device pixels
+  gridLineColor: string;
+  fontSize: number;
+  textColor: string;
+  maxTicks: number;
+};
+
 // all dimensions in this file are *CSS* pixels unless otherwise stated
-export const DEFAULT_OPTIONS = {
+export const DEFAULT_OPTIONS: Options = {
   windowMs: 5000,
   colors: ['#2979ff', '#dd2c00', '#4caf50', '#7c4dff', '#ffa000'],
   lineWidth: 2,
@@ -16,7 +30,7 @@ export const DEFAULT_OPTIONS = {
   maxTicks: 7,
 };
 
-function niceNum(range, round) {
+function niceNum(range: number, round: boolean) {
   const exponent = Math.floor(Math.log10(range));
   const fraction = range / Math.pow(10, exponent);
   let niceFraction;
@@ -43,7 +57,7 @@ function niceNum(range, round) {
 }
 
 // interesting algorithm (see http://erison.blogspot.nl/2011/07/algorithm-for-optimal-scaling-on-chart.html)
-function getAxisScaling(min, max, maxTicks) {
+function getAxisScaling(min: number, max: number, maxTicks: number) {
   const range = niceNum(max - min, false);
   const tickSpacing = niceNum(range / (maxTicks - 1), true);
   const niceMin = Math.floor(min / tickSpacing) * tickSpacing;
@@ -56,7 +70,7 @@ function getAxisScaling(min, max, maxTicks) {
 }
 
 // shamelessly stolen from https://github.com/chartjs/Chart.js/blob/master/src/core/core.ticks.js
-function formatTicks(tickValue, ticks) {
+function formatTicks(tickValue: number, ticks: number[]) {
   // If we have lots of ticks, don't use the ones
   let delta = ticks.length > 3 ? ticks[2] - ticks[1] : ticks[1] - ticks[0];
 
@@ -82,7 +96,13 @@ function formatTicks(tickValue, ticks) {
   return tickString;
 }
 
-function getTicks(axis) {
+type Axis = {
+  min: number;
+  max: number;
+  spacing: number;
+};
+
+function getTicks(axis: Axis) {
   // get tick array
   const ticks = [];
   for (let i = axis.min; i <= axis.max; i += axis.spacing) {
@@ -99,31 +119,57 @@ function getTicks(axis) {
   return tickStrings;
 }
 
-function scale(value, fromLow, fromHigh, toLow, toHigh) {
+function scale(
+  value: number,
+  fromLow: number,
+  fromHigh: number,
+  toLow: number,
+  toHigh: number,
+) {
   const frac = (toHigh - toLow) / (fromHigh - fromLow);
   return toLow + frac * (value - fromLow);
 }
 
+type Sample = {
+  name: string;
+  value: number;
+};
+
+type ExtendedCanvasRenderingContext2D = CanvasRenderingContext2D & {
+  fineMoveTo: (x: number, y: number) => void;
+  fineLineTo: (x: number, y: number) => void;
+};
+
 export default class Graph {
-  constructor(canvas, options) {
+  canvas: HTMLCanvasElement;
+  ctx: ExtendedCanvasRenderingContext2D;
+  options: Options;
+
+  data: { [key: string]: { ts: number[]; vs: number[]; color: string } };
+
+  beginGraphNowMs = Number.NaN; // in telemetry time
+  beginRenderTimeMs = Number.NaN; // in browser time
+
+  constructor(canvas: HTMLCanvasElement, options: Options) {
     this.canvas = canvas;
-    this.ctx = canvas.getContext('2d');
+    this.ctx = canvas.getContext('2d') as ExtendedCanvasRenderingContext2D;
 
     this.options = cloneDeep(DEFAULT_OPTIONS);
     Object.assign(this.options, options || {});
+
+    this.data = {};
 
     this.reset();
   }
 
   reset() {
-    // type: { [k: key]: { ts: number[]; vs: number[]; } }
     this.data = {};
 
     this.beginGraphNowMs = Number.NaN; // in telemetry time
     this.beginRenderTimeMs = Number.NaN; // in browser time
   }
 
-  add(samples) {
+  add(samples: Sample[][]) {
     const o = this.options;
 
     for (const sample of samples) {
@@ -229,7 +275,7 @@ export default class Graph {
     return true;
   }
 
-  renderKey(x, y, width) {
+  renderKey(x: number, y: number, width: number) {
     const o = this.options;
 
     this.ctx.save();
@@ -260,7 +306,13 @@ export default class Graph {
     return height;
   }
 
-  renderGraph(x, y, width, height, graphNowMs) {
+  renderGraph(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    graphNowMs: number,
+  ) {
     const o = this.options;
 
     const graphHeight = height - 2 * o.padding;
@@ -295,7 +347,7 @@ export default class Graph {
     );
   }
 
-  renderAxisLabels(x, y, height, ticks) {
+  renderAxisLabels(x: number, y: number, height: number, ticks: string[]) {
     this.ctx.save();
 
     let width = 0;
@@ -321,7 +373,14 @@ export default class Graph {
     return width;
   }
 
-  renderGridLines(x, y, width, height, numTicksX, numTicksY) {
+  renderGridLines(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    numTicksX: number,
+    numTicksY: number,
+  ) {
     this.ctx.save();
 
     this.ctx.strokeStyle = this.options.gridLineColor;
@@ -349,7 +408,14 @@ export default class Graph {
     this.ctx.restore();
   }
 
-  renderGraphLines(x, y, width, height, axis, graphNowMs) {
+  renderGraphLines(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    axis: Axis,
+    graphNowMs: number,
+  ) {
     const o = this.options;
 
     this.ctx.lineWidth = o.lineWidth;
