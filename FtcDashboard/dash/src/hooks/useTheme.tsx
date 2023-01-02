@@ -8,7 +8,7 @@ import {
 } from 'react';
 
 import twColors from 'tailwindcss/colors';
-import { KeysMatching } from '@/typeHelpers';
+import { KeysWithType } from '@/typeHelpers';
 
 const BLACK_LIST_COLORS = [
   'lightBlue',
@@ -25,7 +25,7 @@ export const colors = Object.fromEntries(
   ),
 );
 
-export type Colors = KeysMatching<
+export type Colors = KeysWithType<
   Omit<typeof twColors, typeof BLACK_LIST_COLORS[number]>,
   Record<string, unknown>
 >;
