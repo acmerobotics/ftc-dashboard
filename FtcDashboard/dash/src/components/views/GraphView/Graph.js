@@ -1,10 +1,19 @@
 import { cloneDeep } from 'lodash';
 import '@/components/Canvas/canvas';
 
+import twColors from 'tailwindcss/colors';
+
 // all dimensions in this file are *CSS* pixels unless otherwise stated
 export const DEFAULT_OPTIONS = {
   windowMs: 5000,
-  colors: ['#2979ff', '#dd2c00', '#4caf50', '#7c4dff', '#ffa000'],
+  colors: [
+    twColors['blue'],
+    twColors['red'],
+    twColors['green'],
+    twColors['purple'],
+    twColors['orange'],
+    twColors['pink'],
+  ],
   lineWidth: 2,
   padding: 15,
   keySpacing: 4,
