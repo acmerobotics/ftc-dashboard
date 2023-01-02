@@ -7,12 +7,12 @@ import twColors from 'tailwindcss/colors';
 export const DEFAULT_OPTIONS = {
   windowMs: 5000,
   colors: [
-    twColors['blue'],
-    twColors['red'],
-    twColors['green'],
-    twColors['purple'],
-    twColors['orange'],
-    twColors['pink'],
+    twColors['blue']['600'],
+    twColors['red']['600'],
+    twColors['green']['600'],
+    twColors['purple']['600'],
+    twColors['orange']['600'],
+    twColors['pink']['600'],
   ],
   lineWidth: 2,
   padding: 15,
