@@ -6,6 +6,14 @@ const {
 } = require('tailwindcss/lib/util/flattenColorPalette');
 const colors = require('tailwindcss/colors');
 
+// Delete deprecated colors to suppress build warnings
+// https://github.com/tailwindlabs/tailwindcss/issues/4690
+delete colors['lightBlue'];
+delete colors['warmGray'];
+delete colors['trueGray'];
+delete colors['coolGray'];
+delete colors['blueGray'];
+
 function hex2rgb(hex) {
   const bigint = parseInt(hex.replace('#', ''), 16);
   return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255];
