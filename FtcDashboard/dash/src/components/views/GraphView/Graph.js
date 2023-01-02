@@ -321,7 +321,6 @@ export default class Graph {
   renderGridLines(x, y, width, height, numTicksX, numTicksY) {
     this.ctx.save();
 
-    console.log(this.options.gridLineColor);
     this.ctx.strokeStyle = this.options.gridLineColor;
     this.ctx.lineWidth = this.options.gridLineWidth / devicePixelRatio;
 
@@ -390,7 +389,6 @@ export default class Graph {
   }
 
   setOptions(options) {
-    console.log('called', options);
     Object.assign(this.options, options);
   }
 }
