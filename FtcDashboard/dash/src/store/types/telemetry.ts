@@ -1,4 +1,4 @@
-export const RECEIVE_TELEMETRY = 'RECEIVE_TELEMETRY' as const;
+export const RECEIVE_TELEMETRY = 'RECEIVE_TELEMETRY';
 
 export type Telemetry = TelemetryItem[];
 
