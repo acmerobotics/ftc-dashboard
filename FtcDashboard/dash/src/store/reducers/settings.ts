@@ -1,5 +1,3 @@
-import LayoutPreset from '@/enums/LayoutPreset';
-
 import {
   SettingState,
   ReceiveLayoutPresetAction,

@@ -1,10 +1,19 @@
 import { cloneDeep } from 'lodash';
 import '@/components/Canvas/canvas';
 
+import twColors from 'tailwindcss/colors';
+
 // all dimensions in this file are *CSS* pixels unless otherwise stated
 export const DEFAULT_OPTIONS = {
   windowMs: 5000,
-  colors: ['#2979ff', '#dd2c00', '#4caf50', '#7c4dff', '#ffa000'],
+  colors: [
+    twColors['blue']['600'],
+    twColors['red']['600'],
+    twColors['green']['600'],
+    twColors['purple']['600'],
+    twColors['orange']['600'],
+    twColors['pink']['600'],
+  ],
   lineWidth: 2,
   padding: 15,
   keySpacing: 4,
@@ -220,9 +229,6 @@ export default class Graph {
     const width = this.canvas.width / devicePixelRatio;
     const height = this.canvas.height / devicePixelRatio;
 
-    this.ctx.fillStyle = '#fff';
-    this.ctx.fillRect(0, 0, width, height);
-
     const keyHeight = this.renderKey(0, 0, width);
     this.renderGraph(0, keyHeight, width, height - keyHeight, graphNowMs);
 
@@ -385,5 +391,13 @@ export default class Graph {
     });
 
     this.ctx.restore();
+  }
+
+  getOptions() {
+    return this.options;
+  }
+
+  setOptions(options) {
+    Object.assign(this.options, options);
   }
 }
