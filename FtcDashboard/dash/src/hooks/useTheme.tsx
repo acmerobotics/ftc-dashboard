@@ -39,16 +39,21 @@ type ThemeAction =
   | { type: 'setTheme'; payload: Colors }
   | { type: 'setDarkMode'; payload: boolean };
 
+enum LocalStorageKeys {
+  isDarkMode = 'isDarkMode',
+  themeColor = 'themeColor',
+}
+
 function isDarkModeOnLoad(): boolean {
   return (
-    localStorage.isDarkMode === 'dark' ||
-    (!('theme' in localStorage) &&
+    localStorage[LocalStorageKeys.isDarkMode] === 'dark' ||
+    (!(LocalStorageKeys.isDarkMode in localStorage) &&
       window.matchMedia('(prefers-color-scheme: dark)').matches)
   );
 }
 
 function themeOnLoad(): Colors {
-  return (localStorage.themeColor as Colors) || 'blue';
+  return (localStorage[LocalStorageKeys.themeColor] as Colors) || 'blue';
 }
 
 const initialState: ThemeState = {
