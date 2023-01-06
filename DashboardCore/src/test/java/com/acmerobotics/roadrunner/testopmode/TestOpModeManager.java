@@ -3,10 +3,11 @@ package com.acmerobotics.roadrunner.testopmode;
 import com.acmerobotics.dashboard.SendFun;
 import com.acmerobotics.roadrunner.TestSineWaveOpMode;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class TestOpModeManager {
-    private final List<TestOpMode> testOpModes = List.of(new TestSineWaveOpMode());
+    private final List<TestOpMode> testOpModes = Arrays.asList(new TestSineWaveOpMode());
     private TestOpMode activeOpMode = null;
 
     SendFun sendFun;
