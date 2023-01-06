@@ -1,7 +1,16 @@
-import { ReactElement, useState, useEffect, useRef, cloneElement } from 'react';
+import {
+  ReactElement,
+  useState,
+  useEffect,
+  useRef,
+  cloneElement,
+  ReactNode,
+  forwardRef,
+} from 'react';
 import RGL, { WidthProvider, Layout } from 'react-grid-layout';
 import { v4 as uuidv4 } from 'uuid';
-import styled from 'styled-components';
+
+import clsx from 'clsx';
 
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
@@ -29,6 +38,9 @@ import LockIconURL from '@/assets/icons/lock.svg';
 import { ReactComponent as RemoveCircleIcon } from '@/assets/icons/remove_circle.svg';
 import { ReactComponent as RemoveCircleOutlineIcon } from '@/assets/icons/remove_circle_outline.svg';
 import CreateIconURL from '@/assets/icons/create.svg';
+
+import { colors } from '@/hooks/useTheme';
+import { useTheme } from '@/hooks/useTheme';
 
 function maxArray(a: number[], b: number[]) {
   if (a.length !== b.length) {
@@ -68,28 +80,38 @@ const GRID_DOT_PADDING = 10;
 
 const ReactGridLayout = WidthProvider(RGL);
 
-const Container = styled.div.attrs<{ isLayoutLocked: boolean }>(
-  ({ isLayoutLocked }) => ({
-    className: `${
-      !isLayoutLocked ? 'bg-gray-100' : 'bg-white'
-    } p-2 transition-colors`,
-  }),
-)<{ isLayoutLocked: boolean; bgGridSize: number }>`
-  position: relative;
-
-  height: calc(100vh - 52px);
-
-  overflow-x: hidden;
-  overflow-y: scroll;
-  padding-bottom: 1em;
-
-  background-image: ${(props) =>
-    !props.isLayoutLocked
-      ? `radial-gradient(#94a3b8 calc((0.5rem + ${GRID_DOT_PADDING}px) - 17px), transparent 0)`
-      : ''};
-  background-size: ${(props) => `${props.bgGridSize}px  ${props.bgGridSize}px`};
-  background-position: ${`calc(0.5rem + ${GRID_DOT_PADDING}px) calc(0.5rem + ${GRID_DOT_PADDING}px - 5px)`};
-`;
+const Container = forwardRef<
+  HTMLDivElement,
+  {
+    children: ReactNode;
+    isLayoutLocked: boolean;
+    bgGridSize: number;
+    isDarkMode: boolean;
+  }
+>((props, ref) => (
+  <div
+    ref={ref}
+    className={clsx(
+      !props.isLayoutLocked
+        ? 'bg-gray-100 dark:bg-slate-900'
+        : 'bg-white dark:bg-slate-900',
+      'relative overflow-x-hidden overflow-y-scroll p-2 pb-4 transition-colors dark:bg-slate-900',
+    )}
+    style={{
+      height: 'calc(100vh - 52px)',
+      backgroundImage: !props.isLayoutLocked
+        ? `radial-gradient(${
+            props.isDarkMode ? colors.slate['600'] : colors.gray['400']
+          } calc((0.5rem + ${GRID_DOT_PADDING}px) - 17px), transparent 0)`
+        : '',
+      backgroundSize: `${props.bgGridSize}px  ${props.bgGridSize}px`,
+      backgroundPosition: `calc(0.5rem + ${GRID_DOT_PADDING}px) calc(0.5rem + ${GRID_DOT_PADDING}px - 5px)`,
+    }}
+  >
+    {props.children}
+  </div>
+));
+Container.displayName = 'Container';
 
 type GridItem = {
   id: string;
@@ -280,6 +302,8 @@ const DEFAULT_GRID_TALL: GridItem[] = [
 export default function ConfigurableLayout() {
   const containerRef = useRef<HTMLDivElement>(null);
   const gridWrapperRef = useRef<HTMLDivElement>(null);
+
+  const theme = useTheme();
 
   const [isLayoutLocked, setIsLayoutLocked] = useState(true);
   const [isInDeleteMode, setIsInDeleteMode] = useState(false);
@@ -506,15 +530,18 @@ export default function ConfigurableLayout() {
       ref={containerRef}
       isLayoutLocked={isLayoutLocked}
       bgGridSize={gridBgSize}
+      isDarkMode={theme.isDarkMode}
     >
       {gridItems.length === 0 && (
         <div
           className={`mt-16 p-12 text-center transition-colors ${
-            isLayoutLocked ? 'bg-white' : 'bg-gray-100'
+            isLayoutLocked
+              ? 'bg-white dark:bg-slate-900'
+              : 'bg-gray-100 dark:bg-slate-900'
           }`}
         >
           <h3 className="text-2xl">Your custom layout is empty!</h3>
-          <p className="mt-3 text-gray-600">
+          <p className="mt-3 text-gray-600 dark:text-slate-400">
             Press the floating pencil icon near the bottom right
             <br />
             and then click the green plus button to create your own layouts!
@@ -569,37 +596,37 @@ export default function ConfigurableLayout() {
         right="3.5em"
         isOpen={!isLayoutLocked}
         isShowing={!(isFabIdle && isLayoutLocked)}
-        clickEvent={clickFAB}
+        onClick={clickFAB}
         icon={!isLayoutLocked ? LockIconURL : CreateIconURL}
-        customClassName={`${
+        className={`${
           !isLayoutLocked
-            ? `bg-gray-500 focus:ring-4 focus:ring-gray-600 shadow-md shadow-gray-900/30 hover:shadow-lg hover:shadow-gray-900/50`
-            : `bg-red-500 focus:ring-4 focus:ring-red-600 shadow-md shadow-red-500/40 hover:shadow-lg hover:shadow-red-500/60`
+            ? `bg-gray-500 shadow-md shadow-gray-900/30 hover:shadow-lg hover:shadow-gray-900/50 focus:ring-4 focus:ring-gray-600`
+            : `bg-red-500 shadow-md shadow-red-500/40 hover:shadow-lg hover:shadow-red-500/60 focus:ring-4 focus:ring-red-600`
         }`}
       >
         <RadialFabChild
-          customClass="w-12 h-12 bg-green-500 border border-green-600 shadow-md shadow-green-500/30 hover:shadow-lg hover:shadow-green-500/50 focus:ring focus:ring-green-600"
+          className="h-12 w-12 border border-green-600 bg-green-500 shadow-md shadow-green-500/30 hover:shadow-lg hover:shadow-green-500/50 focus:ring focus:ring-green-600"
           angle={(-80 * Math.PI) / 180}
           openMargin="5em"
           fineAdjustIconX="2%"
           fineAdjustIconY="2%"
           toolTipText="Add Item"
-          clickEvent={() => setIsShowingViewPicker(!isShowingViewPicker)}
+          onClick={() => setIsShowingViewPicker(!isShowingViewPicker)}
         >
           <AddIcon className="h-6 w-6 text-white" />
         </RadialFabChild>
         <RadialFabChild
-          customClass={`w-12 h-12 border shadow-md shadow-orange-500/30 hover:shadow-lg hover:shadow-orange-500/50 focus:ring ${
+          className={`h-12 w-12 border shadow-md shadow-orange-500/30 hover:shadow-lg hover:shadow-orange-500/50 focus:ring ${
             isInDeleteMode
-              ? 'bg-orange-500 border-yellow-600 focus:ring-amber-300'
-              : 'bg-amber-500 border-amber-600 focus:ring-orange-300'
+              ? 'border-yellow-600 bg-orange-500 focus:ring-amber-300'
+              : 'border-amber-600 bg-amber-500 focus:ring-orange-300'
           }`}
           angle={(-135 * Math.PI) / 180}
           openMargin="5em"
           fineAdjustIconX="0"
           fineAdjustIconY="0"
           toolTipText="Delete Item"
-          clickEvent={() => setIsInDeleteMode(!isInDeleteMode)}
+          onClick={() => setIsInDeleteMode(!isInDeleteMode)}
         >
           {isInDeleteMode ? (
             <RemoveCircleOutlineIcon className="h-5 w-5" />
@@ -608,13 +635,13 @@ export default function ConfigurableLayout() {
           )}
         </RadialFabChild>
         <RadialFabChild
-          customClass="w-12 h-12 bg-indigo-500 border border-indigo-600 shadow-md shadow-indigo-500/30 hover:shadow-lg hover:shadow-indigo-500/50 focus:ring focus:ring-indigo-300"
+          className="h-12 w-12 border border-indigo-600 bg-indigo-500 shadow-md shadow-indigo-500/30 hover:shadow-lg hover:shadow-indigo-500/50 focus:ring focus:ring-indigo-300"
           angle={(170 * Math.PI) / 180}
           openMargin="5em"
           fineAdjustIconX="8%"
           fineAdjustIconY="-2%"
           toolTipText="Clear Layout"
-          clickEvent={() => setGrid([])}
+          onClick={() => setGrid([])}
         >
           <DeleteSweepIcon className="h-5 w-5" />
         </RadialFabChild>
@@ -623,7 +650,7 @@ export default function ConfigurableLayout() {
         isOpen={isShowingViewPicker}
         bottom="13em"
         right="1.5em"
-        clickEvent={addItem}
+        onClick={addItem}
       />
     </Container>
   );

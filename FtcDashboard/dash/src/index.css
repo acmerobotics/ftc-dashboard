@@ -75,25 +75,6 @@
       url('assets/fonts/roboto-v20-latin-700.svg#Roboto') format('svg'); /* Legacy iOS */
 }
 
-body {
-  font-family: 'Roboto', sans-serif;
-}
-
-.tile-grid {
-  display: grid;
-  overflow: auto;
-  flex: 1;
-}
-
-.tile {
-  border: 1px solid #eee;
-}
-
-.tile > div {
-  height: 100%;
-  overflow: auto;
-}
-
 table {
   margin: 0;
   border-collapse: collapse;
@@ -118,8 +99,8 @@ input {
 
 .icon-btn {
   @apply flex items-center justify-center rounded-md;
-  @apply border border-transparent transition-colors hover:border-gray-400 focus:border-blue-500;
-  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-30;
+  @apply border border-transparent transition-colors hover:border-gray-400 focus:border-primary-500;
+  @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-opacity-30;
 }
 
 .error {

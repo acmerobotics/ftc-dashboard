@@ -2,7 +2,6 @@
 
 export type Values<T> = T[keyof T];
 export type Extends<T, U extends T> = U;
-
-export type WithChildren<T = Record<string, unknown>> = T & {
-  children?: React.ReactNode;
-};
+export type KeysWithType<T, V> = {
+  [K in keyof T]: T[K] extends V ? K : never;
+}[keyof T];

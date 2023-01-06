@@ -1,4 +1,5 @@
-import React, { ReactNode } from 'react';
+import { Component, ReactNode } from 'react';
+import clsx from 'clsx';
 
 import BasicVariable from './BasicVariable';
 
@@ -21,7 +22,7 @@ interface State {
   expanded: boolean;
 }
 
-class CustomVariable extends React.Component<Props, State> {
+class CustomVariable extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
@@ -40,17 +41,19 @@ class CustomVariable extends React.Component<Props, State> {
 
   renderHelper(name: string, children: ReactNode) {
     return (
-      <tr>
-        <td>
+      <tr className="block">
+        <td className="block">
           <div
             className="option-header cursor-pointer py-1"
             onClick={this.toggleVisibility}
           >
             <div
-              className={`flex-center mr-2 h-7 w-7 transform rounded-full border border-gray-200 bg-gray-100 transition
-                          hover:border-gray-400 hover:bg-gray-200 ${
-                            this.state.expanded ? `` : '-rotate-90'
-                          }`}
+              className={clsx(
+                'flex-center mr-2 h-7 w-7 transform rounded-full border transition',
+                'border-gray-200 bg-gray-100 hover:border-gray-400 hover:bg-gray-200',
+                'dark:border-slate-500/80 dark:bg-slate-700 dark:text-slate-200',
+                !this.state.expanded && '-rotate-90',
+              )}
             >
               <ExpandedMoreIcon className="h-6 w-6" />
             </div>

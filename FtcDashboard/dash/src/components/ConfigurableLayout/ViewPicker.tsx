@@ -1,5 +1,5 @@
-import { cloneElement } from 'react';
-import styled from 'styled-components';
+import { cloneElement, PropsWithChildren } from 'react';
+import clsx from 'clsx';
 
 import { ConfigurableView } from '@/enums/ConfigurableView';
 
@@ -17,34 +17,52 @@ type ViewPickerProps = {
   bottom: string;
   right: string;
 
-  clickEvent: (item: ConfigurableView) => void;
+  onClick: (item: ConfigurableView) => void;
 };
 
-const Container = styled.div.attrs({
-  className: 'pointer-events-none grid grid-cols-2 gap-x-6 gap-y-5',
-})<ViewPickerProps>`
-  position: fixed;
-  bottom: ${({ bottom }) => bottom};
-  right: ${({ right }) => right};
-`;
+const Container = (props: PropsWithChildren<ViewPickerProps>) => (
+  <div
+    className="pointer-events-none fixed grid grid-cols-2 gap-x-6 gap-y-5"
+    style={{ bottom: props.bottom, right: props.right }}
+  >
+    {props.children}
+  </div>
+);
 
-const CardButton = styled.button.attrs<{
-  isOpen: boolean;
-  customStyles: string;
-}>(({ isOpen, customStyles }) => ({
-  className: `rounded bg-white border border-gray-300 hover:border-gray-400 shadow-md hover:shadow-lg flex justify-start items-center px-4 py-4 transform transition
-    hover:-translate-y-0.5 focus:-translate-y-0.5 focus:border-0 focus:outline-none ring-2 ring-transparent ${
-      isOpen
-        ? 'pointer-events-auto opacity-100 scale-100'
-        : 'pointer-events-none opacity-0 scale-75'
-    } ${customStyles}`,
-}))<{
+const CardButton = ({
+  isOpen,
+  customStyles,
+  index,
+  children,
+  ...props
+}: PropsWithChildren<{
   isOpen: boolean;
   customStyles: string;
   index: number;
-}>`
-  transition-delay: ${({ index }) => `${8 * Math.pow(index, 1.5)}ms`};
-`;
+}> &
+  JSX.IntrinsicElements['button']) => (
+  <button
+    className={clsx(
+      'flex transform items-center justify-start',
+      'rounded bg-white px-4 py-4 shadow-md',
+      'border border-gray-300 transition hover:border-gray-500 hover:shadow-lg',
+      'ring-2 ring-transparent hover:-translate-y-0.5',
+      'focus:-translate-y-0.5 focus:border-0 focus:outline-none',
+      'dark:border-slate-500/70 dark:bg-slate-700 dark:hover:border-slate-300',
+      'dark:shadow-slate-400/10 dark:hover:shadow-slate-400/20',
+      isOpen
+        ? 'pointer-events-auto scale-100 opacity-100'
+        : 'pointer-events-none scale-75 opacity-0',
+      customStyles,
+    )}
+    style={{
+      transitionDelay: `${8 * Math.pow(index, 1.5)}ms`,
+    }}
+    {...props}
+  >
+    {children}
+  </button>
+);
 
 const listContent = [
   {
@@ -107,15 +125,19 @@ const ViewPicker = (props: ViewPickerProps) => {
           {...props}
           index={index}
           customStyles={item.customStyles}
-          onClick={() => props.clickEvent(item.view)}
+          onClick={() => props.onClick(item.view)}
           disabled={!props.isOpen}
         >
-          <div className={`flex-center mr-3  h-8 w-8 rounded ${item.iconBg}`}>
-            {cloneElement(item.icon)}
-          </div>
-          <div className="flex flex-col items-start">
-            <h3 className="mt-0 text-lg font-medium leading-4">{item.title}</h3>
-          </div>
+          <>
+            <div className={`flex-center mr-3  h-8 w-8 rounded ${item.iconBg}`}>
+              {cloneElement(item.icon)}
+            </div>
+            <div className="flex flex-col items-start">
+              <h3 className="mt-0 text-lg font-medium leading-4">
+                {item.title}
+              </h3>
+            </div>
+          </>
         </CardButton>
       ))}
     </Container>

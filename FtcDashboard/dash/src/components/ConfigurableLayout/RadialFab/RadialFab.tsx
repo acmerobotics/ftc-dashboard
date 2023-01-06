@@ -1,15 +1,12 @@
-import { ReactElement, cloneElement, Children } from 'react';
-import styled from 'styled-components';
+import { ReactElement, cloneElement, Children, PropsWithChildren } from 'react';
 
-import { WithChildren } from '@/typeHelpers';
-
-type RadialFabProps = {
+type RadialFabProps = PropsWithChildren<{
   isOpen: boolean;
   isShowing: boolean;
 
   icon: string;
 
-  customClassName: string;
+  className: string;
 
   width?: string;
   height?: string;
@@ -17,46 +14,55 @@ type RadialFabProps = {
   bottom?: string;
   right?: string;
 
-  clickEvent: () => void;
-};
+  onClick: () => void;
+}>;
 
-const FixedContainer = styled.div<RadialFabProps>`
-  position: fixed;
-  bottom: ${({ bottom, height, isShowing }) =>
-    isShowing ? bottom : `calc(${bottom} - (${height} * 2)) `};
-  right: ${({ right }) => right};
+const FixedContainer = ({
+  bottom,
+  height,
+  isShowing,
+  right,
+  children,
+}: RadialFabProps) => (
+  <div
+    style={{
+      position: 'fixed',
+      bottom: isShowing ? bottom : `calc(${bottom} - (${height} * 2))`,
+      right,
+      transition: 'bottom 300ms ease',
+    }}
+  >
+    {children}
+  </div>
+);
 
-  transition: bottom 300ms ease;
-`;
+const FloatingButton = ({
+  children,
+  width,
+  height,
+  className,
+  ...props
+}: Pick<RadialFabProps, 'children' | 'width' | 'height'> &
+  JSX.IntrinsicElements['button']) => (
+  <button
+    className={`flex-center rounded-full border-none p-0 !outline-none transition duration-300 focus:outline-none focus:ring-2 focus:ring-opacity-50 ${className}`}
+    style={{ width, height }}
+    {...props}
+  >
+    {children}
+  </button>
+);
 
-const FloatingButton = styled.button.attrs<RadialFabProps>(
-  ({ customClassName }) => ({
-    className: `focus:outline-none focus:ring-2 focus:ring-opacity-50 flex-center transition ${customClassName}`,
-  }),
-)<RadialFabProps>`
-  width: ${({ width }) => width};
-  height: ${({ height }) => height};
-
-  border-radius: 50%;
-
-  padding: 0;
-
-  border: none;
-  outline: none !important;
-
-  transition: 300ms ease;
-`;
-
-const CreateIcon = styled.img`
-  width: 1.95em;
-  color: white;
-`;
-
-const RadialFab = (props: WithChildren<RadialFabProps>) => {
+const RadialFab = (props: RadialFabProps) => {
   return (
     <FixedContainer {...props}>
-      <FloatingButton {...props} onClick={props.clickEvent}>
-        <CreateIcon src={props.icon} />
+      <FloatingButton
+        width={props.width}
+        height={props.height}
+        onClick={props.onClick}
+        className={props.className}
+      >
+        <img src={props.icon} className="w-[1.95em] text-white" />
       </FloatingButton>
       {Children.map(props.children, (e) =>
         cloneElement(e as ReactElement, { isOpen: props.isOpen }),

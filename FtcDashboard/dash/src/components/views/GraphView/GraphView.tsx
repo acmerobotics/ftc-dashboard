@@ -20,6 +20,7 @@ import { ReactComponent as PauseIcon } from '@/assets/icons/pause.svg';
 
 import { RootState } from '@/store/reducers';
 import { validateInt } from '@/components/views/ConfigView/inputs/validation';
+import { colors, ThemeConsumer } from '@/hooks/useTheme';
 import { DEFAULT_OPTIONS } from './Graph';
 
 type GraphViewState = {
@@ -199,7 +200,7 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
 
             <BaseViewIconButton>
               {this.state.graphing ? (
-                <CloseIcon className="h-6 w-6 text-black" onClick={this.stop} />
+                <CloseIcon className="h-6 w-6" onClick={this.stop} />
               ) : (
                 <ChartIcon className="h-6 w-6" onClick={this.start} />
               )}
@@ -269,15 +270,25 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
               No telemetry selected to graph
             </p>
           ) : (
-            <GraphCanvas
-              data={graphData}
-              options={{
-                windowMs: this.state.windowMs.valid
-                  ? this.state.windowMs.value
-                  : DEFAULT_OPTIONS.windowMs,
-              }}
-              paused={this.state.paused}
-            />
+            <ThemeConsumer>
+              {({ isDarkMode }) => (
+                <GraphCanvas
+                  data={graphData}
+                  options={{
+                    windowMs: this.state.windowMs.valid
+                      ? this.state.windowMs.value
+                      : DEFAULT_OPTIONS.windowMs,
+                    gridLineColor: isDarkMode
+                      ? colors.slate[500]
+                      : colors.gray[300],
+                    textColor: isDarkMode
+                      ? colors.slate[100]
+                      : colors.gray[900],
+                  }}
+                  paused={this.state.paused}
+                />
+              )}
+            </ThemeConsumer>
           )}
         </BaseViewBody>
       </BaseView>

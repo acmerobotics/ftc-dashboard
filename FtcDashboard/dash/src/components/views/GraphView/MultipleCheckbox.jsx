@@ -44,7 +44,7 @@ class MultipleCheckbox extends React.Component {
                 <td>
                   <input
                     id={`multiple-checkbox-${this.state.uuid}-${val}`}
-                    className="rounded"
+                    className="rounded text-primary-600 transition hover:border-gray-900 hover:shadow focus:ring-primary-600 dark:ring-offset-slate-100/40"
                     type="checkbox"
                     onChange={(evt) => this.handleChange(evt, val)}
                     checked={this.state.selected.indexOf(val) !== -1}
