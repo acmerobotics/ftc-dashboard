@@ -524,7 +524,7 @@ export default class Graph {
     return this.options;
   }
 
-  setOptions(options) {
+  setOptions(options: Options) {
     Object.assign(this.options, options);
   }
 }
