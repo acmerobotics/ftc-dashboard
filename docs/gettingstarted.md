@@ -12,7 +12,7 @@ Open `build.dependencies.gradle`. In the `repositories` section add `maven { url
 
 Note: If you're using OpenRC or have non-standard SDK dependencies, add the following exclusion.
 ```groovy
-implementation('com.acmerobotics.dashboard:dashboard:0.4.7') {
+implementation('com.acmerobotics.dashboard:dashboard:0.4.8') {
     exclude group: 'org.firstinspires.ftc'
 }
 ```
