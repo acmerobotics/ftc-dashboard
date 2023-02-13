@@ -12,10 +12,9 @@ FTC Dashboard provides telemetry and monitoring tools for the FTC robots during 
 
 Check out our [online documentation](https://acmerobotics.github.io/ftc-dashboard).
 
-<p style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-  <img src="docs/images/readme-screenshot-2.jpg" />
-  <img src="docs/images/readme-screenshot-1.jpg" /> 
-</p>
+|                    ‎                     |                    ‎                     |
+| :--------------------------------------: | :--------------------------------------: |
+| ![](docs/images/readme-screenshot-2.jpg) | ![](docs/images/readme-screenshot-1.jpg) |
 
 ![Dashboard Screenshot 3](docs/images/readme-screenshot-3.png)
 
