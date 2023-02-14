@@ -76,7 +76,7 @@ See the online documentation [getting started page](https://acmerobotics.github.
 
    - Alternatively, prefix the following command (in the next step) with `VITE_REACT_APP_HOST=<insert IP>`
 
-   - Default IP's:
+   - Default IPs:
      - Android Phone: `192.168.49.1`
      - Control Hub: `192.168.43.1`
 
