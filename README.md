@@ -39,7 +39,7 @@ implementation('com.acmerobotics.dashboard:dashboard:0.4.8') {
 See the online documentation [getting started page](https://acmerobotics.github.io/ftc-dashboard/gettingstarted) for the following installation instructions:
 
 - Running a local version of FTC Dashboard
-  - For custom development purposes or testing out the latest dashboard java-side features prior to release
+  - For custom development purposes or testing out the latest dashboard Java-side features prior to release
   - See "Advanced" section on the getting started page for more details
 - Usage with the FTC SDK
 - Development
