@@ -6,9 +6,9 @@ layout: default
 
 ## Telemetry
 
-FTC apps keep the dashboard updated through periodic telemetry transmissions. Telemetry packets contain text key-value pairs like the provided SDK interfaces. They also store graphics to be display over the field image. 
+FTC apps keep the dashboard updated through periodic telemetry transmissions. Telemetry packets contain text key-value pairs like the provided SDK interfaces. They also store graphics to be displayed over the field image. 
 
-Packets have a map-like interface for adding unstructed data.
+Packets have a map-like interface for adding unstructured data.
 
 ```java
 TelemetryPacket packet = new TelemetryPacket();
@@ -35,7 +35,7 @@ FtcDashboard dashboard = FtcDashboard.getInstance();
 dashboard.sendTelemetryPacket(packet);
 ```
 
-For convenience the dashboard offers a restricted implementation of `Telemetry`. 
+For convenience, the dashboard offers a restricted implementation of `Telemetry`. 
 
 ```java
 FtcDashboard dashboard = FtcDashboard.getInstance();
@@ -77,7 +77,7 @@ public class RobotConstants {
 
 It's conventional to name variables in uppercase and treat them as constants inside the code. While saved dashboard changes instantly apply to the code fields, code-side changes only propagate to the client on explicit refresh.
 
-Also keep the copy semantics of Java primitives in mind when using this feature. Why does the following op mode fail to observe position offset changes during operation?
+Also, keep the copy semantics of Java primitives in mind when using this feature. Why does the following op mode fail to observe position offset changes during operation?
 
 ```java
 public class ServoArm {
@@ -113,7 +113,7 @@ public class StaleServoOpMode extends LinearOpMode {
 
 The value of `SERVO_POS_OFFSET` is read once at the start of the op mode to pass to the `ServoArm` constructor. The field `posOffset` gets an independent copy of `SERVO_POS_OFFSET`; it only gets the new `SERVO_POS_OFFSET` when the op mode is reinitialized. 
 
-With some slight adjustments, position offset modifications ccan appear truly live, 
+With some slight adjustments, position offset modifications can appear truly live, 
 
 ```java
 @Config
@@ -145,7 +145,7 @@ public class FixedServoOpMode extends LinearOpMode {
 }
 ```
 
-Java experts may have noticed that `POS_OFFSET` can still be stale or partially updated. If this bothers you, mark all of your config variable fields with `volatile`. You can read more about word tearing in [JLS 17.7](https://docs.oracle.com/javase/specs/jls/se8/html/jls-17.html#jls-17.7).
+Java experts may have noticed that `POS_OFFSET` can still be stale or partially updated. If this bothers you, mark all your config variable fields with `volatile`. You can read more about word tearing in [JLS 17.7](https://docs.oracle.com/javase/specs/jls/se8/html/jls-17.html#jls-17.7).
 
 Config variable declarations in Kotlin are cumbersome but still possible with `@JvmField`.
 
