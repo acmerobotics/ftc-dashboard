@@ -6,7 +6,7 @@ FTC Dashboard provides telemetry and monitoring tools for FTC robots during oper
 - Live configuration variables
 - Camera streaming
 - Limited op mode controls and gamepad support
-  - Note: Gamepad support is volatile due to unstable browser API's
+  - Note: Gamepad support is volatile due to unstable browser APIs
 - Custom dashboard layouts
 - Telemetry CSV export
 
@@ -16,44 +16,34 @@ Check out our [online documentation](https://acmerobotics.github.io/ftc-dashboar
 | :--------------------------------------: | :--------------------------------------: |
 | ![](docs/images/readme-screenshot-2.jpg) | ![](docs/images/readme-screenshot-1.jpg) |
 
-![Dashboard Screenshot 3](docs/images/readme-screenshot-3.png)
-
 # Installation
-
-Most up to date installation can be found online here: [https://acmerobotics.github.io/ftc-dashboard/gettingstarted](https://acmerobotics.github.io/ftc-dashboard/gettingstarted)
 
 ## Basic
 
 1. Open [`build.dependencies.gradle`](https://github.com/FIRST-Tech-Challenge/FtcRobotController/blob/master/build.dependencies.gradle)
 2. In the `repositories` section, add `maven { url = 'https://maven.brott.dev/' }`
 3. In the `dependencies` section, add `implementation 'com.acmerobotics.dashboard:dashboard:0.4.8'`
-   - Please see [GitHub releases page](https://github.com/acmerobotics/ftc-dashboard/releases) for latest version number
-4. Note: If you’re using OpenRC or have non-standard SDK dependencies, add the following exclusion:
+  - Please see [GitHub releases page](https://github.com/acmerobotics/ftc-dashboard/releases) for the latest version number
 
-```
-implementation('com.acmerobotics.dashboard:dashboard:0.4.8') {
+  Note: If you’re using OpenRC or have non-standard SDK dependencies, add the following exclusion:
+
+  ```
+  implementation('com.acmerobotics.dashboard:dashboard:0.4.8') {
     exclude group: 'org.firstinspires.ftc'
-}
-```
-
-See the online documentation [getting started page](https://acmerobotics.github.io/ftc-dashboard/gettingstarted) for the following installation instructions:
+  }
+  ```
 
 - Running a local version of FTC Dashboard
-  - For custom development purposes or testing out the latest dashboard Java-side features prior to release
-  - See "Advanced" section on the getting started page for more details
-- Usage with the FTC SDK
-- Development
-  - For custom development of FTC Dashboard browser client
+- Using it with the FTC SDK
+- Developing the browser client
 
 # Browser Client Development
 
 ## Installation
 
-See the online documentation [getting started page](https://acmerobotics.github.io/ftc-dashboard/gettingstarted) for further details
-
 1. Install Node.js
 
-   - Note: Node.js 16+ is required for builds to work on the M1 macbooks
+   - Note: Node.js 16+ is required for builds to work on M1 MacBooks
    - Current Node version used in gradle builds can be found in [FtcDashboard/build.gradle](https://github.com/acmerobotics/ftc-dashboard/blob/8ac8b29257dede5f4a13c440fe6756efc270cbb8/FtcDashboard/build.gradle#L4)
    - Node version is `18.12.1` as of time of writing
 
@@ -68,13 +58,9 @@ See the online documentation [getting started page](https://acmerobotics.github.
 
    - This only need be done once
 
-5. Optionally, specify the server IP address through the environment variable: `VITE_REACT_APP_HOST`
+5. Optionally, specify the server IP address through the environment variable `VITE_REACT_APP_HOST`
 
-   - It is the author recommendation to save `VITE_REACT_APP_HOST=<insert IP>` in a `.env.development.local` file
-
-     - Details on Vite's environment variables can be found [here](https://vitejs.dev/guide/env-and-mode.html)
-
-   - Alternatively, prefix the following command (in the next step) with `VITE_REACT_APP_HOST=<insert IP>`
+   - Details on Vite's environment variables can be found [here](https://vitejs.dev/guide/env-and-mode.html)
 
    - Default IPs:
      - Android Phone: `192.168.49.1`
@@ -134,8 +120,8 @@ Primary interface as a web-client acessible to the end-user through a web browse
 
 For testing dashboard client without a robot
 
-- Java mock FTC Dashboard server is located in [`DashboardCore/src/test/java/com/acmerobotics/roadrunner/`](https://github.com/acmerobotics/ftc-dashboard/blob/master/DashboardCore/src/test/java/com/acmerobotics/roadrunner/TestServer.java)
+- Java mock FTC Dashboard server is located in [`DashboardCore/src/test/java/com/acmerobotics/dashboard/`](https://github.com/acmerobotics/ftc-dashboard/blob/master/DashboardCore/src/test/java/com/acmerobotics/dashboard/TestServer.java)
 - Mock server is a simple Java server hosting mock FTC opmode
 - Run this Java file with your choice of JVM application runner (e.g. through Intellij)
-- A test sample opmode can be found at [`TestSineWaveOpMode.java`](https://github.com/acmerobotics/ftc-dashboard/blob/master/DashboardCore/src/test/java/com/acmerobotics/roadrunner/TestSineWaveOpMode.java)
-- Test opmodes registered in [`TestOpmodeManager.java`](https://github.com/acmerobotics/ftc-dashboard/blob/8ac8b29257dede5f4a13c440fe6756efc270cbb8/DashboardCore/src/test/java/com/acmerobotics/roadrunner/testopmode/TestOpModeManager.java#L10)
+- A test sample opmode can be found at [`TestSineWaveOpMode.java`](https://github.com/acmerobotics/ftc-dashboard/blob/master/DashboardCore/src/test/java/com/acmerobotics/dashboard/TestSineWaveOpMode.java)
+- Test opmodes registered in [`TestOpmodeManager.java`](https://github.com/acmerobotics/ftc-dashboard/blob/8ac8b29257dede5f4a13c440fe6756efc270cbb8/DashboardCore/src/test/java/com/acmerobotics/dashboard/testopmode/TestOpModeManager.java#L10)
