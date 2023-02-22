@@ -1,4 +1,4 @@
-package com.acmerobotics.roadrunner;
+package com.acmerobotics.dashboard;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

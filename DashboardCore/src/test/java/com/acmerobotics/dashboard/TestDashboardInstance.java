@@ -1,4 +1,4 @@
-package com.acmerobotics.roadrunner;
+package com.acmerobotics.dashboard;
 
 import com.acmerobotics.dashboard.DashboardCore;
 import com.acmerobotics.dashboard.RobotStatus;
@@ -10,8 +10,8 @@ import com.acmerobotics.dashboard.message.redux.InitOpMode;
 import com.acmerobotics.dashboard.message.redux.ReceiveOpModeList;
 import com.acmerobotics.dashboard.message.redux.ReceiveRobotStatus;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.acmerobotics.roadrunner.testopmode.TestOpMode;
-import com.acmerobotics.roadrunner.testopmode.TestOpModeManager;
+import com.acmerobotics.dashboard.testopmode.TestOpMode;
+import com.acmerobotics.dashboard.testopmode.TestOpModeManager;
 
 import java.io.IOException;
 import java.util.stream.Collectors;

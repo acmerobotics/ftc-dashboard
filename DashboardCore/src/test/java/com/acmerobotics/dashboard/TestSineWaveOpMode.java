@@ -1,6 +1,6 @@
-package com.acmerobotics.roadrunner;
+package com.acmerobotics.dashboard;
 
-import com.acmerobotics.roadrunner.testopmode.TestOpMode;
+import com.acmerobotics.dashboard.testopmode.TestOpMode;
 
 public class TestSineWaveOpMode extends TestOpMode {
     TestDashboardInstance dashboard;

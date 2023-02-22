@@ -1,7 +1,7 @@
-package com.acmerobotics.roadrunner.testopmode;
+package com.acmerobotics.dashboard.testopmode;
 
 import com.acmerobotics.dashboard.SendFun;
-import com.acmerobotics.roadrunner.TestSineWaveOpMode;
+import com.acmerobotics.dashboard.TestSineWaveOpMode;
 
 import java.util.Arrays;
 import java.util.List;
