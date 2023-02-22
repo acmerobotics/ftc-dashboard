@@ -23,21 +23,18 @@ Check out our [online documentation](https://acmerobotics.github.io/ftc-dashboar
 1. Open [`build.dependencies.gradle`](https://github.com/FIRST-Tech-Challenge/FtcRobotController/blob/master/build.dependencies.gradle)
 2. In the `repositories` section, add `maven { url = 'https://maven.brott.dev/' }`
 3. In the `dependencies` section, add `implementation 'com.acmerobotics.dashboard:dashboard:0.4.8'`
-  - Please see [GitHub releases page](https://github.com/acmerobotics/ftc-dashboard/releases) for the latest version number
 
-  Note: If you’re using OpenRC or have non-standard SDK dependencies, add the following exclusion:
+    Please see [GitHub releases page](https://github.com/acmerobotics/ftc-dashboard/releases) for the latest version number
 
-  ```
-  implementation('com.acmerobotics.dashboard:dashboard:0.4.8') {
-    exclude group: 'org.firstinspires.ftc'
-  }
-  ```
+4. If you’re using OpenRC or have non-standard SDK dependencies, add the following exclusion:
 
-- Running a local version of FTC Dashboard
-- Using it with the FTC SDK
-- Developing the browser client
+    ```
+    implementation('com.acmerobotics.dashboard:dashboard:0.4.8') {
+      exclude group: 'org.firstinspires.ftc'
+    }
+    ```
 
-# Browser Client Development
+# Development
 
 ## Installation
 
@@ -72,9 +69,17 @@ Check out our [online documentation](https://acmerobotics.github.io/ftc-dashboar
    - Navigate to this address in your browser to view the dashboard client
    - The development server will automatically reload when changes are made to the source code
 
-## Basic Architecture
+## Mock server
 
-### Java Server
+To test without an FTC app, run the mock server located at `DashboardCore/src/test/java/com/acmerobotics/dashboard/TestServer.java`.
+
+- Mock server is a simple Java server hosting mock FTC op modes
+- A test sample op mode can be found at [`TestSineWaveOpMode.java`](https://github.com/acmerobotics/ftc-dashboard/blob/master/DashboardCore/src/test/java/com/acmerobotics/dashboard/TestSineWaveOpMode.java)
+- Test op modes are registered in [`TestOpModeManager.java`](https://github.com/acmerobotics/ftc-dashboard/blob/8ac8b29257dede5f4a13c440fe6756efc270cbb8/DashboardCore/src/test/java/com/acmerobotics/dashboard/testopmode/TestOpModeManager.java#L10)
+
+# Basic Architecture
+
+## Java Server
 
 Dashboard's server is split into two packages, `DashboardCore` and `FtcDashboard`
 
@@ -85,7 +90,7 @@ Dashboard's server is split into two packages, `DashboardCore` and `FtcDashboard
   - Contains the API FTC teams will access and manipulate through their own code
   - This package also contains the browser client source
 
-### Browser Client
+## Browser Client
 
 Primary interface as a web-client acessible to the end-user through a web browser
 
@@ -95,7 +100,7 @@ Primary interface as a web-client acessible to the end-user through a web browse
 - Vite for builds
 - Web Socket connection to the dashboard server
 
-#### Relevant files
+### Relevant files
 
 - [Dashboard.tsx](https://github.com/acmerobotics/ftc-dashboard/blob/master/FtcDashboard/dash/src/components/Dashboard/Dashboard.tsx)
   - Primary functional entrypoint
@@ -115,13 +120,3 @@ Primary interface as a web-client acessible to the end-user through a web browse
     - etc
 - Views subscribe to websocket updates via the Redux store
   - Basic example can be found in the [`TelemetryView`](https://github.com/acmerobotics/ftc-dashboard/blob/8ac8b29257dede5f4a13c440fe6756efc270cbb8/FtcDashboard/dash/src/components/views/TelemetryView.tsx#L21) component
-
-## Mock server
-
-For testing dashboard client without a robot
-
-- Java mock FTC Dashboard server is located in [`DashboardCore/src/test/java/com/acmerobotics/dashboard/`](https://github.com/acmerobotics/ftc-dashboard/blob/master/DashboardCore/src/test/java/com/acmerobotics/dashboard/TestServer.java)
-- Mock server is a simple Java server hosting mock FTC opmode
-- Run this Java file with your choice of JVM application runner (e.g. through Intellij)
-- A test sample opmode can be found at [`TestSineWaveOpMode.java`](https://github.com/acmerobotics/ftc-dashboard/blob/master/DashboardCore/src/test/java/com/acmerobotics/dashboard/TestSineWaveOpMode.java)
-- Test opmodes registered in [`TestOpmodeManager.java`](https://github.com/acmerobotics/ftc-dashboard/blob/8ac8b29257dede5f4a13c440fe6756efc270cbb8/DashboardCore/src/test/java/com/acmerobotics/dashboard/testopmode/TestOpModeManager.java#L10)
