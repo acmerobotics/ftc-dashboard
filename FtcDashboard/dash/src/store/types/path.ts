@@ -14,3 +14,8 @@ export type SegmentData = {
   heading: number;
   headingType: typeof headingTypes[number];
 };
+
+export type Path = {
+  start: Omit<SegmentData, 'type' | 'time' | 'headingType'>;
+  segments: SegmentData[];
+};

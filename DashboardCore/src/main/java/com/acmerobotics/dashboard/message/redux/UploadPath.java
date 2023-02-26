@@ -9,12 +9,12 @@ import java.util.List;
 
 public class UploadPath extends Message {
     public PathSegment start;
-    public List<PathSegment> segments;
+    public PathSegment[] segments;
 
     public UploadPath(PathSegment start, PathSegment[] segments) {
         super(MessageType.UPLOAD_PATH);
 
         this.start = start;
-        this.segments = Arrays.asList(segments);
+        this.segments = segments;
     }
 }

@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName;
 public enum SegmentType {
     @SerializedName("Line")
     LINE(),
-    @SerializedName("Spine")
+    @SerializedName("Spline")
     SPLINE(),
     @SerializedName("Wait")
     WAIT()

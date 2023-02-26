@@ -12,10 +12,19 @@ import { ReactComponent as AddIcon } from '@/assets/icons/add.svg';
 import { ReactComponent as SaveIcon } from '@/assets/icons/save.svg';
 import { ReactComponent as DownloadIcon } from '@/assets/icons/file_download.svg';
 import { ReactComponent as DeleteIcon } from '@/assets/icons/delete.svg';
-import PathSegment, { PointInput, AngleInput } from '@/components/views/PathView/PathSegment';
+import PathSegment from '@/components/views/PathView/PathSegment';
 import { SegmentData } from '@/store/types';
-import { useDispatch } from 'react-redux';
-import { uploadPathAction } from '@/store/actions/path';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  addSegmentPathAction,
+  clearSegmentsPathAction,
+  setSegmentPathAction,
+  setStartPathAction,
+  uploadPathAction,
+} from '@/store/actions/path';
+import PointInput from '@/components/views/PathView/inputs/PointInput';
+import AngleInput from '@/components/views/PathView/inputs/AngleInput';
+import { RootState } from '@/store/reducers';
 
 type PathSegmentViewProps = BaseViewProps & BaseViewHeadingProps;
 
@@ -49,18 +58,9 @@ const PathSegmentView = ({
   isUnlocked = false,
 }: PathSegmentViewProps) => {
   const dispatch = useDispatch();
-  const [startPose, setStartPose] = useState({
-    x: 0,
-    y: 0,
-    tangent: 0,
-    heading: 0,
-  });
-  const [segments, setSegments] = useState([] as SegmentData[]);
-  const changeSegment = (i: number, val: Partial<SegmentData>) =>
-    setSegments((prev) => {
-      Object.assign(prev[i], val);
-      return [...prev];
-    });
+  const { start, segments } = useSelector((state: RootState) => ({
+    ...state.path,
+  }));
   return (
     <BaseView isUnlocked={isUnlocked}>
       <div className="flex">
@@ -68,78 +68,73 @@ const PathSegmentView = ({
           Path Segments
         </BaseViewHeading>
         <BaseViewIcons>
-          <BaseViewIconButton onClick={() => setSegments([])}>
-            <DeleteIcon className="w-6 h-6" fill="black" />
+          <BaseViewIconButton
+            onClick={() => dispatch(clearSegmentsPathAction())}
+          >
+            <DeleteIcon className="h-6 w-6" fill="black" />
           </BaseViewIconButton>
           <BaseViewIconButton
-            onClick={() => console.log(exportPath(startPose, segments))}
+            onClick={() => {
+              const file = new Blob([exportPath(start, segments)], {
+                  type: 'yaml',
+                }),
+                a = document.createElement('a'),
+                url = URL.createObjectURL(file);
+              a.href = url;
+              a.download = 'path.yaml';
+              document.body.appendChild(a);
+              a.click();
+              setTimeout(function () {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+              }, 0);
+            }}
           >
-            <DownloadIcon className="w-6 h-6" fill="black" />
+            <DownloadIcon className="h-6 w-6" fill="black" />
           </BaseViewIconButton>
           <BaseViewIconButton
-            onClick={() => dispatch(uploadPathAction(startPose, segments))}
+            onClick={() => dispatch(uploadPathAction(start, segments))}
           >
-            <SaveIcon className="w-6 h-6" />
+            <SaveIcon className="h-6 w-6" />
           </BaseViewIconButton>
-          <BaseViewIconButton
-            onClick={() =>
-              setSegments((prev) =>
-                prev.concat([
-                  {
-                    type: 'Spline',
-                    x: 0,
-                    y: 0,
-                    tangent: 0,
-                    time: 0,
-                    heading: 0,
-                    headingType: 'Tangent',
-                  },
-                ]),
-              )
-            }
-          >
-            <AddIcon className="w-6 h-6" />
+          <BaseViewIconButton onClick={() => dispatch(addSegmentPathAction())}>
+            <AddIcon className="h-6 w-6" />
           </BaseViewIconButton>
         </BaseViewIcons>
       </div>
       <BaseViewBody className="flex flex-col">
         <div className="flex-grow">
-          <div className="flex self-center gap-2 mb-2">
+          <div className="mb-2 flex gap-2 self-center">
             <div className="flex-grow self-center">Start at</div>
             <PointInput
-              valueX={startPose.x}
-              valueY={startPose.y}
-              onChange={(newVals) =>
-                setStartPose((prev) => ({ ...prev, ...newVals }))
-              }
+              valueX={start.x}
+              valueY={start.y}
+              onChange={(newVals) => dispatch(setStartPathAction(newVals))}
             />
           </div>
-          <div className="flex self-center gap-2 mb-2">
+          <div className="mb-2 flex gap-2 self-center">
             <div className="flex-grow self-center">Start Tangent:</div>
             <AngleInput
-              value={startPose.tangent}
+              value={start.tangent}
               name="tangent"
-              onChange={(newVals) =>
-                setStartPose((prev) => ({ ...prev, ...newVals }))
-              }
+              onChange={(newVals) => dispatch(setStartPathAction(newVals))}
             />
           </div>
-          <div className="flex self-center gap-2 mb-2">
+          <div className="mb-2 flex gap-2 self-center">
             <div className="flex-grow self-center">Start Heading:</div>
             <AngleInput
-              value={startPose.heading}
+              value={start.heading}
               name="heading"
-              onChange={(newVals) =>
-                setStartPose((prev) => ({ ...prev, ...newVals }))
-              }
+              onChange={(newVals) => dispatch(setStartPathAction(newVals))}
             />
           </div>
-          <ol className="list-decimal marker:hover:cursor-move pl-4" start={1}>
+          <ol className="list-decimal pl-4 marker:hover:cursor-move" start={1}>
             {segments.map((segment, i) => (
               <PathSegment
                 key={i}
-                index={i}
-                onChange={changeSegment}
+                onChange={(newVals) =>
+                  dispatch(setSegmentPathAction(i, newVals))
+                }
                 data={segment}
               />
             ))}
