@@ -12,6 +12,7 @@ import com.acmerobotics.dashboard.message.redux.ReceiveTelemetry;
 import com.acmerobotics.dashboard.message.redux.SaveConfig;
 import com.acmerobotics.dashboard.message.redux.StartOpMode;
 import com.acmerobotics.dashboard.message.redux.StopOpMode;
+import com.acmerobotics.dashboard.message.redux.UploadPath;
 
 /**
  * Dashboard message types. These values match the corresponding Redux actions in the frontend.
@@ -39,8 +40,10 @@ public enum MessageType {
     RECEIVE_IMAGE(ReceiveImage.class),
 
     /* gamepad */
-    RECEIVE_GAMEPAD_STATE(ReceiveGamepadState.class);
+    RECEIVE_GAMEPAD_STATE(ReceiveGamepadState.class),
 
+    /* path */
+    UPLOAD_PATH(UploadPath.class);
     final Class<? extends Message> msgClass;
 
     MessageType(Class<? extends Message> msgClass) {

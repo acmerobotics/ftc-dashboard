@@ -8,6 +8,7 @@ import statusReducer from './status';
 import cameraReducer from './camera';
 import settingsReducer from './settings';
 import gamepadReducer from './gamepad';
+import pathReducer from './path';
 import { createDispatchHook } from 'react-redux';
 
 const rootReducer = combineReducers({
@@ -18,6 +19,7 @@ const rootReducer = combineReducers({
   camera: cameraReducer,
   settings: settingsReducer,
   gamepad: gamepadReducer,
+  path: pathReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;
