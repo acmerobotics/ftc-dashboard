@@ -44,7 +44,7 @@ public class DashboardCore {
     private CustomVariable configRoot = new CustomVariable(); // guarded by configLock
 
     private final Object pathLock = new Object();
-    private ArrayList<FieldProvider> pathFields; // guarded by pathLock
+    public ArrayList<FieldProvider> pathFields = new ArrayList<>(); // guarded by pathLock
 
 
     // TODO: this doensn't make a ton of sense here, though it needs to go in this module for testing

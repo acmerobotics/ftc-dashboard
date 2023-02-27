@@ -27,6 +27,8 @@ import com.acmerobotics.dashboard.message.redux.ReceiveImage;
 import com.acmerobotics.dashboard.message.redux.ReceiveOpModeList;
 import com.acmerobotics.dashboard.message.redux.ReceiveRobotStatus;
 import com.acmerobotics.dashboard.message.redux.SaveConfig;
+import com.acmerobotics.dashboard.path.DashboardPath;
+import com.acmerobotics.dashboard.path.reflection.FieldProvider;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.ftccommon.FtcEventLoop;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -62,6 +64,8 @@ import org.firstinspires.ftc.robotserver.internal.webserver.MimeTypesUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -541,6 +545,49 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             throw new RuntimeException(e);
         }
     }
+    private static void addPathClasses(ArrayList<FieldProvider> pathFields) {
+        ClassLoader classLoader = FtcDashboard.class.getClassLoader();
+
+        Context context = AppUtil.getInstance().getApplication();
+        try {
+            DexFile dexFile = new DexFile(context.getPackageCodePath());
+
+            List<String> classNames = Collections.list(dexFile.entries());
+
+            for (String className : classNames) {
+                boolean skip = false;
+                for (String prefix : IGNORED_PACKAGES) if (className.startsWith(prefix)) {
+                    skip = true;
+                    break;
+                }
+
+                if (skip) continue;
+
+                try {
+                    Class<?> pathClass = Class.forName(className, false, classLoader);
+
+                    if (
+                        !pathClass.isAnnotationPresent(DashboardPath.class)
+                        || pathClass.isAnnotationPresent(Disabled.class)
+                    ) continue;
+
+
+                    for (Field field : pathClass.getFields()) {
+                        if (Modifier.isStatic(field.getModifiers())
+                            && !Modifier.isFinal(field.getModifiers())
+                            && field.getName().equals("dashboardPath")
+                        )  pathFields.add(new FieldProvider<Boolean>(field, null));
+                    }
+                } catch (ClassNotFoundException | NoClassDefFoundError ignored) {
+                    // dash is unable to access many classes and reporting every instance
+                    // only clutters the logs
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     private class DashWebSocket extends NanoWSD.WebSocket implements SendFun {
         final SocketHandler sh = core.newSocket(this);
@@ -631,12 +678,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     private FtcDashboard() {
-        core.withConfigRoot(new CustomVariableConsumer() {
-            @Override
-            public void accept(CustomVariable configRoot) {
-                addConfigClasses(configRoot);
-            }
-        });
+        core.withConfigRoot(FtcDashboard::addConfigClasses);
+        addPathClasses(core.pathFields);
 
         try {
             server.start();
