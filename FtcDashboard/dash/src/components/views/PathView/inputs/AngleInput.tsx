@@ -15,14 +15,14 @@ export default function AngleInput({
   onChange: (_: Partial<SegmentData>) => void;
 }) {
   const [isPickingAngle, setIsPickingAngle] = useState(false);
-  const angleSelecter = createRef<HTMLDivElement>();
+  const angleSelector = createRef<HTMLDivElement>();
   const pickAngle: MouseEventHandler<HTMLInputElement> = (e) => {
     e.preventDefault();
     e.persist();
     setIsPickingAngle(true);
 
-    if (!angleSelecter.current) return;
-    const a = angleSelecter.current;
+    if (!angleSelector.current) return;
+    const a = angleSelector.current;
 
     a.style.left = e.pageX - 32 + 'px';
     a.style.top = e.pageY - 32 + 'px';
@@ -52,7 +52,9 @@ export default function AngleInput({
         onClick={(e) => {
           onChange({
             [name]: deg2rad(
-              +getComputedStyle(e.target as HTMLElement).getPropertyValue('--angle') + 180,
+              +getComputedStyle(e.target as HTMLElement).getPropertyValue(
+                '--angle',
+              ) + 180,
             ),
           });
           setIsPickingAngle(false);
@@ -63,7 +65,7 @@ export default function AngleInput({
         }}
       >
         <div
-          ref={angleSelecter}
+          ref={angleSelector}
           className="direction-selector absolute h-16 w-16 rounded-full"
         ></div>
       </div>

@@ -1,4 +1,5 @@
-import React, {
+import {
+  createRef,
   KeyboardEventHandler,
   useEffect,
   useRef,
@@ -8,7 +9,6 @@ import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import fieldImageName from '@/assets/field.png';
 
-import { ReactComponent as RefreshIcon } from '@/assets/icons/refresh.svg';
 import BaseView, {
   BaseViewBody,
   BaseViewHeading,
@@ -39,7 +39,7 @@ type PathSegmentViewProps = BaseViewProps & BaseViewHeadingProps;
 
 function PathView({ isUnlocked, isDraggable }: PathSegmentViewProps) {
   const dispatch = useDispatch();
-  const container = useRef<HTMLDivElement | null>(null);
+  const container = createRef<HTMLDivElement>();
   const [canvasSize, setCanvasSize] = useState(0);
   const {
     path: { start, segments },
@@ -63,9 +63,9 @@ function PathView({ isUnlocked, isDraggable }: PathSegmentViewProps) {
   const [multiplier, setMultiplier] = useState('');
   const [selected, setSelected] = useState(0);
   const [pickingAngle, setPickingAngle] = useState('');
-  const angleSelecter = useRef<HTMLDivElement | null>(null);
+  const angleSelector = useRef<HTMLDivElement | null>(null);
   const pickAngle = (name: string) => {
-    if (!angleSelecter.current || !container.current) return;
+    if (!angleSelector.current || !container.current) return;
     setPickingAngle(name);
     const rect =
       container.current.firstElementChild?.getBoundingClientRect() ?? {
@@ -75,7 +75,7 @@ function PathView({ isUnlocked, isDraggable }: PathSegmentViewProps) {
     const pageX = rect.x + canvasSize * (points[selected].x / 144 + 0.5);
     const pageY = rect.y + canvasSize * (-points[selected].y / 144 + 0.5);
 
-    const a = angleSelecter.current;
+    const a = angleSelector.current;
     a.style.left = pageX - 32 + 'px';
     a.style.top = pageY - 32 + 'px';
 
@@ -411,7 +411,7 @@ function PathView({ isUnlocked, isDraggable }: PathSegmentViewProps) {
           }}
         >
           <div
-            ref={angleSelecter}
+            ref={angleSelector}
             className="direction-selector absolute h-16 w-16 rounded-full"
           ></div>
         </div>
