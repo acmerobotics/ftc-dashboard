@@ -15,7 +15,7 @@ const PathSegment = ({
   <li className="my-4 pl-2">
     <div className="mb-2 flex gap-2">
       <select
-        className="valid flex-grow rounded py-0"
+        className="valid flex-grow rounded py-0 dark:border-slate-500/80 dark:bg-slate-700 dark:text-slate-200"
         value={data.type}
         onChange={(e) =>
           onChange({
@@ -38,7 +38,7 @@ const PathSegment = ({
             step={0.5}
             value={data.time}
             onChange={(evt) => onChange({ time: +evt.target.value })}
-            className="h-8 w-16 p-2"
+            className="h-8 w-16 p-2 dark:border-slate-500/80 dark:bg-slate-700 dark:text-slate-200"
             title="Time in Seconds"
           />
         </>
@@ -67,7 +67,7 @@ const PathSegment = ({
       <div className="mb-2 flex gap-2 self-center">
         <div className="self-center">Heading:</div>
         <select
-          className="valid h-8 flex-grow rounded py-0"
+          className="valid h-8 flex-grow rounded py-0 dark:border-slate-500/80 dark:bg-slate-700 dark:text-slate-200"
           value={data.headingType}
           onChange={(e) =>
             onChange({

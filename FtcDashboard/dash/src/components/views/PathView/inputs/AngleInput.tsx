@@ -41,7 +41,7 @@ export default function AngleInput({
         step={15}
         value={rad2deg(value).toFixed()}
         onChange={(e) => onChange({ [name]: deg2rad(+e.target.value) })}
-        className="h-8 w-16 p-2"
+        className="h-8 w-16 p-2 dark:border-slate-500/80 dark:bg-slate-700 dark:text-slate-200"
         title={`${name} in degrees`}
         onContextMenu={pickAngle}
       />
