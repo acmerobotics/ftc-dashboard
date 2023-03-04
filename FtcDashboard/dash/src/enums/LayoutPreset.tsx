@@ -80,7 +80,7 @@ const LAYOUT_DETAILS: { [key in Values<typeof LayoutPreset>]: Layout } = {
           <OpModeView />
         </Tile>
         <Tile row="2 / span 2" col={1}>
-          <FieldView />
+          <ConfigView />
         </Tile>
         <Tile row="1 / span 3" col={2}>
           <PathView />
@@ -89,7 +89,7 @@ const LAYOUT_DETAILS: { [key in Values<typeof LayoutPreset>]: Layout } = {
           <PathSegmentView />
         </Tile>
       </TileGrid>
-    )
+    ),
   },
   [LayoutPreset.GRAPH]: {
     name: 'Graph',
