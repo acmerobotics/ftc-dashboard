@@ -548,7 +548,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 }
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            RobotLog.logStackTrace(e);
         }
     }
 
@@ -565,7 +565,9 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 String messageStr = DashboardCore.GSON.toJson(message);
                 send(messageStr);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                // NOTE: It's possible that the socket has closed and we have a backlog of messages
+                // to send. Settle for logging here instead of trying to get all the checks right.
+                RobotLog.logStackTrace(e);
             }
         }
 
@@ -651,7 +653,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         try {
             server.start();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            RobotLog.logStackTrace(e);
         }
 
         enableMenuItems = new ArrayList<>();
