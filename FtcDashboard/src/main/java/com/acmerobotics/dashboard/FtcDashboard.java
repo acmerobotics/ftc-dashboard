@@ -19,14 +19,11 @@ import com.acmerobotics.dashboard.config.ValueProvider;
 import com.acmerobotics.dashboard.config.reflection.ReflectionConfig;
 import com.acmerobotics.dashboard.config.variable.CustomVariable;
 import com.acmerobotics.dashboard.message.Message;
-import com.acmerobotics.dashboard.message.MessageType;
 import com.acmerobotics.dashboard.message.redux.InitOpMode;
-import com.acmerobotics.dashboard.message.redux.ReceiveConfig;
 import com.acmerobotics.dashboard.message.redux.ReceiveGamepadState;
 import com.acmerobotics.dashboard.message.redux.ReceiveImage;
 import com.acmerobotics.dashboard.message.redux.ReceiveOpModeList;
 import com.acmerobotics.dashboard.message.redux.ReceiveRobotStatus;
-import com.acmerobotics.dashboard.message.redux.SaveConfig;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.ftccommon.FtcEventLoop;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -37,6 +34,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpModeManagerImpl;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeRegistrar;
 import com.qualcomm.robotcore.exception.RobotCoreException;
 import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.robot.Robot;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.qualcomm.robotcore.util.ThreadPool;
 import com.qualcomm.robotcore.util.WebHandlerManager;
@@ -191,10 +189,10 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     private FtcEventLoop eventLoop;
     private OpModeManagerImpl opModeManager;
-    private OpMode activeOpMode;
-    private RobotStatus.OpModeStatus activeOpModeStatus = RobotStatus.OpModeStatus.STOPPED;
-    private final List<String> opModeList = new ArrayList<>();
-    private final Object opModeLock = new Object();
+
+    private final Mutex<OpModeAndStatus> activeOpMode = new Mutex<>(new OpModeAndStatus());
+
+    private final Mutex<List<String>> opModeList = new Mutex<>(new ArrayList<>());
 
     private ExecutorService gamepadWatchdogExecutor;
     private long lastGamepadTimestamp;
@@ -203,6 +201,11 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     private TextView connectionStatusTextView;
     private LinearLayout parentLayout;
+
+    private static class OpModeAndStatus {
+        public OpMode opMode;
+        public RobotStatus.OpModeStatus status = RobotStatus.OpModeStatus.STOPPED;
+    }
 
     private class GamepadWatchdogRunnable implements Runnable {
         @Override
@@ -213,8 +216,15 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                     if (lastGamepadTimestamp == 0) {
                         Thread.sleep(GAMEPAD_WATCHDOG_INTERVAL);
                     } else if ((timestamp - lastGamepadTimestamp) > GAMEPAD_WATCHDOG_INTERVAL) {
-                        activeOpMode.gamepad1.copy(new Gamepad());
-                        activeOpMode.gamepad2.copy(new Gamepad());
+                        activeOpMode.with(o -> {
+                            try {
+                                o.opMode.gamepad1.copy(new Gamepad());
+                                o.opMode.gamepad2.copy(new Gamepad());
+                            } catch (RobotCoreException e) {
+                                // we tried, continue on
+                                RobotLog.logStackTrace(e);
+                            }
+                        });
                         lastGamepadTimestamp = 0;
                     } else {
                         Thread.sleep(GAMEPAD_WATCHDOG_INTERVAL -
@@ -222,8 +232,6 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                     }
                 } catch (InterruptedException e) {
                     break;
-                } catch (RobotCoreException e) {
-                    throw new RuntimeException(e);
                 }
             }
         }
@@ -233,13 +241,15 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         @Override
         public void run() {
             RegisteredOpModes.getInstance().waitOpModesRegistered();
-            synchronized (opModeList) {
+
+            opModeList.with(l -> {
+                l.clear();
                 for (OpModeMeta opModeMeta : RegisteredOpModes.getInstance().getOpModes()) {
-                    opModeList.add(opModeMeta.name);
+                    l.add(opModeMeta.name);
                 }
-                Collections.sort(opModeList);
-                sendAll(new ReceiveOpModeList(opModeList));
-            }
+                Collections.sort(l);
+                sendAll(new ReceiveOpModeList(l));
+            });
         }
     }
 
@@ -563,11 +573,11 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         protected void onOpen() {
             sh.onOpen();
 
-            synchronized (opModeList) {
-                if (opModeList.size() > 0) {
-                    send(new ReceiveOpModeList(opModeList));
+            opModeList.with(l -> {
+                if (l.size() > 0) {
+                    send(new ReceiveOpModeList(l));
                 }
-            }
+            });
 
             updateStatusView();
         }
@@ -843,10 +853,6 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         opModeManager = eventLoop.getOpModeManager();
         if (opModeManager != null) {
             opModeManager.registerListener(this);
-        }
-
-        synchronized (opModeList) {
-            opModeList.clear();
         }
 
         Thread t = new Thread(new ListOpModesRunnable());
@@ -1134,28 +1140,35 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     private void updateGamepads(ReceiveGamepadState.Gamepad gamepad1, ReceiveGamepadState.Gamepad gamepad2) {
-        synchronized (opModeLock) {
+        activeOpMode.with(o -> {
             // for now, the dashboard only overrides synthetic gamepads
-            if (activeOpModeStatus == RobotStatus.OpModeStatus.STOPPED) {
+            if (o.status == RobotStatus.OpModeStatus.STOPPED) {
                 return;
             }
 
-            if (activeOpMode.gamepad1.getGamepadId() != Gamepad.ID_UNASSOCIATED ||
-                    activeOpMode.gamepad2.getGamepadId() != Gamepad.ID_UNASSOCIATED) {
+            if (o.opMode.gamepad1.getGamepadId() != Gamepad.ID_UNASSOCIATED ||
+                    o.opMode.gamepad2.getGamepadId() != Gamepad.ID_UNASSOCIATED) {
                 return;
             }
 
-            copyIntoSdkGamepad(gamepad1, activeOpMode.gamepad1);
-            copyIntoSdkGamepad(gamepad2, activeOpMode.gamepad2);
+            copyIntoSdkGamepad(gamepad1, o.opMode.gamepad1);
+            copyIntoSdkGamepad(gamepad2, o.opMode.gamepad2);
             lastGamepadTimestamp = System.currentTimeMillis();
-        }
+        });
     }
 
     private RobotStatus getRobotStatus() {
         if (opModeManager == null) {
             return new RobotStatus(core.enabled, false, "", RobotStatus.OpModeStatus.STOPPED, "", "");
         } else {
-            return new RobotStatus(core.enabled, true, opModeManager.getActiveOpModeName(), activeOpModeStatus, RobotLog.getGlobalWarningMessage().message, RobotLog.getGlobalErrorMsg());
+            return activeOpMode.with(o -> {
+                return new RobotStatus(
+                        core.enabled, true, opModeManager.getActiveOpModeName(),
+                        // status is an enum so it's okay to return a copy here.
+                        o.status,
+                        RobotLog.getGlobalWarningMessage().message, RobotLog.getGlobalErrorMsg()
+                );
+            });
         }
     }
 
@@ -1176,10 +1189,10 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     @Override
     public void onOpModePreInit(OpMode opMode) {
-        synchronized (opModeLock) {
-            activeOpModeStatus = RobotStatus.OpModeStatus.INIT;
-            activeOpMode = opMode;
-        }
+        activeOpMode.with(o -> {
+            o.opMode = opMode;
+            o.status = RobotStatus.OpModeStatus.INIT;
+        });
 
         if (!(opMode instanceof OpModeManagerImpl.DefaultOpMode)) {
             clearTelemetry();
@@ -1188,40 +1201,38 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     @Override
     public void onOpModePreStart(OpMode opMode) {
-        synchronized (opModeLock) {
-            activeOpModeStatus = RobotStatus.OpModeStatus.RUNNING;
-            activeOpMode = opMode;
-        }
+        activeOpMode.with(o -> {
+            o.opMode = opMode;
+            o.status = RobotStatus.OpModeStatus.RUNNING;
+        });
     }
 
     @Override
     public void onOpModePostStop(OpMode opMode) {
-        synchronized (opModeLock) {
-            activeOpModeStatus = RobotStatus.OpModeStatus.STOPPED;
-            activeOpMode = opMode;
-        }
-
-        withConfigRoot(new CustomVariableConsumer() {
-            @Override
-            public void accept(CustomVariable configRoot) {
-                for (String[] var : varsToRemove) {
-                    String category = var[0];
-                    String name = var[1];
-                    CustomVariable catVar = (CustomVariable) configRoot.getVariable(category);
-                    catVar.removeVariable(name);
-                    if (catVar.size() == 0) {
-                        configRoot.removeVariable(category);
-                    }
-                }
-                varsToRemove.clear();
-            }
+        activeOpMode.with(o -> {
+            o.opMode = opMode;
+            o.status = RobotStatus.OpModeStatus.STOPPED;
         });
 
         // this callback is sometimes called from the UI thread
         (new Thread() {
             @Override
             public void run() {
-                updateConfig();
+                withConfigRoot(new CustomVariableConsumer() {
+                    @Override
+                    public void accept(CustomVariable configRoot) {
+                        for (String[] var : varsToRemove) {
+                            String category = var[0];
+                            String name = var[1];
+                            CustomVariable catVar = (CustomVariable) configRoot.getVariable(category);
+                            catVar.removeVariable(name);
+                            if (catVar.size() == 0) {
+                                configRoot.removeVariable(category);
+                            }
+                        }
+                        varsToRemove.clear();
+                    }
+                });
             }
         }).start();
 
