@@ -6,3 +6,4 @@ com.acmerobotics.dashboard.config.variable
 com.acmerobotics.dashboard.message
 com.acmerobotics.dashboard.message.redux
 com.acmerobotics.dashboard.telemetry
+com.acmerobotics.dashboard.testopmode

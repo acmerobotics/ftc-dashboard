@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * Main class for interacting with the instance.
@@ -34,20 +35,20 @@ public class DashboardCore {
 
     public boolean enabled;
 
-    private final List<SendFun> sockets = new ArrayList<>();
+    private final Mutex<List<SendFun>> sockets = new Mutex<>(new ArrayList<>());
 
     private ExecutorService telemetryExecutorService;
+    // NOTE: We're doing fancy stuff that precludes the use of Mutex.
     private final List<TelemetryPacket> pendingTelemetry = new ArrayList<>(); // guarded by itself
     private volatile int telemetryTransmissionInterval = DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL;
 
-    private final Object configLock = new Object();
-    private CustomVariable configRoot = new CustomVariable(); // guarded by configLock
+    private final Mutex<CustomVariable> configRoot = new Mutex<>(new CustomVariable());
 
     private final Object pathLock = new Object();
     public ArrayList<FieldProvider> pathFields = new ArrayList<>(); // guarded by pathLock
 
 
-    // TODO: this doensn't make a ton of sense here, though it needs to go in this module for testing
+    // NOTE: Helps to have this here for testing
     public static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(Message.class, new MessageDeserializer())
             .registerTypeAdapter(BasicVariable.class, new ConfigVariableSerializer())
@@ -90,8 +91,7 @@ public class DashboardCore {
     }
 
     public DashboardCore() {
-        // TODO: name the thread? it used to be "dash telemetry"
-        telemetryExecutorService = Executors.newSingleThreadExecutor();
+        telemetryExecutorService = Executors.newSingleThreadExecutor(r -> new Thread(r, "dash telemetry"));
         telemetryExecutorService.submit(new TelemetryUpdateRunnable());
     }
 
@@ -99,20 +99,20 @@ public class DashboardCore {
         return new SocketHandler() {
             @Override
             public void onOpen() {
-                synchronized (configLock) {
-                    sendFun.send(new ReceiveConfig(configRoot));
-                }
+                configRoot.with(v -> {
+                    sendFun.send(new ReceiveConfig(v));
+                });
 
-                synchronized (sockets) {
-                    sockets.add(sendFun);
-                }
+                sockets.with(l -> {
+                    l.add(sendFun);
+                });
             }
 
             @Override
             public void onClose() {
-                synchronized (sockets) {
-                    sockets.remove(sendFun);
-                }
+                sockets.with(l -> {
+                    l.remove(sendFun);
+                });
             }
 
             @Override
@@ -124,9 +124,9 @@ public class DashboardCore {
 
                 switch (message.getType()) {
                     case GET_CONFIG: {
-                        synchronized (configLock) {
-                            sendFun.send(new ReceiveConfig(configRoot));
-                        }
+                        configRoot.with(v -> {
+                            sendFun.send(new ReceiveConfig(v));
+                        });
                         return true;
                     }
                     case SAVE_CONFIG: {
@@ -170,6 +170,8 @@ public class DashboardCore {
 
             pendingTelemetry.add(telemetryPacket);
 
+            // There should only be one thread, so we should avoid a thundering herd. (But then
+            // why not just go with notify()?)
             pendingTelemetry.notifyAll();
         }
     }
@@ -204,9 +206,9 @@ public class DashboardCore {
      * Sends updated configuration data to all instance clients.
      */
     public void updateConfig() {
-        synchronized (configLock) {
-            sendAll(new ReceiveConfig(configRoot));
-        }
+        configRoot.with(v -> {
+            sendAll(new ReceiveConfig(v));
+        });
     }
 
     /**
@@ -218,9 +220,7 @@ public class DashboardCore {
      * @param function
      */
     public void withConfigRoot(CustomVariableConsumer function) {
-        synchronized (configLock) {
-            function.accept(configRoot);
-        }
+        configRoot.with(function::accept);
 
         updateConfig();
     }
@@ -233,17 +233,17 @@ public class DashboardCore {
      * @param <T> variable type
      */
     public <T> void addConfigVariable(String category, String name, ValueProvider<T> provider) {
-        synchronized (configLock) {
-            CustomVariable catVar = (CustomVariable) configRoot.getVariable(category);
+        configRoot.with(v -> {
+            CustomVariable catVar = (CustomVariable) v.getVariable(category);
             if (catVar != null) {
                 catVar.putVariable(name, new BasicVariable<>(provider));
             } else {
                 catVar = new CustomVariable();
                 catVar.putVariable(name, new BasicVariable<>(provider));
-                configRoot.putVariable(category, catVar);
+                v.putVariable(category, catVar);
             }
             updateConfig();
-        }
+        });
     }
 
     /**
@@ -252,27 +252,27 @@ public class DashboardCore {
      * @param name variable name
      */
     public void removeConfigVariable(String category, String name) {
-        synchronized (configLock) {
-            CustomVariable catVar = (CustomVariable) configRoot.getVariable(category);
+        configRoot.with(v -> {
+            CustomVariable catVar = (CustomVariable) v.getVariable(category);
             catVar.removeVariable(name);
             if (catVar.size() == 0) {
-                configRoot.removeVariable(category);
+                v.removeVariable(category);
             }
             updateConfig();
-        }
+        });
     }
 
     public void sendAll(Message message) {
-        synchronized (sockets) {
-            for (SendFun sf : sockets) {
+        sockets.with(l -> {
+            for (SendFun sf : l) {
                 sf.send(message);
             }
-        }
+        });
     }
 
     public int clientCount() {
-        synchronized (sockets) {
-            return sockets.size();
-        }
+        return sockets.with(l -> {
+            return l.size();
+        });
     }
 }
