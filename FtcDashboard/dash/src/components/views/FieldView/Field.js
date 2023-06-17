@@ -146,7 +146,7 @@ export default class Field {
 
   renderOverlay(x, y, width, height) {
     const o = this.options;
-    var originX = x + width / 2:
+    var originX = x + width / 2;
     var originY = y + height / 2;
     var rotation = Math.PI / 2;
     this.ctx.save();
@@ -155,7 +155,7 @@ export default class Field {
 
     this.overlay.ops.forEach((op) => {
       switch (op.type) {
-        case 'rotation'
+        case 'rotation':
             rotation = op.rotation;
             break;
         case 'origin':
