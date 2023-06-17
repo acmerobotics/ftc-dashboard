@@ -15,6 +15,16 @@ public class Canvas {
         return this;
     }
 
+    public Canvas setRotation(double radians) {
+        ops.add(new Rotation(radians));
+        return this;
+    }
+
+    public Canvas setOrigin(double x, double y) {
+        ops.add(new Origin(x, y));
+        return this;
+    }
+
     public Canvas fillCircle(double x, double y, double radius) {
         ops.add(new Circle(x, y, radius, false));
         return this;

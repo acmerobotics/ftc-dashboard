@@ -146,16 +146,22 @@ export default class Field {
 
   renderOverlay(x, y, width, height) {
     const o = this.options;
-
+    var originX = x + width / 2:
+    var originY = y + height / 2;
+    var rotation = Math.PI / 2;
     this.ctx.save();
-    this.ctx.translate(x + width / 2, y + height / 2);
     this.ctx.scale(width / o.fieldSize, -height / o.fieldSize);
-    this.ctx.rotate(Math.PI / 2);
-
     this.ctx.lineCap = 'butt';
 
     this.overlay.ops.forEach((op) => {
       switch (op.type) {
+        case 'rotation'
+            rotation = op.rotation;
+            break;
+        case 'origin':
+            originX = op.origin.x;
+            originY = op.origin.y;
+            break;
         case 'fill':
           this.ctx.fillStyle = op.color;
           break;
@@ -228,6 +234,10 @@ export default class Field {
         default:
           throw new Error(`unknown operation: ${op.type}`);
       }
+
+        this.ctx.translate(originX, originY);
+        this.ctx.rotate(rotation);
+
     });
 
     this.ctx.restore();

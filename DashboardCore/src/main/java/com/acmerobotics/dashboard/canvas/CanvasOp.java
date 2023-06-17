@@ -4,6 +4,12 @@ import com.google.gson.annotations.SerializedName;
 
 public abstract class CanvasOp {
     public enum Type {
+
+        @SerializedName("origin")
+        ORIGIN,
+
+        @SerializedName("rotation")
+        ROTATION,
         @SerializedName("circle")
         CIRCLE,
 
