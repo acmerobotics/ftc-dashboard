@@ -144,23 +144,39 @@ export default class Field {
     this.ctx.restore();
   }
 
+adjustOrigin(ctx, defaultTransform, altOriginX, altOriginY, altRotation){
+    ctx.setTransform(defaultTransform);
+    ctx.translate(altOriginX, altOriginY);
+    ctx.rotate(altRotation);
+}
+
   renderOverlay(x, y, width, height) {
     const o = this.options;
-    var originX = x + width / 2;
-    var originY = y + height / 2;
-    var rotation = Math.PI / 2;
     this.ctx.save();
+    const originX = x + width / 2;
+    const originY = y + height / 2;
+    const rotation = Math.PI / 2;
+    var altOriginX = 0;
+    var altOriginY = 0;
+    var altRotation = 0;
+
+    this.ctx.translate(originX, originY);
     this.ctx.scale(width / o.fieldSize, -height / o.fieldSize);
+    this.ctx.rotate(rotation);
+    var defaultTransform = this.ctx.getTransform();
+
     this.ctx.lineCap = 'butt';
 
     this.overlay.ops.forEach((op) => {
       switch (op.type) {
         case 'rotation':
-            rotation = op.rotation;
+            altRotation = op.rotation;
+            this.adjustOrigin(this.ctx, defaultTransform, altOriginX, altOriginY, altRotation);
             break;
         case 'origin':
-            originX = op.origin.x;
-            originY = op.origin.y;
+            altOriginX=op.x;
+            altOriginY=op.y;
+            this.adjustOrigin(this.ctx, defaultTransform, altOriginX, altOriginY, altRotation);
             break;
         case 'fill':
           this.ctx.fillStyle = op.color;
@@ -234,10 +250,6 @@ export default class Field {
         default:
           throw new Error(`unknown operation: ${op.type}`);
       }
-
-        this.ctx.translate(originX, originY);
-        this.ctx.rotate(rotation);
-
     });
 
     this.ctx.restore();

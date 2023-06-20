@@ -206,4 +206,8 @@ public class TestDashboardInstance {
         if (currentPacket != null)
             core.sendTelemetryPacket(currentPacket);
     }
+
+    public void sendTelemetryPacket(TelemetryPacket t){
+        core.sendTelemetryPacket(t);
+    }
 }
