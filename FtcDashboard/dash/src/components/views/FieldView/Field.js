@@ -187,6 +187,19 @@ adjustOrigin(ctx, defaultTransform, altOriginX, altOriginY, altRotation){
         case 'strokeWidth':
           this.ctx.lineWidth = op.width;
           break;
+        case 'text':
+            this.ctx.save();
+            this.ctx.rotate(op.theta);
+            this.ctx.font = op.font;
+            //have to flip y axis again temporarily or text will be mirrored
+            this.ctx.scale(1, -1);
+            if (op.stroke) {
+                this.ctx.strokeText(op.text, op.x, op.y)
+            } else {
+                this.ctx.fillText(op.text, op.x, op.y)
+            }
+            this.ctx.restore();
+            break;
         case 'circle':
           this.ctx.beginPath();
           this.ctx.arc(op.x, op.y, op.radius, 0, 2 * Math.PI);

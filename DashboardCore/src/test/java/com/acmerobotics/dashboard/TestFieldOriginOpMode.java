@@ -96,14 +96,19 @@ public class TestFieldOriginOpMode extends TestOpMode {
                 //blue alliance would be
                 //.setRotation(Math.PI)
                 //.setOrigin(0, 12*6)
-                //.setRotation(-Math.PI/4) //unlikely to want a rotation of 45 degrees, but test anyway
+
+                //.setRotation(-Math.PI/4) //unlikely to want a rotation of 45 degrees, but tested it anyway
 
                 .setStrokeWidth(1)
                 //draw the origin
                 .setStroke("red")
                 .strokeLine(0,0,24,0) //x axis
+                .setFill("red")
+                .fillText("X axis", 0, 0,"8px Arial", 0)
                 .setStroke("green")
                 .strokeLine(0,0,0,24) //y axis
+                .setFill("green")
+                .strokeText("Y axis", (RED_ALLIANCE? -24: 0), 0,"8px serif", Math.PI/2 * (RED_ALLIANCE? -1: 1))
                 .setStroke("goldenrod")
                 .strokeCircle(0, 0, ORBITAL_RADIUS)
                 .setFill("black")

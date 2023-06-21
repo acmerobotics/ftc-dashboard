@@ -10,11 +10,6 @@ public class Canvas {
         ops = new ArrayList<>();
     }
 
-    public Canvas strokeCircle(double x, double y, double radius) {
-        ops.add(new Circle(x, y, radius, true));
-        return this;
-    }
-
     public Canvas setRotation(double radians) {
         ops.add(new Rotation(radians));
         return this;
@@ -22,6 +17,21 @@ public class Canvas {
 
     public Canvas setOrigin(double x, double y) {
         ops.add(new Origin(x, y));
+        return this;
+    }
+
+    public Canvas strokeText(String text, double x, double y, String font, double theta) {
+        ops.add(new Text(text, x, y, font, theta, true));
+        return this;
+    }
+
+    public Canvas fillText(String text, double x, double y, String font, double theta) {
+        ops.add(new Text(text, x, y, font, theta, false));
+        return this;
+    }
+
+    public Canvas strokeCircle(double x, double y, double radius) {
+        ops.add(new Circle(x, y, radius, true));
         return this;
     }
 

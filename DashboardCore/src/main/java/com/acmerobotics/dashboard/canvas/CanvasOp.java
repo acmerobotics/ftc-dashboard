@@ -29,7 +29,10 @@ public abstract class CanvasOp {
         FILL,
 
         @SerializedName("strokeWidth")
-        STROKE_WIDTH;
+        STROKE_WIDTH,
+
+        @SerializedName("text")
+        TEXT;
     }
 
     private Type type;
