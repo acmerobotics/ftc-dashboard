@@ -55,6 +55,19 @@ fieldImage.onload = function () {
 };
 fieldImage.src = fieldImageName;
 
+const fieldAltImage = new Image();
+let fieldAltLoaded = false;
+
+fieldAltImage.onload = function(){
+    fieldAltLoaded = true;
+  }
+
+
+
+
+fieldAltImage.src = '';
+//fieldAltImage.src = 'https://upload.wikimedia.org/wikipedia/commons/4/45/Football_field.svg';
+
 // all dimensions in this file are *CSS* pixels unless otherwise stated
 const DEFAULT_OPTIONS = {
   padding: 15,
@@ -66,6 +79,7 @@ const DEFAULT_OPTIONS = {
 };
 
 export default class Field {
+
   constructor(canvas, options) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
@@ -76,6 +90,14 @@ export default class Field {
     this.overlay = {
       ops: [],
     };
+
+    this.altIX = 0;
+    this.altIY = 0;
+    this.altIWidth = 0;
+    this.altIHeight = 0;
+    this.altOpaque = false;
+    this.gridlinesVertical = 7;
+    this.gridlinesHorizontal = 7;
   }
 
   setOverlay(overlay) {
@@ -110,9 +132,15 @@ export default class Field {
     this.ctx.save();
     this.ctx.globalAlpha = this.options.alpha;
     this.ctx.drawImage(fieldImage, x, y, width, height);
+    if (fieldAltLoaded){
+        //this.ctx.drawImage(fieldAltImage, x, y, width, height);
+        if (this.altOpaque) this.ctx.globalAlpha = 1.0;
+        this.ctx.drawImage(fieldAltImage, x + (this.altIX/144 * width), y + (this.altIY/144 * height), this.altIWidth/144 * width, this.altIHeight/144 * width);
+        this.ctx.globalAlpha = this.options.alpha;
+    }
     this.ctx.restore();
 
-    this.renderGridLines(x, y, width, height, 7, 7);
+    this.renderGridLines(x, y, width, height, this.gridlinesHorizontal, this.gridlinesVertical);
     this.renderOverlay(x, y, width, height);
   }
 
@@ -150,6 +178,17 @@ adjustOrigin(ctx, defaultTransform, altOriginX, altOriginY, altRotation){
     ctx.rotate(altRotation);
 }
 
+drawAltFieldImage(ctx, src, x, y, width, height, altX, altY, altWidth, altHeight, altOpaque){
+    fieldAltLoaded = false;
+    this.altIX = altX;
+    this.altIY = altY;
+    this.altIWidth = altWidth;
+    this.altIHeight = altHeight;
+    this.altOpaque = altOpaque;
+    fieldAltImage.src = src;
+    //ctx.drawImage(fieldAltImage, x + (altX/144 * width), y + (altY/144 * height), altWidth/144 * width, altHeight/144 * width);
+}
+
   renderOverlay(x, y, width, height) {
     const o = this.options;
     this.ctx.save();
@@ -169,9 +208,20 @@ adjustOrigin(ctx, defaultTransform, altOriginX, altOriginY, altRotation){
 
     this.overlay.ops.forEach((op) => {
       switch (op.type) {
+        case 'image':
+            this.drawAltFieldImage(this.ctx, op.src, x, y, width, height, op.x, op.y, op.width, op.height, op.opaque);
+            break;
+        case 'grid':
+            this.gridlinesHorizontal = (op.numHorizontal>2) ? op.numHorizontal : 2;
+            this.gridlinesVertical = (op.numVertical>2) ? op.numVertical : 2;
+            break;
+        case 'scale':
+            this.ctx.scale(op.scaleX, op.scaleY);
+            break;
         case 'rotation':
             altRotation = op.rotation;
             this.adjustOrigin(this.ctx, defaultTransform, altOriginX, altOriginY, altRotation);
+            fieldAltImage
             break;
         case 'origin':
             altOriginX=op.x;

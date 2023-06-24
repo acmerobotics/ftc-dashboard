@@ -11,14 +11,23 @@ public class TestFieldOriginOpMode extends TestOpMode {
     public static double PHASE = 90;
     public static double FREQUENCY = 0.25;
     public static double ORIGIN_OFFSET_X = 0;
-    public static double ORIGIN_OFFSET_Y = 0;
-    public static double ORIGIN_HEAD_ZERO = 0;
+    public static double ORIGIN_OFFSET_Y = 12 * 6;
+    public static double ORIGIN_ZEROHEADING = Math.PI/2;
     public static boolean RED_ALLIANCE = true;
     public static double ORBITAL_FREQUENCY = 0.05;
     public static double SPIN_FREQUENCY = 0.25;
-
     public static double ORBITAL_RADIUS = 50;
     public static double SIDE_LENGTH = 10;
+    public static String ALTIMGSRC = "https://upload.wikimedia.org/wikipedia/commons/4/45/Football_field.svg";
+    public static double ALTIMGX = 0; //try 24
+    public static double ALTIMGY = 0; //try 24
+    public static double ALTIMGW = 144; //try 48
+    public static double ALTIMGH = 144; //try 48
+    public static boolean ALTIMGOPAQUE = true;
+    public static double SCALEX = 1.0;
+    public static double SCALEY = 1.0;
+    public static double GRIDHORIZONTAL = 7; //includes field edges
+    public static double GRIDVERTICAL = 7;
 
     private static void rotatePoints(double[] xPoints, double[] yPoints, double angle) {
         for (int i = 0; i < xPoints.length; i++) {
@@ -88,19 +97,29 @@ public class TestFieldOriginOpMode extends TestOpMode {
         //draw the field overlay
         TelemetryPacket packet = new TelemetryPacket();
         packet.fieldOverlay()
+                //optionally add an alternate field image on top of the default
+                .setAltImage(ALTIMGSRC, ALTIMGX, ALTIMGY,ALTIMGW, ALTIMGH, ALTIMGOPAQUE)
+                //.setAltImage("", 0, 0,144, 144, false) //empty src will clear the alt field image
+
+                //optionally override default gridlines, minimum of 2 to render field edges, anything less suppresses gridlines in that direction, default is 7
+                .setGrid(GRIDHORIZONTAL, GRIDVERTICAL)
+
                 //historical default origin for dashboard is in the center of the field with X axis pointing up
                 //for powerplay season iron reign decided to set the origin to the alliance substation
-                //to take advantage of the inherent symmetries of the challenge
+                //to take advantage of the inherent symmetries of the challenge:
                 .setRotation(RED_ALLIANCE ? 0: Math.PI)
-                .setOrigin(0, 12 * 6 * (RED_ALLIANCE ? -1: 1))
+                .setOrigin(ORIGIN_OFFSET_X, ORIGIN_OFFSET_Y * (RED_ALLIANCE ? -1: 1))
                 //blue alliance would be
                 //.setRotation(Math.PI)
                 //.setOrigin(0, 12*6)
 
-                //.setRotation(-Math.PI/4) //unlikely to want a rotation of 45 degrees, but tested it anyway
+                //.setRotation(-Math.PI/4) //uncomment to see a rotation of 45 degrees, there have been challenges with a diagonal field symmetry
+
+                .setScale(SCALEX, SCALEY) //be sure the vales evaluate to a doubles and not ints
+                //.setScale(144.0/105,144.0/105) //FIFA soccer field in meters
 
                 .setStrokeWidth(1)
-                //draw the origin
+                //draw the axes of the new origin
                 .setStroke("red")
                 .strokeLine(0,0,24,0) //x axis
                 .setFill("red")

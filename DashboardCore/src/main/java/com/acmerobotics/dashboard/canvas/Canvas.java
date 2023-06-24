@@ -10,6 +10,21 @@ public class Canvas {
         ops = new ArrayList<>();
     }
 
+    public Canvas setAltImage(String src, double x, double y, double width, double height, boolean opaque){
+        ops.add(new Image(src, x, y, width, height, opaque));
+        return this;
+    }
+
+    public Canvas setGrid(double horizontal, double vertical) {
+        ops.add(new Grid(horizontal, vertical));
+        return this;
+    }
+
+    public Canvas setScale(double scaleX, double scaleY) {
+        ops.add(new Scale(scaleX, scaleY));
+        return this;
+    }
+
     public Canvas setRotation(double radians) {
         ops.add(new Rotation(radians));
         return this;
