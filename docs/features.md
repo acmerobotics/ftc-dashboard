@@ -61,11 +61,13 @@ Then your CanvasOps can be specified in meters.
 .setScale(144.0/105.0, 144.0/105.0) //be sure the calculation evaluates to a double and not an int
 ```
 
-Note that multiple calls to .setScale are cumulative:
+Note that multiple calls to .setScale are each relative to default scaling:
 
 ```java
-.setScale(.5,2) //x-axis will be squished and y-axis operations will be doubled
-.setScale(2,.5) //this will undo the previous command for normal scaling        
+.setScale(.5,2) //x-axis will be squished and y-axis operations will be double
+.strokeCircle(0, 0, ORBITAL_RADIUS) //squishy circle
+.setScale(1,1) //this will return to default scaling
+.strokeCircle(0, 0, ORBITAL_RADIUS) //normal circle
 ```
 
 You can optionally load an alternate field image on top of the default field that is updated yearly. This can be

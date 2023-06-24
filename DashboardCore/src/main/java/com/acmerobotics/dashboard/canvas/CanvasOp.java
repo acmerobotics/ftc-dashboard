@@ -19,6 +19,9 @@ public abstract class CanvasOp {
         @SerializedName("scale")
         SCALE,
 
+        @SerializedName("alpha")
+        ALPHA,
+
         @SerializedName("circle")
         CIRCLE,
 

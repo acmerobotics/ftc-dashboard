@@ -216,6 +216,8 @@ drawAltFieldImage(ctx, src, x, y, width, height, altX, altY, altWidth, altHeight
             this.gridlinesVertical = (op.numVertical>2) ? op.numVertical : 2;
             break;
         case 'scale':
+            //first reset the scale to the default
+            this.adjustOrigin(this.ctx, defaultTransform, altOriginX, altOriginY, altRotation);
             this.ctx.scale(op.scaleX, op.scaleY);
             break;
         case 'rotation':
@@ -227,6 +229,9 @@ drawAltFieldImage(ctx, src, x, y, width, height, altX, altY, altWidth, altHeight
             altOriginX=op.x;
             altOriginY=op.y;
             this.adjustOrigin(this.ctx, defaultTransform, altOriginX, altOriginY, altRotation);
+            break;
+        case 'alpha':
+            this.ctx.globalAlpha = op.alpha;
             break;
         case 'fill':
           this.ctx.fillStyle = op.color;

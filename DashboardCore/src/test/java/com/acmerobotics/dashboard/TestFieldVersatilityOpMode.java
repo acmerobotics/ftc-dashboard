@@ -5,7 +5,7 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.dashboard.testopmode.TestOpMode;
 
 
-public class TestFieldOriginOpMode extends TestOpMode {
+public class TestFieldVersatilityOpMode extends TestOpMode {
     TestDashboardInstance dashboard;
     public static double AMPLITUDE = 1;
     public static double PHASE = 90;
@@ -38,8 +38,8 @@ public class TestFieldOriginOpMode extends TestOpMode {
         }
     }
 
-    public TestFieldOriginOpMode(){
-        super("TestFieldOriginOpMode");
+    public TestFieldVersatilityOpMode(){
+        super("TestFieldVersatilityOpMode");
     }
 
     @Override
@@ -116,7 +116,7 @@ public class TestFieldOriginOpMode extends TestOpMode {
                 //.setRotation(-Math.PI/4) //uncomment to see a rotation of 45 degrees, there have been challenges with a diagonal field symmetry
 
                 .setScale(SCALEX, SCALEY) //be sure the vales evaluate to a doubles and not ints
-                //.setScale(144.0/105,144.0/105) //FIFA soccer field in meters
+                //.setScale(144.0/105,144.0/105) //example of FIFA soccer field in meters
 
                 .setStrokeWidth(1)
                 //draw the axes of the new origin
