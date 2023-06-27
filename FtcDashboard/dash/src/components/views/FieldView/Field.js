@@ -186,7 +186,6 @@ drawAltFieldImage(ctx, src, x, y, width, height, altX, altY, altWidth, altHeight
     this.altIHeight = altHeight;
     this.altOpaque = altOpaque;
     fieldAltImage.src = src;
-    //ctx.drawImage(fieldAltImage, x + (altX/144 * width), y + (altY/144 * height), altWidth/144 * width, altHeight/144 * width);
 }
 
   renderOverlay(x, y, width, height) {
