@@ -1,10 +1,10 @@
 package com.acmerobotics.dashboard.canvas;
 
-public class Origin extends CanvasOp {
+public class Translate extends CanvasOp {
     private double x;
     private double y;
-    public Origin(double x, double y) {
-        super(Type.ORIGIN);
+    public Translate(double x, double y) {
+        super(Type.TRANSLATE);
 
         this.x = x;
         this.y = y;

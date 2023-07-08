@@ -83,11 +83,13 @@ public class FieldVersatilityOpMode extends LinearOpMode {
                     //historical default origin for dashboard is in the center of the field with X axis pointing up
                     //for powerplay season iron reign decided to set the origin to the alliance substation
                     //to take advantage of the inherent symmetries of the challenge:
+
                     .setRotation(RED_ALLIANCE ? 0: Math.PI)
-                    .setOrigin(ORIGIN_OFFSET_X, ORIGIN_OFFSET_Y * (RED_ALLIANCE ? -1: 1))
+//                    .setRotation(ORIGIN_ZEROHEADING)
+                    .setTranslation(ORIGIN_OFFSET_X, ORIGIN_OFFSET_Y * (RED_ALLIANCE ? -1: 1))
                     //blue alliance would be
                     //.setRotation(Math.PI)
-                    //.setOrigin(0, 12*6)
+                    //.setTranslation(0, 12*6)
 
                     //.setRotation(-Math.PI/4) //uncomment to see a rotation of 45 degrees, there have been challenges with a diagonal field symmetry
 

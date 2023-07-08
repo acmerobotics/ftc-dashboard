@@ -10,8 +10,8 @@ public abstract class CanvasOp {
         @SerializedName("grid")
         GRID,
 
-        @SerializedName("origin")
-        ORIGIN,
+        @SerializedName("translate")
+        TRANSLATE,
 
         @SerializedName("rotation")
         ROTATION,

@@ -30,8 +30,8 @@ public class Canvas {
         return this;
     }
 
-    public Canvas setOrigin(double x, double y) {
-        ops.add(new Origin(x, y));
+    public Canvas setTranslation(double x, double y) {
+        ops.add(new Translate(x, y));
         return this;
     }
 

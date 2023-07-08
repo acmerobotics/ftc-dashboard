@@ -172,7 +172,7 @@ export default class Field {
     this.ctx.restore();
   }
 
-adjustOrigin(ctx, defaultTransform, altOriginX, altOriginY, altRotation){
+adjustTransform(ctx, defaultTransform, altOriginX, altOriginY, altRotation){
     ctx.setTransform(defaultTransform);
     ctx.translate(altOriginX, altOriginY);
     ctx.rotate(altRotation);
@@ -216,18 +216,17 @@ drawAltFieldImage(ctx, src, x, y, width, height, altX, altY, altWidth, altHeight
             break;
         case 'scale':
             //first reset the scale to the default
-            this.adjustOrigin(this.ctx, defaultTransform, altOriginX, altOriginY, altRotation);
+            this.adjustTransform(this.ctx, defaultTransform, altOriginX, altOriginY, altRotation);
             this.ctx.scale(op.scaleX, op.scaleY);
             break;
         case 'rotation':
             altRotation = op.rotation;
-            this.adjustOrigin(this.ctx, defaultTransform, altOriginX, altOriginY, altRotation);
-            fieldAltImage
+            this.adjustTransform(this.ctx, defaultTransform, altOriginX, altOriginY, altRotation);
             break;
-        case 'origin':
+        case 'translate':
             altOriginX=op.x;
             altOriginY=op.y;
-            this.adjustOrigin(this.ctx, defaultTransform, altOriginX, altOriginY, altRotation);
+            this.adjustTransform(this.ctx, defaultTransform, altOriginX, altOriginY, altRotation);
             break;
         case 'alpha':
             this.ctx.globalAlpha = op.alpha;

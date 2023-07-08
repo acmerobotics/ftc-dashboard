@@ -41,13 +41,13 @@ packet.fieldOverlay()
     .setRotation(-Math.PI/2);
     //all subsequent CanvasOps will render relative to this new orientation
 ```
-You can optionally change the origin of the rendered field to align with your custom global origin. The default origin of the
-field is in the center with the Y axis increasing to the left (rotation matters). To set an alternate origin, specify an offset to the default origin in inches:
+You can optionally translate the origin of the rendered field to align with your custom global translation. The default translation of the
+field is in the center with the Y axis increasing to the left (rotation matters). To set an alternate translation, specify an offset to the default translation in inches:
 
 ```java
 packet.fieldOverlay()
     //shift the origin to the middle of the left edge of the rendered field
-   .setOrigin(0, 12 * 6);
+   .setTranslation(0, 12 * 6);
     //all subsequent CanvasOps will render relative to this updated origin
 ```
 
