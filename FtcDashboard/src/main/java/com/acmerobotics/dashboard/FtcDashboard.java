@@ -32,9 +32,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeManager;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeManagerImpl;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeRegistrar;
-import com.qualcomm.robotcore.exception.RobotCoreException;
 import com.qualcomm.robotcore.hardware.Gamepad;
-import com.qualcomm.robotcore.robot.Robot;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.qualcomm.robotcore.util.ThreadPool;
 import com.qualcomm.robotcore.util.WebHandlerManager;
@@ -217,13 +215,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                         Thread.sleep(GAMEPAD_WATCHDOG_INTERVAL);
                     } else if ((timestamp - lastGamepadTimestamp) > GAMEPAD_WATCHDOG_INTERVAL) {
                         activeOpMode.with(o -> {
-                            try {
-                                o.opMode.gamepad1.copy(new Gamepad());
-                                o.opMode.gamepad2.copy(new Gamepad());
-                            } catch (RobotCoreException e) {
-                                // we tried, continue on
-                                RobotLog.logStackTrace(e);
-                            }
+                            o.opMode.gamepad1.copy(new Gamepad());
+                            o.opMode.gamepad2.copy(new Gamepad());
                         });
                         lastGamepadTimestamp = 0;
                     } else {
@@ -607,7 +600,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 }
                 case INIT_OP_MODE: {
                     String opModeName = ((InitOpMode) msg).getOpModeName();
-                    opModeManager.initActiveOpMode(opModeName);
+                    opModeManager.initOpMode(opModeName);
                     break;
                 }
                 case START_OP_MODE: {
