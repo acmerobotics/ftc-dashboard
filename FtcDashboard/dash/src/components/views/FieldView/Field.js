@@ -1,5 +1,4 @@
 import { cloneDeep } from 'lodash';
-import fieldImageName from '@/assets/field.png';
 
 // align coordinate to the nearest pixel, offset by a half pixel
 // this helps with drawing thin lines; e.g., if a line of width 1px
@@ -34,6 +33,7 @@ CanvasRenderingContext2D.prototype.getScalingFactors = function () {
   };
 };
 
+// TODO: Avoid calling getScalingFactors() when we know the scale isn't changing.
 CanvasRenderingContext2D.prototype.fineMoveTo = function (x, y) {
   const { scalingX, scalingY } = this.getScalingFactors();
   this.moveTo(alignCoord(x, scalingX), alignCoord(y, scalingY));
@@ -44,16 +44,22 @@ CanvasRenderingContext2D.prototype.fineLineTo = function (x, y) {
   this.lineTo(alignCoord(x, scalingX), alignCoord(y, scalingY));
 };
 
-// this is a bit of a hack bit it'll have to do
-// it's much better than sticking field renders in requestAnimationFrame()
-const fieldImage = new Image();
+const images = {};
 const fieldsToRender = [];
-let fieldLoaded = false;
-fieldImage.onload = function () {
-  fieldLoaded = true;
-  fieldsToRender.forEach((field) => field.render());
-};
-fieldImage.src = fieldImageName;
+
+function loadImage(src) {
+  if (images[src]) {
+    return images[src];
+  }
+
+  const image = new Image();
+  image.onload = function () {
+    fieldsToRender.forEach((field) => field.render());
+  };
+  image.src = src;
+  images[src] = image;
+  return image;
+}
 
 const fieldAltImage = new Image();
 let fieldAltLoaded = false;
@@ -71,7 +77,6 @@ fieldAltImage.src = '';
 // all dimensions in this file are *CSS* pixels unless otherwise stated
 const DEFAULT_OPTIONS = {
   padding: 15,
-  alpha: 0.25,
   fieldSize: 12 * 12, // inches
   splineSamples: 250,
   gridLineWidth: 1, // device pixels
@@ -116,7 +121,7 @@ export default class Field {
     const smallerDim = width < height ? width : height;
     const fieldSize = smallerDim - 2 * this.options.padding;
 
-    if (!fieldLoaded && fieldsToRender.indexOf(this) === -1) {
+    if (fieldsToRender.indexOf(this) === -1) {
       fieldsToRender.push(this);
     }
 
@@ -128,67 +133,12 @@ export default class Field {
     );
   }
 
-  renderField(x, y, width, height) {
-    this.ctx.save();
-    this.ctx.globalAlpha = this.options.alpha;
-    this.ctx.drawImage(fieldImage, x, y, width, height);
-    if (fieldAltLoaded){
-        //this.ctx.drawImage(fieldAltImage, x, y, width, height);
-        if (this.altOpaque) this.ctx.globalAlpha = 1.0;
-        this.ctx.drawImage(fieldAltImage, x + (this.altIX/144 * width), y + (this.altIY/144 * height), this.altIWidth/144 * width, this.altIHeight/144 * width);
-        this.ctx.globalAlpha = this.options.alpha;
-    }
-    this.ctx.restore();
-
-    this.renderGridLines(x, y, width, height, this.gridlinesHorizontal, this.gridlinesVertical);
-    this.renderOverlay(x, y, width, height);
-  }
-
-  renderGridLines(x, y, width, height, numTicksX, numTicksY) {
-    this.ctx.save();
-
-    this.ctx.strokeStyle = this.options.gridLineColor;
-    this.ctx.lineWidth = this.options.gridLineWidth / devicePixelRatio;
-
-    const horSpacing = width / (numTicksX - 1);
-    const vertSpacing = height / (numTicksY - 1);
-
-    for (let i = 0; i < numTicksX; i++) {
-      const lineX = x + horSpacing * i;
-      this.ctx.beginPath();
-      this.ctx.fineMoveTo(lineX, y);
-      this.ctx.fineLineTo(lineX, y + height);
-      this.ctx.stroke();
-    }
-
-    for (let i = 0; i < numTicksY; i++) {
-      const lineY = y + vertSpacing * i;
-      this.ctx.beginPath();
-      this.ctx.fineMoveTo(x, lineY);
-      this.ctx.fineLineTo(x + width, lineY);
-      this.ctx.stroke();
-    }
-
-    this.ctx.restore();
-  }
-
 adjustTransform(ctx, defaultTransform, altOriginX, altOriginY, altRotation){
     ctx.setTransform(defaultTransform);
     ctx.translate(altOriginX, altOriginY);
     ctx.rotate(altRotation);
 }
-
-drawAltFieldImage(ctx, src, x, y, width, height, altX, altY, altWidth, altHeight, altOpaque){
-    fieldAltLoaded = false;
-    this.altIX = altX;
-    this.altIY = altY;
-    this.altIWidth = altWidth;
-    this.altIHeight = altHeight;
-    this.altOpaque = altOpaque;
-    fieldAltImage.src = src;
-}
-
-  renderOverlay(x, y, width, height) {
+    renderField(x, y, width, height) {
     const o = this.options;
     this.ctx.save();
     const originX = x + width / 2;
@@ -207,13 +157,7 @@ drawAltFieldImage(ctx, src, x, y, width, height, altX, altY, altWidth, altHeight
 
     this.overlay.ops.forEach((op) => {
       switch (op.type) {
-        case 'image':
-            this.drawAltFieldImage(this.ctx, op.src, x, y, width, height, op.x, op.y, op.width, op.height, op.opaque);
-            break;
-        case 'grid':
-            this.gridlinesHorizontal = (op.numHorizontal>2) ? op.numHorizontal : 2;
-            this.gridlinesVertical = (op.numVertical>2) ? op.numVertical : 2;
-            break;
+
         case 'scale':
             //first reset the scale to the default
             this.adjustTransform(this.ctx, defaultTransform, altOriginX, altOriginY, altRotation);
@@ -228,9 +172,7 @@ drawAltFieldImage(ctx, src, x, y, width, height, altX, altY, altWidth, altHeight
             altOriginY=op.y;
             this.adjustTransform(this.ctx, defaultTransform, altOriginX, altOriginY, altRotation);
             break;
-        case 'alpha':
-            this.ctx.globalAlpha = op.alpha;
-            break;
+
         case 'fill':
           this.ctx.fillStyle = op.color;
           break;
@@ -311,6 +253,49 @@ drawAltFieldImage(ctx, src, x, y, width, height, altX, altY, altWidth, altHeight
             this.ctx.lineTo(sx, sy);
           }
           this.ctx.stroke();
+          break;
+        }
+        case 'image': {
+          const image = loadImage(op.path);
+          this.ctx.drawImage(image, op.x, op.y, op.width, op.height);
+          break;
+        }
+        case 'grid': {
+          this.ctx.save();
+
+          this.ctx.strokeStyle = this.options.gridLineColor;
+
+          const horSpacing = op.width / (op.numTicksX - 1);
+          const vertSpacing = op.height / (op.numTicksY - 1);
+
+          const { scalingX, scalingY } = this.ctx.getScalingFactors();
+
+          this.ctx.lineWidth = this.options.gridLineWidth / (scalingY * devicePixelRatio);
+
+          for (let i = 0; i < op.numTicksX; i++) {
+            const lineX = op.x + horSpacing * i;
+            this.ctx.beginPath();
+            this.ctx.fineMoveTo(lineX, op.y);
+            this.ctx.fineLineTo(lineX, op.y + op.height);
+            this.ctx.stroke();
+          }
+
+          this.ctx.lineWidth = this.options.gridLineWidth / (scalingX * devicePixelRatio);
+
+          for (let i = 0; i < op.numTicksY; i++) {
+            const lineY = op.y + vertSpacing * i;
+            this.ctx.beginPath();
+            this.ctx.fineMoveTo(op.x, lineY);
+            this.ctx.fineLineTo(op.x + op.width, lineY);
+            this.ctx.stroke();
+          }
+
+          this.ctx.restore();
+
+          break;
+        }
+        case 'alpha': {
+          this.ctx.globalAlpha = op.alpha;
           break;
         }
         default:

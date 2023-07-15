@@ -4,9 +4,6 @@ import com.google.gson.annotations.SerializedName;
 
 public abstract class CanvasOp {
     public enum Type {
-        @SerializedName("image")
-        ALTIMAGE,
-
         @SerializedName("grid")
         GRID,
 
@@ -43,8 +40,12 @@ public abstract class CanvasOp {
         @SerializedName("strokeWidth")
         STROKE_WIDTH,
 
+
         @SerializedName("text")
-        TEXT;
+        TEXT,
+
+        @SerializedName("image")
+        IMAGE;
     }
 
     private Type type;

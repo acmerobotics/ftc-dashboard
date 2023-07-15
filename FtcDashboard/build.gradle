@@ -1,6 +1,6 @@
 //noinspection GradleDependency
 buildscript {
-    ext.min_sdk_version = "8.0.0"
+    ext.min_sdk_version = "8.2.0"
 }
 
 plugins {

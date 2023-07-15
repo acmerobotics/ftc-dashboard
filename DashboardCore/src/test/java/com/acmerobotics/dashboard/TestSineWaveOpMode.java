@@ -20,11 +20,10 @@ public class TestSineWaveOpMode extends TestOpMode {
 
     @Override
     protected void loop() throws InterruptedException {
-        System.out.println(Math.sin(System.currentTimeMillis()));
         dashboard.addData("x", AMPLITUDE * Math.sin(
                 2 * Math.PI * FREQUENCY * (System.currentTimeMillis() / 1000d) + Math.toRadians(PHASE)
         ));
         dashboard.update();
-        Thread.sleep(1);
+        Thread.sleep(10);
     }
 }

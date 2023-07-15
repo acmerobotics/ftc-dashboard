@@ -1,12 +1,19 @@
 package com.acmerobotics.dashboard.canvas;
 
 public class Grid extends CanvasOp {
-    private double numHorizontal;
-    private double numVertical;
-    public Grid(double numHorizontal, double numVertical) {
+
+    private double x, y;
+    private double width, height;
+    private int numTicksX, numTicksY;
+
+    public Grid(double x, double y, double width, double height, int numTicksX, int numTicksY) {
         super(Type.GRID);
 
-        this.numHorizontal = numHorizontal;
-        this.numVertical = numVertical;
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.numTicksX = numTicksX;
+        this.numTicksY = numTicksY;
     }
 }
