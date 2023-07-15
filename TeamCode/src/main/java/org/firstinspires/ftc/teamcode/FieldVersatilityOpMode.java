@@ -106,10 +106,17 @@ public class FieldVersatilityOpMode extends LinearOpMode {
                     .strokeLine(0,0,0,24) //y axis
                     .setFill("green")
                     .strokeText("Y axis", (RED_ALLIANCE? -24: 0), 0,"8px serif", Math.PI/2 * (RED_ALLIANCE? -1: 1))
+                    //draw the orbiting heading indicator
                     .setStroke("goldenrod")
                     .strokeCircle(0, 0, ORBITAL_RADIUS)
                     .setFill("black")
-                    .fillPolygon(bxPoints, byPoints);
+                    .fillPolygon(bxPoints, byPoints)
+                    //draw a 1 ft blue square at the first diagonal tile intersection
+                    .setFill("blue")
+                    .fillRect(24, 24, 12, 12)
+                    //draw another square to confirm positioning across the y axis
+                    .setFill("orange")
+                    .fillRect(-24, 36, 12, 12);;
             dashboard.sendTelemetryPacket(packet);
 
             sleep(20);
