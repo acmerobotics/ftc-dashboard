@@ -4,7 +4,6 @@ import com.acmerobotics.dashboard.config.ValueProvider;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.dashboard.testopmode.TestOpMode;
 
-
 public class TestFieldVersatilityOpMode extends TestOpMode {
     TestDashboardInstance dashboard;
     public static double AMPLITUDE = 1;
@@ -98,12 +97,9 @@ public class TestFieldVersatilityOpMode extends TestOpMode {
         TelemetryPacket packet = new TelemetryPacket();
         packet.fieldOverlay()
                 //optionally add an alternate field image on top of the default
-                .setAltImage(ALTIMGSRC, ALTIMGX, ALTIMGY,ALTIMGW, ALTIMGH, ALTIMGOPAQUE)
-                //.setAltImage("", 0, 0,144, 144, false) //empty src will clear the alt field image
-
+                .drawImage(ALTIMGSRC, ALTIMGX, ALTIMGY,ALTIMGW, ALTIMGH)
                 //optionally override default gridlines, minimum of 2 to render field edges, anything less suppresses gridlines in that direction, default is 7
-                .setGrid(GRIDHORIZONTAL, GRIDVERTICAL)
-
+                .drawGrid(0, 0, GRIDHORIZONTAL, GRIDVERTICAL, 2, 2)
                 //historical default origin for dashboard is in the center of the field with X axis pointing up
                 //for powerplay season iron reign decided to set the origin to the alliance substation
                 //to take advantage of the inherent symmetries of the challenge:
