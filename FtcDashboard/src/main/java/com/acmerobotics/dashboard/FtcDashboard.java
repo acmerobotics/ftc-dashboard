@@ -250,7 +250,9 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             opModeList.with(l -> {
                 l.clear();
                 for (OpModeMeta opModeMeta : RegisteredOpModes.getInstance().getOpModes()) {
-                    l.add(opModeMeta.name);
+                    if (opModeMeta.flavor != OpModeMeta.Flavor.SYSTEM) {
+                        l.add(opModeMeta.name);
+                    }
                 }
                 Collections.sort(l);
                 sendAll(new ReceiveOpModeList(l));
