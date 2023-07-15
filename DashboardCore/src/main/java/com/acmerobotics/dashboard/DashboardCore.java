@@ -1,5 +1,6 @@
 package com.acmerobotics.dashboard;
 
+import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.ValueProvider;
 import com.acmerobotics.dashboard.config.variable.BasicVariable;
 import com.acmerobotics.dashboard.config.variable.ConfigVariableDeserializer;
@@ -20,7 +21,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 
 /**
  * Main class for interacting with the instance.
@@ -32,6 +32,7 @@ public class DashboardCore {
     private static final int DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL = 100; // ms
 
     public boolean enabled;
+    public boolean drawDefaultField = true;
 
     private final Mutex<List<SendFun>> sockets = new Mutex<>(new ArrayList<>());
 
@@ -51,6 +52,14 @@ public class DashboardCore {
             .registerTypeAdapter(CustomVariable.class, new ConfigVariableDeserializer())
             .serializeNulls()
             .create();
+
+    private static final Canvas DEFAULT_FIELD = new Canvas();
+    static {
+        DEFAULT_FIELD.setAlpha(0.25);
+        DEFAULT_FIELD.drawImage("/dash/powerplay.png", -72, -72, 144, 144);
+        DEFAULT_FIELD.setAlpha(1.0);
+        DEFAULT_FIELD.drawGrid(-72, -72, 144, 144, 7, 7);
+    }
 
     private class TelemetryUpdateRunnable implements Runnable {
         @Override
@@ -154,6 +163,11 @@ public class DashboardCore {
         }
 
         telemetryPacket.addTimestamp();
+
+        if (drawDefaultField) {
+            telemetryPacket.fieldOverlay().getOperations()
+                            .addAll(0, new ArrayList<>(DEFAULT_FIELD.getOperations()));
+        }
 
         synchronized (pendingTelemetry) {
             // TODO: a circular buffer is probably a better idea, but this will work for now

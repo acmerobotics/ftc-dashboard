@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.config.ValueProvider;
 import com.acmerobotics.dashboard.config.reflection.ReflectionConfig;
@@ -81,6 +82,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private static final int GAMEPAD_WATCHDOG_INTERVAL = 500; // ms
 
     private static boolean suppressOpMode = false;
+    private static boolean drawDefaultField = true;
 
     private static final String PREFS_NAME = "FtcDashboard";
     private static final String PREFS_AUTO_ENABLE_KEY = "autoEnable";
@@ -99,6 +101,16 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      */
     public static void suppressOpMode() {
         suppressOpMode = true;
+    }
+
+    /**
+     * Set whether the default field is drawn. Persists between op mode invocations.
+     */
+    public static void setDrawDefaultField(boolean drawDefaultField) {
+        FtcDashboard.drawDefaultField = drawDefaultField;
+        if (instance != null) {
+            instance.core.drawDefaultField = drawDefaultField;
+        }
     }
 
     /**
@@ -638,6 +650,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     private FtcDashboard() {
+        core.drawDefaultField = drawDefaultField;
+
         core.withConfigRoot(new CustomVariableConsumer() {
             @Override
             public void accept(CustomVariable configRoot) {
@@ -833,6 +847,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         webHandlerManager.register("/dash/",
                 newStaticAssetHandler(assetManager, "dash/index.html"));
         addAssetWebHandlers(webHandlerManager, assetManager, "dash");
+
+        addAssetWebHandlers(webHandlerManager, assetManager, "images");
 
         webServerAttached = true;
 

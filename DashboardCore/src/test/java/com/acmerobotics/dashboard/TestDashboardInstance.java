@@ -203,7 +203,9 @@ public class TestDashboardInstance {
     }
 
     public void update() {
-        if (currentPacket != null)
+        if (currentPacket != null) {
             core.sendTelemetryPacket(currentPacket);
+            currentPacket = null;
+        }
     }
 }

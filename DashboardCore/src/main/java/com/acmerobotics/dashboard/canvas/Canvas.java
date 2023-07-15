@@ -74,6 +74,28 @@ public class Canvas {
         return this;
     }
 
+    /**
+     * Draws an image served at the given path. All files stored in the assets images/ folder will
+     * be served under path /images/.
+     */
+    public Canvas drawImage(String path, double x, double y, double width, double height) {
+        ops.add(new Image(path, x, y, width, height));
+        return this;
+    }
+
+    public Canvas drawGrid(double x, double y, double width, double height, int numTicksX, int numTicksY) {
+        ops.add(new Grid(x, y, width, height, numTicksX, numTicksY));
+        return this;
+    }
+
+    /**
+     * Set the global alpha for subsequent operations.
+     */
+    public Canvas setAlpha(double alpha) {
+        ops.add(new Alpha(alpha));
+        return this;
+    }
+
     public List<CanvasOp> getOperations() {
         return ops;
     }
