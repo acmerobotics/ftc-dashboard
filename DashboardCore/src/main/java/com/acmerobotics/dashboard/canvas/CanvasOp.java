@@ -23,7 +23,16 @@ public abstract class CanvasOp {
         FILL,
 
         @SerializedName("strokeWidth")
-        STROKE_WIDTH;
+        STROKE_WIDTH,
+
+        @SerializedName("image")
+        IMAGE,
+
+        @SerializedName("grid")
+        GRID,
+
+        @SerializedName("alpha")
+        ALPHA,
     }
 
     private Type type;
