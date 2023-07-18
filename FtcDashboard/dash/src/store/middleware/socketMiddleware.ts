@@ -59,6 +59,7 @@ const socketMiddleware: Middleware<Record<string, unknown>, RootState> =
         break;
       }
       // messages forwarded to the server
+      case 'UPLOAD_PATH':
       case RECEIVE_GAMEPAD_STATE:
       case GET_ROBOT_STATUS:
       case 'SAVE_CONFIG':

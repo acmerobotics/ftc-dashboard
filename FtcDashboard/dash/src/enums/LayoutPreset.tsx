@@ -10,10 +10,13 @@ import GraphView from '@/components/views/GraphView/GraphView';
 import ConfigView from '@/components/views/ConfigView/ConfigView';
 import TelemetryView from '@/components/views/TelemetryView';
 import FieldView from '@/components/views/FieldView/FieldView';
+import PathView from '@/components/views/PathView/PathView';
+import PathSegmentView from '@/components/views/PathView/PathSegmentView';
 
 const LayoutPreset = {
   DEFAULT: 'DEFAULT',
   FIELD: 'FIELD',
+  PATH: 'PATH',
   GRAPH: 'GRAPH',
   ORIGINAL: 'ORIGINAL',
   CONFIGURABLE: 'CONFIGURABLE',
@@ -65,6 +68,25 @@ const LAYOUT_DETAILS: { [key in Values<typeof LayoutPreset>]: Layout } = {
         </Tile>
         <Tile row={3} col={3}>
           <TelemetryView />
+        </Tile>
+      </TileGrid>
+    ),
+  },
+  [LayoutPreset.PATH]: {
+    name: 'Path',
+    content: (
+      <TileGrid gridTemplate="220px calc(60% - 220px) 40% / 25% 50 % 25%">
+        <Tile row="1 / span 1" col={1}>
+          <OpModeView />
+        </Tile>
+        <Tile row="2 / span 2" col={1}>
+          <ConfigView />
+        </Tile>
+        <Tile row="1 / span 3" col={2}>
+          <PathView />
+        </Tile>
+        <Tile row="1/ span 3" col={3}>
+          <PathSegmentView />
         </Tile>
       </TileGrid>
     ),

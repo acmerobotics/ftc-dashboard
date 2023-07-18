@@ -11,6 +11,8 @@ import com.acmerobotics.dashboard.message.MessageType;
 import com.acmerobotics.dashboard.message.redux.ReceiveConfig;
 import com.acmerobotics.dashboard.message.redux.ReceiveTelemetry;
 import com.acmerobotics.dashboard.message.redux.SaveConfig;
+import com.acmerobotics.dashboard.message.redux.UploadPath;
+import com.acmerobotics.dashboard.path.reflection.FieldProvider;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -40,6 +42,10 @@ public class DashboardCore {
     private volatile int telemetryTransmissionInterval = DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL;
 
     private final Mutex<CustomVariable> configRoot = new Mutex<>(new CustomVariable());
+
+    private final Object pathLock = new Object();
+    public ArrayList<FieldProvider> pathFields = new ArrayList<>(); // guarded by pathLock
+
 
     // NOTE: Helps to have this here for testing
     public static final Gson GSON = new GsonBuilder()
@@ -123,13 +129,14 @@ public class DashboardCore {
                         return true;
                     }
                     case SAVE_CONFIG: {
-                        withConfigRoot(new CustomVariableConsumer() {
-                            @Override
-                            public void accept(CustomVariable configRoot) {
-                                configRoot.update(((SaveConfig) message).getConfigDiff());
-                            }
-                        });
-
+                        withConfigRoot(configRoot -> configRoot.update(((SaveConfig) message).getConfigDiff()));
+                        return true;
+                    }
+                    case UPLOAD_PATH: {
+                        synchronized (pathLock) {
+                            for (FieldProvider field : pathFields)
+                                field.set((UploadPath) message);
+                        }
                         return true;
                     }
                     default:

@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { forwardRef, PropsWithChildren } from 'react';
+import { ForwardedRef, forwardRef, PropsWithChildren } from 'react';
 
 type BaseViewProps = PropsWithChildren<{
   isUnlocked?: boolean;
@@ -47,15 +47,21 @@ const BaseViewHeading = ({
   </h2>
 );
 
-const BaseViewBody = ({
-  children,
-  className,
-  ...props
-}: JSX.IntrinsicElements['div']) => (
-  <div className={`flex-1 overflow-auto px-4 ${className}`} {...props}>
-    {children}
-  </div>
+const BaseViewBody = forwardRef(
+  (
+    { children, className, ...props }: JSX.IntrinsicElements['div'],
+    ref: ForwardedRef<HTMLDivElement>,
+  ) => (
+    <div
+      ref={ref}
+      className={`flex-1 overflow-auto px-4 ${className}`}
+      {...props}
+    >
+      {children}
+    </div>
+  ),
 );
+BaseViewBody.displayName = 'BaseViewBody';
 
 const BaseViewIcons = ({
   className,

@@ -14,7 +14,7 @@ type Stroke = {
 
 type StrokeWidth = {
   type: 'strokeWidth';
-  lineWidth: number;
+  width: number;
 };
 
 type Circle = {
@@ -53,7 +53,7 @@ type Spline = {
   fy: number;
 };
 
-type DrawOp =
+export type DrawOp =
   | Fill
   | Stroke
   | StrokeWidth
