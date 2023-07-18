@@ -1,16 +1,10 @@
 import {
   StatusState,
-  GetRobotStatusAction,
   ReceiveOpModeListAction,
   ReceiveRobotStatusAction,
-  GET_ROBOT_STATUS,
   RECEIVE_OP_MODE_LIST,
   RECEIVE_ROBOT_STATUS,
 } from '@/store/types';
-
-export const getRobotStatus = (): GetRobotStatusAction => ({
-  type: GET_ROBOT_STATUS,
-});
 
 export const receiveRobotStatus = (
   status: StatusState,

@@ -48,8 +48,6 @@ export type {
 } from './settings';
 
 export {
-  CONNECT,
-  DISCONNECT,
   RECEIVE_PING_TIME,
   RECEIVE_CONNECTION_STATUS,
   SEND_MESSAGE,
