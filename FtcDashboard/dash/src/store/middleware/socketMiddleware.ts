@@ -1,8 +1,7 @@
-import { Middleware, Store } from 'redux';
+import { Middleware } from 'redux';
 
-import { RootState, AppThunkAction, AppThunkDispatch } from '@/store/reducers';
+import { RootState, AppThunkDispatch } from '@/store/reducers';
 import {
-  connect,
   receiveConnectionStatus,
   receivePingTime,
 } from '@/store/actions/socket';
@@ -21,7 +20,11 @@ let statusSentTime: number;
 export function startSocketWatcher(dispatch: AppThunkDispatch) {
   setInterval(() => {
     if (socket === undefined || socket.readyState === WebSocket.CLOSED) {
-      socket = new WebSocket(`ws://${import.meta.env['VITE_REACT_APP_HOST'] || window.location.hostname}:${import.meta.env['VITE_REACT_APP_PORT']}`);
+      socket = new WebSocket(
+        `ws://${
+          import.meta.env['VITE_REACT_APP_HOST'] || window.location.hostname
+        }:${import.meta.env['VITE_REACT_APP_PORT']}`,
+      );
 
       socket.onmessage = (evt) => {
         const msg = JSON.parse(evt.data);

@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import LayoutPreset, { LayoutPresetType } from '@/enums/LayoutPreset';
-import { connect, disconnect } from '@/store/actions/socket';
 import { saveLayoutPreset, getLayoutPreset } from '@/store/actions/settings';
 import { RootState } from '@/store/reducers';
 
