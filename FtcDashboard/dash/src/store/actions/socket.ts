@@ -1,10 +1,6 @@
 import { Dispatch } from 'redux';
 
 import {
-  CONNECT,
-  DISCONNECT,
-  ConnectAction,
-  DisconnectAction,
   ReceiveConnectionStatusAction,
   ReceiveOpModeListAction,
   ReceivePingTimeAction,
@@ -12,16 +8,6 @@ import {
   RECEIVE_PING_TIME,
 } from '@/store/types';
 import { receiveOpModeList } from './status';
-
-export const connect = (host: string, port: string): ConnectAction => ({
-  type: CONNECT,
-  host,
-  port,
-});
-
-export const disconnect = (): DisconnectAction => ({
-  type: DISCONNECT,
-});
 
 export const receivePingTime = (pingTime: number): ReceivePingTimeAction => ({
   type: RECEIVE_PING_TIME,
