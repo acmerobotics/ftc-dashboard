@@ -61,19 +61,6 @@ function loadImage(src) {
   return image;
 }
 
-const fieldAltImage = new Image();
-let fieldAltLoaded = false;
-
-fieldAltImage.onload = function(){
-    fieldAltLoaded = true;
-  }
-
-
-
-
-fieldAltImage.src = '';
-//fieldAltImage.src = 'https://upload.wikimedia.org/wikipedia/commons/4/45/Football_field.svg';
-
 // all dimensions in this file are *CSS* pixels unless otherwise stated
 const DEFAULT_OPTIONS = {
   padding: 15,
@@ -95,7 +82,7 @@ export default class Field {
     this.overlay = {
       ops: [],
     };
-
+/* todo remove this section
     this.altIX = 0;
     this.altIY = 0;
     this.altIWidth = 0;
@@ -103,6 +90,7 @@ export default class Field {
     this.altOpaque = false;
     this.gridlinesVertical = 7;
     this.gridlinesHorizontal = 7;
+    */
   }
 
   setOverlay(overlay) {
@@ -133,14 +121,16 @@ export default class Field {
     );
   }
 
-adjustTransform(ctx, defaultTransform, altOriginX, altOriginY, altRotation){
-    ctx.setTransform(defaultTransform);
-    ctx.translate(altOriginX, altOriginY);
-    ctx.rotate(altRotation);
-}
+    adjustTransform(ctx, defaultTransform, altOriginX, altOriginY, altRotation){
+        ctx.setTransform(defaultTransform);
+        ctx.translate(altOriginX, altOriginY);
+        ctx.rotate(altRotation);
+    }
     renderField(x, y, width, height) {
     const o = this.options;
+
     this.ctx.save();
+
     const originX = x + width / 2;
     const originY = y + height / 2;
     const rotation = Math.PI / 2;
@@ -149,7 +139,8 @@ adjustTransform(ctx, defaultTransform, altOriginX, altOriginY, altRotation){
     var altRotation = 0;
 
     this.ctx.translate(originX, originY);
-    this.ctx.scale(width / o.fieldSize, -height / o.fieldSize);
+    //todo remove this line this.ctx.scale(width / o.fieldSize, -height / o.fieldSize);
+    this.ctx.scale(width / o.fieldSize, height / o.fieldSize);
     this.ctx.rotate(rotation);
     var defaultTransform = this.ctx.getTransform();
 

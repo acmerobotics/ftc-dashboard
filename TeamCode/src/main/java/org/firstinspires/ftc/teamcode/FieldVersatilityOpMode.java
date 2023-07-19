@@ -31,8 +31,12 @@ public class FieldVersatilityOpMode extends LinearOpMode {
     public static boolean ALTIMGOPAQUE = true;
     public static double SCALEX = 1.0;
     public static double SCALEY = 1.0;
-    public static double GRIDHORIZONTAL = 7; //includes field edges
-    public static double GRIDVERTICAL = 7;
+    public static int GRIDHORIZONTAL = 7; //includes field edges
+    public static int GRIDVERTICAL = 7;
+    public static double GRIDX = 0;
+    public static double GRIDY = 0;
+    public static double GRIDH = 144;
+    public static double GRIDW = 144;
 
     private static void rotatePoints(double[] xPoints, double[] yPoints, double angle) {
         for (int i = 0; i < xPoints.length; i++) {
@@ -74,11 +78,11 @@ public class FieldVersatilityOpMode extends LinearOpMode {
             TelemetryPacket packet = new TelemetryPacket();
             packet.fieldOverlay()
                     //optionally add an alternate field image on top of the default
-                    .drawImage(ALTIMGSRC, ALTIMGX, ALTIMGY,ALTIMGW, ALTIMGH)
+                    //.drawImage(ALTIMGSRC, ALTIMGX, ALTIMGY,ALTIMGW, ALTIMGH)
                     //.setAltImage("", 0, 0,144, 144, false) //empty src will clear the alt field image
 
                     //optionally override default gridlines, minimum of 2 to render field edges, anything less suppresses gridlines in that direction, default is 7
-                    .drawGrid(0, 0, GRIDHORIZONTAL, GRIDVERTICAL, 4, 4)
+                    //.drawGrid(GRIDX, GRIDY, GRIDW, GRIDH, GRIDHORIZONTAL, GRIDVERTICAL)
 
                     //historical default origin for dashboard is in the center of the field with X axis pointing up
                     //for powerplay season iron reign decided to set the origin to the alliance substation
@@ -94,7 +98,14 @@ public class FieldVersatilityOpMode extends LinearOpMode {
                     //.setRotation(-Math.PI/4) //uncomment to see a rotation of 45 degrees, there have been challenges with a diagonal field symmetry
 
                     .setScale(SCALEX, SCALEY) //be sure the vales evaluate to a doubles and not ints
-                    //.setScale(144.0/105,144.0/105) //example of FIFA soccer field in meters
+                    //.setScale(144.0/105,144.0/105) //example of FIFA soccer
+                    // field in meters
+//optionally add an alternate field image on top of the default
+                    .drawImage(ALTIMGSRC, ALTIMGX, ALTIMGY,ALTIMGW, ALTIMGH)
+                    //.setAltImage("", 0, 0,144, 144, false) //empty src will clear the alt field image
+
+                    //optionally override default gridlines, minimum of 2 to render field edges, anything less suppresses gridlines in that direction, default is 7
+                    .drawGrid(GRIDX, GRIDY, GRIDW, GRIDH, GRIDHORIZONTAL, GRIDVERTICAL)
 
                     .setStrokeWidth(1)
                     //draw the axes of the new origin
