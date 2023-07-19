@@ -18,13 +18,29 @@ public class TelemetryPacket {
     private List<String> log;
     private Canvas fieldOverlay;
 
+    private static final Canvas DEFAULT_FIELD = new Canvas();
+    static {
+        DEFAULT_FIELD.setAlpha(0.25);
+        DEFAULT_FIELD.drawImage("/dash/powerplay.png", -72, -72, 144, 144);
+        DEFAULT_FIELD.setAlpha(1.0);
+        DEFAULT_FIELD.drawGrid(-72, -72, 144, 144, 7, 7);
+    }
+
     /**
      * Creates a new telemetry packet.
      */
-    public TelemetryPacket() {
+    public TelemetryPacket(boolean drawDefaultField) {
         data = new TreeMap<>();
         log = new ArrayList<>();
         fieldOverlay = new Canvas();
+
+        if (drawDefaultField) {
+            fieldOverlay.getOperations().addAll(DEFAULT_FIELD.getOperations());
+        }
+    }
+
+    public TelemetryPacket() {
+        this(true);
     }
 
     /**

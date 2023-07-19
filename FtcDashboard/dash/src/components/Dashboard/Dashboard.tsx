@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import LayoutPreset, { LayoutPresetType } from '@/enums/LayoutPreset';
-import { connect, disconnect } from '@/store/actions/socket';
 import { saveLayoutPreset, getLayoutPreset } from '@/store/actions/settings';
 import { RootState } from '@/store/reducers';
 
@@ -11,6 +10,7 @@ import { ReactComponent as ConnectedIcon } from '@/assets/icons/wifi.svg';
 import { ReactComponent as DisconnectedIcon } from '@/assets/icons/wifi_off.svg';
 import { ReactComponent as SettingsIcon } from '@/assets/icons/settings.svg';
 import SettingsModal from './SettingsModal';
+import { startSocketWatcher } from '@/store/middleware/socketMiddleware';
 
 export default function Dashboard() {
   const socket = useSelector((state: RootState) => state.socket);
@@ -23,17 +23,9 @@ export default function Dashboard() {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
   useEffect(() => {
-    dispatch(
-      connect(
-        import.meta.env['VITE_REACT_APP_HOST'] || window.location.hostname,
-        import.meta.env['VITE_REACT_APP_PORT'],
-      ),
-    );
     dispatch(getLayoutPreset());
 
-    return () => {
-      dispatch(disconnect());
-    };
+    startSocketWatcher(dispatch);
   }, [dispatch]);
 
   return (

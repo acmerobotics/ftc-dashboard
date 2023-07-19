@@ -261,7 +261,8 @@ export default class Field {
 
           const { scalingX, scalingY } = this.ctx.getScalingFactors();
 
-          this.ctx.lineWidth = this.options.gridLineWidth / (scalingY * devicePixelRatio);
+          this.ctx.lineWidth =
+            this.options.gridLineWidth / (scalingY * devicePixelRatio);
 
           for (let i = 0; i < op.numTicksX; i++) {
             const lineX = op.x + horSpacing * i;
@@ -271,7 +272,8 @@ export default class Field {
             this.ctx.stroke();
           }
 
-          this.ctx.lineWidth = this.options.gridLineWidth / (scalingX * devicePixelRatio);
+          this.ctx.lineWidth =
+            this.options.gridLineWidth / (scalingX * devicePixelRatio);
 
           for (let i = 0; i < op.numTicksY; i++) {
             const lineY = op.y + vertSpacing * i;

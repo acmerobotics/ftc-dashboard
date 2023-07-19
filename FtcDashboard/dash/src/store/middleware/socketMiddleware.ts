@@ -1,15 +1,11 @@
 import { Middleware } from 'redux';
 
-import { RootState, AppThunkAction, AppThunkDispatch } from '@/store/reducers';
-import { getRobotStatus } from '@/store/actions/status';
+import { RootState, AppThunkDispatch } from '@/store/reducers';
 import {
-  connect,
   receiveConnectionStatus,
   receivePingTime,
 } from '@/store/actions/socket';
 import {
-  CONNECT,
-  DISCONNECT,
   GET_ROBOT_STATUS,
   INIT_OP_MODE,
   RECEIVE_GAMEPAD_STATE,
@@ -21,62 +17,45 @@ import {
 let socket: WebSocket;
 let statusSentTime: number;
 
-const robotStatusLoop =
-  (): AppThunkAction =>
-  // TODO: Return to this. New Redux types too complex at the moment
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  (dispatch: AppThunkDispatch, getState: () => RootState) => {
-    const { isConnected } = getState().socket;
+export function startSocketWatcher(dispatch: AppThunkDispatch) {
+  setInterval(() => {
+    if (socket === undefined || socket.readyState === WebSocket.CLOSED) {
+      socket = new WebSocket(
+        `ws://${
+          import.meta.env['VITE_REACT_APP_HOST'] || window.location.hostname
+        }:${import.meta.env['VITE_REACT_APP_PORT']}`,
+      );
 
-    if (!isConnected) {
-      return;
+      socket.onmessage = (evt) => {
+        const msg = JSON.parse(evt.data);
+        dispatch(msg);
+      };
+
+      socket.onopen = () => {
+        dispatch(receiveConnectionStatus(true));
+      };
+
+      socket.onclose = () => {
+        dispatch(receiveConnectionStatus(false));
+      };
+    } else if (socket.readyState === WebSocket.OPEN) {
+      statusSentTime = Date.now();
+      socket.send(JSON.stringify({ type: 'GET_ROBOT_STATUS' }));
     }
 
-    statusSentTime = Date.now();
-
-    dispatch(getRobotStatus());
-
-    setTimeout(() => {
-      dispatch(robotStatusLoop());
-    }, 1000);
-  };
+    dispatch(receiveConnectionStatus(socket.readyState === WebSocket.OPEN));
+  }, 1000);
+}
 
 const socketMiddleware: Middleware<Record<string, unknown>, RootState> =
   (store) => (next) => (action) => {
     switch (action.type) {
-      case CONNECT:
-        socket = new WebSocket(`ws://${action.host}:${action.port}`);
-
-        socket.onmessage = (evt) => {
-          const msg = JSON.parse(evt.data);
-          store.dispatch(msg);
-        };
-
-        socket.onopen = () => {
-          (store.dispatch as AppThunkDispatch)(receiveConnectionStatus(true));
-
-          (store.dispatch as AppThunkDispatch)(robotStatusLoop());
-        };
-
-        socket.onclose = () => {
-          (store.dispatch as AppThunkDispatch)(receiveConnectionStatus(false));
-
-          setTimeout(
-            () => store.dispatch(connect(action.host, action.port)),
-            500,
-          );
-        };
-
-        break;
-      case DISCONNECT:
-        socket.close();
-        break;
       case RECEIVE_ROBOT_STATUS: {
         const pingTime = Date.now() - statusSentTime;
         store.dispatch(receivePingTime(pingTime));
 
         next(action);
+
         break;
       }
       // messages forwarded to the server
@@ -87,9 +66,7 @@ const socketMiddleware: Middleware<Record<string, unknown>, RootState> =
       case INIT_OP_MODE:
       case START_OP_MODE:
       case STOP_OP_MODE: {
-        const { isConnected } = store.getState().socket;
-
-        if (isConnected) {
+        if (socket !== undefined && socket.readyState === WebSocket.OPEN) {
           socket.send(JSON.stringify(action));
         }
 
