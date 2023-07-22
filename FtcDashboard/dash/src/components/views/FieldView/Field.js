@@ -82,15 +82,6 @@ export default class Field {
     this.overlay = {
       ops: [],
     };
-/* todo remove this section
-    this.altIX = 0;
-    this.altIY = 0;
-    this.altIWidth = 0;
-    this.altIHeight = 0;
-    this.altOpaque = false;
-    this.gridlinesVertical = 7;
-    this.gridlinesHorizontal = 7;
-    */
   }
 
   setOverlay(overlay) {
@@ -121,10 +112,11 @@ export default class Field {
     );
   }
 
-    adjustTransform(ctx, defaultTransform, altOriginX, altOriginY, altRotation){
+    adjustTransform(ctx, defaultTransform, altOriginX, altOriginY, altRotation, altScaleX, altScaleY){
         ctx.setTransform(defaultTransform);
         ctx.translate(altOriginX, altOriginY);
         ctx.rotate(altRotation);
+        ctx.scale(altScaleX, altScaleY);
     }
     renderField(x, y, width, height) {
     const o = this.options;
@@ -133,16 +125,27 @@ export default class Field {
 
     const originX = x + width / 2;
     const originY = y + height / 2;
+    //const rotation = 0;
     const rotation = Math.PI / 2;
     var altOriginX = 0;
     var altOriginY = 0;
     var altRotation = 0;
+    var altScaleX = 1;
+    var altScaleY = 1;
 
-    this.ctx.translate(originX, originY);
-    //todo remove this line this.ctx.scale(width / o.fieldSize, -height / o.fieldSize);
+    var preTransform = this.ctx.getTransform();
+    this.ctx.translate(x, y);
     this.ctx.scale(width / o.fieldSize, height / o.fieldSize);
+
+    var pageTransform = this.ctx.getTransform(); //this is the scaled transform in which text and image drawing take place
+    this.ctx.setTransform(preTransform);
+    this.ctx.translate(originX, originY);
+    //this.ctx.translate(width/2, height/2);
+    //todo remove this line this.ctx.scale(width / o.fieldSize, -height / o.fieldSize);
+    this.ctx.scale(width / o.fieldSize, -height / o.fieldSize);
+    //this.ctx.scale(1,-1);
     this.ctx.rotate(rotation);
-    var defaultTransform = this.ctx.getTransform();
+    var defaultTransform = this.ctx.getTransform(); //this is the default transform with the origin in the center of the field with the x axis directed upward
 
     this.ctx.lineCap = 'butt';
 
@@ -150,20 +153,19 @@ export default class Field {
       switch (op.type) {
 
         case 'scale':
-            //first reset the scale to the default
-            this.adjustTransform(this.ctx, defaultTransform, altOriginX, altOriginY, altRotation);
-            this.ctx.scale(op.scaleX, op.scaleY);
+            altScaleX = op.scaleX;
+            altScaleY = op.scaleY;
+            this.adjustTransform(this.ctx, defaultTransform, altOriginX, altOriginY, altRotation, altScaleX, altScaleY);
             break;
         case 'rotation':
             altRotation = op.rotation;
-            this.adjustTransform(this.ctx, defaultTransform, altOriginX, altOriginY, altRotation);
+            this.adjustTransform(this.ctx, defaultTransform, altOriginX, altOriginY, altRotation, altScaleX, altScaleY);
             break;
         case 'translate':
             altOriginX=op.x;
             altOriginY=op.y;
-            this.adjustTransform(this.ctx, defaultTransform, altOriginX, altOriginY, altRotation);
+            this.adjustTransform(this.ctx, defaultTransform, altOriginX, altOriginY, altRotation, altScaleX, altScaleY);
             break;
-
         case 'fill':
           this.ctx.fillStyle = op.color;
           break;
@@ -173,19 +175,6 @@ export default class Field {
         case 'strokeWidth':
           this.ctx.lineWidth = op.width;
           break;
-        case 'text':
-            this.ctx.save();
-            this.ctx.rotate(op.theta);
-            this.ctx.font = op.font;
-            //have to flip y axis again temporarily or text will be mirrored
-            this.ctx.scale(1, -1);
-            if (op.stroke) {
-                this.ctx.strokeText(op.text, op.x, op.y)
-            } else {
-                this.ctx.fillText(op.text, op.x, op.y)
-            }
-            this.ctx.restore();
-            break;
         case 'circle':
           this.ctx.beginPath();
           this.ctx.arc(op.x, op.y, op.radius, 0, 2 * Math.PI);
@@ -248,12 +237,48 @@ export default class Field {
         }
         case 'image': {
           const image = loadImage(op.path);
-          this.ctx.drawImage(image, op.x, op.y, op.width, op.height);
+          this.ctx.save();
+          if (op.usePageFrame)
+            {
+              this.ctx.setTransform(pageTransform);
+              this.ctx.translate(op.x, op.y);
+            }
+          else //still have to flip y axis again temporarily or image will be mirrored
+            {
+
+            this.ctx.scale(1, -1);
+            this.ctx.translate(op.x, -op.y);
+            }
+
+          this.ctx.rotate(op.theta);
+          this.ctx.drawImage(image, 0, 0, op.width, op.height);
+          this.ctx.restore();
           break;
         }
+        case 'text': {
+            this.ctx.save();
+            this.ctx.font = op.font;
+            if (op.usePageFrame)
+                {
+                this.ctx.setTransform(pageTransform);
+                }
+            else //still have to flip y axis again temporarily or text will be mirrored
+                {
+                this.ctx.translate(op.x, -op.y);
+                this.ctx.scale(1, -1);
+                }
+            this.ctx.rotate(op.theta);
+            if (op.stroke) {
+                this.ctx.strokeText(op.text, 0, 0)
+            } else {
+                this.ctx.fillText(op.text, 0, 0)
+            }
+            this.ctx.restore();
+            break;
+            }
         case 'grid': {
           this.ctx.save();
-
+          this.ctx.setTransform(pageTransform);
           this.ctx.strokeStyle = this.options.gridLineColor;
 
           const horSpacing = op.width / (op.numTicksX - 1);

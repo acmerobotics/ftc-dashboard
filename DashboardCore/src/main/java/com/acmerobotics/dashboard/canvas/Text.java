@@ -7,8 +7,9 @@ public class Text extends CanvasOp {
     private String font;
     private double theta;
     private boolean stroke;
+    private boolean usePageFrame;
 
-    public Text(String text, double x, double y, String font, double theta, boolean stroke) {
+    public Text(String text, double x, double y, String font, double theta, boolean stroke, boolean usePageFrame) {
         super(Type.TEXT);
         this.text = text;
         this.x = x;
@@ -16,5 +17,6 @@ public class Text extends CanvasOp {
         this.font = font;
         this.theta = theta;
         this.stroke = stroke;
+        this.usePageFrame = usePageFrame;
     }
 }

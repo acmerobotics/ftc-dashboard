@@ -61,10 +61,11 @@ public class FieldVersatilityOpMode extends LinearOpMode {
             double bx = ORBITAL_RADIUS * Math.cos(2 * Math.PI * ORBITAL_FREQUENCY * time);
             double by = ORBITAL_RADIUS * Math.sin(2 * Math.PI * ORBITAL_FREQUENCY * time);
             double l = SIDE_LENGTH / 2;
-            //drawing an orbiting triangle pointing up the X axis to indicate field theta = 0
+            //drawing an orbiting triangle pointing mostly up the X axis to indicate field theta = 15 degrees
             double[] bxPoints = { 0, SIDE_LENGTH*2, 0 };
             double[] byPoints = { l, 0, -l };
             //rotatePoints(bxPoints, byPoints, 2 * Math.PI * SPIN_FREQUENCY * time);
+            rotatePoints(bxPoints, byPoints, Math.toRadians(15));
             for (int i = 0; i < 3; i++) {
                 bxPoints[i] += bx;
                 byPoints[i] += by;
@@ -75,7 +76,8 @@ public class FieldVersatilityOpMode extends LinearOpMode {
             telemetry.update();
 
             //draw the field overlay
-            TelemetryPacket packet = new TelemetryPacket();
+            TelemetryPacket packet = new TelemetryPacket(false);
+
             packet.fieldOverlay()
                     //optionally add an alternate field image on top of the default
                     //.drawImage(ALTIMGSRC, ALTIMGX, ALTIMGY,ALTIMGW, ALTIMGH)
@@ -89,7 +91,7 @@ public class FieldVersatilityOpMode extends LinearOpMode {
                     //to take advantage of the inherent symmetries of the challenge:
 
                     .setRotation(RED_ALLIANCE ? 0: Math.PI)
-//                    .setRotation(ORIGIN_ZEROHEADING)
+                    //.setRotation(ORIGIN_ZEROHEADING)
                     .setTranslation(ORIGIN_OFFSET_X, ORIGIN_OFFSET_Y * (RED_ALLIANCE ? -1: 1))
                     //blue alliance would be
                     //.setRotation(Math.PI)
@@ -100,7 +102,7 @@ public class FieldVersatilityOpMode extends LinearOpMode {
                     .setScale(SCALEX, SCALEY) //be sure the vales evaluate to a doubles and not ints
                     //.setScale(144.0/105,144.0/105) //example of FIFA soccer
                     // field in meters
-//optionally add an alternate field image on top of the default
+                    //optionally add an alternate field image on top of the default
                     .drawImage(ALTIMGSRC, ALTIMGX, ALTIMGY,ALTIMGW, ALTIMGH)
                     //.setAltImage("", 0, 0,144, 144, false) //empty src will clear the alt field image
 

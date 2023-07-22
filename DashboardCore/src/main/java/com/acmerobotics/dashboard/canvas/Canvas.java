@@ -25,13 +25,20 @@ public class Canvas {
         return this;
     }
 
-    public Canvas strokeText(String text, double x, double y, String font, double theta) {
-        ops.add(new Text(text, x, y, font, theta, true));
+    public Canvas strokeText(String text, double x, double y, String font, double theta, boolean usePageFrame) {
+        ops.add(new Text(text, x, y, font, theta, true, usePageFrame));
         return this;
     }
-
+    public Canvas strokeText(String text, double x, double y, String font, double theta) {
+        strokeText( text, x, y, font, theta,true);
+        return this;
+    }
+    public Canvas fillText(String text, double x, double y, String font, double theta, boolean usePageFrame) {
+        ops.add(new Text(text, x, y, font, theta, false, usePageFrame));
+        return this;
+    }
     public Canvas fillText(String text, double x, double y, String font, double theta) {
-        ops.add(new Text(text, x, y, font, theta, false));
+        fillText( text, x, y, font, theta,true);
         return this;
     }
 
@@ -104,7 +111,12 @@ public class Canvas {
      * be served under path /images/.
      */
     public Canvas drawImage(String path, double x, double y, double width, double height) {
-        ops.add(new Image(path, x, y, width, height));
+        drawImage(path, x, y, width, height, 0, true);
+        return this;
+    }
+
+    public Canvas drawImage(String path, double x, double y, double width, double height, double theta, boolean usePageFrame) {
+        ops.add(new Image(path, x, y, width, height, theta, usePageFrame));
         return this;
     }
 
