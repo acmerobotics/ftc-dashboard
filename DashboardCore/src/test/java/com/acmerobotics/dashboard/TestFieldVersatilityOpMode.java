@@ -77,6 +77,11 @@ public class TestFieldVersatilityOpMode extends TestOpMode {
     protected void loop() throws InterruptedException {
         System.out.println(Math.sin(System.currentTimeMillis()));
         double time = System.currentTimeMillis() / 1000d;
+        double angleAnim = 2 * Math.PI * SPIN_FREQUENCY * time;
+        long millis = System.currentTimeMillis();
+        double seconds = millis / 1000.0 * SPIN_FREQUENCY;
+        double fraction = seconds - (int)seconds;
+        angleAnim = 2 * Math.PI * fraction;
 
         double bx = ORBITAL_RADIUS * Math.cos(2 * Math.PI * ORBITAL_FREQUENCY * time);
         double by = ORBITAL_RADIUS * Math.sin(2 * Math.PI * ORBITAL_FREQUENCY * time);
@@ -93,6 +98,7 @@ public class TestFieldVersatilityOpMode extends TestOpMode {
         dashboard.addData("x", AMPLITUDE * Math.sin(
                 2 * Math.PI * FREQUENCY * (System.currentTimeMillis() / 1000d) + Math.toRadians(PHASE)
         ));
+        dashboard.addData("theta", angleAnim);
         dashboard.update();
 
         //draw the field overlay - supply false if we want to suppress the default field image
@@ -108,8 +114,8 @@ public class TestFieldVersatilityOpMode extends TestOpMode {
                 //optionally add custom gridlines, minimum of 2 to render field edges, anything less suppresses gridlines in that direction, default is 7
                 .drawGrid(0, 0, GRIDHORIZONTAL, GRIDVERTICAL, 13, 13)
                 .setAlpha(1.0)
-                //you can draw multiple images and can rotate them around their top left coordinate and draw them in the current transform instead of the page frame
-                .drawImage("/dash/dist/ftc.jpg", 24, 24, 48, 48, Math.PI/4,false)
+                //you can draw multiple images and can rotate them around a specified anchor/pivot point and draw them in the current transform instead of the page frame
+                .drawImage("/dash/ftc.jpg", 24, 24, 48, 48, 0, 24, 24, false)
 
                 //demonstrate an alternate transform to move the origin and orientation
                 //default origin for dashboard is in the center of the field with X axis pointing up
@@ -144,8 +150,9 @@ public class TestFieldVersatilityOpMode extends TestOpMode {
                 .fillPolygon(bxPoints, byPoints)
                 .setFill("blue")
                 .fillText("15 deg", bx-10, -by,"8px Arial", Math.toRadians(90-15), false)
-                //you can draw multiple images and can rotate them around their top left coordinate and draw them in the current transform instead of the page frame
-                .drawImage("/dash/powerplay.png", 24, 24, 48, 48, Math.PI/4,false);
+                .setAlpha(.25)
+                //you can draw multiple images and can rotate them around a specified pivot point, and draw them in the current transform instead of the page frame
+                .drawImage("/dash/powerplay.png", 24, 24, 48, 48, angleAnim, 24, 24,false);
 
         dashboard.sendTelemetryPacket(packet);
         Thread.sleep(10);

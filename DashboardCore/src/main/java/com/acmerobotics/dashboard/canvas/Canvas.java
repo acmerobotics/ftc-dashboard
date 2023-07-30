@@ -111,12 +111,12 @@ public class Canvas {
      * be served under path /images/.
      */
     public Canvas drawImage(String path, double x, double y, double width, double height) {
-        drawImage(path, x, y, width, height, 0, true);
+        drawImage(path, x, y, width, height, 0, 0, 0, true);
         return this;
     }
 
-    public Canvas drawImage(String path, double x, double y, double width, double height, double theta, boolean usePageFrame) {
-        ops.add(new Image(path, x, y, width, height, theta, usePageFrame));
+    public Canvas drawImage(String path, double x, double y, double width, double height, double theta, double pivotX, double pivotY, boolean usePageFrame) {
+        ops.add(new Image(path, x, y, width, height, theta, pivotX, pivotY, usePageFrame));
         return this;
     }
 

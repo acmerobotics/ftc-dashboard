@@ -245,13 +245,21 @@ export default class Field {
             }
           else //still have to flip y axis again temporarily or image will be mirrored
             {
-
             this.ctx.scale(1, -1);
             this.ctx.translate(op.x, -op.y);
             }
-
-          this.ctx.rotate(op.theta);
-          this.ctx.drawImage(image, 0, 0, op.width, op.height);
+          this.ctx.rotate(op.theta, op.pivotX, op.pivotY);
+          /*
+          if (op.usePageFrame)
+            {
+            this.ctx.translate(-op.pivotX, -op.pivotY);
+            }
+          else
+            {
+            this.ctx.translate(op.pivotX, -op.pivotY);
+            }
+            */
+          this.ctx.drawImage(image, -op.pivotX, -op.pivotY, op.width, op.height);
           this.ctx.restore();
           break;
         }
