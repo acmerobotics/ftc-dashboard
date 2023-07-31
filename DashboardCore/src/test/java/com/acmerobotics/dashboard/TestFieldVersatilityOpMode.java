@@ -17,13 +17,12 @@ public class TestFieldVersatilityOpMode extends TestOpMode {
     public static double SPIN_FREQUENCY = 0.25;
     public static double ORBITAL_RADIUS = 50;
     public static double SIDE_LENGTH = 10;
-    //public static String ALTIMGSRC = "https://upload.wikimedia.org/wikipedia/commons/4/45/Football_field.svg";
-    public static String ALTIMGSRC = "dist/assets/play_arrow.95e2d7e4.svg";
+    public static String ALTIMGSRC = "https://upload.wikimedia.org/wikipedia/commons/4/45/Football_field.svg";
+    //public static String ALTIMGSRC = "dist/assets/play_arrow.95e2d7e4.svg";
     public static double ALTIMGX = 0; //try 24
     public static double ALTIMGY = 0; //try 24
     public static double ALTIMGW = 144; //try 48
     public static double ALTIMGH = 144; //try 48
-    public static boolean ALTIMGOPAQUE = true;
     public static double SCALEX = 1.0;
     public static double SCALEY = 1.0;
     public static double GRIDHORIZONTAL = 144;
@@ -86,7 +85,7 @@ public class TestFieldVersatilityOpMode extends TestOpMode {
         double bx = ORBITAL_RADIUS * Math.cos(2 * Math.PI * ORBITAL_FREQUENCY * time);
         double by = ORBITAL_RADIUS * Math.sin(2 * Math.PI * ORBITAL_FREQUENCY * time);
         double l = SIDE_LENGTH / 2;
-        //drawing an orbiting triangle pointing mostly up the X axis to indicate field theta = 15 degrees
+        //drawing an orbiting triangle pointing mostly up the X axis to indicate field theta = 15 degrees counter clockwise
         double[] bxPoints = { 0, SIDE_LENGTH*2, 0 };
         double[] byPoints = { l, 0, -l };
         //rotatePoints(bxPoints, byPoints, 2 * Math.PI * SPIN_FREQUENCY * time);
@@ -106,16 +105,19 @@ public class TestFieldVersatilityOpMode extends TestOpMode {
         TelemetryPacket packet = new TelemetryPacket();
 
         packet.fieldOverlay()
-                //explicitly draw an alternate field image
-                //images, text and grids by default are drawn using the standard canvas transform where 0,0 is top left and 144,144 is bottom right
-                //all other drawing primitives are rendered in the current (or default) transform built setTranslation, setRotation and setScale
+                //explicitly draw another field image
+                //images, text and grids by default are drawn using the page transform where 0,0 is top left and 144,144 is bottom right
+                //but extra parameters are available to allow rotation and drawing in the current transform
+                //all other drawing primitives are rendered in the current (or default) transform, as built using setTranslation, setRotation and setScale
                 .setAlpha(.25)
                 .drawImage(ALTIMGSRC, ALTIMGX, ALTIMGY,ALTIMGW, ALTIMGH)
+
                 //optionally add custom gridlines, minimum of 2 to render field edges, anything less suppresses gridlines in that direction, default is 7
-                .drawGrid(0, 0, GRIDHORIZONTAL, GRIDVERTICAL, 13, 13)
                 .setAlpha(1.0)
+                .drawGrid(0, 0, GRIDHORIZONTAL, GRIDVERTICAL, 13, 13)
+
                 //you can draw multiple images and can rotate them around a specified anchor/pivot point and draw them in the current transform instead of the page frame
-                .drawImage("/dash/ftc.jpg", 24, 24, 48, 48, 0, 24, 24, false)
+                .drawImage("/dash/ftc.jpg", 24, 24, 48, 48, 0, 0, 0, false)
 
                 //demonstrate an alternate transform to move the origin and orientation
                 //default origin for dashboard is in the center of the field with X axis pointing up
@@ -123,9 +125,6 @@ public class TestFieldVersatilityOpMode extends TestOpMode {
                 //to take advantage of the inherent symmetries of the challenge:
                 .setRotation(RED_ALLIANCE ? 0: Math.PI)
                 .setTranslation(ORIGIN_OFFSET_X, ORIGIN_OFFSET_Y * (RED_ALLIANCE ? -1: 1))
-                //blue alliance would be
-                //.setRotation(Math.PI)
-                //.setTranslation(0, 12*6)
 
                 //.setRotation(-Math.PI/4) //uncomment to see a rotation of 45 degrees, there have been FTC games with a diagonal field symmetry
 
@@ -138,7 +137,7 @@ public class TestFieldVersatilityOpMode extends TestOpMode {
                 .setStroke("green")
                 .strokeLine(0,0,0,24) //y axis
                 .setFill("green")
-                .strokeText("Y axis", 0, (RED_ALLIANCE? -24: 0),"8px serif", -Math.PI/2 * (RED_ALLIANCE? -1: 1), false)
+                .strokeText("Y axis", 0, (RED_ALLIANCE? 24: 0),"8px serif", -Math.PI/2 * (RED_ALLIANCE? -1: 1), false)
                 .setStroke("red")
                 .strokeLine(0,0,24,0) //x axis
                 .setFill("red")
@@ -149,10 +148,14 @@ public class TestFieldVersatilityOpMode extends TestOpMode {
                 .setFill("black")
                 .fillPolygon(bxPoints, byPoints)
                 .setFill("blue")
-                .fillText("15 deg", bx-10, -by,"8px Arial", Math.toRadians(90-15), false)
+                //label the arrow as pointing 15 degree counter clockwsie
+                .fillText("15 deg CC", bx-10, by,"8px Arial", Math.toRadians(90-15), false)
                 .setAlpha(.25)
                 //you can draw multiple images and can rotate them around a specified pivot point, and draw them in the current transform instead of the page frame
-                .drawImage("/dash/powerplay.png", 24, 24, 48, 48, angleAnim, 24, 24,false);
+                .drawImage("/dash/powerplay.png", 24, 24, 48, 48, angleAnim, 24, 24,false)
+                .setAlpha(1.0)
+                .fillText("baseline",48,48,"8px Arial", Math.toRadians(90),false);
+
 
         dashboard.sendTelemetryPacket(packet);
         Thread.sleep(10);

@@ -125,8 +125,7 @@ export default class Field {
 
     const originX = x + width / 2;
     const originY = y + height / 2;
-    //const rotation = 0;
-    const rotation = Math.PI / 2;
+    const rotation = -Math.PI / 2;
     var altOriginX = 0;
     var altOriginY = 0;
     var altRotation = 0;
@@ -137,15 +136,12 @@ export default class Field {
     this.ctx.translate(x, y);
     this.ctx.scale(width / o.fieldSize, height / o.fieldSize);
 
-    var pageTransform = this.ctx.getTransform(); //this is the scaled transform in which text and image drawing take place
+    var pageTransform = this.ctx.getTransform(); //this is the scaled page transform in which text and image drawing take place by default
     this.ctx.setTransform(preTransform);
     this.ctx.translate(originX, originY);
-    //this.ctx.translate(width/2, height/2);
-    //todo remove this line this.ctx.scale(width / o.fieldSize, -height / o.fieldSize);
-    this.ctx.scale(width / o.fieldSize, -height / o.fieldSize);
-    //this.ctx.scale(1,-1);
+    this.ctx.scale(width / o.fieldSize, height / o.fieldSize);
     this.ctx.rotate(rotation);
-    var defaultTransform = this.ctx.getTransform(); //this is the default transform with the origin in the center of the field with the x axis directed upward
+    var defaultTransform = this.ctx.getTransform(); //this is the default transform with the origin in the center of the field with the x axis considered upward on the java side, but negative on the canvas side (here), requiring a negation of all y components
 
     this.ctx.lineCap = 'butt';
 
@@ -163,7 +159,7 @@ export default class Field {
             break;
         case 'translate':
             altOriginX=op.x;
-            altOriginY=op.y;
+            altOriginY=-op.y;
             this.adjustTransform(this.ctx, defaultTransform, altOriginX, altOriginY, altRotation, altScaleX, altScaleY);
             break;
         case 'fill':
@@ -177,7 +173,7 @@ export default class Field {
           break;
         case 'circle':
           this.ctx.beginPath();
-          this.ctx.arc(op.x, op.y, op.radius, 0, 2 * Math.PI);
+          this.ctx.arc(op.x, -op.y, op.radius, 0, 2 * Math.PI);
 
           if (op.stroke) {
             this.ctx.stroke();
@@ -188,9 +184,9 @@ export default class Field {
         case 'polygon': {
           this.ctx.beginPath();
           const { xPoints, yPoints, stroke } = op;
-          this.ctx.fineMoveTo(xPoints[0], yPoints[0]);
+          this.ctx.fineMoveTo(xPoints[0], -yPoints[0]);
           for (let i = 1; i < xPoints.length; i++) {
-            this.ctx.fineLineTo(xPoints[i], yPoints[i]);
+            this.ctx.fineLineTo(xPoints[i], -yPoints[i]);
           }
           this.ctx.closePath();
 
@@ -204,9 +200,9 @@ export default class Field {
         case 'polyline': {
           this.ctx.beginPath();
           const { xPoints, yPoints } = op;
-          this.ctx.fineMoveTo(xPoints[0], yPoints[0]);
+          this.ctx.fineMoveTo(xPoints[0], -yPoints[0]);
           for (let i = 1; i < xPoints.length; i++) {
-            this.ctx.fineLineTo(xPoints[i], yPoints[i]);
+            this.ctx.fineLineTo(xPoints[i], -yPoints[i]);
           }
           this.ctx.stroke();
           break;
@@ -214,7 +210,7 @@ export default class Field {
         case 'spline': {
           this.ctx.beginPath();
           const { ax, bx, cx, dx, ex, fx, ay, by, cy, dy, ey, fy } = op;
-          this.ctx.fineMoveTo(fx, fy);
+          this.ctx.fineMoveTo(fx, -fy);
           for (let i = 0; i <= o.splineSamples; i++) {
             const t = i / o.splineSamples;
             const sx =
@@ -230,7 +226,7 @@ export default class Field {
               ey * t +
               fy;
 
-            this.ctx.lineTo(sx, sy);
+            this.ctx.lineTo(sx, -sy);
           }
           this.ctx.stroke();
           break;
@@ -243,22 +239,11 @@ export default class Field {
               this.ctx.setTransform(pageTransform);
               this.ctx.translate(op.x, op.y);
             }
-          else //still have to flip y axis again temporarily or image will be mirrored
+          else //use current transform
             {
-            this.ctx.scale(1, -1);
             this.ctx.translate(op.x, -op.y);
             }
           this.ctx.rotate(op.theta, op.pivotX, op.pivotY);
-          /*
-          if (op.usePageFrame)
-            {
-            this.ctx.translate(-op.pivotX, -op.pivotY);
-            }
-          else
-            {
-            this.ctx.translate(op.pivotX, -op.pivotY);
-            }
-            */
           this.ctx.drawImage(image, -op.pivotX, -op.pivotY, op.width, op.height);
           this.ctx.restore();
           break;
@@ -269,11 +254,11 @@ export default class Field {
             if (op.usePageFrame)
                 {
                 this.ctx.setTransform(pageTransform);
+                this.ctx.translate(op.x, op.y);
                 }
-            else //still have to flip y axis again temporarily or text will be mirrored
+            else //use current transform
                 {
                 this.ctx.translate(op.x, -op.y);
-                this.ctx.scale(1, -1);
                 }
             this.ctx.rotate(op.theta);
             if (op.stroke) {
