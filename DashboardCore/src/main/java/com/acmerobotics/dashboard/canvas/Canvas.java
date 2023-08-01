@@ -121,7 +121,11 @@ public class Canvas {
     }
 
     public Canvas drawGrid(double x, double y, double width, double height, int numTicksX, int numTicksY) {
-        ops.add(new Grid(x, y, width, height, numTicksX, numTicksY));
+        drawGrid(x, y, width, height, numTicksX, numTicksY, 0, 0,0, true);
+        return this;
+    }
+    public Canvas drawGrid(double x, double y, double width, double height, int numTicksX, int numTicksY, double theta, double pivotX, double pivotY, boolean usePageFrame) {
+        ops.add(new Grid(x, y, width, height, numTicksX, numTicksY, theta, pivotX, pivotY, usePageFrame));
         return this;
     }
 

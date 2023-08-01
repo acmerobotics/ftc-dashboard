@@ -61,6 +61,13 @@ function loadImage(src) {
   return image;
 }
 
+function adjustTransform(ctx, defaultTransform, altOriginX, altOriginY, altRotation, altScaleX, altScaleY){
+  ctx.setTransform(defaultTransform);
+  ctx.translate(altOriginX, altOriginY);
+  ctx.rotate(altRotation);
+  ctx.scale(altScaleX, altScaleY);
+}
+
 // all dimensions in this file are *CSS* pixels unless otherwise stated
 const DEFAULT_OPTIONS = {
   padding: 15,
@@ -112,12 +119,6 @@ export default class Field {
     );
   }
 
-    adjustTransform(ctx, defaultTransform, altOriginX, altOriginY, altRotation, altScaleX, altScaleY){
-        ctx.setTransform(defaultTransform);
-        ctx.translate(altOriginX, altOriginY);
-        ctx.rotate(altRotation);
-        ctx.scale(altScaleX, altScaleY);
-    }
     renderField(x, y, width, height) {
     const o = this.options;
 
@@ -151,16 +152,16 @@ export default class Field {
         case 'scale':
             altScaleX = op.scaleX;
             altScaleY = op.scaleY;
-            this.adjustTransform(this.ctx, defaultTransform, altOriginX, altOriginY, altRotation, altScaleX, altScaleY);
+            adjustTransform(this.ctx, defaultTransform, altOriginX, altOriginY, altRotation, altScaleX, altScaleY);
             break;
         case 'rotation':
             altRotation = op.rotation;
-            this.adjustTransform(this.ctx, defaultTransform, altOriginX, altOriginY, altRotation, altScaleX, altScaleY);
+            adjustTransform(this.ctx, defaultTransform, altOriginX, altOriginY, altRotation, altScaleX, altScaleY);
             break;
         case 'translate':
             altOriginX=op.x;
             altOriginY=-op.y;
-            this.adjustTransform(this.ctx, defaultTransform, altOriginX, altOriginY, altRotation, altScaleX, altScaleY);
+            adjustTransform(this.ctx, defaultTransform, altOriginX, altOriginY, altRotation, altScaleX, altScaleY);
             break;
         case 'fill':
           this.ctx.fillStyle = op.color;
@@ -271,7 +272,16 @@ export default class Field {
             }
         case 'grid': {
           this.ctx.save();
-          this.ctx.setTransform(pageTransform);
+            if (op.usePageFrame)
+              {
+                this.ctx.setTransform(pageTransform);
+                this.ctx.translate(op.x + op.pivotX , op.y + op.pivotY);
+              }
+            else //use current transform
+              {
+              this.ctx.translate(op.x, -op.y);
+              }
+            this.ctx.rotate(op.theta, op.pivotX, op.pivotY);
           this.ctx.strokeStyle = this.options.gridLineColor;
 
           const horSpacing = op.width / (op.numTicksX - 1);
@@ -283,10 +293,10 @@ export default class Field {
             this.options.gridLineWidth / (scalingY * devicePixelRatio);
 
           for (let i = 0; i < op.numTicksX; i++) {
-            const lineX = op.x + horSpacing * i;
+            const lineX = -op.pivotX + horSpacing * i;
             this.ctx.beginPath();
-            this.ctx.fineMoveTo(lineX, op.y);
-            this.ctx.fineLineTo(lineX, op.y + op.height);
+            this.ctx.fineMoveTo(lineX, -op.pivotY);
+            this.ctx.fineLineTo(lineX , -op.pivotY + op.height);
             this.ctx.stroke();
           }
 
@@ -294,10 +304,10 @@ export default class Field {
             this.options.gridLineWidth / (scalingX * devicePixelRatio);
 
           for (let i = 0; i < op.numTicksY; i++) {
-            const lineY = op.y + vertSpacing * i;
+            const lineY = -op.pivotY + vertSpacing * i;
             this.ctx.beginPath();
-            this.ctx.fineMoveTo(op.x, lineY);
-            this.ctx.fineLineTo(op.x + op.width, lineY);
+            this.ctx.fineMoveTo(- op.pivotX, lineY);
+            this.ctx.fineLineTo(- op.pivotX + op.width, lineY);
             this.ctx.stroke();
           }
 
