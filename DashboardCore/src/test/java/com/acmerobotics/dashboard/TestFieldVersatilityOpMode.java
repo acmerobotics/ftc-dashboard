@@ -106,7 +106,7 @@ public class TestFieldVersatilityOpMode extends TestOpMode {
                 2 * Math.PI * FREQUENCY * (System.currentTimeMillis() / 1000d) + Math.toRadians(PHASE)
         ));
         dashboard.addData("theta", angleAnim);
-        //dashboard.update();
+        dashboard.update();
 
         //draw the field overlay - supply false if we want to suppress the default field image
         //TelemetryPacket packet = new TelemetryPacket(false);
@@ -169,7 +169,7 @@ public class TestFieldVersatilityOpMode extends TestOpMode {
             .setAlpha(1.0)
             .fillText("baseline", 48, 48, "8px Arial", Math.toRadians(90), false);
 
-        dashboard.update();
+        dashboard.sendTelemetryPacket(packet);
         Thread.sleep(10);
     }
 }
