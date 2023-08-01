@@ -16,81 +16,15 @@ packet.put("x", 3.7);
 packet.put("status", "alive");
 ```
 
-The accessor `fieldOverlay()` returns a `Canvas` that records a sequence of drawing operations.
+The accessor `fieldOverlay()` returns a `Canvas` that records a sequence of drawing operations that show up in the Field View.
 
 ```java
 packet.fieldOverlay()
     .setFill("blue")
     .fillRect(-20, -20, 40, 40);
 ```
+###[See here for more detail on drawing into the Field View](fieldview)
 
-All valid [web colors](https://developer.mozilla.org/en-US/docs/Web/HTML/Applying_color#how_to_describe_a_color) are allowed.
-
-Specify coordinates in inches with respect to the [official field frame](official_field_coord_sys.pdf). The origin of the frame is in the center of the mat surface. The positive y-axis extends away from the wall closest to the red alliance station, the positive z-axis rises vertically, and the positive x-axis completes the right-handed frame.
-
-Some teams may find the default coordinate system restrictive. Each year the challenge changes and there are often
-symmetries that can simplify autonomous navigation if the origin can be transformed. Field Overlay versatility features can
-make it easier to directly use your custom coordinate system:
-
-You can optionally change the rotation of the rendered field to align with your custom global zero heading. The default rotation of the
-field is PI/2 which points the x axis (theta = 0) upwards. To set an alternate rotation, specify an offset to the default rotation in radians:
-
-```java
-packet.fieldOverlay()
-    //rotate x axis clockwise 90 degrees from the default orientation
-    .setRotation(-Math.PI/2);
-    //all subsequent CanvasOps will render relative to this new orientation
-```
-You can optionally translate the origin of the rendered field to align with your custom global translation. The default translation of the
-field is in the center with the Y axis increasing to the left (rotation matters). To set an alternate translation, specify an offset to the default translation in inches:
-
-```java
-packet.fieldOverlay()
-    //shift the origin to the middle of the left edge of the rendered field
-   .setTranslation(0, 12 * 6);
-    //all subsequent CanvasOps will render relative to this updated origin
-```
-
-You can optionally change the scale of subsequent drawing operations. This is not needed for a regulation
-FTC field where your odometry is measured in inches, but can be useful for custom challenges or odometry measured in meters. 
-As an example, imagine your robot is painting the lines on a FIFA soccer field. A soccer field 
-is 105 meters long so we'll set scale to 144/105, converting the default field dimensions of 144 inches to 105 meters. 
-Then your CanvasOps can be specified in meters.
-
-```java
-.setScale(144.0/105.0, 144.0/105.0) //be sure the calculation evaluates to a double and not an int
-```
-
-Note that multiple calls to .setScale are each relative to default scaling:
-
-```java
-.setScale(.5,2) //x-axis will be squished and y-axis operations will be double
-.strokeCircle(0, 0, ORBITAL_RADIUS) //squishy circle
-.setScale(1,1) //this will return to default scaling
-.strokeCircle(0, 0, ORBITAL_RADIUS) //normal circle
-```
-
-You can optionally load an alternate field image on top of the default field that is updated yearly. This can be
-used to support demos using previous year's robots/challenges or to tackle off season challenges with custom fields. It can
-even be used as a poor coder's sprite animation, but it is not meant for that. This gets rendered before any custom
-scaling, rotations or translations, so the units are 0-144 "inches" starting from the top left (0,0) of the field view.
-Different browsers may render non-square image sources differently. Chrome will fit to the square destination likely
-stretching the smaller dimension. Firefox will fit the larger dimension to the destination coordinates and preserve the 
-aspect ratio by centering the smaller dimension. If you want consistent behavior, edit your custom field image so
-that it is square.
-
-```java
-.setAltImage("https://upload.wikimedia.org/wikipedia/commons/4/45/Football_field.svg", 0, 0, 144, 144, true)
-// or shift and scale the image
-//.setAltImage("https://upload.wikimedia.org/wikipedia/commons/4/45/Football_field.svg", 24, 24,48, 48, true)
-```
-You can override the default gridlines. There are normally 7 gridlines including the field
-edges in both dimensions. The minimum value is 2 which just draws the field edges.
-
-```java
-.setGrid(13, 13) //sets a grid line at every ft assuming no custom scaling
-//.setGrid(2, 2) //no grid - only strokes the field edges
-```
 
 Use `FtcDashboard#sendTelemetryPacket()` to dispatch complete packets. 
 

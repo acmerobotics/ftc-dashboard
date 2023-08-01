@@ -19,6 +19,16 @@ layout: default
 
 [Features](features)
 
+-[Telemetry](features#telemetry)
+
+-[Field View](fieldview)
+
+-[Configuration Variables](features#configuration-variables)
+
+-[Op Mode Controls ](features#op-mode-controls)
+
+-[Camera](features#camera)
+
 [Competition Use](competition)
 
 [Samples](https://github.com/acmerobotics/ftc-dashboard/tree/master/TeamCode/src/main/java/org/firstinspires/ftc/teamcode)
