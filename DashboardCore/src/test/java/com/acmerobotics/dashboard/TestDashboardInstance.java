@@ -208,4 +208,8 @@ public class TestDashboardInstance {
             currentPacket = null;
         }
     }
+
+    public void sendTelemetryPacket(TelemetryPacket t){
+        core.sendTelemetryPacket(t);
+    }
 }

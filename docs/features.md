@@ -16,17 +16,15 @@ packet.put("x", 3.7);
 packet.put("status", "alive");
 ```
 
-The accessor `fieldOverlay()` returns a `Canvas` that records a sequence of drawing operations.
+The accessor `fieldOverlay()` returns a `Canvas` that records a sequence of drawing operations that show up in the Field View.
 
 ```java
 packet.fieldOverlay()
     .setFill("blue")
     .fillRect(-20, -20, 40, 40);
 ```
+###[See here for more detail on drawing into the Field View](fieldview)
 
-All valid [web colors](https://developer.mozilla.org/en-US/docs/Web/HTML/Applying_color#how_to_describe_a_color) are allowed.
-
-Specify coordinates in inches with respect to the [official field frame](official_field_coord_sys.pdf). The origin of the frame is in the center of the mat surface. The positive y-axis extends away from the wall closest to the red alliance station, the positive z-axis rises vertically, and the positive x-axis completes the right-handed frame.
 
 Use `FtcDashboard#sendTelemetryPacket()` to dispatch complete packets. 
 

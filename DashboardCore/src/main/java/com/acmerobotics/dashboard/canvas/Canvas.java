@@ -10,6 +10,38 @@ public class Canvas {
         ops = new ArrayList<>();
     }
 
+    public Canvas setScale(double scaleX, double scaleY) {
+        ops.add(new Scale(scaleX, scaleY));
+        return this;
+    }
+
+    public Canvas setRotation(double radians) {
+        ops.add(new Rotation(radians));
+        return this;
+    }
+
+    public Canvas setTranslation(double x, double y) {
+        ops.add(new Translate(x, y));
+        return this;
+    }
+
+    public Canvas strokeText(String text, double x, double y, String font, double theta, boolean usePageFrame) {
+        ops.add(new Text(text, x, y, font, theta, true, usePageFrame));
+        return this;
+    }
+    public Canvas strokeText(String text, double x, double y, String font, double theta) {
+        strokeText( text, x, y, font, theta,true);
+        return this;
+    }
+    public Canvas fillText(String text, double x, double y, String font, double theta, boolean usePageFrame) {
+        ops.add(new Text(text, x, y, font, theta, false, usePageFrame));
+        return this;
+    }
+    public Canvas fillText(String text, double x, double y, String font, double theta) {
+        fillText( text, x, y, font, theta,true);
+        return this;
+    }
+
     public Canvas strokeCircle(double x, double y, double radius) {
         ops.add(new Circle(x, y, radius, true));
         return this;
@@ -79,12 +111,21 @@ public class Canvas {
      * be served under path /images/.
      */
     public Canvas drawImage(String path, double x, double y, double width, double height) {
-        ops.add(new Image(path, x, y, width, height));
+        drawImage(path, x, y, width, height, 0, 0, 0, true);
+        return this;
+    }
+
+    public Canvas drawImage(String path, double x, double y, double width, double height, double theta, double pivotX, double pivotY, boolean usePageFrame) {
+        ops.add(new Image(path, x, y, width, height, theta, pivotX, pivotY, usePageFrame));
         return this;
     }
 
     public Canvas drawGrid(double x, double y, double width, double height, int numTicksX, int numTicksY) {
-        ops.add(new Grid(x, y, width, height, numTicksX, numTicksY));
+        drawGrid(x, y, width, height, numTicksX, numTicksY, 0, 0,0, true);
+        return this;
+    }
+    public Canvas drawGrid(double x, double y, double width, double height, int numTicksX, int numTicksY, double theta, double pivotX, double pivotY, boolean usePageFrame) {
+        ops.add(new Grid(x, y, width, height, numTicksX, numTicksY, theta, pivotX, pivotY, usePageFrame));
         return this;
     }
 
