@@ -30,7 +30,7 @@ public class Canvas {
         return this;
     }
     public Canvas strokeText(String text, double x, double y, String font, double theta) {
-        strokeText( text, x, y, font, theta,true);
+        strokeText(text, x, y, font, theta, true);
         return this;
     }
     public Canvas fillText(String text, double x, double y, String font, double theta, boolean usePageFrame) {
@@ -38,7 +38,7 @@ public class Canvas {
         return this;
     }
     public Canvas fillText(String text, double x, double y, String font, double theta) {
-        fillText( text, x, y, font, theta,true);
+        fillText(text, x, y, font, theta, true);
         return this;
     }
 
