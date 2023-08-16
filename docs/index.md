@@ -19,15 +19,15 @@ layout: default
 
 [Features](features)
 
--[Telemetry](features#telemetry)
+* [Telemetry](features#telemetry)
 
--[Field View](fieldview)
+* [Field View](fieldview)
 
--[Configuration Variables](features#configuration-variables)
+* [Configuration Variables](features#configuration-variables)
 
--[Op Mode Controls ](features#op-mode-controls)
+* [Op Mode Controls](features#op-mode-controls)
 
--[Camera](features#camera)
+* [Camera](features#camera)
 
 [Competition Use](competition)
 
