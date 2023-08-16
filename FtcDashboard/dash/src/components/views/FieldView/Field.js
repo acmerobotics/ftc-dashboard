@@ -61,7 +61,15 @@ function loadImage(src) {
   return image;
 }
 
-function adjustTransform(ctx, defaultTransform, altOriginX, altOriginY, altRotation, altScaleX, altScaleY){
+function adjustTransform(
+  ctx,
+  defaultTransform,
+  altOriginX,
+  altOriginY,
+  altRotation,
+  altScaleX,
+  altScaleY,
+) {
   ctx.setTransform(defaultTransform);
   ctx.translate(altOriginX, altOriginY);
   ctx.rotate(altRotation);
@@ -78,7 +86,6 @@ const DEFAULT_OPTIONS = {
 };
 
 export default class Field {
-
   constructor(canvas, options) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
@@ -119,7 +126,7 @@ export default class Field {
     );
   }
 
-    renderField(x, y, width, height) {
+  renderField(x, y, width, height) {
     const o = this.options;
 
     this.ctx.save();
@@ -148,21 +155,44 @@ export default class Field {
 
     this.overlay.ops.forEach((op) => {
       switch (op.type) {
-
         case 'scale':
-            altScaleX = op.scaleX;
-            altScaleY = op.scaleY;
-            adjustTransform(this.ctx, defaultTransform, altOriginX, altOriginY, altRotation, altScaleX, altScaleY);
-            break;
+          altScaleX = op.scaleX;
+          altScaleY = op.scaleY;
+          adjustTransform(
+            this.ctx,
+            defaultTransform,
+            altOriginX,
+            altOriginY,
+            altRotation,
+            altScaleX,
+            altScaleY,
+          );
+          break;
         case 'rotation':
-            altRotation = op.rotation;
-            adjustTransform(this.ctx, defaultTransform, altOriginX, altOriginY, altRotation, altScaleX, altScaleY);
-            break;
+          altRotation = op.rotation;
+          adjustTransform(
+            this.ctx,
+            defaultTransform,
+            altOriginX,
+            altOriginY,
+            altRotation,
+            altScaleX,
+            altScaleY,
+          );
+          break;
         case 'translate':
-            altOriginX=op.x;
-            altOriginY=-op.y;
-            adjustTransform(this.ctx, defaultTransform, altOriginX, altOriginY, altRotation, altScaleX, altScaleY);
-            break;
+          altOriginX = op.x;
+          altOriginY = -op.y;
+          adjustTransform(
+            this.ctx,
+            defaultTransform,
+            altOriginX,
+            altOriginY,
+            altRotation,
+            altScaleX,
+            altScaleY,
+          );
+          break;
         case 'fill':
           this.ctx.fillStyle = op.color;
           break;
@@ -235,53 +265,53 @@ export default class Field {
         case 'image': {
           const image = loadImage(op.path);
           this.ctx.save();
-          if (op.usePageFrame)
-            {
-              this.ctx.setTransform(pageTransform);
-              this.ctx.translate(op.x, op.y);
-            }
-          else //use current transform
-            {
+          if (op.usePageFrame) {
+            this.ctx.setTransform(pageTransform);
+            this.ctx.translate(op.x, op.y);
+          } //use current transform
+          else {
             this.ctx.translate(op.x, -op.y);
-            }
+          }
           this.ctx.rotate(op.theta, op.pivotX, op.pivotY);
-          this.ctx.drawImage(image, -op.pivotX, -op.pivotY, op.width, op.height);
+          this.ctx.drawImage(
+            image,
+            -op.pivotX,
+            -op.pivotY,
+            op.width,
+            op.height,
+          );
           this.ctx.restore();
           break;
         }
         case 'text': {
-            this.ctx.save();
-            this.ctx.font = op.font;
-            if (op.usePageFrame)
-                {
-                this.ctx.setTransform(pageTransform);
-                this.ctx.translate(op.x, op.y);
-                }
-            else //use current transform
-                {
-                this.ctx.translate(op.x, -op.y);
-                }
-            this.ctx.rotate(op.theta);
-            if (op.stroke) {
-                this.ctx.strokeText(op.text, 0, 0)
-            } else {
-                this.ctx.fillText(op.text, 0, 0)
-            }
-            this.ctx.restore();
-            break;
-            }
+          this.ctx.save();
+          this.ctx.font = op.font;
+          if (op.usePageFrame) {
+            this.ctx.setTransform(pageTransform);
+            this.ctx.translate(op.x, op.y);
+          } //use current transform
+          else {
+            this.ctx.translate(op.x, -op.y);
+          }
+          this.ctx.rotate(op.theta);
+          if (op.stroke) {
+            this.ctx.strokeText(op.text, 0, 0);
+          } else {
+            this.ctx.fillText(op.text, 0, 0);
+          }
+          this.ctx.restore();
+          break;
+        }
         case 'grid': {
           this.ctx.save();
-            if (op.usePageFrame)
-              {
-                this.ctx.setTransform(pageTransform);
-                this.ctx.translate(op.x + op.pivotX , op.y + op.pivotY);
-              }
-            else //use current transform
-              {
-              this.ctx.translate(op.x, -op.y);
-              }
-            this.ctx.rotate(op.theta, op.pivotX, op.pivotY);
+          if (op.usePageFrame) {
+            this.ctx.setTransform(pageTransform);
+            this.ctx.translate(op.x + op.pivotX, op.y + op.pivotY);
+          } //use current transform
+          else {
+            this.ctx.translate(op.x, -op.y);
+          }
+          this.ctx.rotate(op.theta, op.pivotX, op.pivotY);
           this.ctx.strokeStyle = this.options.gridLineColor;
 
           const horSpacing = op.width / (op.numTicksX - 1);
@@ -296,7 +326,7 @@ export default class Field {
             const lineX = -op.pivotX + horSpacing * i;
             this.ctx.beginPath();
             this.ctx.fineMoveTo(lineX, -op.pivotY);
-            this.ctx.fineLineTo(lineX , -op.pivotY + op.height);
+            this.ctx.fineLineTo(lineX, -op.pivotY + op.height);
             this.ctx.stroke();
           }
 
@@ -306,8 +336,8 @@ export default class Field {
           for (let i = 0; i < op.numTicksY; i++) {
             const lineY = -op.pivotY + vertSpacing * i;
             this.ctx.beginPath();
-            this.ctx.fineMoveTo(- op.pivotX, lineY);
-            this.ctx.fineLineTo(- op.pivotX + op.width, lineY);
+            this.ctx.fineMoveTo(-op.pivotX, lineY);
+            this.ctx.fineLineTo(-op.pivotX + op.width, lineY);
             this.ctx.stroke();
           }
 
