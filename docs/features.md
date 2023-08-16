@@ -23,8 +23,8 @@ packet.fieldOverlay()
     .setFill("blue")
     .fillRect(-20, -20, 40, 40);
 ```
-###[See here for more detail on drawing into the Field View](fieldview)
 
+Check out [this page](fieldview) for more information on Field View drawing.
 
 Use `FtcDashboard#sendTelemetryPacket()` to dispatch complete packets. 
 
