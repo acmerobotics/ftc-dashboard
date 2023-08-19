@@ -14,7 +14,7 @@ type Stroke = {
 
 type StrokeWidth = {
   type: 'strokeWidth';
-  lineWidth: number;
+  width: number;
 };
 
 type Circle = {
@@ -22,13 +22,14 @@ type Circle = {
   x: number;
   y: number;
   radius: number;
+  stroke: boolean;
 };
 
 type Polygon = {
   type: 'polygon';
   xPoints: number[];
   yPoints: number[];
-  stroke: string;
+  stroke: boolean;
 };
 
 type Polyline = {
@@ -53,14 +54,81 @@ type Spline = {
   fy: number;
 };
 
-type DrawOp =
+type Scale = {
+  type: 'scale';
+  scaleX: number;
+  scaleY: number;
+};
+
+type Rotation = {
+  type: 'rotation';
+  rotation: number;
+};
+
+type Translate = {
+  type: 'translate';
+  x: number;
+  y: number;
+};
+
+type Image = {
+  type: 'image';
+  path: string;
+  x: number;
+  y: number;
+  pivotX: number;
+  pivotY: number;
+  width: number;
+  height: number;
+  theta: number;
+  usePageFrame: boolean;
+};
+
+type Text = {
+  type: 'text';
+  text: string;
+  x: number;
+  y: number;
+  font: string;
+  stroke: boolean;
+  usePageFrame: boolean;
+  theta: number;
+};
+
+type Grid = {
+  type: 'grid';
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  numTicksX: number;
+  numTicksY: number;
+  pivotX: number;
+  pivotY: number;
+  theta: number;
+  usePageFrame: boolean;
+};
+
+type Alpha = {
+  type: 'alpha';
+  alpha: number;
+};
+
+export type DrawOp =
   | Fill
   | Stroke
   | StrokeWidth
   | Circle
   | Polygon
   | Polyline
-  | Spline;
+  | Spline
+  | Scale
+  | Rotation
+  | Translate
+  | Image
+  | Text
+  | Grid
+  | Alpha;
 
 export type TelemetryItem = {
   data: {
