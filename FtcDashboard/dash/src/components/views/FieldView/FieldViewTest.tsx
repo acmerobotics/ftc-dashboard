@@ -80,6 +80,21 @@ const PRELUDE: DrawOp[] = [
     usePageFrame: true,
   },
 ];
+const TWELVEBY: DrawOp[] = [
+  {
+    type: 'grid',
+    x: 0,
+    y: 0,
+    width: 144,
+    height: 144,
+    numTicksX: 13,
+    numTicksY: 13,
+    theta: 0,
+    pivotX: 0,
+    pivotY: 0,
+    usePageFrame: true,
+  },
+];
 
 const IMAGE_PATH =
   'https://www.firstinspires.org/sites/default/files/uploads/resource_library/brand/thumbnails/FTC-Vertical.png';
@@ -119,7 +134,7 @@ const TEST_CASES: DrawOp[][] = [
     },
   ],
   [
-    OUTLINE,
+    ...TWELVEBY,
     {
       type: 'grid',
       x: 24,
@@ -136,11 +151,12 @@ const TEST_CASES: DrawOp[][] = [
     { type: 'fill', color: 'goldenrod' },
     {
       type: 'circle',
-      x: 12,
-      y: 12,
+      x: 72-24,
+      y: 72-24,
       /* (24 + 36, 24 + 36) page frame */ radius: 3,
       stroke: false,
     },
+    ...fieldAxes(0, 0),
   ],
   [
     OUTLINE,
@@ -258,10 +274,25 @@ const TEST_CASES: DrawOp[][] = [
       height: 72,
       path: IMAGE_PATH,
       theta: Math.PI / 6,
-      pivotX: 0,
-      pivotY: 0,
+      pivotX: 36,
+      pivotY: 24,
       usePageFrame: false,
     },
+    {
+      type: 'grid',
+      x: 24,
+      y: 24,
+      width: 72,
+      height: 72,
+      numTicksX: 3,
+      numTicksY: 4,
+      theta: Math.PI / 6,
+      pivotX: 36,
+      pivotY: 24,
+      usePageFrame: false,
+    },
+    { type: 'fill', color: 'green' },
+    { type: 'circle', x: 24, y: 24, radius: 3, stroke: false },
   ],
   // [
   //   ...PRELUDE,
