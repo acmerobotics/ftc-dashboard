@@ -242,7 +242,7 @@ export default class Field {
             this.ctx.setTransform(pageTransform);
           }
 
-          this.ctx.translate(op.x + op.pivotX, op.y + op.pivotY);
+          this.ctx.translate(op.x, op.y);
 
           // Flipped to match text behavior.
           if (!op.usePageFrame) {
@@ -292,9 +292,15 @@ export default class Field {
             this.ctx.setTransform(pageTransform);
           }
 
-          this.ctx.translate(op.x + op.pivotX, op.y + op.pivotY);
+          this.ctx.translate(op.x, op.y);
+
+          // Flipped to match text behavior.
+          if (!op.usePageFrame) {
+            this.ctx.scale(1, -1);
+          }
+
           this.ctx.rotate(op.theta);
-          this.ctx.translate(-op.pivotX, -op.pivotY);
+          this.ctx.translate(op.X, op.Y);
 
           this.ctx.strokeStyle = this.options.gridLineColor;
 
@@ -308,10 +314,10 @@ export default class Field {
             this.options.gridLineWidth / (scalingY * devicePixelRatio);
 
           for (let i = 0; i < op.numTicksX; i++) {
-            const lineX = horSpacing * i;
+            const lineX = -op.pivotX + horSpacing * i;
             this.ctx.beginPath();
-            this.ctx.fineMoveTo(lineX, 0);
-            this.ctx.fineLineTo(lineX, op.height);
+            this.ctx.fineMoveTo(lineX, -op.pivotY );
+            this.ctx.fineLineTo(lineX, -op.pivotY + op.height);
             this.ctx.stroke();
           }
 
@@ -319,10 +325,10 @@ export default class Field {
             this.options.gridLineWidth / (scalingX * devicePixelRatio);
 
           for (let i = 0; i < op.numTicksY; i++) {
-            const lineY = vertSpacing * i;
+            const lineY = -op.pivotY + vertSpacing * i;
             this.ctx.beginPath();
-            this.ctx.fineMoveTo(0, lineY);
-            this.ctx.fineLineTo(op.width, lineY);
+            this.ctx.fineMoveTo(-op.pivotX, lineY);
+            this.ctx.fineLineTo(-op.pivotX + op.width, lineY);
             this.ctx.stroke();
           }
 
