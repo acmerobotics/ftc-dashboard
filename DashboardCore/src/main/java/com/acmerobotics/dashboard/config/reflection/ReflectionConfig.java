@@ -8,6 +8,7 @@ import com.acmerobotics.dashboard.config.variable.VariableType;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 
 public class ReflectionConfig {
     private ReflectionConfig() {}
@@ -25,8 +26,7 @@ public class ReflectionConfig {
 
         return customVariable;
     }
-    private static ConfigVariable<?>  createVariableFromArrayField(Field field, Object parent, int index) {
-        Class<?> fieldClass = field.getType().getComponentType();
+    private static ConfigVariable<?>  createVariableFromArrayField(Field field, Class<?> fieldClass, Object parent, int[] indices) {
         VariableType type = VariableType.fromClass(fieldClass);
         switch (type) {
             case BOOLEAN:
@@ -34,19 +34,30 @@ public class ReflectionConfig {
             case DOUBLE:
             case STRING:
             case ENUM:
-                return new BasicVariable<>(type, new ArrayProvider<Boolean>(field, parent,index));
+                return new BasicVariable<>(type, new ArrayProvider<Boolean>(field, parent,Arrays.copyOf(indices, indices.length)));
             case CUSTOM:
                 try {
-                    Object value = Array.get(field.get(parent), index);
+                    Object value = null;
+                    try {
+                        value = ArrayProvider.getArrayRecursive(field.get(parent), indices);
+                    }catch (ArrayIndexOutOfBoundsException ignored )
+                    {
+
+                    }
+
                     if (value == null) {
                         return new CustomVariable(null);
                     }
                     CustomVariable customVariable = new CustomVariable();
                     if(fieldClass.isArray())
                     {
+                        int[] newIndices = Arrays.copyOf(indices, indices.length+1);
+
                         for(int i = 0; i<Array.getLength(value); i++)
                         {
-                            customVariable.putVariable(Integer.toString(i), createVariableFromArrayField(field, parent, i));
+
+                            newIndices[newIndices.length-1]=i;
+                            customVariable.putVariable(Integer.toString(i), createVariableFromArrayField(field, fieldClass.getComponentType(), parent, newIndices));
                         }
                     }
                     else {
@@ -90,7 +101,7 @@ public class ReflectionConfig {
                     {
                         for(int i = 0; i<Array.getLength(value); i++)
                         {
-                            customVariable.putVariable(Integer.toString(i), createVariableFromArrayField(field, parent, i));
+                            customVariable.putVariable(Integer.toString(i), createVariableFromArrayField(field, field.getType().getComponentType(), parent, new int[]{i}));
                         }
                     }
                     else {
