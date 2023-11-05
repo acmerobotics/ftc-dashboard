@@ -1,4 +1,4 @@
-type ValResult<T> =
+export type ValResult<T> =
   | {
       value: T;
       valid: true;

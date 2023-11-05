@@ -19,19 +19,16 @@ import { ReactComponent as PlayIcon } from '@/assets/icons/play_arrow.svg';
 import { ReactComponent as PauseIcon } from '@/assets/icons/pause.svg';
 
 import { RootState } from '@/store/reducers';
-import { validateInt } from '@/components/views/ConfigView/inputs/validation';
 import { colors, ThemeConsumer } from '@/hooks/useTheme';
 import { DEFAULT_OPTIONS } from './Graph';
+import { validateInt, ValResult } from '@/components/inputs/validation';
 
 type GraphViewState = {
   graphing: boolean;
   paused: boolean;
   availableKeys: string[];
   selectedKeys: string[];
-  windowMs: {
-    value: number;
-    valid: boolean;
-  };
+  windowMs: ValResult<number>;
 };
 
 const mapStateToProps = (state: RootState) => ({
@@ -242,18 +239,9 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
                               value={this.state.windowMs.value}
                               valid={this.state.windowMs.valid}
                               validate={validateInt}
-                              onChange={({
-                                value,
-                                valid,
-                              }: {
-                                value: number;
-                                valid: boolean;
-                              }) =>
+                              onChange={(arg) =>
                                 this.setState({
-                                  windowMs: {
-                                    value,
-                                    valid,
-                                  },
+                                  windowMs: arg,
                                 })
                               }
                             />

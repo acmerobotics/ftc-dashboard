@@ -13,6 +13,7 @@ import {
 
 interface Props {
   name: string;
+  path: string;
   state: CustomVarState;
   onChange: (state: CustomVarState) => void;
   onSave: (variable: CustomVar) => void;
@@ -72,7 +73,7 @@ class CustomVariable extends Component<Props, State> {
   }
 
   render() {
-    const { name, state } = this.props;
+    const { name, path, state } = this.props;
 
     const value = state.__value;
     if (value === null) {
@@ -116,6 +117,7 @@ class CustomVariable extends Component<Props, State> {
           <CustomVariable
             key={key}
             name={key}
+            path={`${path}.${key}`}
             state={child}
             onChange={onChange}
             onSave={onSave}
@@ -127,6 +129,7 @@ class CustomVariable extends Component<Props, State> {
         <BasicVariable
           key={key}
           name={key}
+          path={`${path}.${key}`}
           state={child}
           onChange={onChange}
           onSave={onSave}

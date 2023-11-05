@@ -72,6 +72,7 @@ function validAndModified(state: ConfigVarState): ConfigVar | null {
 type ConfigViewProps = BaseViewProps & BaseViewHeadingProps;
 
 const ConfigView = ({
+  id,
   isDraggable = false,
   isUnlocked = false,
 }: ConfigViewProps) => {
@@ -127,6 +128,7 @@ const ConfigView = ({
               <CustomVariable
                 key={key}
                 name={key}
+                path={id ? `${id}.${key}` : key}
                 // invariant 2: children of the root are custom
                 state={rootValue[key] as CustomVarState}
                 onChange={(newState) =>

@@ -2,6 +2,7 @@ import clsx from 'clsx';
 import { forwardRef, PropsWithChildren } from 'react';
 
 type BaseViewProps = PropsWithChildren<{
+  id?: string;
   isUnlocked?: boolean;
 }>;
 

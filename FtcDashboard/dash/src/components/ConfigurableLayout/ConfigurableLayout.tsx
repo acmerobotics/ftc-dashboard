@@ -565,6 +565,7 @@ export default function ConfigurableLayout() {
           {gridItems.map((item) => (
             <div key={item.id}>
               {cloneElement(VIEW_MAP[item.view], {
+                id: item.id,
                 isDraggable: item.layout.isDraggable,
                 isUnlocked: !isLayoutLocked,
               })}
