@@ -66,12 +66,20 @@ public class DashboardCore {
                         pendingTelemetry.clear();
                     }
 
-                    // only the latest packet field overlay is used
+                    // only the latest packet non-empty field overlay is used
                     // this helps save bandwidth, especially for more complex overlays
-                    for (TelemetryPacket packet : telemetryToSend.subList(0,
-                        telemetryToSend.size() - 1)) {
-                        packet.field().clear();
-                        packet.fieldOverlay().clear();
+                    for (int i = telemetryToSend.size() - 1; i >= 0; i--) {
+                        TelemetryPacket packet = telemetryToSend.get(i);
+                        if (!packet.fieldOverlay().getOperations().isEmpty()) {
+                            for (int j = 0; j < i; j++) {
+                                TelemetryPacket packet2 = telemetryToSend.get(j);
+                                packet2.field().clear();
+                                packet2.fieldOverlay().clear();
+                            }
+                            break;
+                        } else {
+                            packet.field().clear();
+                        }
                     }
 
                     sendAll(new ReceiveTelemetry(telemetryToSend));
