@@ -2,16 +2,12 @@ package com.acmerobotics.dashboard;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.acmerobotics.dashboard.DashboardCore;
-import com.acmerobotics.dashboard.RobotStatus;
 import com.acmerobotics.dashboard.config.reflection.ReflectionConfig;
 import com.acmerobotics.dashboard.config.variable.BasicVariable;
 import com.acmerobotics.dashboard.config.variable.ConfigVariable;
 import com.acmerobotics.dashboard.config.variable.CustomVariable;
-
-import org.junit.jupiter.api.Test;
-
 import java.util.Map;
+import org.junit.jupiter.api.Test;
 
 public class SerializationTests {
 

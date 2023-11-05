@@ -1,6 +1,5 @@
 package com.acmerobotics.dashboard;
 
-import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.ValueProvider;
 import com.acmerobotics.dashboard.config.variable.BasicVariable;
 import com.acmerobotics.dashboard.config.variable.ConfigVariableDeserializer;
@@ -15,7 +14,6 @@ import com.acmerobotics.dashboard.message.redux.SaveConfig;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -44,13 +42,13 @@ public class DashboardCore {
 
     // NOTE: Helps to have this here for testing
     public static final Gson GSON = new GsonBuilder()
-            .registerTypeAdapter(Message.class, new MessageDeserializer())
-            .registerTypeAdapter(BasicVariable.class, new ConfigVariableSerializer())
-            .registerTypeAdapter(BasicVariable.class, new ConfigVariableDeserializer())
-            .registerTypeAdapter(CustomVariable.class, new ConfigVariableSerializer())
-            .registerTypeAdapter(CustomVariable.class, new ConfigVariableDeserializer())
-            .serializeNulls()
-            .create();
+        .registerTypeAdapter(Message.class, new MessageDeserializer())
+        .registerTypeAdapter(BasicVariable.class, new ConfigVariableSerializer())
+        .registerTypeAdapter(BasicVariable.class, new ConfigVariableDeserializer())
+        .registerTypeAdapter(CustomVariable.class, new ConfigVariableSerializer())
+        .registerTypeAdapter(CustomVariable.class, new ConfigVariableDeserializer())
+        .serializeNulls()
+        .create();
 
     private class TelemetryUpdateRunnable implements Runnable {
         @Override
@@ -70,7 +68,8 @@ public class DashboardCore {
 
                     // only the latest packet field overlay is used
                     // this helps save bandwidth, especially for more complex overlays
-                    for (TelemetryPacket packet : telemetryToSend.subList(0, telemetryToSend.size() - 1)) {
+                    for (TelemetryPacket packet : telemetryToSend.subList(0,
+                        telemetryToSend.size() - 1)) {
                         packet.fieldOverlay().clear();
                     }
 
@@ -85,7 +84,8 @@ public class DashboardCore {
     }
 
     public DashboardCore() {
-        telemetryExecutorService = Executors.newSingleThreadExecutor(r -> new Thread(r, "dash telemetry"));
+        telemetryExecutorService =
+            Executors.newSingleThreadExecutor(r -> new Thread(r, "dash telemetry"));
         telemetryExecutorService.submit(new TelemetryUpdateRunnable());
     }
 
@@ -189,6 +189,7 @@ public class DashboardCore {
 
     /**
      * Sets the telemetry transmission interval.
+     *
      * @param newTransmissionInterval transmission interval in milliseconds
      */
     public void setTelemetryTransmissionInterval(int newTransmissionInterval) {
@@ -207,7 +208,7 @@ public class DashboardCore {
     /**
      * Executes {@param function} in an exclusive context for thread-safe config tree modification
      * and calls {@link #updateConfig()} to keep clients up to date.
-     *
+     * <p>
      * Do not leak the config tree outside the function.
      *
      * @param function
@@ -220,10 +221,11 @@ public class DashboardCore {
 
     /**
      * Add config variable with custom provider.
+     *
      * @param category top-level category
-     * @param name variable name
+     * @param name     variable name
      * @param provider getter/setter for the variable
-     * @param <T> variable type
+     * @param <T>      variable type
      */
     public <T> void addConfigVariable(String category, String name, ValueProvider<T> provider) {
         configRoot.with(v -> {
@@ -241,8 +243,9 @@ public class DashboardCore {
 
     /**
      * Remove a config variable.
+     *
      * @param category top-level category
-     * @param name variable name
+     * @param name     variable name
      */
     public void removeConfigVariable(String category, String name) {
         configRoot.with(v -> {

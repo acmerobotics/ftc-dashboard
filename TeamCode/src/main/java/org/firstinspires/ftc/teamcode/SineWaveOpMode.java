@@ -23,11 +23,13 @@ public class SineWaveOpMode extends LinearOpMode {
 
         waitForStart();
 
-        if (isStopRequested()) return;
+        if (isStopRequested()) {
+            return;
+        }
 
         while (opModeIsActive()) {
             telemetry.addData("x", AMPLITUDE * Math.sin(
-                    2 * Math.PI * FREQUENCY * getRuntime() + Math.toRadians(PHASE)
+                2 * Math.PI * FREQUENCY * getRuntime() + Math.toRadians(PHASE)
             ));
             telemetry.update();
 

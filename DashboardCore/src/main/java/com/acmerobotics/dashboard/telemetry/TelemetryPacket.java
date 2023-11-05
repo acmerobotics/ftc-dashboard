@@ -1,7 +1,6 @@
 package com.acmerobotics.dashboard.telemetry;
 
 import com.acmerobotics.dashboard.canvas.Canvas;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +18,7 @@ public class TelemetryPacket {
     private Canvas fieldOverlay;
 
     private static final Canvas DEFAULT_FIELD = new Canvas();
+
     static {
         DEFAULT_FIELD.setAlpha(0.4);
         DEFAULT_FIELD.drawImage("/dash/centerstage.webp", 0, 0, 144, 144);
@@ -45,6 +45,7 @@ public class TelemetryPacket {
 
     /**
      * Stores a single key-value pair.
+     *
      * @param key
      * @param value
      */
@@ -54,6 +55,7 @@ public class TelemetryPacket {
 
     /**
      * Stores all entries of the provided map.
+     *
      * @param map
      */
     public void putAll(Map<String, Object> map) {
@@ -64,6 +66,7 @@ public class TelemetryPacket {
 
     /**
      * Adds a line to the telemetry log.
+     *
      * @param line
      */
     public void addLine(String line) {

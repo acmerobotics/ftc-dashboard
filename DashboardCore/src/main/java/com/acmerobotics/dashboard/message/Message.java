@@ -8,6 +8,7 @@ public class Message {
 
     /**
      * Creates a message.
+     *
      * @param type message type
      */
     public Message(MessageType type) {

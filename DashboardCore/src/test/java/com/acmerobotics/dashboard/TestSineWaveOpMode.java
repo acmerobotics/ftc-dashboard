@@ -9,7 +9,7 @@ public class TestSineWaveOpMode extends TestOpMode {
     public static double FREQUENCY = 0.25;
 
 
-    public TestSineWaveOpMode(){
+    public TestSineWaveOpMode() {
         super("TestSineWaveOpMode");
     }
 
@@ -21,7 +21,7 @@ public class TestSineWaveOpMode extends TestOpMode {
     @Override
     protected void loop() throws InterruptedException {
         dashboard.addData("x", AMPLITUDE * Math.sin(
-                2 * Math.PI * FREQUENCY * (System.currentTimeMillis() / 1000d) + Math.toRadians(PHASE)
+            2 * Math.PI * FREQUENCY * (System.currentTimeMillis() / 1000d) + Math.toRadians(PHASE)
         ));
         dashboard.update();
         Thread.sleep(10);

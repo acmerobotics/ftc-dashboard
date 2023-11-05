@@ -11,18 +11,20 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 @TeleOp
 public class ArrayTestOpMode extends LinearOpMode {
     public static class NestedClass {
-        public int a,b;
+        public int a, b;
     }
+
     public static int[] array = new int[3];
-    public static NestedClass[] innerArray = new NestedClass[] { new NestedClass(), new NestedClass(), new NestedClass()};
+    public static NestedClass[] innerArray =
+        new NestedClass[] {new NestedClass(), new NestedClass(), new NestedClass()};
+
     @Override
     public void runOpMode() {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         waitForStart();
-        array=new int[2];
-        while(opModeIsActive())
-        {
+        array = new int[2];
+        while (opModeIsActive()) {
             telemetry.addData("array0", array[0]);
             telemetry.addData("array1", array[1]);
             telemetry.addData("innerArray0A", innerArray[0].a);

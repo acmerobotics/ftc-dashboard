@@ -1,9 +1,5 @@
 package com.acmerobotics.dashboard;
 
-import com.acmerobotics.dashboard.DashboardCore;
-import com.acmerobotics.dashboard.RobotStatus;
-import com.acmerobotics.dashboard.SendFun;
-import com.acmerobotics.dashboard.SocketHandler;
 import com.acmerobotics.dashboard.config.ValueProvider;
 import com.acmerobotics.dashboard.message.Message;
 import com.acmerobotics.dashboard.message.redux.InitOpMode;
@@ -12,12 +8,10 @@ import com.acmerobotics.dashboard.message.redux.ReceiveRobotStatus;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.dashboard.testopmode.TestOpMode;
 import com.acmerobotics.dashboard.testopmode.TestOpModeManager;
-
-import java.io.IOException;
-import java.util.stream.Collectors;
-
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoWSD;
+import java.io.IOException;
+import java.util.stream.Collectors;
 
 enum TestEnum {
     Value1,
@@ -65,15 +59,16 @@ public class TestDashboardInstance {
 
             opModeManager.setSendFun(this);
             send(new ReceiveOpModeList(
-                    opModeManager
-                            .getTestOpModes()
-                            .stream().map(TestOpMode::getName)
-                            .collect(Collectors.toList())
+                opModeManager
+                    .getTestOpModes()
+                    .stream().map(TestOpMode::getName)
+                    .collect(Collectors.toList())
             ));
         }
 
         @Override
-        protected void onClose(NanoWSD.WebSocketFrame.CloseCode code, String reason, boolean initiatedByRemote) {
+        protected void onClose(NanoWSD.WebSocketFrame.CloseCode code, String reason,
+                               boolean initiatedByRemote) {
             sh.onClose();
 
             opModeManager.clearSendFun();
@@ -101,7 +96,7 @@ public class TestDashboardInstance {
                     }
 
                     send(new ReceiveRobotStatus(
-                            new RobotStatus(core.enabled, true, opModeName, opModeStatus, "", "")
+                        new RobotStatus(core.enabled, true, opModeName, opModeStatus, "", "")
                     ));
                     break;
                 }
@@ -209,7 +204,7 @@ public class TestDashboardInstance {
         }
     }
 
-    public void sendTelemetryPacket(TelemetryPacket t){
+    public void sendTelemetryPacket(TelemetryPacket t) {
         core.sendTelemetryPacket(t);
     }
 }

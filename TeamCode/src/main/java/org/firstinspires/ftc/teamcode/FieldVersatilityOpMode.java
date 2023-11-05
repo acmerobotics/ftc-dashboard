@@ -23,7 +23,8 @@ public class FieldVersatilityOpMode extends LinearOpMode {
     public static double SPIN_FREQUENCY = 0.25;
     public static double ORBITAL_RADIUS = 50;
     public static double SIDE_LENGTH = 10;
-    public static String ALTIMGSRC = "https://upload.wikimedia.org/wikipedia/commons/4/45/Football_field.svg";
+    public static String ALTIMGSRC =
+        "https://upload.wikimedia.org/wikipedia/commons/4/45/Football_field.svg";
     //public static String ALTIMGSRC = "dist/assets/play_arrow.95e2d7e4.svg";
     public static double ALTIMGX = 0; //try 24
     public static double ALTIMGY = 0; //try 24
@@ -66,7 +67,9 @@ public class FieldVersatilityOpMode extends LinearOpMode {
 
         waitForStart();
 
-        if (isStopRequested()) return;
+        if (isStopRequested()) {
+            return;
+        }
 
         while (opModeIsActive()) {
             double time = getRuntime();
@@ -91,7 +94,8 @@ public class FieldVersatilityOpMode extends LinearOpMode {
                 byPoints[i] += by;
             }
             telemetry.addData("x", AMPLITUDE * Math.sin(
-                    2 * Math.PI * FREQUENCY * (System.currentTimeMillis() / 1000d) + Math.toRadians(PHASE)
+                2 * Math.PI * FREQUENCY * (System.currentTimeMillis() / 1000d) +
+                    Math.toRadians(PHASE)
             ));
             telemetry.addData("theta", angleAnim);
             telemetry.update();
@@ -113,7 +117,9 @@ public class FieldVersatilityOpMode extends LinearOpMode {
                 //this will be drawn in the pageFrame orientation
                 .drawGrid(0, 0, 144, 144, 7, 7)
                 //disabling the pageFrame will draw a grid in the current transform
-                .drawGrid(GRIDX, GRIDY, GRIDW, GRIDH, GRID_LINESX, GRID_LINESY, Math.toRadians(GRID_THETA_DEGREES), GRID_PIVOTX, GRID_PIVOTY, GRID_USE_PAGE_FRAME)
+                .drawGrid(GRIDX, GRIDY, GRIDW, GRIDH, GRID_LINESX, GRID_LINESY,
+                    Math.toRadians(GRID_THETA_DEGREES), GRID_PIVOTX, GRID_PIVOTY,
+                    GRID_USE_PAGE_FRAME)
                 //.drawGrid(GRIDX, GRIDY, GRIDW, GRIDH, GRID_LINESX, GRID_LINESY, angleAnim, GRID_PIVOTX, GRID_PIVOTY, GRID_USE_PAGE_FRAME)
 
                 //you can draw multiple images and can rotate them around a specified anchor/pivot point and draw them in the current transform instead of the page frame
@@ -137,7 +143,8 @@ public class FieldVersatilityOpMode extends LinearOpMode {
                 .setStroke("green")
                 .strokeLine(0, 0, 0, 24) //y axis
                 .setFill("green")
-                .strokeText("Y axis", 0, (RED_ALLIANCE ? 24 : 0), "8px serif", -Math.PI / 2 * (RED_ALLIANCE ? -1 : 1), false)
+                .strokeText("Y axis", 0, (RED_ALLIANCE ? 24 : 0), "8px serif",
+                    -Math.PI / 2 * (RED_ALLIANCE ? -1 : 1), false)
                 .setStroke("red")
                 .strokeLine(0, 0, 24, 0) //x axis
                 .setFill("red")
@@ -154,7 +161,8 @@ public class FieldVersatilityOpMode extends LinearOpMode {
                 //you can draw multiple images and can rotate them around a specified pivot point, and draw them in the current transform instead of the page frame
                 .drawImage("/dash/powerplay.png", 24, 24, 48, 48, angleAnim, 24, 24, false)
                 .setAlpha(1.0)
-                .fillText(TXTTEXT, TXTX, TXTY, TXTFONT, Math.toRadians(TXT_THETA_DEGREES), TXT_USE_PAGE_FRAME);
+                .fillText(TXTTEXT, TXTX, TXTY, TXTFONT, Math.toRadians(TXT_THETA_DEGREES),
+                    TXT_USE_PAGE_FRAME);
 
             dashboard.sendTelemetryPacket(packet);
 

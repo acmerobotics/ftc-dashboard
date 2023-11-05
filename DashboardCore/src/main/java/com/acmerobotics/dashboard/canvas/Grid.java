@@ -8,7 +8,8 @@ public class Grid extends CanvasOp {
     private double theta, pivotX, pivotY;
     private boolean usePageFrame;
 
-    public Grid(double x, double y, double width, double height, int numTicksX, int numTicksY, double theta, double pivotX, double pivotY, boolean usePageFrame) {
+    public Grid(double x, double y, double width, double height, int numTicksX, int numTicksY,
+                double theta, double pivotX, double pivotY, boolean usePageFrame) {
         super(Type.GRID);
 
         this.x = x;

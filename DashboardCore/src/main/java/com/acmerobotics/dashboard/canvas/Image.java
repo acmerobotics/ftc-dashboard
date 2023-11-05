@@ -8,7 +8,8 @@ public class Image extends CanvasOp {
     private double theta, pivotX, pivotY;
     private boolean usePageFrame;
 
-    public Image(String path, double x, double y, double width, double height, double theta, double pivotX, double pivotY, boolean usePageFrame) {
+    public Image(String path, double x, double y, double width, double height, double theta,
+                 double pivotX, double pivotY, boolean usePageFrame) {
         super(Type.IMAGE);
 
         this.path = path;

@@ -17,7 +17,8 @@ public class TestFieldVersatilityOpMode extends TestOpMode {
     public static double SPIN_FREQUENCY = 0.25;
     public static double ORBITAL_RADIUS = 50;
     public static double SIDE_LENGTH = 10;
-    public static String ALTIMGSRC = "https://upload.wikimedia.org/wikipedia/commons/4/45/Football_field.svg";
+    public static String ALTIMGSRC =
+        "https://upload.wikimedia.org/wikipedia/commons/4/45/Football_field.svg";
     //public static String ALTIMGSRC = "dist/assets/play_arrow.95e2d7e4.svg";
     public static double ALTIMGX = 0; //try 24
     public static double ALTIMGY = 0; //try 24
@@ -52,19 +53,20 @@ public class TestFieldVersatilityOpMode extends TestOpMode {
     @Override
     protected void init() {
         dashboard = TestDashboardInstance.getInstance();
-        dashboard.core.addConfigVariable("Test", "ORIGIN_HEADING_OFFSET", new ValueProvider<Double>() {
-            private double x;
+        dashboard.core.addConfigVariable("Test", "ORIGIN_HEADING_OFFSET",
+            new ValueProvider<Double>() {
+                private double x;
 
-            @Override
-            public Double get() {
-                return x;
-            }
+                @Override
+                public Double get() {
+                    return x;
+                }
 
-            @Override
-            public void set(Double value) {
-                x = value;
-            }
-        });
+                @Override
+                public void set(Double value) {
+                    x = value;
+                }
+            });
         dashboard.core.addConfigVariable("Test", "RED_ALLIANCE", new ValueProvider<Boolean>() {
             private boolean red;
 
@@ -103,7 +105,7 @@ public class TestFieldVersatilityOpMode extends TestOpMode {
             byPoints[i] += by;
         }
         dashboard.addData("x", AMPLITUDE * Math.sin(
-                2 * Math.PI * FREQUENCY * (System.currentTimeMillis() / 1000d) + Math.toRadians(PHASE)
+            2 * Math.PI * FREQUENCY * (System.currentTimeMillis() / 1000d) + Math.toRadians(PHASE)
         ));
         dashboard.addData("theta", angleAnim);
         dashboard.update();
@@ -126,7 +128,8 @@ public class TestFieldVersatilityOpMode extends TestOpMode {
             //this will be drawn in the pageFrame orientation
             .drawGrid(0, 0, 144, 144, 7, 7)
             //disabling the pageFrame will draw a grid in the current transform
-            .drawGrid(GRIDX, GRIDY, GRIDW, GRIDH, GRID_LINESX, GRID_LINESY, Math.toRadians(GRID_THETA_DEGREES), GRID_PIVOTX, GRID_PIVOTY, GRID_USE_PAGE_FRAME)
+            .drawGrid(GRIDX, GRIDY, GRIDW, GRIDH, GRID_LINESX, GRID_LINESY,
+                Math.toRadians(GRID_THETA_DEGREES), GRID_PIVOTX, GRID_PIVOTY, GRID_USE_PAGE_FRAME)
             //.drawGrid(GRIDX, GRIDY, GRIDW, GRIDH, GRID_LINESX, GRID_LINESY, angleAnim, GRID_PIVOTX, GRID_PIVOTY, GRID_USE_PAGE_FRAME)
 
             //you can draw multiple images and can rotate them around a specified anchor/pivot point and draw them in the current transform instead of the page frame
@@ -150,7 +153,8 @@ public class TestFieldVersatilityOpMode extends TestOpMode {
             .setStroke("green")
             .strokeLine(0, 0, 0, 24) //y axis
             .setFill("green")
-            .strokeText("Y axis", 0, (RED_ALLIANCE ? 24 : 0), "8px serif", -Math.PI / 2 * (RED_ALLIANCE ? -1 : 1), false)
+            .strokeText("Y axis", 0, (RED_ALLIANCE ? 24 : 0), "8px serif",
+                -Math.PI / 2 * (RED_ALLIANCE ? -1 : 1), false)
             .setStroke("red")
             .strokeLine(0, 0, 24, 0) //x axis
             .setFill("red")

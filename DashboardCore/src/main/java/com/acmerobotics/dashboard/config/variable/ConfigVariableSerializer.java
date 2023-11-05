@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-
 import java.lang.reflect.Type;
 
 public class ConfigVariableSerializer implements JsonSerializer<ConfigVariable<?>> {
@@ -17,7 +16,7 @@ public class ConfigVariableSerializer implements JsonSerializer<ConfigVariable<?
 
         JsonObject obj = new JsonObject();
         obj.add(ConfigVariable.TYPE_KEY,
-                jsonSerializationContext.serialize(configVariable.getType()));
+            jsonSerializationContext.serialize(configVariable.getType()));
 
         if (value == null) {
             obj.add(ConfigVariable.VALUE_KEY, null);
@@ -28,12 +27,12 @@ public class ConfigVariableSerializer implements JsonSerializer<ConfigVariable<?
             obj.add(ConfigVariable.VALUE_KEY, new JsonPrimitive(String.valueOf(value)));
         } else {
             obj.add(ConfigVariable.VALUE_KEY,
-                    jsonSerializationContext.serialize(value));
+                jsonSerializationContext.serialize(value));
         }
 
         if (configVariable.getType() == VariableType.ENUM) {
             obj.add(ConfigVariable.ENUM_CLASS_KEY, new JsonPrimitive(
-                    value.getClass().getName()));
+                value.getClass().getName()));
             JsonArray values = new JsonArray();
             for (Object o : value.getClass().getEnumConstants()) {
                 values.add(o.toString());

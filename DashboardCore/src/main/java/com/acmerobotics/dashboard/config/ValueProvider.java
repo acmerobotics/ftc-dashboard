@@ -2,6 +2,7 @@ package com.acmerobotics.dashboard.config;
 
 /**
  * A generic interface for providing and storing a single value.
+ *
  * @param <T> type of the value
  */
 public interface ValueProvider<T> {
@@ -12,6 +13,7 @@ public interface ValueProvider<T> {
 
     /**
      * Updates the value. {@link #get()} should now return this new value.
+     *
      * @param value
      */
     void set(T value);

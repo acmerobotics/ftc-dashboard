@@ -1,11 +1,11 @@
 package com.acmerobotics.dashboard.config.reflection;
 
 import com.acmerobotics.dashboard.config.ValueProvider;
-
 import java.lang.reflect.Field;
 
 /**
  * Value provider backed by a class field.
+ *
  * @param <T> type of the class field
  */
 public class FieldProvider<T> implements ValueProvider<T> {

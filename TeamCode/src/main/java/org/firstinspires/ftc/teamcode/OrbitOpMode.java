@@ -33,7 +33,9 @@ public class OrbitOpMode extends LinearOpMode {
 
         waitForStart();
 
-        if (isStopRequested()) return;
+        if (isStopRequested()) {
+            return;
+        }
 
         while (opModeIsActive()) {
             double time = getRuntime();
@@ -42,8 +44,8 @@ public class OrbitOpMode extends LinearOpMode {
             double by = ORBITAL_RADIUS * Math.sin(2 * Math.PI * ORBITAL_FREQUENCY * time);
             double l = SIDE_LENGTH / 2;
 
-            double[] bxPoints = { l, -l, -l, l };
-            double[] byPoints = { l, l, -l, -l };
+            double[] bxPoints = {l, -l, -l, l};
+            double[] byPoints = {l, l, -l, -l};
             rotatePoints(bxPoints, byPoints, 2 * Math.PI * SPIN_FREQUENCY * time);
             for (int i = 0; i < 4; i++) {
                 bxPoints[i] += bx;
@@ -52,11 +54,11 @@ public class OrbitOpMode extends LinearOpMode {
 
             TelemetryPacket packet = new TelemetryPacket();
             packet.fieldOverlay()
-                    .setStrokeWidth(1)
-                    .setStroke("goldenrod")
-                    .strokeCircle(0, 0, ORBITAL_RADIUS)
-                    .setFill("black")
-                    .fillPolygon(bxPoints, byPoints);
+                .setStrokeWidth(1)
+                .setStroke("goldenrod")
+                .strokeCircle(0, 0, ORBITAL_RADIUS)
+                .setFill("black")
+                .fillPolygon(bxPoints, byPoints);
             dashboard.sendTelemetryPacket(packet);
 
             sleep(20);

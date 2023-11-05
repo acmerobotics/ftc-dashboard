@@ -13,8 +13,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.config.ValueProvider;
 import com.acmerobotics.dashboard.config.reflection.ReflectionConfig;
@@ -38,7 +36,19 @@ import com.qualcomm.robotcore.util.RobotLog;
 import com.qualcomm.robotcore.util.ThreadPool;
 import com.qualcomm.robotcore.util.WebHandlerManager;
 import com.qualcomm.robotcore.util.WebServer;
-
+import dalvik.system.DexFile;
+import fi.iki.elonen.NanoHTTPD;
+import fi.iki.elonen.NanoWSD;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
 import org.firstinspires.ftc.ftccommon.external.OnCreate;
 import org.firstinspires.ftc.ftccommon.external.OnCreateEventLoop;
 import org.firstinspires.ftc.ftccommon.external.OnCreateMenu;
@@ -56,21 +66,6 @@ import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.robotcore.internal.system.Misc;
 import org.firstinspires.ftc.robotcore.internal.webserver.WebHandler;
 import org.firstinspires.ftc.robotserver.internal.webserver.MimeTypesUtil;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-
-import dalvik.system.DexFile;
-import fi.iki.elonen.NanoHTTPD;
-import fi.iki.elonen.NanoWSD;
 
 /**
  * Main class for interacting with the instance.
@@ -134,6 +129,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     /**
      * Populates the menu with dashboard enable/disable options.
+     *
      * @param menu menu
      */
     @OnCreateMenu
@@ -148,7 +144,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      */
     @OnDestroy
     public static void stop(Context context) {
-        if (!FtcRobotControllerWatchdogService.isLaunchActivity(AppUtil.getInstance().getRootActivity())) {
+        if (!FtcRobotControllerWatchdogService.isLaunchActivity(
+            AppUtil.getInstance().getRootActivity())) {
             // prevent premature stop when the app is launched via hardware attachment
             return;
         }
@@ -161,6 +158,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     /**
      * Returns the active instance instance. This should be called after {@link #start(Context)}.
+     *
      * @return active instance instance or null outside of its lifecycle
      */
     public static FtcDashboard getInstance() {
@@ -171,20 +169,22 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     private NanoWSD server = new NanoWSD(8000) {
         @Override
-        protected NanoWSD.WebSocket openWebSocket (NanoHTTPD.IHTTPSession handshake){
+        protected NanoWSD.WebSocket openWebSocket(NanoHTTPD.IHTTPSession handshake) {
             return new DashWebSocket(handshake);
         }
     };
 
     private SharedPreferences prefs;
-    private final List<MenuItem> enableMenuItems, disableMenuItems;
+    private final List<MenuItem> enableMenuItems;
+    private final List<MenuItem> disableMenuItems;
 
     private Telemetry telemetry = new TelemetryAdapter();
 
     private ExecutorService cameraStreamExecutor;
     private int imageQuality = DEFAULT_IMAGE_QUALITY;
 
-    private final List<String[]> varsToRemove = new ArrayList<>(); // only modified inside withConfigRoot
+    // only modified inside withConfigRoot
+    private final List<String[]> varsToRemove = new ArrayList<>();
 
     private FtcEventLoop eventLoop;
     private OpModeManagerImpl opModeManager;
@@ -221,8 +221,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                         });
                         lastGamepadTimestamp = 0;
                     } else {
-                        Thread.sleep(GAMEPAD_WATCHDOG_INTERVAL -
-                                (timestamp - lastGamepadTimestamp));
+                        Thread.sleep(GAMEPAD_WATCHDOG_INTERVAL
+                            - (timestamp - lastGamepadTimestamp));
                     }
                 } catch (InterruptedException e) {
                     break;
@@ -460,7 +460,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         public void run() {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
-                    long timestamp = System.currentTimeMillis();
+                    final long timestamp = System.currentTimeMillis();
 
                     if (core.clientCount() == 0) {
                         Thread.sleep(250);
@@ -482,8 +482,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                         continue;
                     }
 
-                    long sleepTime = (long) (1000 / maxFps -
-                            (System.currentTimeMillis() - timestamp));
+                    long sleepTime = (long) (1000 / maxFps
+                        - (System.currentTimeMillis() - timestamp));
                     Thread.sleep(Math.max(sleepTime, 0));
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
@@ -493,12 +493,12 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     private static final Set<String> IGNORED_PACKAGES = new HashSet<>(Arrays.asList(
-            "java",
-            "android",
-            "com.sun",
-            "com.vuforia",
-            "com.google",
-            "kotlin"
+        "java",
+        "android",
+        "com.sun",
+        "com.vuforia",
+        "com.google",
+        "kotlin"
     ));
 
     private static void addConfigClasses(CustomVariable customVariable) {
@@ -527,7 +527,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                     Class<?> configClass = Class.forName(className, false, classLoader);
 
                     if (!configClass.isAnnotationPresent(Config.class)
-                            || configClass.isAnnotationPresent(Disabled.class)) {
+                        || configClass.isAnnotationPresent(Disabled.class)) {
                         continue;
                     }
 
@@ -537,7 +537,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                         name = altName;
                     }
 
-                    customVariable.putVariable(name, ReflectionConfig.createVariableFromClass(configClass));
+                    customVariable.putVariable(name,
+                        ReflectionConfig.createVariableFromClass(configClass));
                 } catch (ClassNotFoundException | NoClassDefFoundError ignored) {
                     // dash is unable to access many classes and reporting every instance
                     // only clutters the logs
@@ -581,7 +582,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         }
 
         @Override
-        protected void onClose(NanoWSD.WebSocketFrame.CloseCode code, String reason, boolean initiatedByRemote) {
+        protected void onClose(NanoWSD.WebSocketFrame.CloseCode code, String reason,
+                               boolean initiatedByRemote) {
             sh.onClose();
 
             updateStatusView();
@@ -670,12 +672,14 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     private void setAutoEnable(boolean autoEnable) {
         prefs.edit()
-             .putBoolean(PREFS_AUTO_ENABLE_KEY, autoEnable)
-             .apply();
+            .putBoolean(PREFS_AUTO_ENABLE_KEY, autoEnable)
+            .apply();
     }
 
     private void enable() {
-        if (core.enabled) return;
+        if (core.enabled) {
+            return;
+        }
 
         setAutoEnable(true);
 
@@ -688,7 +692,9 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     private void disable() {
-        if (!core.enabled) return;
+        if (!core.enabled) {
+            return;
+        }
 
         setAutoEnable(false);
 
@@ -704,28 +710,30 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private void injectStatusView() {
         Activity activity = AppUtil.getInstance().getActivity();
 
-        if (activity == null) return;
+        if (activity == null) {
+            return;
+        }
 
         connectionStatusTextView = new TextView(activity);
         connectionStatusTextView.setTypeface(Typeface.DEFAULT_BOLD);
         int color = activity.getResources().getColor(R.color.dashboardColor);
         connectionStatusTextView.setTextColor(color);
         int horizontalMarginId = activity.getResources().getIdentifier(
-                "activity_horizontal_margin", "dimen", activity.getPackageName());
+            "activity_horizontal_margin", "dimen", activity.getPackageName());
         int horizontalMargin = (int) activity.getResources().getDimension(horizontalMarginId);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
         );
         params.setMargins(horizontalMargin, 0, horizontalMargin, 0);
         connectionStatusTextView.setLayoutParams(params);
 
         int parentLayoutId = activity.getResources().getIdentifier(
-                "entire_screen", "id", activity.getPackageName());
+            "entire_screen", "id", activity.getPackageName());
         parentLayout = activity.findViewById(parentLayoutId);
         int childCount = parentLayout.getChildCount();
         int relativeLayoutId = activity.getResources().getIdentifier(
-                "RelativeLayout", "id", activity.getPackageName());
+            "RelativeLayout", "id", activity.getPackageName());
         int i;
         for (i = 0; i < childCount; i++) {
             if (parentLayout.getChildAt(i).getId() == relativeLayoutId) {
@@ -777,7 +785,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                         connStatus = connections + " connections";
                     }
 
-                    connectionStatusTextView.setText("Dashboard: " + serverStatus + ", " + connStatus);
+                    connectionStatusTextView.setText(
+                        "Dashboard: " + serverStatus + ", " + connStatus);
                 }
             });
         }
@@ -787,14 +796,14 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         return new WebHandler() {
             @Override
             public NanoHTTPD.Response getResponse(NanoHTTPD.IHTTPSession session)
-                    throws IOException {
+                throws IOException {
                 if (session.getMethod() == NanoHTTPD.Method.GET) {
                     String mimeType = MimeTypesUtil.determineMimeType(file);
                     return NanoHTTPD.newChunkedResponse(NanoHTTPD.Response.Status.OK,
-                            mimeType, assetManager.open(file));
+                        mimeType, assetManager.open(file));
                 } else {
                     return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND,
-                            NanoHTTPD.MIME_PLAINTEXT, "");
+                        NanoHTTPD.MIME_PLAINTEXT, "");
                 }
             }
         };
@@ -805,7 +814,9 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         try {
             String[] list = assetManager.list(path);
 
-            if (list == null) return;
+            if (list == null) {
+                return;
+            }
 
             if (list.length > 0) {
                 for (String file : list) {
@@ -813,7 +824,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 }
             } else {
                 webHandlerManager.register("/" + path,
-                        newStaticAssetHandler(assetManager, path));
+                    newStaticAssetHandler(assetManager, path));
             }
         } catch (IOException e) {
             Log.w(TAG, e);
@@ -821,18 +832,22 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     private void internalAttachWebServer(WebServer webServer) {
-        if (webServer == null) return;
+        if (webServer == null) {
+            return;
+        }
 
         Activity activity = AppUtil.getInstance().getActivity();
 
-        if (activity == null) return;
+        if (activity == null) {
+            return;
+        }
 
         WebHandlerManager webHandlerManager = webServer.getWebHandlerManager();
         AssetManager assetManager = activity.getAssets();
         webHandlerManager.register("/dash",
-                newStaticAssetHandler(assetManager, "dash/index.html"));
+            newStaticAssetHandler(assetManager, "dash/index.html"));
         webHandlerManager.register("/dash/",
-                newStaticAssetHandler(assetManager, "dash/index.html"));
+            newStaticAssetHandler(assetManager, "dash/index.html"));
         addAssetWebHandlers(webHandlerManager, assetManager, "dash");
 
         addAssetWebHandlers(webHandlerManager, assetManager, "images");
@@ -919,31 +934,33 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     private void internalRegisterOpMode(OpModeManager manager) {
         manager.register(
-                new OpModeMeta.Builder()
-                    .setName("Enable/Disable Dashboard")
-                    .setFlavor(OpModeMeta.Flavor.TELEOP)
-                    .setGroup("dash")
-                    .build(),
-                new LinearOpMode() {
-                    @Override
-                    public void runOpMode() throws InterruptedException {
-                        telemetry.log().add(Misc.formatInvariant("Dashboard is currently %s. Press Start to %s it.",
-                                core.enabled ? "enabled" : "disabled", core.enabled ? "disable" : "enable"));
-                        telemetry.update();
+            new OpModeMeta.Builder()
+                .setName("Enable/Disable Dashboard")
+                .setFlavor(OpModeMeta.Flavor.TELEOP)
+                .setGroup("dash")
+                .build(),
+            new LinearOpMode() {
+                @Override
+                public void runOpMode() throws InterruptedException {
+                    telemetry.log().add(
+                        Misc.formatInvariant("Dashboard is currently %s. Press Start to %s it.",
+                            core.enabled ? "enabled" : "disabled",
+                            core.enabled ? "disable" : "enable"));
+                    telemetry.update();
 
-                        waitForStart();
+                    waitForStart();
 
-                        if (isStopRequested()) {
-                            return;
-                        }
-                        
-                        if (core.enabled) {
-                            disable();
-                        } else {
-                            enable();
-                        }
-                   }
-                });
+                    if (isStopRequested()) {
+                        return;
+                    }
+
+                    if (core.enabled) {
+                        disable();
+                    } else {
+                        enable();
+                    }
+                }
+            });
     }
 
     /**
@@ -983,6 +1000,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     /**
      * Sets the telemetry transmission interval.
+     *
      * @param newTransmissionInterval transmission interval in milliseconds
      */
     public void setTelemetryTransmissionInterval(int newTransmissionInterval) {
@@ -1000,9 +1018,9 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * Executes {@param function} in an exclusive context for thread-safe config tree modification
      * and calls {@link #updateConfig()} to keep clients up to date.
      *
-     * Do not leak the config tree outside the function.
+     * <p>Do not leak the config tree outside the function.
      *
-     * @param function
+     * @param function custom variable consumer
      */
     public void withConfigRoot(CustomVariableConsumer function) {
         core.withConfigRoot(function);
@@ -1010,10 +1028,11 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     /**
      * Add config variable with custom provider that is automatically removed when op mode ends.
+     *
      * @param category top-level category
-     * @param name variable name
+     * @param name     variable name
      * @param provider getter/setter for the variable
-     * @param <T> variable type
+     * @param <T>      variable type
      */
     public <T> void addConfigVariable(String category, String name, ValueProvider<T> provider) {
         core.addConfigVariable(category, name, provider);
@@ -1021,13 +1040,15 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     /**
      * Add config variable with custom provider.
-     * @param category top-level category
-     * @param name variable name
-     * @param provider getter/setter for the variable
+     *
+     * @param category   top-level category
+     * @param name       variable name
+     * @param provider   getter/setter for the variable
      * @param autoRemove if true, the variable is removed on op mode termination
-     * @param <T> variable type
+     * @param <T>        variable type
      */
-    public <T> void addConfigVariable(final String category, final String name, final ValueProvider<T> provider,
+    public <T> void addConfigVariable(final String category, final String name,
+                                      final ValueProvider<T> provider,
                                       final boolean autoRemove) {
         withConfigRoot(new CustomVariableConsumer() {
             @Override
@@ -1035,7 +1056,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 core.addConfigVariable(category, name, provider);
 
                 if (autoRemove) {
-                    varsToRemove.add(new String[]{category, name});
+                    varsToRemove.add(new String[] {category, name});
                 }
             }
         });
@@ -1043,8 +1064,9 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     /**
      * Remove a config variable.
+     *
      * @param category top-level category
-     * @param name variable name
+     * @param name     variable name
      */
     public void removeConfigVariable(String category, String name) {
         core.removeConfigVariable(category, name);
@@ -1053,6 +1075,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     /**
      * Sends an image to the dashboard for display (MJPEG style). Note that the encoding process is
      * synchronous. Stops the active stream if running.
+     *
      * @param bitmap bitmap to send
      */
     public void sendImage(Bitmap bitmap) {
@@ -1067,6 +1090,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     /**
      * Sends a stream of camera frames at a regular interval.
+     *
      * @param source camera stream source
      * @param maxFps maximum frames per second; 0 indicates unlimited
      */
@@ -1093,7 +1117,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     /**
      * Returns the image quality used by {@link #sendImage(Bitmap)} and
-     * {@link #startCameraStream(CameraStreamSource, double)}
+     * {@link #startCameraStream(CameraStreamSource, double)}.
      */
     public int getImageQuality() {
         return imageQuality;
@@ -1101,7 +1125,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     /**
      * Sets the image quality used by {@link #sendImage(Bitmap)} and
-     * {@link #startCameraStream(CameraStreamSource, double)}
+     * {@link #startCameraStream(CameraStreamSource, double)}.
      */
     public void setImageQuality(int quality) {
         imageQuality = quality;
@@ -1139,15 +1163,16 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         dst.touchpad = src.touchpad;
     }
 
-    private void updateGamepads(ReceiveGamepadState.Gamepad gamepad1, ReceiveGamepadState.Gamepad gamepad2) {
+    private void updateGamepads(ReceiveGamepadState.Gamepad gamepad1,
+                                ReceiveGamepadState.Gamepad gamepad2) {
         activeOpMode.with(o -> {
             // for now, the dashboard only overrides synthetic gamepads
             if (o.status == RobotStatus.OpModeStatus.STOPPED) {
                 return;
             }
 
-            if (o.opMode.gamepad1.getGamepadId() != Gamepad.ID_UNASSOCIATED ||
-                    o.opMode.gamepad2.getGamepadId() != Gamepad.ID_UNASSOCIATED) {
+            if (o.opMode.gamepad1.getGamepadId() != Gamepad.ID_UNASSOCIATED
+                || o.opMode.gamepad2.getGamepadId() != Gamepad.ID_UNASSOCIATED) {
                 return;
             }
 
@@ -1159,14 +1184,15 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     private RobotStatus getRobotStatus() {
         if (opModeManager == null) {
-            return new RobotStatus(core.enabled, false, "", RobotStatus.OpModeStatus.STOPPED, "", "");
+            return new RobotStatus(core.enabled, false, "", RobotStatus.OpModeStatus.STOPPED, "",
+                "");
         } else {
             return activeOpMode.with(o -> {
                 return new RobotStatus(
-                        core.enabled, true, opModeManager.getActiveOpModeName(),
-                        // status is an enum so it's okay to return a copy here.
-                        o.status,
-                        RobotLog.getGlobalWarningMessage().message, RobotLog.getGlobalErrorMsg()
+                    core.enabled, true, opModeManager.getActiveOpModeName(),
+                    // status is an enum so it's okay to return a copy here.
+                    o.status,
+                    RobotLog.getGlobalWarningMessage().message, RobotLog.getGlobalErrorMsg()
                 );
             });
         }
@@ -1224,7 +1250,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                         for (String[] var : varsToRemove) {
                             String category = var[0];
                             String name = var[1];
-                            CustomVariable catVar = (CustomVariable) configRoot.getVariable(category);
+                            CustomVariable catVar =
+                                (CustomVariable) configRoot.getVariable(category);
                             catVar.removeVariable(name);
                             if (catVar.size() == 0) {
                                 configRoot.removeVariable(category);

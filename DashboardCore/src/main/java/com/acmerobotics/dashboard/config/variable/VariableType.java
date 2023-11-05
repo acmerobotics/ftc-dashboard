@@ -26,6 +26,7 @@ public enum VariableType {
 
     /**
      * Returns the variable type corresponding to the class provided.
+     *
      * @param klass
      */
     public static VariableType fromClass(Class<?> klass) {

@@ -4,21 +4,21 @@ import com.acmerobotics.dashboard.config.variable.BasicVariable;
 import com.acmerobotics.dashboard.config.variable.ConfigVariable;
 import com.acmerobotics.dashboard.config.variable.CustomVariable;
 import com.acmerobotics.dashboard.config.variable.VariableType;
-
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 
 public class ReflectionConfig {
-    private ReflectionConfig() {}
+    private ReflectionConfig() {
+    }
 
     public static CustomVariable createVariableFromClass(Class<?> configClass) {
         CustomVariable customVariable = new CustomVariable();
 
         for (Field field : configClass.getFields()) {
             if (!Modifier.isStatic(field.getModifiers())
-                    || Modifier.isFinal(field.getModifiers())) {
+                || Modifier.isFinal(field.getModifiers())) {
                 continue;
             }
             customVariable.putVariable(field.getName(), createVariableFromField(field, null));
@@ -26,7 +26,9 @@ public class ReflectionConfig {
 
         return customVariable;
     }
-    private static ConfigVariable<?>  createVariableFromArrayField(Field field, Class<?> fieldClass, Object parent, int[] indices) {
+
+    private static ConfigVariable<?> createVariableFromArrayField(Field field, Class<?> fieldClass,
+                                                                  Object parent, int[] indices) {
         VariableType type = VariableType.fromClass(fieldClass);
         switch (type) {
             case BOOLEAN:
@@ -34,14 +36,14 @@ public class ReflectionConfig {
             case DOUBLE:
             case STRING:
             case ENUM:
-                return new BasicVariable<>(type, new ArrayProvider<Boolean>(field, parent,Arrays.copyOf(indices, indices.length)));
+                return new BasicVariable<>(type, new ArrayProvider<Boolean>(field, parent,
+                    Arrays.copyOf(indices, indices.length)));
             case CUSTOM:
                 try {
                     Object value = null;
                     try {
                         value = ArrayProvider.getArrayRecursive(field.get(parent), indices);
-                    }catch (ArrayIndexOutOfBoundsException ignored )
-                    {
+                    } catch (ArrayIndexOutOfBoundsException ignored) {
 
                     }
 
@@ -49,18 +51,17 @@ public class ReflectionConfig {
                         return new CustomVariable(null);
                     }
                     CustomVariable customVariable = new CustomVariable();
-                    if(fieldClass.isArray())
-                    {
-                        int[] newIndices = Arrays.copyOf(indices, indices.length+1);
+                    if (fieldClass.isArray()) {
+                        int[] newIndices = Arrays.copyOf(indices, indices.length + 1);
 
-                        for(int i = 0; i<Array.getLength(value); i++)
-                        {
+                        for (int i = 0; i < Array.getLength(value); i++) {
 
-                            newIndices[newIndices.length-1]=i;
-                            customVariable.putVariable(Integer.toString(i), createVariableFromArrayField(field, fieldClass.getComponentType(), parent, newIndices));
+                            newIndices[newIndices.length - 1] = i;
+                            customVariable.putVariable(Integer.toString(i),
+                                createVariableFromArrayField(field, fieldClass.getComponentType(),
+                                    parent, newIndices));
                         }
-                    }
-                    else {
+                    } else {
                         for (Field nestedField : fieldClass.getFields()) {
                             if (Modifier.isFinal(field.getModifiers())) {
                                 continue;
@@ -68,7 +69,7 @@ public class ReflectionConfig {
 
                             String name = nestedField.getName();
                             customVariable.putVariable(name,
-                                    createVariableFromField(nestedField, value));
+                                createVariableFromField(nestedField, value));
                         }
                     }
                     return customVariable;
@@ -77,9 +78,10 @@ public class ReflectionConfig {
                 }
             default:
                 throw new RuntimeException("Unsupported field type: " +
-                        fieldClass.getName());
+                    fieldClass.getName());
         }
     }
+
     private static ConfigVariable<?> createVariableFromField(Field field, Object parent) {
         Class<?> fieldClass = field.getType();
         VariableType type = VariableType.fromClass(fieldClass);
@@ -97,14 +99,13 @@ public class ReflectionConfig {
                         return new CustomVariable(null);
                     }
                     CustomVariable customVariable = new CustomVariable();
-                    if(fieldClass.isArray())
-                    {
-                        for(int i = 0; i<Array.getLength(value); i++)
-                        {
-                            customVariable.putVariable(Integer.toString(i), createVariableFromArrayField(field, field.getType().getComponentType(), parent, new int[]{i}));
+                    if (fieldClass.isArray()) {
+                        for (int i = 0; i < Array.getLength(value); i++) {
+                            customVariable.putVariable(Integer.toString(i),
+                                createVariableFromArrayField(field,
+                                    field.getType().getComponentType(), parent, new int[] {i}));
                         }
-                    }
-                    else {
+                    } else {
                         for (Field nestedField : fieldClass.getFields()) {
                             if (Modifier.isFinal(field.getModifiers())) {
                                 continue;
@@ -112,7 +113,7 @@ public class ReflectionConfig {
 
                             String name = nestedField.getName();
                             customVariable.putVariable(name,
-                                    createVariableFromField(nestedField, value));
+                                createVariableFromField(nestedField, value));
                         }
                     }
                     return customVariable;
@@ -121,7 +122,7 @@ public class ReflectionConfig {
                 }
             default:
                 throw new RuntimeException("Unsupported field type: " +
-                        fieldClass.getName());
+                    fieldClass.getName());
         }
     }
 }

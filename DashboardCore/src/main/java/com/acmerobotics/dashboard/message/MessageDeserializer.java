@@ -6,7 +6,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
-
 import java.lang.reflect.Type;
 
 /**
@@ -16,10 +15,10 @@ public class MessageDeserializer implements JsonDeserializer<Message> {
     @Override
     public Message deserialize(JsonElement jsonElement, Type type,
                                JsonDeserializationContext jsonDeserializationContext)
-            throws JsonParseException {
+        throws JsonParseException {
         JsonObject messageObj = jsonElement.getAsJsonObject();
         MessageType messageType = jsonDeserializationContext.deserialize(
-                messageObj.get("type"), MessageType.class);
+            messageObj.get("type"), MessageType.class);
         if (messageType == null || messageType.msgClass == null) {
             return null;
         }

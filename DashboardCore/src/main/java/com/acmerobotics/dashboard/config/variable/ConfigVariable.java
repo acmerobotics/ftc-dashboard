@@ -14,6 +14,7 @@ public abstract class ConfigVariable<T> {
 
     // Set.of() is unfortunately unavailable
     private static final Set<String> RESERVED_KEYS = new HashSet<>();
+
     static {
         RESERVED_KEYS.add(TYPE_KEY);
         RESERVED_KEYS.add(VALUE_KEY);

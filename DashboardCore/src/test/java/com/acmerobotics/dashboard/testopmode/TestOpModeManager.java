@@ -1,14 +1,14 @@
 package com.acmerobotics.dashboard.testopmode;
 
 import com.acmerobotics.dashboard.SendFun;
-import com.acmerobotics.dashboard.TestSineWaveOpMode;
 import com.acmerobotics.dashboard.TestFieldVersatilityOpMode;
-
+import com.acmerobotics.dashboard.TestSineWaveOpMode;
 import java.util.Arrays;
 import java.util.List;
 
 public class TestOpModeManager {
-    private final List<TestOpMode> testOpModes = Arrays.asList(new TestSineWaveOpMode(), new TestFieldVersatilityOpMode());
+    private final List<TestOpMode> testOpModes =
+        Arrays.asList(new TestSineWaveOpMode(), new TestFieldVersatilityOpMode());
     private TestOpMode activeOpMode = null;
 
     SendFun sendFun;
@@ -22,8 +22,9 @@ public class TestOpModeManager {
     }
 
     public void initOpMode(String opModeName) {
-        if (activeOpMode != null)
+        if (activeOpMode != null) {
             activeOpMode.internalStop();
+        }
 
         for (TestOpMode opMode : testOpModes) {
             if (opMode.getName().equals(opModeName)) {
@@ -37,13 +38,17 @@ public class TestOpModeManager {
     }
 
     public void startOpMode() {
-        if (activeOpMode == null) return;
+        if (activeOpMode == null) {
+            return;
+        }
 
         activeOpMode.internalStart();
     }
 
     public void stopOpMode() {
-        if (activeOpMode == null) return;
+        if (activeOpMode == null) {
+            return;
+        }
 
         activeOpMode.internalStop();
         activeOpMode = null;
