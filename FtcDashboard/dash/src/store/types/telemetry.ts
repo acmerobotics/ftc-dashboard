@@ -67,6 +67,9 @@ export type TelemetryItem = {
     [key: string]: string;
   };
 
+  field: {
+    ops: DrawOp[];
+  };
   fieldOverlay: {
     ops: DrawOp[];
   };

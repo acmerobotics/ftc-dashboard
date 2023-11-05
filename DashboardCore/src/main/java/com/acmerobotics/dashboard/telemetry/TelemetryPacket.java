@@ -15,6 +15,7 @@ public class TelemetryPacket {
     private long timestamp;
     private SortedMap<String, String> data;
     private List<String> log;
+    private Canvas field;
     private Canvas fieldOverlay;
 
     private static final Canvas DEFAULT_FIELD = new Canvas();
@@ -32,10 +33,11 @@ public class TelemetryPacket {
     public TelemetryPacket(boolean drawDefaultField) {
         data = new TreeMap<>();
         log = new ArrayList<>();
+        field = new Canvas();
         fieldOverlay = new Canvas();
 
         if (drawDefaultField) {
-            fieldOverlay.getOperations().addAll(DEFAULT_FIELD.getOperations());
+            field.getOperations().addAll(DEFAULT_FIELD.getOperations());
         }
     }
 
@@ -94,5 +96,9 @@ public class TelemetryPacket {
      */
     public Canvas fieldOverlay() {
         return fieldOverlay;
+    }
+
+    public Canvas field() {
+        return field;
     }
 }

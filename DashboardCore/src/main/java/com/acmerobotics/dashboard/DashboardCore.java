@@ -70,6 +70,7 @@ public class DashboardCore {
                     // this helps save bandwidth, especially for more complex overlays
                     for (TelemetryPacket packet : telemetryToSend.subList(0,
                         telemetryToSend.size() - 1)) {
+                        packet.field().clear();
                         packet.fieldOverlay().clear();
                     }
 

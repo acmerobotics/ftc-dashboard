@@ -9,6 +9,9 @@ const initialState: Telemetry = [
     timestamp: 0,
     data: {},
     log: [],
+    field: {
+      ops: [],
+    },
     fieldOverlay: {
       ops: [],
     },
