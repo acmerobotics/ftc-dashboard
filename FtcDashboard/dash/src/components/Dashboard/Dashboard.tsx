@@ -6,8 +6,8 @@ import { saveLayoutPreset, getLayoutPreset } from '@/store/actions/settings';
 import { RootState } from '@/store/reducers';
 
 import { BaseViewIconButton } from '@/components/views/BaseView';
-import { ReactComponent as ConnectedIcon } from '@/assets/icons/wifi.svg';
-import { ReactComponent as DisconnectedIcon } from '@/assets/icons/wifi_off.svg';
+import { ReactComponent as ConnectedIcon } from '@/assets/icons/connected.svg';
+import { ReactComponent as DisconnectedIcon } from '@/assets/icons/disconnected.svg';
 import { ReactComponent as SettingsIcon } from '@/assets/icons/settings.svg';
 import SettingsModal from './SettingsModal';
 import { startSocketWatcher } from '@/store/middleware/socketMiddleware';
@@ -71,6 +71,7 @@ export default function Dashboard() {
             <DisconnectedIcon className="ml-4 h-10 w-10 py-1" />
           )}
           <BaseViewIconButton
+            title="Settings"
             className="icon-btn group ml-3 h-8 w-8 hover:border-white/50"
             onClick={() => setIsSettingsModalOpen(true)}
           >

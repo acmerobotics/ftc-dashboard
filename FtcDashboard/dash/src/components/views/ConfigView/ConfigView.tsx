@@ -98,6 +98,7 @@ const ConfigView = ({
         </BaseViewHeading>
         <BaseViewIcons>
           <BaseViewIconButton
+            title="Save Changes"
             onClick={() => {
               const configDiff = validAndModified(configRoot);
               if (configDiff != null) {
@@ -111,6 +112,7 @@ const ConfigView = ({
             <SaveIcon className="h-6 w-6" />
           </BaseViewIconButton>
           <BaseViewIconButton
+            title="Reload Values"
             onClick={() =>
               dispatch({
                 type: 'REFRESH_CONFIG',
