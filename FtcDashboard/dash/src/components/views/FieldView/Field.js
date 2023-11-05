@@ -316,7 +316,7 @@ export default class Field {
           for (let i = 0; i < op.numTicksX; i++) {
             const lineX = -op.pivotX + horSpacing * i;
             this.ctx.beginPath();
-            this.ctx.fineMoveTo(lineX, -op.pivotY );
+            this.ctx.fineMoveTo(lineX, -op.pivotY);
             this.ctx.fineLineTo(lineX, -op.pivotY + op.height);
             this.ctx.stroke();
           }
