@@ -96,7 +96,7 @@ public class TestDashboardInstance {
                     }
 
                     send(new ReceiveRobotStatus(
-                        new RobotStatus(core.enabled, true, opModeName, opModeStatus, "", "")
+                        new RobotStatus(core.enabled, true, opModeName, opModeStatus, "", "", 12.0)
                     ));
                     break;
                 }

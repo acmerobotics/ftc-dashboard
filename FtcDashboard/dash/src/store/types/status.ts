@@ -13,6 +13,7 @@ export type RobotStatus = {
   activeOpModeStatus: Values<typeof OpModeStatus>;
   warningMessage: string;
   errorMessage: string;
+  batteryVoltage: number;
 };
 
 export type StatusState = {
@@ -22,6 +23,7 @@ export type StatusState = {
   activeOpModeStatus: Values<typeof OpModeStatus>;
   warningMessage: string;
   errorMessage: string;
+  batteryVoltage: number;
   opModeList: string[];
   gamepadsSupported: boolean;
 };

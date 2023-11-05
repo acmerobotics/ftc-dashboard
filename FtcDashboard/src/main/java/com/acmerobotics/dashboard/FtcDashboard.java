@@ -25,6 +25,7 @@ import com.acmerobotics.dashboard.message.redux.ReceiveOpModeList;
 import com.acmerobotics.dashboard.message.redux.ReceiveRobotStatus;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.ftccommon.FtcEventLoop;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -59,6 +60,7 @@ import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.function.Consumer;
 import org.firstinspires.ftc.robotcore.external.function.Continuation;
+import org.firstinspires.ftc.robotcore.external.navigation.VoltageUnit;
 import org.firstinspires.ftc.robotcore.external.stream.CameraStreamSource;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeMeta;
 import org.firstinspires.ftc.robotcore.internal.opmode.RegisteredOpModes;
@@ -1185,14 +1187,23 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private RobotStatus getRobotStatus() {
         if (opModeManager == null) {
             return new RobotStatus(core.enabled, false, "", RobotStatus.OpModeStatus.STOPPED, "",
-                "");
+                "", -1.0);
         } else {
             return activeOpMode.with(o -> {
+                double batteryVoltage = -1.0;
+                if (o.opMode.hardwareMap != null) {
+                    for (LynxModule m : o.opMode.hardwareMap.getAll(LynxModule.class)) {
+                        batteryVoltage =
+                            Math.max(batteryVoltage, m.getInputVoltage(VoltageUnit.VOLTS));
+                    }
+                }
+
                 return new RobotStatus(
                     core.enabled, true, opModeManager.getActiveOpModeName(),
                     // status is an enum so it's okay to return a copy here.
                     o.status,
-                    RobotLog.getGlobalWarningMessage().message, RobotLog.getGlobalErrorMsg()
+                    RobotLog.getGlobalWarningMessage().message, RobotLog.getGlobalErrorMsg(),
+                    batteryVoltage
                 );
             });
         }

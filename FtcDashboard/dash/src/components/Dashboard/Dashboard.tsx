@@ -18,6 +18,9 @@ export default function Dashboard() {
     (state: RootState) => state.settings.layoutPreset,
   );
   const enabled = useSelector((state: RootState) => state.status.enabled);
+  const batteryVoltage = useSelector(
+    (state: RootState) => state.status.batteryVoltage,
+  );
   const dispatch = useDispatch();
 
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
@@ -58,11 +61,12 @@ export default function Dashboard() {
             <p
               className="mx-2"
               style={{
-                width: '60px',
+                width: batteryVoltage > 0 ? '120px' : '60px',
                 textAlign: 'right',
               }}
             >
               {socket.pingTime}ms
+              {batteryVoltage > 0 ? ` / ${batteryVoltage.toFixed(2)}V` : ''}
             </p>
           )}
           {socket.isConnected ? (
