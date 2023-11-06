@@ -233,7 +233,7 @@ export default class Graph {
     this.beginRenderTimeMs = Number.NaN; // in browser time
   }
 
-  add(samples: Sample[][]) {
+  add(time: number, samples: Sample[][]) {
     const o = this.options;
 
     for (const sample of samples) {
@@ -269,7 +269,7 @@ export default class Graph {
         Number.NaN,
       );
       this.beginGraphNowMs = maxT - 250; // introduce lag to allow for transmission time
-      this.beginRenderTimeMs = Date.now();
+      this.beginRenderTimeMs = time;
     }
   }
 
@@ -290,7 +290,7 @@ export default class Graph {
     return getAxisScaling(min, max, this.options.maxTicks);
   }
 
-  render() {
+  render(time: number) {
     const o = this.options;
 
     // eslint-disable-next-line
@@ -298,8 +298,7 @@ export default class Graph {
 
     if (isNaN(this.beginGraphNowMs)) return false;
 
-    const graphNowMs =
-      this.beginGraphNowMs + (Date.now() - this.beginRenderTimeMs);
+    const graphNowMs = this.beginGraphNowMs + (time - this.beginRenderTimeMs);
 
     // prune old samples
     for (const k of Object.keys(this.data)) {

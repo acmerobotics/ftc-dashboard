@@ -26,6 +26,7 @@ import { validateInt, ValResult } from '@/components/inputs/validation';
 type GraphViewState = {
   graphing: boolean;
   paused: boolean;
+  pausedTime: number;
   availableKeys: string[];
   selectedKeys: string[];
   windowMs: ValResult<number>;
@@ -50,6 +51,7 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
     this.state = {
       graphing: false,
       paused: false,
+      pausedTime: 0,
       availableKeys: [],
       selectedKeys: [],
       windowMs: {
@@ -118,6 +120,7 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
       this.setState({
         ...this.state,
         paused: !this.state.paused,
+        pausedTime: Date.now(),
       });
     }
   }
@@ -141,6 +144,7 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
     this.setState({
       ...this.state,
       paused: true,
+      pausedTime: Date.now(),
     });
   }
 
@@ -279,6 +283,7 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
                       : colors.gray[900],
                   }}
                   paused={this.state.paused}
+                  pausedTime={this.state.pausedTime}
                 />
               )}
             </ThemeConsumer>

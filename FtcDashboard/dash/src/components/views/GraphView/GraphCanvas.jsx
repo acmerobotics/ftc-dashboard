@@ -45,8 +45,12 @@ class GraphCanvas extends React.Component {
       graphIsDirty = true;
     }
 
-    if (!isEqual(this.props.data, prevProps.data)) {
-      this.graph.add(this.props.data);
+    if (prevProps.paused && !this.props.paused) {
+      this.graph.reset();
+    }
+
+    if (!this.props.paused && !isEqual(this.props.data, prevProps.data)) {
+      this.graph.add(Date.now(), this.props.data);
     }
 
     if (!this.props.paused && !this.requestId) graphIsDirty = true;
@@ -59,7 +63,7 @@ class GraphCanvas extends React.Component {
       this.requestId = 0;
     } else {
       this.setState(() => ({
-        graphEmpty: !this.graph.render(),
+        graphEmpty: !this.graph.render(Date.now()),
       }));
 
       this.requestId = requestAnimationFrame(this.renderGraph);
@@ -72,7 +76,13 @@ class GraphCanvas extends React.Component {
         <div
           className={`${this.state.graphEmpty ? 'hidden' : ''} h-full w-full`}
         >
-          <AutoFitCanvas ref={this.canvasRef} />
+          <AutoFitCanvas
+            ref={this.canvasRef}
+            onResize={() => {
+              if (this.graph && this.props.paused)
+                this.graph.render(this.props.pausedTime);
+            }}
+          />
         </div>
         <div className="flex-center pointer-events-none absolute top-0 left-0 h-full w-full">
           {this.state.graphEmpty && (
@@ -88,6 +98,7 @@ GraphCanvas.propTypes = {
   data: PropTypes.arrayOf(PropTypes.any).isRequired,
   options: PropTypes.object.isRequired,
   paused: PropTypes.bool.isRequired,
+  pausedTime: PropTypes.number.isRequired,
 };
 
 export default GraphCanvas;
