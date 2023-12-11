@@ -15,6 +15,9 @@ public enum VariableType {
     @SerializedName("long")
     LONG,
 
+    @SerializedName("float")
+    FLOAT,
+
     @SerializedName("double")
     DOUBLE,
 
@@ -39,6 +42,8 @@ public enum VariableType {
             return INT;
         } else if (klass == Long.class || klass == long.class) {
             return LONG;
+        } else if (klass == Float.class || klass == float.class) {
+            return FLOAT;
         } else if (klass == Double.class || klass == double.class) {
             return DOUBLE;
         } else if (klass == String.class) {

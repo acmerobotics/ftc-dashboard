@@ -34,6 +34,7 @@ public class ReflectionConfig {
             case BOOLEAN:
             case INT:
             case LONG:
+            case FLOAT:
             case DOUBLE:
             case STRING:
             case ENUM:
@@ -90,6 +91,7 @@ public class ReflectionConfig {
             case BOOLEAN:
             case INT:
             case LONG:
+            case FLOAT:
             case DOUBLE:
             case STRING:
             case ENUM:

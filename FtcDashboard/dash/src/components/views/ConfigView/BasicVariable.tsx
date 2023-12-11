@@ -73,6 +73,7 @@ class BasicVariable extends React.Component<Props> {
             />
           );
           break;
+        case 'float':
         case 'double':
           if (typeof state.__value === 'string') {
             input = <p>{state.__value}</p>;

@@ -175,6 +175,7 @@ public class TestDashboardInstance {
                 te = value;
             }
         });
+
         core.addConfigVariable("More Primitives", "Long", new ValueProvider<Long>() {
             private long value = 10L;
 
@@ -185,6 +186,19 @@ public class TestDashboardInstance {
 
             @Override
             public void set(Long value) {
+                this.value = value;
+            }
+        });
+        core.addConfigVariable("More Primitives", "Float", new ValueProvider<Float>() {
+            private float value = 10L;
+
+            @Override
+            public Float get() {
+                return this.value;
+            }
+
+            @Override
+            public void set(Float value) {
                 this.value = value;
             }
         });
