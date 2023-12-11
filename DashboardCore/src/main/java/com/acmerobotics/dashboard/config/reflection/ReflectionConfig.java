@@ -33,6 +33,7 @@ public class ReflectionConfig {
         switch (type) {
             case BOOLEAN:
             case INT:
+            case LONG:
             case DOUBLE:
             case STRING:
             case ENUM:
@@ -88,6 +89,7 @@ public class ReflectionConfig {
         switch (type) {
             case BOOLEAN:
             case INT:
+            case LONG:
             case DOUBLE:
             case STRING:
             case ENUM:
