@@ -61,6 +61,7 @@ class BasicVariable extends React.Component<Props> {
     } else {
       switch (state.__type) {
         case 'int':
+        case 'long':
           input = (
             <TextInput
               id={path}
@@ -72,6 +73,7 @@ class BasicVariable extends React.Component<Props> {
             />
           );
           break;
+        case 'float':
         case 'double':
           if (typeof state.__value === 'string') {
             input = <p>{state.__value}</p>;

@@ -25,6 +25,12 @@ public class ConfigVariableDeserializer implements JsonDeserializer<ConfigVariab
             case INT:
                 return new BasicVariable<>(varType,
                     new ConstantProvider<>(valueEl.isJsonNull() ? null : valueEl.getAsInt()));
+            case LONG:
+                return new BasicVariable<>(varType,
+                    new ConstantProvider<>(valueEl.isJsonNull() ? null : valueEl.getAsLong()));
+            case FLOAT:
+                return new BasicVariable<>(varType,
+                    new ConstantProvider<>(valueEl.isJsonNull() ? null : valueEl.getAsFloat()));
             case DOUBLE:
                 return new BasicVariable<>(varType,
                     new ConstantProvider<>(valueEl.isJsonNull() ? null : valueEl.getAsDouble()));

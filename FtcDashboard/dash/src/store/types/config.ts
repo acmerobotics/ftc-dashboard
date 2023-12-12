@@ -20,7 +20,7 @@ export type BasicVar =
       __enumValues: string[];
     }
   | {
-      __type: 'boolean' | 'int' | 'double' | 'string';
+      __type: 'boolean' | 'int' | 'long' | 'float' | 'double' | 'string';
       __value: boolean | number | string | null;
     };
 
@@ -33,7 +33,7 @@ export type BasicVarState = (
       __enumValues: string[];
     }
   | {
-      __type: 'boolean' | 'int' | 'double' | 'string';
+      __type: 'boolean' | 'int' | 'long' | 'float' | 'double' | 'string';
       __value: boolean | number | string | null;
       __newValue: boolean | number | string | null;
     }
