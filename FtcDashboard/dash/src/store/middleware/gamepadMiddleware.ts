@@ -118,8 +118,8 @@ const extractGamepadState = (gamepad: Gamepad) => {
         // USB ID=24C6, PID=530A
         left_stick_x: cleanMotionValues(gamepad.axes[0]),
         left_stick_y: cleanMotionValues(gamepad.axes[1]),
-        right_stick_x: cleanMotionValues(gamepad.axes[3]),
-        right_stick_y: cleanMotionValues(gamepad.axes[4]),
+        right_stick_x: cleanMotionValues(gamepad.axes[2]),
+        right_stick_y: cleanMotionValues(gamepad.axes[3]),
 
         dpad_up: gamepad.buttons[12].pressed,
         dpad_down: gamepad.buttons[13].pressed,
