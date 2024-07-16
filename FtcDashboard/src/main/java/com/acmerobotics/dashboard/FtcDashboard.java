@@ -167,6 +167,11 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         return instance;
     }
 
+    /**
+     * @return a boolean indicating if the dashboard is currently active
+     */
+    public boolean isEnabled() { return core.enabled; }
+
     private DashboardCore core = new DashboardCore();
 
     private NanoWSD server = new NanoWSD(8000) {
