@@ -32,7 +32,7 @@ android {
 node {
     version = "18.12.1"
     download = true
-    nodeModulesDir = file("${project.projectDir}/dash")
+    nodeModulesDir = file("${project.projectDir}/../client")
 }
 
 yarn_build.dependsOn yarn_install
@@ -44,7 +44,7 @@ task cleanDashAssets(type: Delete) {
 clean.dependsOn cleanDashAssets
 
 task copyDashAssets(type: Copy) {
-    from "${project.projectDir}/dash/dist"
+    from "${project.projectDir}/../client/dist"
     into "${android.sourceSets.getByName("main").assets.srcDirs[0]}/dash"
 }
 
