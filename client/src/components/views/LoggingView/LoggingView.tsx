@@ -199,7 +199,7 @@ const LoggingView = ({
   }, [activeOpMode, activeOpModeStatus, isRecording, opModeList, telemetry]);
 
   useEffect(() => {
-    if (activeOpModeStatus === OpModeStatus.RUNNING) {
+    if (activeOpModeStatus === OpModeStatus.RUNNING && activeOpMode !== STOP_OP_MODE_TAG) {
       setCurrentOpModeName(activeOpMode ?? '');
     }
   }, [activeOpMode, activeOpModeStatus]);
