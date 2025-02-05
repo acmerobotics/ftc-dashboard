@@ -27,15 +27,14 @@ class FieldView extends React.Component {
   componentDidUpdate(prevProps) {
     if (this.props.telemetry === prevProps.telemetry) return;
 
-    this.overlay = this.props.telemetry.reduce(
-      (acc, { field, fieldOverlay }) =>
-        fieldOverlay.ops.length === 0
-          ? acc
-          : {
-              ops: [...field.ops, ...fieldOverlay.ops],
-            },
-      this.overlay,
-    );
+   this.overlay = this.props.telemetry.reduce((acc, { field, replayOverlay, fieldOverlay }) => ({
+     ops: [
+       ...acc.ops,
+       ...(field?.ops || []),
+       ...(replayOverlay?.ops || []),
+       ...(fieldOverlay?.ops || []),
+      ],
+    }), { ops: [] });
 
     this.field.setOverlay(this.overlay);
     this.renderField();
