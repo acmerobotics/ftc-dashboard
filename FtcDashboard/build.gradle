@@ -11,9 +11,9 @@ apply plugin: "maven-publish"
 apply plugin: "checkstyle"
 
 android {
-    compileSdkVersion 28
     namespace 'com.acmerobotics.dashboard'
 
+    compileSdkVersion 35
 
     defaultConfig {
         minSdkVersion 23
