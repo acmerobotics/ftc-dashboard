@@ -1,4 +1,5 @@
 export const RECEIVE_TELEMETRY = 'RECEIVE_TELEMETRY';
+export const SET_REPLAY_OVERLAY = 'SET_REPLAY_OVERLAY';
 
 export type Telemetry = TelemetryItem[];
 
@@ -73,6 +74,9 @@ export type TelemetryItem = {
   fieldOverlay: {
     ops: DrawOp[];
   };
+  replayOverlay?: {
+    ops: DrawOp[];
+  };
   log: string[];
   timestamp: number;
 };
@@ -81,3 +85,10 @@ export type ReceiveTelemetryAction = {
   type: typeof RECEIVE_TELEMETRY;
   telemetry: Telemetry;
 };
+
+export type SetReplayOverlayAction = {
+  type: typeof SET_REPLAY_OVERLAY;
+  overlay: DrawOp[];
+};
+
+export type TelemetryAction = ReceiveTelemetryAction | SetReplayOverlayAction;

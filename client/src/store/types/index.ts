@@ -74,9 +74,10 @@ export type {
   GamepadSupportedStatus,
 } from './status';
 
-export { RECEIVE_TELEMETRY } from './telemetry';
+export { RECEIVE_TELEMETRY, SET_REPLAY_OVERLAY } from './telemetry';
 export type {
   Telemetry,
   TelemetryItem,
   ReceiveTelemetryAction,
+  SetReplayOverlayAction,
 } from './telemetry';
