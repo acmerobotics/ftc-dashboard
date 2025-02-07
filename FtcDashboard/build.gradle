@@ -11,6 +11,8 @@ apply plugin: "maven-publish"
 apply plugin: "checkstyle"
 
 android {
+    namespace = "com.acmerobotics.dashboard"
+
     compileSdkVersion 28
 
     defaultConfig {
@@ -87,9 +89,7 @@ def javaSources() {
 }
 
 repositories {
-    flatDir {
-        dirs "../libs"
-    }
+    files("../libs")
     mavenCentral()
 }
 
@@ -142,7 +142,7 @@ def addPomDependencies(root) {
 }
 
 task androidSourcesJar(type: Jar) {
-    classifier = "sources"
+    archiveClassifier = "sources"
     from android.sourceSets.main.java.srcDirs
 }
 
@@ -154,7 +154,7 @@ task androidJavadocs(type: Javadoc) {
 }
 
 task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
-    classifier = "javadoc"
+    archiveClassifier = "javadoc"
     from androidJavadocs.destinationDir
 }
 
