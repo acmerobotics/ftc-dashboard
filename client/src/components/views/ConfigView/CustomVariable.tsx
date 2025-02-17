@@ -110,8 +110,8 @@ class CustomVariable extends Component<Props, State> {
     
         downloadBlob(
           reactNodeToString(children),
-          `${name}.csv`,
-          'text/csv',
+          `${name}.txt`,
+          'text/txt',
         );
       };
 
