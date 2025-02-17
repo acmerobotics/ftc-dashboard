@@ -76,15 +76,20 @@ const ConfigView = ({
   isDraggable = false,
   isUnlocked = false,
 }: ConfigViewProps) => {
+
   const dispatch = useAppDispatch();
 
   const configRoot = useSelector(
     (state: RootState) => state.config.configRoot,
   ) as CustomVarState;
 
-  const rootValue = configRoot.__value;
-  if (rootValue === null) {
-    return null;
+  // const rootValue = configRoot.__value;
+  // if (rootValue === null) {
+  //   return null;
+  // }
+  const rootValue: Record<string, ConfigVarState> = {
+    "test": {__type: 'custom', __value: {"testvar": {__type: "double", __value: -1, __newValue: -1, __valid: true},
+    "testvar2": {__type: "double", __value: -1, __newValue: -1, __valid: true}}}
   }
 
   const sortedKeys = Object.keys(rootValue);
