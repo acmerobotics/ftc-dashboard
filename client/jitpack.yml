@@ -13,7 +13,7 @@ before_script:
   - echo "Pre-build setup completed."
 
 build:
-  - ./gradlew clean assemble publishToMavenLocal -x test -x lint  # Skip unnecessary tasks
+  - ./gradlew clean assemble publishToMavenLocal -x test -x lint --debug # Skip unnecessary tasks
 
 cache:
   - $HOME/.gradle/caches
