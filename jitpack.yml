@@ -1,5 +1,5 @@
 jdk:
-  - openjdk11  # Ensure JitPack uses Java 11
+  - openjdk17  # Ensure JitPack uses Java 11
 
 build:
   - ./gradlew clean assemble publishToMavenLocal -x test -x lint --debug # Skip unnecessary tasks
