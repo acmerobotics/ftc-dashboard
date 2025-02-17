@@ -2,5 +2,5 @@ jdk:
   - openjdk17  # Ensure JitPack uses Java 11
 
 install:
-  - ./gradlew tasks --all --debug
+  - ./gradlew build
 
