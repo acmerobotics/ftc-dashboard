@@ -2,5 +2,14 @@ jdk:
   - openjdk17  # Ensure JitPack uses Java 11
 
 install:
-  - ./gradlew tasks --all --debug
+  - java -version
+
+build:
+  - ./gradlew clean assemble publishToMavenLocal -x test -x lint --debug # Skip unnecessary tasks
+
+cache:
+  - $HOME/.gradle/caches
+  - $HOME/.gradle/wrapper
+  - $HOME/.npm
+  - $HOME/.yarn-cache
 
