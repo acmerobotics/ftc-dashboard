@@ -76,7 +76,6 @@ const ConfigView = ({
   isDraggable = false,
   isUnlocked = false,
 }: ConfigViewProps) => {
-
   const dispatch = useAppDispatch();
 
   const configRoot = useSelector(
