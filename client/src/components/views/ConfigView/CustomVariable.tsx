@@ -63,49 +63,35 @@ class CustomVariable extends Component<Props, State> {
 
         if(children == null) return
         
-        const reactNodeToString = (node: ReactNode, indent = 0): string => {
-          // Handle null or undefined
-          if (node == null) return 'null';
-        
-          // Handle strings, numbers, and other primitives
-          if (typeof node !== 'object') return String(node);
-        
-          // Handle arrays (like from React.Children.toArray())
+        const reactNodeToString = (node: ReactNode): string => {
           if (Array.isArray(node)) {
-            return node.map(child => reactNodeToString(child, indent + 2)).join('\n');
+            return node.map(child => reactNodeToString(child)).join('\n');
           }
-        
-          // Handle React elements
-          if (isValidElement(node)) {
-            const type = typeof node.type === 'string' ? node.type : node.type.name || 'Component';
-            var varType = '';
-            var varName = '';
-            var varVal = '';
-            Object.entries(node.props)
-              .filter(([key]) => key !== 'children')
-              .map(([key, value]) => {
-                if(key == 'state'){
-                  const val = value as BasicVarState;
-                  varType = val['__type'];
-                  const currVarVal = val['__value'];
-                  const newVarVal = val['__newValue'];
-                  if(currVarVal != newVarVal){
-                    varVal = 'WARNING: YOU MAY NOT HAVE SAVED CONFIG VAR CHANGES IN DASHBOARD';
-                  }
-                  else{
-                    varVal = newVarVal!.toString();
-                  }
+
+          if (node == null) return 'null';
+          if (!isValidElement(node)) return 'null';
+
+          var varType;
+          var varName;
+          var varVal;
+          Object.entries(node.props).map(([key, value]) => {
+              if(key == 'state'){
+                const val = value as BasicVarState;
+                const type = val['__type'];
+                if(type == 'enum'){
+                  varType = val['__enumClass'];
                 }
-                if(key == 'name'){
-                  varName = value as string;
+                else{
+                  varType = type;
                 }
-              });
-            
-            return 'public static ' + varType + ' ' + varName + ' = ' + varVal + ';';
-          }
-        
-          // Handle other objects
-          return JSON.stringify(node);
+                varVal = val['__newValue']!.toString();
+              }
+              if(key == 'name'){
+                varName = value as string;
+              }
+            });
+          
+          return 'public static ' + varType + ' ' + varName + ' = ' + varVal + ';';
         };
     
         downloadBlob(
