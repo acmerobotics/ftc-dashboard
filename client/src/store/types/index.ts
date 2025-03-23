@@ -10,6 +10,15 @@ export type {
   RefreshConfigAction,
 } from './config';
 
+export type {
+  HardwareState,
+  ReceiveHardwareAction,
+  GetHardwareAction,
+  UpdateHardwareAction,
+  SaveHardwareAction,
+  RefreshHardwareAction,
+} from './hardware';
+
 export {
   GAMEPAD_CONNECTED,
   GAMEPAD_DISCONNECTED,

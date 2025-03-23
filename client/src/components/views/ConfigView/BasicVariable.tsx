@@ -56,6 +56,8 @@ class BasicVariable extends React.Component<Props> {
 
     let input;
 
+    const noop = () => {};
+
     if (state.__newValue === null) {
       input = <p>null</p>;
     } else {
@@ -67,9 +69,26 @@ class BasicVariable extends React.Component<Props> {
               id={path}
               value={state.__newValue as number | string}
               valid={state.__valid}
-              validate={validateInt}
-              onChange={onChange}
-              onSave={onSave}
+              validate={validateDouble}
+              onChange={
+                name === 'Current Position' ||
+                name === 'Control Hub Port' ||
+                name === 'Expansion Hub Port'
+                  ? noop
+                  : onChange
+              }
+              onSave={
+                name === 'Current Position' ||
+                name === 'Control Hub Port' ||
+                name === 'Expansion Hub Port'
+                  ? noop
+                  : onSave
+              }
+              readOnly={
+                name === 'Current Position' ||
+                name === 'Control Hub Port' ||
+                name === 'Expansion Hub Port'
+              }
             />
           );
           break;
@@ -90,8 +109,9 @@ class BasicVariable extends React.Component<Props> {
                   value={state.__newValue as number | string}
                   valid={state.__valid}
                   validate={validateDouble}
-                  onChange={onChange}
-                  onSave={onSave}
+                  onChange={name === 'Current' ? noop : onChange}
+                  onSave={name === 'Current' ? noop : onSave}
+                  readOnly={name === 'Current'}
                 />
                 {state.__valid && (
                   <p
