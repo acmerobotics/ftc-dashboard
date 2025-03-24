@@ -130,7 +130,8 @@ public class HardwareOpMode extends OpMode {
         motorVar.putVariable("Current Position", createVariableFromValue(motor.getCurrentPosition()));
         motorVar.putVariable("Target Position", createVariableFromValue(motor.getTargetPosition()));
         motorVar.putVariable("Run Mode", createVariableFromValue(runMode));
-        motorVar.putVariable("Current", createVariableFromValue(motor.getCurrent(AMPS)));
+        double current = Math.round(motor.getCurrent(AMPS) * 100) / 100.0;
+        motorVar.putVariable("Current", createVariableFromValue(current));
         motorVar.putVariable(hubType + " Port", createVariableFromValue(motor.getPortNumber()));
 
         return motorVar;
@@ -182,7 +183,8 @@ public class HardwareOpMode extends OpMode {
 
             CustomVariable stateUpdate = new CustomVariable();
             stateUpdate.putVariable("Current Position", createVariableFromValue(motorEx.getCurrentPosition()));
-            stateUpdate.putVariable("Current", createVariableFromValue(motorEx.getCurrent(AMPS)));
+            double current = Math.round((motorEx.getCurrent(AMPS) * 100)) / 100.0;
+            stateUpdate.putVariable("Current", createVariableFromValue(current));
 
             CustomVariable existingConfig = (CustomVariable) motorsVar.getVariable(deviceName);
             if (existingConfig != null) {
