@@ -30,11 +30,13 @@ class RecorderView extends React.Component {
     this.preCurrOps = [];
     this.currOps = [];
 
+    this.replayUpdateInterval = 20;
+
     this.state = {
       savedReplays: [],
       selectedReplays: [],
       telemetryReplay: [],
-      replayUpdateInterval: 20,
+      record: true,
       replayOnStart: false,
       autoSelect: false,
       errorMessage: '',
@@ -89,11 +91,7 @@ class RecorderView extends React.Component {
   };
 
   handleSaveToLocalStorage = () => {
-    const currentDate = new Date();
-    const formattedDate = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}` +
-        `_T${String(currentDate.getHours()).padStart(2, '0')}_${String(currentDate.getMinutes()).padStart(2, '0')}_${String(currentDate.getSeconds()).padStart(2, '0')}`;
-
-    const storageKey = `field_replay_${formattedDate}`;
+    if (!this.state.record) {return;}
 
     let totalSize = 0;
     for (let i = 0; i < window.localStorage.length; i++) {
@@ -132,6 +130,12 @@ class RecorderView extends React.Component {
       dataToSave = JSON.stringify(trimmed);
     }
 
+    const currentDate = new Date();
+    const formattedDate = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}` +
+        `_T${String(currentDate.getHours()).padStart(2, '0')}_${String(currentDate.getMinutes()).padStart(2, '0')}_${String(currentDate.getSeconds()).padStart(2, '0')}`;
+
+    const storageKey = `field_replay_${formattedDate}`;
+
     window.localStorage.setItem(storageKey, dataToSave);
 
     this.loadSavedReplays();
@@ -165,6 +169,8 @@ class RecorderView extends React.Component {
       window.localStorage.removeItem(filename);
     });
 
+    this.clearPlayback();
+
     this.setState((prevState) => ({
       savedReplays: prevState.savedReplays.filter((file) => !selectedReplays.includes(file)),
       selectedReplays: [],
@@ -181,6 +187,8 @@ class RecorderView extends React.Component {
 
     savedReplays.forEach((filename) => window.localStorage.removeItem(filename));
     this.currOps = [[]];
+
+    this.clearPlayback();
 
     this.setState({ telemetryReplay: [], savedReplays: [], selectedReplays: [] });
   };
@@ -231,7 +239,7 @@ class RecorderView extends React.Component {
 
     this.playbackInterval = setInterval(() => {
       const elapsedTime = Date.now() - this.startReplayTime;
-      const timeRangeEnd = elapsedTime + this.state.replayUpdateInterval / 2;
+      const timeRangeEnd = elapsedTime + this.replayUpdateInterval / 2;
 
       for (let replayIndex = 0; replayIndex < this.state.telemetryReplay.length; replayIndex++) {
         let isUpdated = false;
@@ -276,7 +284,7 @@ class RecorderView extends React.Component {
       if (playbackComplete) {
         this.clearPlayback();
       }
-    }, this.state.replayUpdateInterval);
+    }, this.replayUpdateInterval);
   };
 
   clearPlayback() {
@@ -357,11 +365,10 @@ class RecorderView extends React.Component {
     }
   }
 
-  handleReplayUpdateIntervalChange = (event) => {
-    const value = parseInt(event.target.value, 10);
-    this.setState({ replayUpdateInterval: value });
+  handleRecordChange = (event) => {
+    const checked = event.target.checked;
+    this.setState({ record: checked });
   };
-
   handleReplayOnStartChange = (event) => {
     const checked = event.target.checked;
     this.setState({ replayOnStart: checked });
@@ -533,7 +540,21 @@ class RecorderView extends React.Component {
             </button>
           </div>
 
-          <div style={{ marginTop: '1.0em' }}>
+          <div style={{ marginTop: '0.5em' }}>
+            <label htmlFor="record" style={{ marginRight: '0.5em' }}>
+              Record:
+            </label>
+            <input
+              type="checkbox"
+              id="record"
+              checked={this.state.record}
+              onChange={this.handleRecordChange}
+              style={{
+                marginRight: '0.5em',
+              }}
+            />
+          </div>
+          <div style={{ marginTop: '0.5em' }}>
             <label htmlFor="replayOnStart" style={{ marginRight: '0.5em' }}>
               Start Replay with OpMode:
             </label>
