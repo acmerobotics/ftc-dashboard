@@ -27,6 +27,7 @@ class RecorderView extends React.Component {
     this.telemetryRecording = new Array(this.telemetryRecordingMaxSize);
     this.telemetryRecordingWriteIndex = 0;
 
+    this.preCurrOps = [];
     this.currOps = [];
 
     this.state = {
@@ -37,6 +38,7 @@ class RecorderView extends React.Component {
       replayOnStart: false,
       autoSelect: false,
       errorMessage: '',
+      replayOpacity: 0.5,
     };
   }
 
@@ -45,7 +47,7 @@ class RecorderView extends React.Component {
   }
 
   loadSavedReplays = () => {
-    const keys = Object.keys(localStorage).filter((key) =>
+    const keys = Object.keys(window.localStorage).filter((key) =>
       key.startsWith('field_replay_')
     );
     this.setState({ savedReplays: keys }, () => {
@@ -55,11 +57,16 @@ class RecorderView extends React.Component {
     });
   };
 
+  handleOpacityChange = (event) => {
+      const opacity = event.target.value;
+      this.setState({ replayOpacity: opacity });
+    };
+
   handleDownloadSelectedReplays = () => {
     const { selectedReplays } = this.state;
 
     selectedReplays.forEach((filename) => {
-      const replayDataString = localStorage.getItem(filename);
+      const replayDataString = window.localStorage.getItem(filename);
 
       if (!replayDataString) {
         return;
@@ -85,9 +92,9 @@ class RecorderView extends React.Component {
     const storageKey = `field_replay_${formattedDate}`;
 
     let totalSize = 0;
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      totalSize += new Blob([localStorage.getItem(key)]).size;
+    for (let i = 0; i < window.localStorage.length; i++) {
+      const key = window.localStorage.key(i);
+      totalSize += new Blob([window.localStorage.getItem(key)]).size;
     }
 
     let dataToSave = JSON.stringify(this.telemetryRecording);
@@ -95,33 +102,33 @@ class RecorderView extends React.Component {
 
     const maxStorageSize = 5 * 1024 * 1024;
     if (totalSize + newDataSize > maxStorageSize) {
-       this.setState({ errorMessage: 'Cannot save replay: LocalStorage quota exceeded.' });
+      this.setState({ errorMessage: 'Cannot save replay: LocalStorage quota exceeded.' });
 
-       setTimeout(() => {
-         this.setState({ errorMessage: '' });
-       }, 5000);
-       return;
+      setTimeout(() => {
+        this.setState({ errorMessage: '' });
+      }, 5000);
+      return;
     }
     if (newDataSize > this.perReplaySizeLimit) {
-        this.setState({ errorMessage: 'Trimming replay: Per-Replay size limit exceeded.' });
+      this.setState({ errorMessage: 'Trimming replay: Per-Replay size limit exceeded.' });
 
-        setTimeout(() => {
-          this.setState({ errorMessage: '' });
-        }, 5000);
+      setTimeout(() => {
+        this.setState({ errorMessage: '' });
+      }, 5000);
 
 
-        // Calculate the current size ratio to the per file max size
-        const ratioToMaxSize = this.perReplaySizeLimit / newDataSize;
+      // Calculate the current size ratio to the per file max size
+      const ratioToMaxSize = this.perReplaySizeLimit / newDataSize;
 
-        // Determine how many elements we need to keep based on the ratio
-        const elementsToKeep = Math.floor(this.telemetryRecording.length * ratioToMaxSize);
+      // Determine how many elements we need to keep based on the ratio
+      const elementsToKeep = Math.floor(this.telemetryRecording.length * ratioToMaxSize);
 
-        // Slice the array from 0 to bound
-        const trimmed = this.telemetryRecording.slice(0, elementsToKeep);
-        dataToSave = JSON.stringify(trimmed);
-      }
+      // Slice the array from 0 to bound
+      const trimmed = this.telemetryRecording.slice(0, elementsToKeep);
+      dataToSave = JSON.stringify(trimmed);
+    }
 
-    localStorage.setItem(storageKey, dataToSave);
+    window.localStorage.setItem(storageKey, dataToSave);
 
     this.loadSavedReplays();
   };
@@ -132,7 +139,7 @@ class RecorderView extends React.Component {
 
     let fileReplayData = [];
     selectedFiles.forEach((filename) => {
-      const savedTelemetry = localStorage.getItem(filename);
+      const savedTelemetry = window.localStorage.getItem(filename);
       if (savedTelemetry) {
         const parsedTelemetry = JSON.parse(savedTelemetry);
         fileReplayData.push(parsedTelemetry);
@@ -151,13 +158,13 @@ class RecorderView extends React.Component {
     if (!selectedReplays.length) return;
 
     selectedReplays.forEach((filename) => {
-      localStorage.removeItem(filename);
+      window.localStorage.removeItem(filename);
     });
 
     this.setState((prevState) => ({
-        savedReplays: prevState.savedReplays.filter((file) => !selectedReplays.includes(file)),
-        selectedReplays: [],
-        telemetryReplay: [],
+      savedReplays: prevState.savedReplays.filter((file) => !selectedReplays.includes(file)),
+      selectedReplays: [],
+      telemetryReplay: [],
       }));
 
     this.currOps = [[]];
@@ -168,34 +175,34 @@ class RecorderView extends React.Component {
 
     if (!savedReplays.length) return;
 
-    savedReplays.forEach((filename) => localStorage.removeItem(filename));
+    savedReplays.forEach((filename) => window.localStorage.removeItem(filename));
     this.currOps = [[]];
 
     this.setState({ telemetryReplay: [], savedReplays: [], selectedReplays: [] });
   };
 
   handleUploadReplay = (event) => {
-      const files = event.target.files;
+    const files = event.target.files;
 
-      Array.from(files).forEach((file) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            const parsedData = JSON.parse(e.target.result);
-            if (!Array.isArray(parsedData)) {
-              alert(`Invalid file format in ${file.name}. Expected an array of telemetry data.`);
-              return;
-            }
-
-            const fileName = file.name.replace('.json', '');
-            localStorage.setItem(fileName, JSON.stringify(parsedData));
-            this.loadSavedReplays()
-          } catch (error) {
-            alert(`Error parsing JSON file: ${file.name}`);
+    Array.from(files).forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const parsedData = JSON.parse(e.target.result);
+          if (!Array.isArray(parsedData)) {
+            alert(`Invalid file format in ${file.name}. Expected an array of telemetry data.`);
+            return;
           }
-        };
-        reader.readAsText(file);
-      });
+
+          const fileName = file.name.replace('.json', '');
+          window.localStorage.setItem(fileName, JSON.stringify(parsedData));
+          this.loadSavedReplays()
+        } catch (error) {
+          alert(`Error parsing JSON file: ${file.name}`);
+        }
+      };
+      reader.readAsText(file);
+    });
     event.target.value = '';
   };
 
@@ -239,8 +246,20 @@ class RecorderView extends React.Component {
           }
         }
       }
-
-      this.currOps = ops.flat();
+      const newOps = ops.flat();
+      if (JSON.stringify(newOps) !== JSON.stringify(this.preCurrOps)) {
+        this.preCurrOps = newOps;
+        this.currOps = newOps.map(op => ({ ...op }));
+        for (let index = 0; index < this.currOps.length; index++) {
+          let op = this.currOps[index];
+           if (op.alpha !== undefined) {
+             op.alpha = op.alpha * this.state.replayOpacity;
+           }
+           else if (index == 0) {
+             this.currOps.unshift({ alpha: this.state.replayOpacity, type: 'alpha' });
+           }
+         }
+      }
 
       if (JSON.stringify(this.currOps).length > 0) {
         this.props.setReplayOverlay(this.currOps);
@@ -291,7 +310,7 @@ class RecorderView extends React.Component {
     );
 
     if (this.props.activeOpModeStatus === OpModeStatus.INIT && !this.isRunning) {
-        if (this.compareOverlays(prevOverlay, overlay)) {
+      if (this.compareOverlays(prevOverlay, overlay)) {
         this.isRunning = true;
         this.telemetryRecordingWriteIndex = 0;
         this.props.setReplayOverlay([]);
@@ -306,29 +325,16 @@ class RecorderView extends React.Component {
     }
 
     if (this.isRunning) {
-      const overlay = this.props.telemetry.reduce(
-        (acc, { fieldOverlay }) => ({
-          ops: [...acc.ops, ...(fieldOverlay?.ops || [])],
-        }),
-        { ops: [] }
-      );
-
       if (overlay.ops.length > 0) {
         const relativeTimestamp = Date.now() - this.startRecordingTime;
-        const overlay = this.props.telemetry.reduce(
-            (acc, { fieldOverlay }) => ({
-              ops: [...acc.ops, ...(fieldOverlay?.ops || [])],
-            }),
-            { ops: [] }
-        );
         const newData = {
           timestamp: relativeTimestamp,
           ops: overlay.ops,
         };
 
         if (this.telemetryRecordingWriteIndex < this.telemetryRecordingMaxSize) {
-            this.telemetryRecording[this.telemetryRecordingWriteIndex] = newData;
-            this.telemetryRecordingWriteIndex++;
+          this.telemetryRecording[this.telemetryRecordingWriteIndex] = newData;
+          this.telemetryRecordingWriteIndex++;
         }
       }
     }
@@ -523,7 +529,7 @@ class RecorderView extends React.Component {
             </button>
           </div>
 
-          <div style={{ marginTop: '1.5em' }}>
+          <div style={{ marginTop: '1.0em' }}>
             <label htmlFor="replayOnStart" style={{ marginRight: '0.5em' }}>
               Start Replay with OpMode:
             </label>
@@ -537,7 +543,7 @@ class RecorderView extends React.Component {
               }}
             />
           </div>
-          <div style={{ marginTop: '1.5em' }}>
+          <div style={{ marginTop: '0.5em' }}>
             <label htmlFor="autoSelect" style={{ marginRight: '0.5em' }}>
               Auto Select Replays:
             </label>
@@ -549,6 +555,24 @@ class RecorderView extends React.Component {
               style={{
                 marginRight: '0.5em',
               }}
+            />
+          </div>
+          <div style={{ marginTop: '0.5em' }}>
+            <label htmlFor="replayOpacity">
+              Replay Opacity:
+            </label>
+            <span>{this.state.replayOpacity}</span> {/* Display current value on the same line as the title */}
+          </div>
+
+          <div>
+            <input
+              type="range"
+              id="replayOpacity"
+              min="0"
+              max="1"
+              step="0.01"
+              value={this.state.replayOpacity}
+              onChange={this.handleOpacityChange}
             />
           </div>
         </div>
