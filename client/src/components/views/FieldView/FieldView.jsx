@@ -25,16 +25,30 @@ class FieldView extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.telemetry === prevProps.telemetry) return;
+    if (this.props.telemetry === prevProps.telemetry && this.props.replay === prevProps.replay) return;
 
-   this.overlay = this.props.telemetry.reduce((acc, { field, replayOverlay, fieldOverlay }) => ({
-     ops: [
-       ...acc.ops,
-       ...(field?.ops || []),
-       ...(replayOverlay?.ops || []),
-       ...(fieldOverlay?.ops || []),
+    this.overlay = this.props.telemetry.reduce((acc, { field, fieldOverlay }) => ({
+      ops: [
+        ...acc.ops,
+        ...(field?.ops || []),
+        ...(fieldOverlay?.ops || []),
       ],
     }), { ops: [] });
+
+    // Merge telemetry and replay
+    if (this.overlay.ops.length === 0) {
+       this.overlay.ops = [
+         ...this.overlay.ops,
+         ...(this.props.replay?.field?.ops || []), // Add replay field.ops if ops is empty
+       ];
+     }
+
+     // Merge telemetry and replay
+     this.overlay.ops = [
+       ...this.overlay.ops,
+       ...(this.props.replay?.ops || []), // Add replay ops if available
+     ];
+
 
     this.field.setOverlay(this.overlay);
     this.renderField();
@@ -64,12 +78,14 @@ class FieldView extends React.Component {
 
 FieldView.propTypes = {
   telemetry: PropTypes.arrayOf(PropTypes.object).isRequired,
+  replayOps: PropTypes.arrayOf(PropTypes.object),
   isDraggable: PropTypes.bool,
   isUnlocked: PropTypes.bool,
 };
 
-const mapStateToProps = ({ telemetry }) => ({
+const mapStateToProps = ({ telemetry, replay }) => ({
   telemetry,
+  replay,
 });
 
 export default connect(mapStateToProps)(FieldView);

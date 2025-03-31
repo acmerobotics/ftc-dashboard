@@ -115,12 +115,12 @@ const listContent = [
     iconBg: 'bg-purple-500',
   },
   {
-    title: 'Recorder View',
-    view: ConfigurableView.RECORDER_VIEW,
-    icon: <CameraIcon className="h-6 w-6" />,
-    customStyles: 'focus:ring-green-600',
-    iconBg: 'bg-green-500',
-    },
+      title: 'Recorder View',
+      view: ConfigurableView.RECORDER_VIEW,
+      icon: <CameraIcon className="h-6 w-6" />,
+      customStyles: 'focus:ring-green-600',
+      iconBg: 'bg-green-500',
+  },
 ];
 
 const ViewPicker = (props: ViewPickerProps) => {

@@ -20,10 +20,10 @@ import GraphView from '@/components/views/GraphView/GraphView';
 import FieldView from '@/components/views/FieldView/FieldView';
 import ConfigView from '@/components/views/ConfigView/ConfigView';
 import TelemetryView from '@/components/views/TelemetryView';
+import RecorderView from '@/components/views/RecorderView/RecorderView';
 import CameraView from '@/components/views/CameraView';
 import OpModeView from '@/components/views/OpModeView';
 import LoggingView from '@/components/views/LoggingView/LoggingView';
-import RecorderView from '@/components/views/RecorderView';
 
 import RadialFab from './RadialFab/RadialFab';
 import RadialFabChild from './RadialFab/RadialFabChild';
@@ -66,10 +66,10 @@ const VIEW_MAP: { [key in ConfigurableView]: ReactElement } = {
   [ConfigurableView.GRAPH_VIEW]: <GraphView />,
   [ConfigurableView.CONFIG_VIEW]: <ConfigView />,
   [ConfigurableView.TELEMETRY_VIEW]: <TelemetryView />,
+  [ConfigurableView.RECORDER_VIEW]: <RecorderView />,
   [ConfigurableView.CAMERA_VIEW]: <CameraView />,
   [ConfigurableView.OPMODE_VIEW]: <OpModeView />,
   [ConfigurableView.LOGGING_VIEW]: <LoggingView />,
-  [ConfigurableView.RECORDER_VIEW]: <RecorderView />,
 };
 
 const LOCAL_STORAGE_LAYOUT_KEY = 'configurableLayoutStorage';

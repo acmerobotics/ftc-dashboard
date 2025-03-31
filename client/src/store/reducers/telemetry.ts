@@ -1,10 +1,5 @@
-import {
-  ReceiveTelemetryAction,
-  RECEIVE_TELEMETRY,
-  SET_REPLAY_OVERLAY,
-  Telemetry,
-  SetReplayOverlayAction,
-} from '@/store/types';
+import { ReceiveTelemetryAction, RECEIVE_TELEMETRY, Telemetry } from '@/store/types/telemetry';
+import { SetReplayOverlayAction } from '@/store/types/replay';
 
 const initialState: Telemetry = [
   {
@@ -17,26 +12,13 @@ const initialState: Telemetry = [
     fieldOverlay: {
       ops: [],
     },
-    replayOverlay: {
-      ops: [],
-    },
   },
 ];
 
-const telemetryReducer = (state = initialState, action) => {
+const telemetryReducer = (state = initialState, action: ReceiveTelemetryAction) => {
   switch (action.type) {
     case RECEIVE_TELEMETRY:
       return action.telemetry;
-
-    case SET_REPLAY_OVERLAY:
-      return state.map((item) => {
-        return {
-          ...item,
-          replayOverlay: {
-            ops: action.overlay,
-          },
-        };
-      });
 
     default:
       return state;
