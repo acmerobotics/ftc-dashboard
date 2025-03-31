@@ -100,7 +100,7 @@ class RecorderView extends React.Component {
       const key = window.localStorage.key(i);
       totalSize += new Blob([window.localStorage.getItem(key)]).size;
     }
-
+    this.telemetryRecording = this.telemetryRecording.slice(0, this.telemetryRecordingWriteIndex);
     let dataToSave = JSON.stringify(this.telemetryRecording);
     const newDataSize = new Blob([dataToSave]).size;
 
@@ -319,7 +319,7 @@ class RecorderView extends React.Component {
         this.telemetryRecordingWriteIndex = 0;
         this.props.setReplayOverlay([]);
         this.startRecordingTime = Date.now();
-        this.telemetryRecording = [];
+        this.telemetryRecording = new Array(this.telemetryRecordingMaxSize);
         this.currOps = [];
 
         if (this.state.replayOnStart) {
