@@ -52,7 +52,11 @@ class RecorderView extends React.Component {
     );
     this.setState({ savedReplays: keys }, () => {
       if (this.state.autoSelect) {
-        this.handleLoadTelemetryByFilename({ target: { selectedOptions: Array.from(this.state.savedReplays.map(filename => ({ value: filename }))) } });
+        this.handleLoadTelemetryByFilename({
+          target: {
+            selectedOptions: this.state.savedReplays.map(filename => ({ value: filename }))
+          }
+        });
       }
     });
   };
