@@ -27,28 +27,27 @@ class FieldView extends React.Component {
   componentDidUpdate(prevProps) {
     if (this.props.telemetry === prevProps.telemetry && this.props.replay === prevProps.replay) return;
 
-    this.overlay = this.props.telemetry.reduce((acc, { field, fieldOverlay }) => ({
-      ops: [
-        ...acc.ops,
-        ...(field?.ops || []),
-        ...(fieldOverlay?.ops || []),
-      ],
-    }), { ops: [] });
+    const replayOps = this.props.replay.reduce((acc, { ops }) => {
+        return ops.length === 0 ? acc : ops;
+      }, []);
 
-    // Merge telemetry and replay
-    if (this.overlay.ops.length === 0) {
-       this.overlay.ops = [
-         ...this.overlay.ops,
-         ...(this.props.replay?.field?.ops || []), // Add replay field.ops if ops is empty
-       ];
-     }
+    this.overlay = this.props.telemetry.reduce(
+      (acc, { field, fieldOverlay }) =>
+        fieldOverlay.ops.length === 0 && replayOps.length === 0
+          ? acc
+          : {
+              ops: [
+                ...field.ops,
+                ...fieldOverlay.ops,
+              ],
+            },
+      this.overlay,
+    );
 
-     // Merge telemetry and replay
-     this.overlay.ops = [
+    this.overlay.ops = [
        ...this.overlay.ops,
-       ...(this.props.replay?.ops || []), // Add replay ops if available
+       ...replayOps,
      ];
-
 
     this.field.setOverlay(this.overlay);
     this.renderField();
@@ -78,7 +77,7 @@ class FieldView extends React.Component {
 
 FieldView.propTypes = {
   telemetry: PropTypes.arrayOf(PropTypes.object).isRequired,
-  replayOps: PropTypes.arrayOf(PropTypes.object),
+  replay: PropTypes.arrayOf(PropTypes.object).isRequired,
   isDraggable: PropTypes.bool,
   isUnlocked: PropTypes.bool,
 };

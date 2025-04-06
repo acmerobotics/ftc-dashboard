@@ -1,5 +1,4 @@
 import { ReceiveTelemetryAction, RECEIVE_TELEMETRY, Telemetry } from '@/store/types/telemetry';
-import { SetReplayOverlayAction } from '@/store/types/replay';
 
 const initialState: Telemetry = [
   {
