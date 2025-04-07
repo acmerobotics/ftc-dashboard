@@ -1,8 +1,4 @@
-import {
-  ReceiveTelemetryAction,
-  RECEIVE_TELEMETRY,
-  Telemetry,
-} from '@/store/types';
+import { ReceiveTelemetryAction, RECEIVE_TELEMETRY, Telemetry } from '@/store/types/telemetry';
 
 const initialState: Telemetry = [
   {
@@ -18,13 +14,11 @@ const initialState: Telemetry = [
   },
 ];
 
-const telemetryReducer = (
-  state = initialState,
-  action: ReceiveTelemetryAction,
-) => {
+const telemetryReducer = (state = initialState, action: ReceiveTelemetryAction) => {
   switch (action.type) {
     case RECEIVE_TELEMETRY:
       return action.telemetry;
+
     default:
       return state;
   }
