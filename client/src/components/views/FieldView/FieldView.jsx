@@ -27,9 +27,7 @@ class FieldView extends React.Component {
   componentDidUpdate(prevProps) {
     if (this.props.telemetry === prevProps.telemetry && this.props.replay === prevProps.replay) return;
 
-    const replayOps = this.props.replay.reduce((acc, { ops }) => {
-        return ops.length === 0 ? acc : ops;
-      }, []);
+    const replayOps = this.props.replay.ops;
 
     this.overlay = this.props.telemetry.reduce(
       (acc, { field, fieldOverlay }) =>
@@ -77,7 +75,7 @@ class FieldView extends React.Component {
 
 FieldView.propTypes = {
   telemetry: PropTypes.arrayOf(PropTypes.object).isRequired,
-  replay: PropTypes.arrayOf(PropTypes.object).isRequired,
+  replay: PropTypes.object.isRequired,
   isDraggable: PropTypes.bool,
   isUnlocked: PropTypes.bool,
 };

@@ -5,38 +5,36 @@ import { receiveTelemetry } from '@/store/actions/telemetry';
 import { setReplayOverlay } from '@/store/actions/replay';
 
 import BaseView, { BaseViewHeading } from '@/components/views/BaseView';
-import AutoFitCanvas from '@/components/Canvas/AutoFitCanvas';
 
 import OpModeStatus from '@/enums/OpModeStatus';
 import { ReactComponent as DeleteSVG } from '@/assets/icons/delete.svg';
 import { ReactComponent as DownloadSVG } from '@/assets/icons/file_download.svg';
 
+const TELEMETRY_RECORDING_MAX_SIZE = 10000; // 2:30 mins at 15ms loop times
+const PER_REPLAY_SIZE_LIMIT = 104857 * 2;   // 0.2MB, can store up to 25 replays
+const LOCALSTORAGE_SIZE_LIMIT = 5 * 1024 * 1024;
+const REPLAY_UPDATE_INTERVAL = 20;
+
 class RecorderView extends React.Component {
   constructor(props) {
     super(props);
-    this.canvasRef = React.createRef();
     this.playbackInterval = null;
     this.startReplayTime = null;
     this.startRecordingTime = null;
     this.isRunning = false;
     this.isReplaying = false;
 
-    this.telemetryRecordingMaxSize = 10000; // 10000 is = 2:30 minutes at 15ms looptimes, should be more than necessary
-    this.perReplaySizeLimit = 104857 * 2; // 0.2MB, so can store up to 25 replays
-
-    this.telemetryRecording = new Array(this.telemetryRecordingMaxSize);
+    this.telemetryRecording = new Array(TELEMETRY_RECORDING_MAX_SIZE);
     this.telemetryRecordingWriteIndex = 0;
 
     this.preCurrOps = [];
     this.currOps = [];
 
-    this.replayUpdateInterval = 20;
-
     this.state = {
       savedReplays: [],
       selectedReplays: [],
       telemetryReplay: [],
-      record: true,
+      record: false,
       replayOnStart: false,
       autoSelect: false,
       errorMessage: '',
@@ -102,8 +100,7 @@ class RecorderView extends React.Component {
     let dataToSave = JSON.stringify(this.telemetryRecording);
     const newDataSize = new Blob([dataToSave]).size;
 
-    const maxStorageSize = 5 * 1024 * 1024;
-    if (totalSize + newDataSize > maxStorageSize) {
+    if (totalSize + newDataSize > LOCALSTORAGE_SIZE_LIMIT) {
       this.setState({ errorMessage: 'Cannot save replay: LocalStorage quota exceeded.' });
 
       setTimeout(() => {
@@ -111,7 +108,7 @@ class RecorderView extends React.Component {
       }, 5000);
       return;
     }
-    if (newDataSize > this.perReplaySizeLimit) {
+    if (newDataSize > PER_REPLAY_SIZE_LIMIT) {
       this.setState({ errorMessage: 'Trimming replay: Per-Replay size limit exceeded.' });
 
       setTimeout(() => {
@@ -120,7 +117,7 @@ class RecorderView extends React.Component {
 
 
       // Calculate the current size ratio to the per file max size
-      const ratioToMaxSize = this.perReplaySizeLimit / newDataSize;
+      const ratioToMaxSize = PER_REPLAY_SIZE_LIMIT / newDataSize;
 
       // Determine how many elements we need to keep based on the ratio
       const elementsToKeep = Math.floor(this.telemetryRecording.length * ratioToMaxSize);
@@ -177,7 +174,7 @@ class RecorderView extends React.Component {
       telemetryReplay: [],
       }));
 
-    this.currOps = [[]];
+    this.currOps = [];
   };
 
   handleDeleteAllReplays = () => {
@@ -186,7 +183,7 @@ class RecorderView extends React.Component {
     if (!savedReplays.length) return;
 
     savedReplays.forEach((filename) => window.localStorage.removeItem(filename));
-    this.currOps = [[]];
+    this.currOps = [];
 
     this.clearPlayback();
 
@@ -239,23 +236,21 @@ class RecorderView extends React.Component {
 
     this.playbackInterval = setInterval(() => {
       const elapsedTime = Date.now() - this.startReplayTime;
-      const timeRangeEnd = elapsedTime + this.replayUpdateInterval / 2;
+      const timeRangeEnd = elapsedTime + REPLAY_UPDATE_INTERVAL / 2;
 
       for (let replayIndex = 0; replayIndex < this.state.telemetryReplay.length; replayIndex++) {
         let isUpdated = false;
-        for (let i = lastIndex[replayIndex]; i < this.state.telemetryReplay[replayIndex].length; i++) {
-          const entry = this.state.telemetryReplay[replayIndex][i];
-
-          if (entry.timestamp <= timeRangeEnd) {
-            if (!isUpdated) {
-              ops[replayIndex] = [];
-              isUpdated = true;
-            }
-            ops[replayIndex].push(...entry.ops);
-            lastIndex[replayIndex] = i + 1;
-          } else {
+        while (lastIndex[replayIndex] < this.state.telemetryReplay[replayIndex].length) {
+          const entry = this.state.telemetryReplay[replayIndex][lastIndex[replayIndex]];
+          if (entry.timestamp > timeRangeEnd) {
             break;
           }
+          if (!isUpdated) {
+            ops[replayIndex] = [];
+            isUpdated = true;
+          }
+          ops[replayIndex].push(...entry.ops);
+          lastIndex[replayIndex]++;
         }
       }
       const newOps = ops.flat();
@@ -284,7 +279,7 @@ class RecorderView extends React.Component {
       if (playbackComplete) {
         this.clearPlayback();
       }
-    }, this.replayUpdateInterval);
+    }, REPLAY_UPDATE_INTERVAL);
   };
 
   clearPlayback() {
@@ -327,7 +322,7 @@ class RecorderView extends React.Component {
         this.telemetryRecordingWriteIndex = 0;
         this.props.setReplayOverlay([]);
         this.startRecordingTime = Date.now();
-        this.telemetryRecording = new Array(this.telemetryRecordingMaxSize);
+        this.telemetryRecording = new Array(TELEMETRY_RECORDING_MAX_SIZE);
         this.currOps = [];
 
         if (this.state.replayOnStart) {
@@ -344,7 +339,7 @@ class RecorderView extends React.Component {
           ops: overlay.ops,
         };
 
-        if (this.telemetryRecordingWriteIndex < this.telemetryRecordingMaxSize) {
+        if (this.telemetryRecordingWriteIndex < TELEMETRY_RECORDING_MAX_SIZE) {
           this.telemetryRecording[this.telemetryRecordingWriteIndex] = newData;
           this.telemetryRecordingWriteIndex++;
         }

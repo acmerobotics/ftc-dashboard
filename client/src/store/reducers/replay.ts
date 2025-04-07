@@ -5,20 +5,16 @@ type ReplayState = {
   ops: DrawOp[];
 };
 
-const initialState: ReplayState = [
-  {
+const initialState: ReplayState = {
     ops: [],
-  },
-];
+};
 
 const replayReducer = (state = initialState, action: SetReplayOverlayAction) => {
   switch (action.type) {
     case SET_REPLAY_OVERLAY:
-      return [
-        {
+      return {
           ops: action.overlay,
-        },
-      ];
+        }
     default:
       return state;
   }
