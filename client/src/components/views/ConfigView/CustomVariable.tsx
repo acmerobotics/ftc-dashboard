@@ -1,18 +1,18 @@
-import { Component, ReactNode, isValidElement } from 'react';
+import { Component, MouseEvent, ReactNode} from 'react';
 import clsx from 'clsx';
 
 import BasicVariable from './BasicVariable';
 
 import { ReactComponent as ExpandedMoreIcon } from '@/assets/icons/expand_more.svg';
 import {
-  BasicVarState,
   ConfigVar,
   ConfigVarState,
   CustomVar,
   CustomVarState,
 } from '@/store/types/config';
 
-import { ReactComponent as DownloadSVG } from '@/assets/icons/file_download.svg';
+import { ReactComponent as CopySVG } from '@/assets/icons/copy.svg';
+import { BaseViewIconButton } from '../BaseView';
 
 interface Props {
   name: string;
@@ -44,62 +44,35 @@ class CustomVariable extends Component<Props, State> {
   }
 
   renderHelper(name: string, children: ReactNode) {
-      const downloadConfig = () => {
-    
-        function downloadBlob(data: string, fileName: string, mime: string) {
-          const a = document.createElement('a');
-          a.style.display = 'none';
-          document.body.appendChild(a);
-    
-          const blob = new Blob([data], { type: mime });
-          const url = window.URL.createObjectURL(blob);
-    
-          a.href = url;
-          a.download = fileName;
-          a.click();
-          window.URL.revokeObjectURL(url);
-          a.remove();
-        }
+    const copyConfig = (evt: MouseEvent) => {
+      evt.stopPropagation();
+      
+      const value = this.props.state.__value;
+      if (value == null) return;
 
-        if(children == null) return
-        
-        const reactNodeToString = (node: ReactNode): string => {
-          if (Array.isArray(node)) {
-            return node.map(child => reactNodeToString(child)).join('\n');
+      const configStr = Object.entries(value).map(
+        ([name, val]) =>
+          {
+          if (val.__type == 'custom') return '';
+
+          var str = 'public static ';
+
+          if (val.__type == 'enum') {
+            str += val.__enumClass;
           }
-
-          if (node == null) return 'null';
-          if (!isValidElement(node)) return 'null';
-
-          var varType;
-          var varName;
-          var varVal;
-          Object.entries(node.props).map(([key, value]) => {
-              if(key == 'state'){
-                const val = value as BasicVarState;
-                const type = val['__type'];
-                if(type == 'enum'){
-                  varType = val['__enumClass'];
-                }
-                else{
-                  varType = type;
-                }
-                varVal = val['__newValue']!.toString();
-              }
-              if(key == 'name'){
-                varName = value as string;
-              }
-            });
+          else {
+            str += val.__type;
+          }
           
-          return 'public static ' + varType + ' ' + varName + ' = ' + varVal + ';';
-        };
-    
-        downloadBlob(
-          reactNodeToString(children),
-          `${name}.txt`,
-          'text/txt',
-        );
-      };
+          str += ' ' + name + ' = ' + val.__value + ';\n';
+
+          return str;
+          }
+        ).join('');
+      
+      navigator.clipboard.writeText(configStr);
+      return;
+    }
 
     return (
       <tr className="block">
@@ -121,15 +94,13 @@ class CustomVariable extends Component<Props, State> {
             <div className="flex items-center justify-between">
               <h3 className="select-none text-lg">{name}</h3>
             </div>
-            <div className="mr-3 flex items-center space-x-1">
-            <button
-              className={`icon-btn h-8 w-8`}
-              onClick={downloadConfig}
+            <BaseViewIconButton
+              title="Copy Config to Clipboard"
+              onClick={copyConfig}
             >
-              <DownloadSVG className="h-6 w-6" />
-            </button>
-            </div>
-            </div>
+              <CopySVG className="h-6 w-6" />
+            </BaseViewIconButton>
+          </div>
           {this.state.expanded && (
             <table>
               <tbody>{children}</tbody>
