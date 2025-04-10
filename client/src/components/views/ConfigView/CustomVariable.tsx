@@ -70,7 +70,21 @@ class CustomVariable extends Component<Props, State> {
           }
         ).join('');
       
-      navigator.clipboard.writeText(configStr);
+      if(window.isSecureContext){
+        navigator.clipboard.writeText(configStr);
+      }
+      else{
+        const textArea = document.createElement("textarea");
+        textArea.value = configStr;
+        document.body.append(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+        } catch (err) {
+          console.error(err);
+        }
+        document.body.removeChild(textArea);
+      }
       return;
     }
 
