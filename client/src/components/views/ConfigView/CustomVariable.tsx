@@ -50,7 +50,7 @@ class CustomVariable extends Component<Props, State> {
       const value = this.props.state.__value;
       if (value == null) return;
 
-      const configStr = Object.entries(value).map(
+      const configStr = Object.entries(value).sort().map(
         ([name, val]) =>
           {
           if (val.__type == 'custom') return '';
