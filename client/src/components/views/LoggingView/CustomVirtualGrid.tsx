@@ -130,7 +130,7 @@ const CustomVirtualGrid = ({ header, data, columnsShowing }: Props) => {
             <span className="flex-grow truncate font-semibold">{e}</span>
             <DraggableCore onDrag={(_, { deltaX }) => resizeCol(e, deltaX)}>
               <div className="absolute right-1 mr-2 cursor-col-resize rounded px-2 transition-colors hover:bg-gray-200 hover:bg-opacity-75">
-                ⋮
+                ⋮⋮
               </div>
             </DraggableCore>
           </div>
