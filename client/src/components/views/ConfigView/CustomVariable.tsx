@@ -64,7 +64,7 @@ class CustomVariable extends Component<Props, State> {
             str += val.__type;
           }
           
-          str += ' ' + name + ' = ' + val.__value + ';\n';
+          str += ' ' + name + ' = ' + val.__newValue + ';\n';
 
           return str;
           }
