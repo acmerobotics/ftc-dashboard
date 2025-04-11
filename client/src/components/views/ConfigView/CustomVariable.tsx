@@ -1,4 +1,4 @@
-import { Component, MouseEvent, ReactNode} from 'react';
+import { Component, ReactNode } from 'react';
 import clsx from 'clsx';
 
 import BasicVariable from './BasicVariable';
@@ -10,9 +10,6 @@ import {
   CustomVar,
   CustomVarState,
 } from '@/store/types/config';
-
-import { ReactComponent as CopySVG } from '@/assets/icons/copy.svg';
-import { BaseViewIconButton } from '../BaseView';
 
 interface Props {
   name: string;
@@ -44,50 +41,6 @@ class CustomVariable extends Component<Props, State> {
   }
 
   renderHelper(name: string, children: ReactNode) {
-    const copyConfig = (evt: MouseEvent) => {
-      evt.stopPropagation();
-      
-      const value = this.props.state.__value;
-      if (value == null) return;
-
-      const configStr = Object.entries(value).sort().map(
-        ([name, val]) =>
-          {
-          if (val.__type == 'custom') return '';
-
-          var str = 'public static ';
-
-          if (val.__type == 'enum') {
-            str += val.__enumClass;
-          }
-          else {
-            str += val.__type;
-          }
-          
-          str += ' ' + name + ' = ' + val.__newValue + ';\n';
-
-          return str;
-          }
-        ).join('');
-      
-      if(window.isSecureContext){
-        navigator.clipboard.writeText(configStr);
-      }
-      else{
-        const textArea = document.createElement("textarea");
-        textArea.value = configStr;
-        document.body.append(textArea);
-        textArea.select();
-        try {
-          document.execCommand('copy');
-        } catch (err) {
-          console.error(err);
-        }
-        document.body.removeChild(textArea);
-      }
-      return;
-    }
-
     return (
       <tr className="block">
         <td className="block">
@@ -108,12 +61,6 @@ class CustomVariable extends Component<Props, State> {
             <div className="flex items-center justify-between">
               <h3 className="select-none text-lg">{name}</h3>
             </div>
-            <BaseViewIconButton
-              title="Copy Config to Clipboard"
-              onClick={copyConfig}
-            >
-              <CopySVG className="h-6 w-6" />
-            </BaseViewIconButton>
           </div>
           {this.state.expanded && (
             <table>
