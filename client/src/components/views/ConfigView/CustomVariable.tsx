@@ -58,13 +58,12 @@ class CustomVariable extends Component<Props, State> {
           var str = 'public static ';
 
           if (val.__type == 'enum') {
-            str += val.__enumClass;
+            const enumClass = val.__enumClass.split(".").at(-1);
+            str += enumClass + ' ' + name + ' = ' + enumClass + '.' + val.__newValue + ';\n';
           }
           else {
-            str += val.__type;
+            str += val.__type + ' ' + name + ' = ' + val.__newValue + ';\n';
           }
-          
-          str += ' ' + name + ' = ' + val.__newValue + ';\n';
 
           return str;
           }
