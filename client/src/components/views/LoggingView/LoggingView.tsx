@@ -343,9 +343,9 @@ const LoggingView = ({
             >
               <div
                 ref={keyShowingMenuRef}
-                className="absolute right-0 mt-2 origin-top-right rounded-md border border-gray-200 bg-white py-2 shadow-lg outline-none"
+                className="absolute right-0 mt-2 origin-top-right rounded-md border border-gray-200 bg-white dark:bg-slate-700 py-2 shadow-lg outline-none"
               >
-                <p className="mb-1 border-b border-gray-100 pb-1 pl-3 text-sm leading-5 text-gray-500">
+                <p className="mb-1 border-b border-gray-100 pb-1 pl-3 text-sm leading-5">
                   Toggle Items
                 </p>
                 <MenuItemSwitch
