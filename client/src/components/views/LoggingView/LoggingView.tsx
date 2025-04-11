@@ -319,10 +319,7 @@ const LoggingView = ({
               {getToolTipError()}
             </ToolTip>
           </button>
-          <div
-            className="relative inline-block"
-            style={{ zIndex: 99 }}
-          >
+          <div className="relative inline-block" style={{ zIndex: 99 }}>
             <button
               ref={keyShowingMenuButtonRef}
               className="icon-btn h-8 w-8"
@@ -343,7 +340,7 @@ const LoggingView = ({
             >
               <div
                 ref={keyShowingMenuRef}
-                className="absolute right-0 mt-2 origin-top-right rounded-md border border-gray-200 bg-white dark:bg-slate-700 py-2 shadow-lg outline-none"
+                className="absolute right-0 mt-2 origin-top-right rounded-md border border-gray-200 bg-white py-2 shadow-lg outline-none dark:bg-slate-700"
               >
                 <p className="mb-1 border-b border-gray-100 pb-1 pl-3 text-sm leading-5">
                   Toggle Items
