@@ -558,8 +558,10 @@ export default function ConfigurableLayout() {
           margin={isLayoutLocked ? [0, 0] : [GRID_MARGIN, GRID_MARGIN]}
         >
           {gridItems.map((item) => (
-            //hi
-            <div key={item.id}>
+            <div
+              className='border border-gray-100 transition-colors dark:border-slate-800'
+              key={item.id}
+            >
               {cloneElement(VIEW_MAP[item.view], {
                 id: item.id,
                 isDraggable: item.layout.isDraggable,
