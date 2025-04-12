@@ -19,6 +19,8 @@ import { ReactComponent as PlayIcon } from '@/assets/icons/play_arrow.svg';
 import { ReactComponent as PauseIcon } from '@/assets/icons/pause.svg';
 
 import { RootState } from '@/store/reducers';
+import { STOP_OP_MODE_TAG } from '@/store/types';
+import { OpModeStatus } from '@/enums/OpModeStatus';
 import { colors, ThemeConsumer } from '@/hooks/useTheme';
 import { DEFAULT_OPTIONS } from './Graph';
 import { validateInt, ValResult } from '@/components/inputs/validation';
@@ -34,6 +36,7 @@ type GraphViewState = {
 
 const mapStateToProps = (state: RootState) => ({
   telemetry: state.telemetry,
+  status: state.status
 });
 
 const connector = connect(mapStateToProps);
@@ -90,6 +93,13 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
   }
 
   componentDidUpdate(prevProps: GraphViewProps) {
+    if (this.noOpmodeRunning(this.props) && !this.noOpmodeRunning(prevProps)){
+      this.setState({
+        ...this.state,
+        pausedTime: Date.now()
+      })
+    }
+
     if (this.props.telemetry === prevProps.telemetry) return;
 
     this.setState((state) => {
@@ -123,6 +133,17 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
         pausedTime: Date.now(),
       });
     }
+  }
+
+  noOpmodeRunning(props: GraphViewProps){
+    if (
+      props.status.opModeList?.length === 0 ||
+      props.status.activeOpMode === STOP_OP_MODE_TAG ||
+      props.status.activeOpModeStatus === OpModeStatus.STOPPED
+    ) {
+      return true;
+    }
+    return false;
   }
 
   start() {
@@ -282,7 +303,7 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
                       ? colors.slate[100]
                       : colors.gray[900],
                   }}
-                  paused={this.state.paused}
+                  paused={this.state.paused || this.noOpmodeRunning(this.props)}
                   pausedTime={this.state.pausedTime}
                 />
               )}

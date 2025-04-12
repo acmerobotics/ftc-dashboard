@@ -291,6 +291,7 @@ export default class Graph {
   }
 
   render(time: number) {
+    console.log(time);
     const o = this.options;
 
     // eslint-disable-next-line
