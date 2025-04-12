@@ -91,12 +91,7 @@ const Container = forwardRef<
 >((props, ref) => (
   <div
     ref={ref}
-    className={clsx(
-      !props.isLayoutLocked
-        ? 'bg-gray-100 dark:bg-slate-900'
-        : 'bg-white dark:bg-slate-900',
-      'relative overflow-x-hidden overflow-y-scroll p-2 pb-4 transition-colors dark:bg-slate-900',
-    )}
+    className='relative overflow-x-hidden overflow-y-scroll bg-gray-100 p-2 pb-4 dark:bg-slate-800'
     style={{
       height: 'calc(100vh - 52px)',
       backgroundImage: !props.isLayoutLocked
@@ -563,6 +558,7 @@ export default function ConfigurableLayout() {
           margin={isLayoutLocked ? [0, 0] : [GRID_MARGIN, GRID_MARGIN]}
         >
           {gridItems.map((item) => (
+            //hi
             <div key={item.id}>
               {cloneElement(VIEW_MAP[item.view], {
                 id: item.id,
