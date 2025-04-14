@@ -36,7 +36,7 @@ type GraphViewState = {
 
 const mapStateToProps = (state: RootState) => ({
   telemetry: state.telemetry,
-  status: state.status
+  status: state.status,
 });
 
 const connector = connect(mapStateToProps);
@@ -93,11 +93,14 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
   }
 
   componentDidUpdate(prevProps: GraphViewProps) {
-    if (this.noOpmodeRunning(this.props) && !this.noOpmodeRunning(prevProps)){
+    if (this.noOpmodeRunning(this.props) && !this.noOpmodeRunning(prevProps)) {
+      // Don't set paused = true so that afterwards,
+      // if an OpMode starts and paused was false,
+      // graphing starts immediately
       this.setState({
         ...this.state,
-        pausedTime: Date.now()
-      })
+        pausedTime: Date.now(),
+      });
     }
 
     if (this.props.telemetry === prevProps.telemetry) return;
@@ -135,7 +138,7 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
     }
   }
 
-  noOpmodeRunning(props: GraphViewProps){
+  noOpmodeRunning(props: GraphViewProps) {
     if (
       props.status.opModeList?.length === 0 ||
       props.status.activeOpMode === STOP_OP_MODE_TAG ||
@@ -212,7 +215,13 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
           <BaseViewIcons>
             {this.state.graphing && this.state.selectedKeys.length !== 0 && (
               <BaseViewIconButton
-                title={this.state.paused ? 'Resume Graphing' : (this.noOpmodeRunning(this.props) ? 'Graphing will restart when an OpMode starts' :  'Pause Graphing')}
+                title={
+                  this.state.paused
+                    ? 'Resume Graphing'
+                    : this.noOpmodeRunning(this.props)
+                    ? 'Graphing will restart when an OpMode starts'
+                    : 'Pause Graphing'
+                }
                 className="icon-btn h-8 w-8"
               >
                 {this.state.paused ? (
