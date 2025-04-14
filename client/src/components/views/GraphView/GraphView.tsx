@@ -27,7 +27,8 @@ import { validateInt, ValResult } from '@/components/inputs/validation';
 
 type GraphViewState = {
   graphing: boolean;
-  paused: boolean;
+  opmodePaused: boolean;
+  userPaused: boolean;
   pausedTime: number;
   availableKeys: string[];
   selectedKeys: string[];
@@ -53,7 +54,8 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
 
     this.state = {
       graphing: false,
-      paused: false,
+      opmodePaused: false,
+      userPaused: false,
       pausedTime: 0,
       availableKeys: [],
       selectedKeys: [],
@@ -68,8 +70,8 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
     this.start = this.start.bind(this);
     this.stop = this.stop.bind(this);
 
-    this.play = this.play.bind(this);
-    this.pause = this.pause.bind(this);
+    this.userPlay = this.userPlay.bind(this);
+    this.userPause = this.userPause.bind(this);
 
     this.handleDocumentKeydown = this.handleDocumentKeydown.bind(this);
   }
@@ -94,13 +96,10 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
 
   componentDidUpdate(prevProps: GraphViewProps) {
     if (this.noOpmodeRunning(this.props) && !this.noOpmodeRunning(prevProps)) {
-      // Don't set paused = true so that afterwards,
-      // if an OpMode starts and paused was false,
-      // graphing starts immediately
-      this.setState({
-        ...this.state,
-        pausedTime: Date.now(),
-      });
+      this.opmodePause();
+    }
+    if (!this.noOpmodeRunning(this.props) && this.noOpmodeRunning(prevProps)) {
+      this.opmodePlay();
     }
 
     if (this.props.telemetry === prevProps.telemetry) return;
@@ -132,7 +131,7 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
     if (evt.code === 'Space' || evt.key === 'k') {
       this.setState({
         ...this.state,
-        paused: !this.state.paused,
+        userPaused: !this.state.userPaused,
         pausedTime: Date.now(),
       });
     }
@@ -153,7 +152,7 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
     this.setState({
       ...this.state,
       graphing: true,
-      paused: false,
+      userPaused: false,
     });
   }
 
@@ -164,18 +163,39 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
     });
   }
 
-  pause() {
+  userPause() {
     this.setState({
       ...this.state,
-      paused: true,
-      pausedTime: Date.now(),
+      userPaused: true,
+      pausedTime:
+        this.state.userPaused || this.state.opmodePaused
+          ? this.state.pausedTime
+          : Date.now(),
     });
   }
 
-  play() {
+  opmodePause() {
     this.setState({
       ...this.state,
-      paused: false,
+      opmodePaused: true,
+      pausedTime:
+        this.state.userPaused || this.state.opmodePaused
+          ? this.state.pausedTime
+          : Date.now(),
+    });
+  }
+
+  userPlay() {
+    this.setState({
+      ...this.state,
+      userPaused: false,
+    });
+  }
+
+  opmodePlay() {
+    this.setState({
+      ...this.state,
+      opmodePaused: false,
     });
   }
 
@@ -216,7 +236,7 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
             {this.state.graphing && this.state.selectedKeys.length !== 0 && (
               <BaseViewIconButton
                 title={
-                  this.state.paused
+                  this.state.userPaused
                     ? 'Resume Graphing'
                     : this.noOpmodeRunning(this.props)
                     ? 'Graphing will restart when an OpMode starts'
@@ -224,10 +244,10 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
                 }
                 className="icon-btn h-8 w-8"
               >
-                {this.state.paused ? (
-                  <PlayIcon className="h-6 w-6" onClick={this.play} />
+                {this.state.userPaused ? (
+                  <PlayIcon className="h-6 w-6" onClick={this.userPlay} />
                 ) : (
-                  <PauseIcon className="h-6 w-6" onClick={this.pause} />
+                  <PauseIcon className="h-6 w-6" onClick={this.userPause} />
                 )}
               </BaseViewIconButton>
             )}
@@ -312,7 +332,7 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
                       ? colors.slate[100]
                       : colors.gray[900],
                   }}
-                  paused={this.state.paused || this.noOpmodeRunning(this.props)}
+                  paused={this.state.userPaused || this.state.opmodePaused}
                   pausedTime={this.state.pausedTime}
                 />
               )}
