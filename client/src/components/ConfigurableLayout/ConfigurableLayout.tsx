@@ -91,7 +91,7 @@ const Container = forwardRef<
 >((props, ref) => (
   <div
     ref={ref}
-    className='relative overflow-x-hidden overflow-y-scroll bg-gray-100 p-2 pb-4 dark:bg-slate-800'
+    className='relative overflow-x-hidden overflow-y-scroll bg-gray-100 dark:bg-slate-800'
     style={{
       height: 'calc(100vh - 52px)',
       backgroundImage: !props.isLayoutLocked
