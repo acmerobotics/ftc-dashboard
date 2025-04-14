@@ -91,7 +91,7 @@ const Container = forwardRef<
 >((props, ref) => (
   <div
     ref={ref}
-    className='relative overflow-x-hidden overflow-y-scroll bg-gray-100 dark:bg-slate-800'
+    className="relative overflow-x-hidden overflow-y-scroll bg-gray-100 dark:bg-slate-800"
     style={{
       height: 'calc(100vh - 52px)',
       backgroundImage: !props.isLayoutLocked
@@ -559,7 +559,7 @@ export default function ConfigurableLayout() {
         >
           {gridItems.map((item) => (
             <div
-              className='border border-gray-100 transition-colors dark:border-slate-800'
+              className="border border-gray-100 transition-colors dark:border-slate-800"
               key={item.id}
             >
               {cloneElement(VIEW_MAP[item.view], {
