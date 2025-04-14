@@ -20,11 +20,14 @@ import com.acmerobotics.dashboard.config.variable.CustomVariable;
 import com.acmerobotics.dashboard.message.Message;
 import com.acmerobotics.dashboard.message.redux.InitOpMode;
 import com.acmerobotics.dashboard.message.redux.ReceiveGamepadState;
+import com.acmerobotics.dashboard.message.redux.ReceiveHardwareConfigList;
 import com.acmerobotics.dashboard.message.redux.ReceiveImage;
 import com.acmerobotics.dashboard.message.redux.ReceiveOpModeList;
 import com.acmerobotics.dashboard.message.redux.ReceiveRobotStatus;
+import com.acmerobotics.dashboard.message.redux.SetHardwareConfig;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.ftccommon.FtcEventLoop;
+import com.qualcomm.ftccommon.configuration.RobotConfigFile;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -37,6 +40,7 @@ import com.qualcomm.robotcore.util.RobotLog;
 import com.qualcomm.robotcore.util.ThreadPool;
 import com.qualcomm.robotcore.util.WebHandlerManager;
 import com.qualcomm.robotcore.util.WebServer;
+import com.qualcomm.ftccommon.configuration.RobotConfigFileManager;
 import dalvik.system.DexFile;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoWSD;
@@ -47,7 +51,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import org.firstinspires.ftc.ftccommon.external.OnCreate;
@@ -208,6 +214,9 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private TextView connectionStatusTextView;
     private LinearLayout parentLayout;
 
+    private RobotConfigFileManager hardwareConfigManager = new RobotConfigFileManager();
+    private final Mutex<Map<String, RobotConfigFile>> hardwareConfigList = new Mutex<>(new TreeMap<>());
+
     private static class OpModeAndStatus {
         public OpMode opMode;
         public RobotStatus.OpModeStatus status = RobotStatus.OpModeStatus.STOPPED;
@@ -252,6 +261,22 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 }
                 Collections.sort(l);
                 sendAll(new ReceiveOpModeList(l));
+            });
+        }
+    }
+
+    private class ListHardwareConfigsRunnable implements Runnable {
+        @Override
+        public void run(){
+            hardwareConfigList.with(l -> {
+                l.clear();
+                for (RobotConfigFile file : hardwareConfigManager.getXMLFiles()){
+                    l.put(file.getName(), file);
+                }
+                sendAll(new ReceiveHardwareConfigList(
+                        new ArrayList<>(l.keySet()),
+                        hardwareConfigManager.getActiveConfig().getName()
+                ));
             });
         }
     }
@@ -585,6 +610,15 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 }
             });
 
+            hardwareConfigList.with(l -> {
+                if (!l.isEmpty()){
+                    send(new ReceiveHardwareConfigList(
+                            new ArrayList<>(l.keySet()),
+                            hardwareConfigManager.getActiveConfig().getName())
+                    );
+                }
+            });
+
             updateStatusView();
         }
 
@@ -627,6 +661,18 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                     ReceiveGamepadState castMsg = (ReceiveGamepadState) msg;
                     updateGamepads(castMsg.getGamepad1(), castMsg.getGamepad2());
                     break;
+                }
+                case SET_HARDWARE_CONFIG: {
+                    String hardwareConfigName = ((SetHardwareConfig) msg).getHardwareConfigName();
+
+                    activeOpMode.with(o -> {
+                        // Don't allow changing the config unless stopped. Who knows what undefined behavior that would cause
+                       if(o.status != RobotStatus.OpModeStatus.STOPPED) return;
+
+                       hardwareConfigList.with(l -> {
+                           hardwareConfigManager.setActiveConfig(false, l.get(hardwareConfigName));
+                       });
+                    });
                 }
                 default: {
                     Log.w(TAG, "Received unknown message of type " + msg.getType());
@@ -879,6 +925,10 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
         Thread t = new Thread(new ListOpModesRunnable());
         t.start();
+
+        // This gets called every time the robot soft-restarts, which includes when modifying/switching configs
+        Thread hardwareConfigThread = new Thread(new ListHardwareConfigsRunnable());
+        hardwareConfigThread.start();
     }
 
     private void internalPopulateMenu(Menu menu) {
