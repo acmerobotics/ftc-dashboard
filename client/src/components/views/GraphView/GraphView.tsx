@@ -212,7 +212,7 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
           <BaseViewIcons>
             {this.state.graphing && this.state.selectedKeys.length !== 0 && (
               <BaseViewIconButton
-                title={this.state.paused ? 'Resume Graphing' : 'Pause Graphing'}
+                title={this.state.paused ? 'Resume Graphing' : (this.noOpmodeRunning(this.props) ? 'Graphing will restart when an OpMode starts' :  'Pause Graphing')}
                 className="icon-btn h-8 w-8"
               >
                 {this.state.paused ? (
