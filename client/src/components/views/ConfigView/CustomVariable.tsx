@@ -1,4 +1,4 @@
-import { Component, MouseEvent, ReactNode} from 'react';
+import { Component, MouseEvent, ReactNode } from 'react';
 import clsx from 'clsx';
 
 import BasicVariable from './BasicVariable';
@@ -12,7 +12,7 @@ import {
 } from '@/store/types/config';
 
 import { ReactComponent as CopySVG } from '@/assets/icons/copy.svg';
-import { BaseViewIconButton } from '../BaseView';
+import { BaseViewIconButton } from '@/components/views/BaseView';
 
 interface Props {
   name: string;
@@ -46,33 +46,52 @@ class CustomVariable extends Component<Props, State> {
   renderHelper(name: string, children: ReactNode) {
     const copyConfig = (evt: MouseEvent) => {
       evt.stopPropagation();
-      
+
       const value = this.props.state.__value;
       if (value == null) return;
 
-      const configStr = Object.entries(value).map(
-        ([name, val]) =>
-          {
-          if (val.__type == 'custom') return '';
+      const configStr = Object.entries(value)
+        .sort()
+        .map(([name, val]) => {
+          if (val.__type === 'custom') return '';
 
-          var str = 'public static ';
+          let str = 'public static ';
 
-          if (val.__type == 'enum') {
-            str += val.__enumClass;
+          if (val.__type === 'enum') {
+            const enumClass = val.__enumClass.split('.').at(-1);
+            str +=
+              enumClass +
+              ' ' +
+              name +
+              ' = ' +
+              enumClass +
+              '.' +
+              val.__newValue +
+              ';\n';
+          } else {
+            str += val.__type + ' ' + name + ' = ' + val.__newValue + ';\n';
           }
-          else {
-            str += val.__type;
-          }
-          
-          str += ' ' + name + ' = ' + val.__value + ';\n';
 
           return str;
-          }
-        ).join('');
-      
-      navigator.clipboard.writeText(configStr);
+        })
+        .join('');
+
+      if (window.isSecureContext) {
+        navigator.clipboard.writeText(configStr);
+      } else {
+        const textArea = document.createElement('textarea');
+        textArea.value = configStr;
+        document.body.append(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+        } catch (err) {
+          console.error(err);
+        }
+        document.body.removeChild(textArea);
+      }
       return;
-    }
+    };
 
     return (
       <tr className="block">
