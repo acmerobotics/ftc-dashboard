@@ -138,14 +138,11 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
   }
 
   noOpmodeRunning(props: GraphViewProps) {
-    if (
+    return (
       props.status.opModeList?.length === 0 ||
       props.status.activeOpMode === STOP_OP_MODE_TAG ||
       props.status.activeOpModeStatus === OpModeStatus.STOPPED
-    ) {
-      return true;
-    }
-    return false;
+    );
   }
 
   start() {
