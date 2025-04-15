@@ -1,4 +1,4 @@
-import type { DrawOp } from './telemetry';
+import type { DrawOp } from '@/store/types/telemetry';
 
 export const SET_REPLAY_OVERLAY = 'SET_REPLAY_OVERLAY';
 

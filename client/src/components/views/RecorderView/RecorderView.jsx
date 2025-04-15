@@ -11,7 +11,7 @@ import { ReactComponent as DeleteSVG } from '@/assets/icons/delete.svg';
 import { ReactComponent as DownloadSVG } from '@/assets/icons/file_download.svg';
 
 const TELEMETRY_RECORDING_MAX_SIZE = 10000; // 2:30 mins at 15ms loop times
-const PER_REPLAY_SIZE_LIMIT = 104857 * 2;   // 0.2MB, can store up to 25 replays
+const PER_REPLAY_SIZE_LIMIT = 104857 * 2; // 0.2MB, can store up to 25 replays
 const LOCALSTORAGE_SIZE_LIMIT = 5 * 1024 * 1024;
 const REPLAY_UPDATE_INTERVAL = 20;
 
@@ -48,23 +48,25 @@ class RecorderView extends React.Component {
 
   loadSavedReplays = () => {
     const keys = Object.keys(window.localStorage).filter((key) =>
-      key.startsWith('field_replay_')
+      key.startsWith('field_replay_'),
     );
     this.setState({ savedReplays: keys }, () => {
       if (this.state.autoSelect) {
         this.handleLoadTelemetryByFilename({
           target: {
-            selectedOptions: this.state.savedReplays.map(filename => ({ value: filename }))
-          }
+            selectedOptions: this.state.savedReplays.map((filename) => ({
+              value: filename,
+            })),
+          },
         });
       }
     });
   };
 
   handleOpacityChange = (event) => {
-      const opacity = event.target.value;
-      this.setState({ replayOpacity: opacity });
-    };
+    const opacity = event.target.value;
+    this.setState({ replayOpacity: opacity });
+  };
 
   handleDownloadSelectedReplays = () => {
     const { selectedReplays } = this.state;
@@ -78,7 +80,9 @@ class RecorderView extends React.Component {
 
       const replayData = JSON.parse(replayDataString);
 
-      const blob = new Blob([JSON.stringify(replayData, null, 2)], { type: 'application/json' });
+      const blob = new Blob([JSON.stringify(replayData, null, 2)], {
+        type: 'application/json',
+      });
 
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
@@ -89,19 +93,26 @@ class RecorderView extends React.Component {
   };
 
   handleSaveToLocalStorage = () => {
-    if (!this.state.record) {return;}
+    if (!this.state.record) {
+      return;
+    }
 
     let totalSize = 0;
     for (let i = 0; i < window.localStorage.length; i++) {
       const key = window.localStorage.key(i);
       totalSize += new Blob([window.localStorage.getItem(key)]).size;
     }
-    this.telemetryRecording = this.telemetryRecording.slice(0, this.telemetryRecordingWriteIndex);
+    this.telemetryRecording = this.telemetryRecording.slice(
+      0,
+      this.telemetryRecordingWriteIndex,
+    );
     let dataToSave = JSON.stringify(this.telemetryRecording);
     const newDataSize = new Blob([dataToSave]).size;
 
     if (totalSize + newDataSize > LOCALSTORAGE_SIZE_LIMIT) {
-      this.setState({ errorMessage: 'Cannot save replay: LocalStorage quota exceeded.' });
+      this.setState({
+        errorMessage: 'Cannot save replay: LocalStorage quota exceeded.',
+      });
 
       setTimeout(() => {
         this.setState({ errorMessage: '' });
@@ -109,18 +120,21 @@ class RecorderView extends React.Component {
       return;
     }
     if (newDataSize > PER_REPLAY_SIZE_LIMIT) {
-      this.setState({ errorMessage: 'Trimming replay: Per-Replay size limit exceeded.' });
+      this.setState({
+        errorMessage: 'Trimming replay: Per-Replay size limit exceeded.',
+      });
 
       setTimeout(() => {
         this.setState({ errorMessage: '' });
       }, 5000);
 
-
       // Calculate the current size ratio to the per file max size
       const ratioToMaxSize = PER_REPLAY_SIZE_LIMIT / newDataSize;
 
       // Determine how many elements we need to keep based on the ratio
-      const elementsToKeep = Math.floor(this.telemetryRecording.length * ratioToMaxSize);
+      const elementsToKeep = Math.floor(
+        this.telemetryRecording.length * ratioToMaxSize,
+      );
 
       // Slice the array from 0 to bound
       const trimmed = this.telemetryRecording.slice(0, elementsToKeep);
@@ -128,8 +142,13 @@ class RecorderView extends React.Component {
     }
 
     const currentDate = new Date();
-    const formattedDate = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}` +
-        `_T${String(currentDate.getHours()).padStart(2, '0')}_${String(currentDate.getMinutes()).padStart(2, '0')}_${String(currentDate.getSeconds()).padStart(2, '0')}`;
+    const formattedDate =
+      `${currentDate.getFullYear()}-${String(
+        currentDate.getMonth() + 1,
+      ).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}` +
+      `_T${String(currentDate.getHours()).padStart(2, '0')}_${String(
+        currentDate.getMinutes(),
+      ).padStart(2, '0')}_${String(currentDate.getSeconds()).padStart(2, '0')}`;
 
     const storageKey = `field_replay_${formattedDate}`;
 
@@ -139,7 +158,9 @@ class RecorderView extends React.Component {
   };
 
   handleLoadTelemetryByFilename = (event) => {
-    const selectedFiles = [...event.target.selectedOptions].map((option) => option.value);
+    const selectedFiles = [...event.target.selectedOptions].map(
+      (option) => option.value,
+    );
     if (!selectedFiles.length) return;
 
     let fileReplayData = [];
@@ -169,10 +190,12 @@ class RecorderView extends React.Component {
     this.clearPlayback();
 
     this.setState((prevState) => ({
-      savedReplays: prevState.savedReplays.filter((file) => !selectedReplays.includes(file)),
+      savedReplays: prevState.savedReplays.filter(
+        (file) => !selectedReplays.includes(file),
+      ),
       selectedReplays: [],
       telemetryReplay: [],
-      }));
+    }));
 
     this.currOps = [];
   };
@@ -182,12 +205,18 @@ class RecorderView extends React.Component {
 
     if (!savedReplays.length) return;
 
-    savedReplays.forEach((filename) => window.localStorage.removeItem(filename));
+    savedReplays.forEach((filename) =>
+      window.localStorage.removeItem(filename),
+    );
     this.currOps = [];
 
     this.clearPlayback();
 
-    this.setState({ telemetryReplay: [], savedReplays: [], selectedReplays: [] });
+    this.setState({
+      telemetryReplay: [],
+      savedReplays: [],
+      selectedReplays: [],
+    });
   };
 
   handleUploadReplay = (event) => {
@@ -199,13 +228,15 @@ class RecorderView extends React.Component {
         try {
           const parsedData = JSON.parse(e.target.result);
           if (!Array.isArray(parsedData)) {
-            alert(`Invalid file format in ${file.name}. Expected an array of telemetry data.`);
+            alert(
+              `Invalid file format in ${file.name}. Expected an array of telemetry data.`,
+            );
             return;
           }
 
           const fileName = file.name.replace('.json', '');
           window.localStorage.setItem(fileName, JSON.stringify(parsedData));
-          this.loadSavedReplays()
+          this.loadSavedReplays();
         } catch (error) {
           alert(`Error parsing JSON file: ${file.name}`);
         }
@@ -238,10 +269,18 @@ class RecorderView extends React.Component {
       const elapsedTime = Date.now() - this.startReplayTime;
       const timeRangeEnd = elapsedTime + REPLAY_UPDATE_INTERVAL / 2;
 
-      for (let replayIndex = 0; replayIndex < this.state.telemetryReplay.length; replayIndex++) {
+      for (
+        let replayIndex = 0;
+        replayIndex < this.state.telemetryReplay.length;
+        replayIndex++
+      ) {
         let isUpdated = false;
-        while (lastIndex[replayIndex] < this.state.telemetryReplay[replayIndex].length) {
-          const entry = this.state.telemetryReplay[replayIndex][lastIndex[replayIndex]];
+        while (
+          lastIndex[replayIndex] <
+          this.state.telemetryReplay[replayIndex].length
+        ) {
+          const entry =
+            this.state.telemetryReplay[replayIndex][lastIndex[replayIndex]];
           if (entry.timestamp > timeRangeEnd) {
             break;
           }
@@ -256,23 +295,30 @@ class RecorderView extends React.Component {
       const newOps = ops.flat();
       if (JSON.stringify(newOps) !== JSON.stringify(this.preCurrOps)) {
         this.preCurrOps = newOps;
-        this.currOps = newOps.map(op => ({ ...op }));
+        this.currOps = newOps.map((op) => ({ ...op }));
         for (let index = 0; index < this.currOps.length; index++) {
           let op = this.currOps[index];
-           if (op.alpha !== undefined) {
-             op.alpha = op.alpha * this.state.replayOpacity;
-           }
-           else if (index == 0) {
-             this.currOps.unshift({ alpha: this.state.replayOpacity, type: 'alpha' });
-           }
-         }
+          if (op.alpha !== undefined) {
+            op.alpha = op.alpha * this.state.replayOpacity;
+          } else if (index === 0) {
+            this.currOps.unshift({
+              alpha: this.state.replayOpacity,
+              type: 'alpha',
+            });
+          }
+        }
       }
 
       if (JSON.stringify(this.currOps).length > 0) {
         this.props.setReplayOverlay(this.currOps);
       }
 
-      if (lastIndex.every((index, idx) => index >= (this.state.telemetryReplay[idx]?.length || 0))) {
+      if (
+        lastIndex.every(
+          (index, idx) =>
+            index >= (this.state.telemetryReplay[idx]?.length || 0),
+        )
+      ) {
         playbackComplete = true;
       }
 
@@ -289,11 +335,16 @@ class RecorderView extends React.Component {
   }
 
   compareOverlays = (prevOverlay, currentOverlay) => {
-    return JSON.stringify(currentOverlay.ops) != JSON.stringify(prevOverlay.ops);
+    return (
+      JSON.stringify(currentOverlay.ops) !== JSON.stringify(prevOverlay.ops)
+    );
   };
 
   componentDidUpdate(prevProps) {
-    if (this.props.activeOpModeStatus === OpModeStatus.STOPPED && this.isRunning) {
+    if (
+      this.props.activeOpModeStatus === OpModeStatus.STOPPED &&
+      this.isRunning
+    ) {
       this.isRunning = false;
       this.handleSaveToLocalStorage();
     }
@@ -306,17 +357,20 @@ class RecorderView extends React.Component {
       (acc, { fieldOverlay }) => ({
         ops: [...acc.ops, ...(fieldOverlay?.ops || [])],
       }),
-      { ops: [] }
+      { ops: [] },
     );
 
     const prevOverlay = prevProps.telemetry.reduce(
       (acc, { fieldOverlay }) => ({
         ops: [...acc.ops, ...(fieldOverlay?.ops || [])],
       }),
-      { ops: [] }
+      { ops: [] },
     );
 
-    if (this.props.activeOpModeStatus === OpModeStatus.INIT && !this.isRunning) {
+    if (
+      this.props.activeOpModeStatus === OpModeStatus.INIT &&
+      !this.isRunning
+    ) {
       if (this.compareOverlays(prevOverlay, overlay)) {
         this.isRunning = true;
         this.telemetryRecordingWriteIndex = 0;
@@ -351,10 +405,14 @@ class RecorderView extends React.Component {
         (acc, { replayOverlay }) => ({
           ops: [...(replayOverlay?.ops || [])],
         }),
-        { ops: [] }
+        { ops: [] },
       );
       const currOpsStr = JSON.stringify(this.currOps);
-      if (!replayOps.ops.length && currOpsStr != JSON.stringify(replayOps.ops) && currOpsStr.length > 0) {
+      if (
+        !replayOps.ops.length &&
+        currOpsStr !== JSON.stringify(replayOps.ops) &&
+        currOpsStr.length > 0
+      ) {
         this.props.setReplayOverlay(this.currOps);
       }
     }
@@ -380,15 +438,17 @@ class RecorderView extends React.Component {
         <BaseViewHeading isDraggable={this.props.isDraggable}>
           Recorder
           {this.state.errorMessage && (
-            <div style={{
-              color: '#d9534f',
-              padding: '5px',
-              fontSize: '14px',
-              borderRadius: '5px',
-              textAlign: 'center',
-              fontWeight: 'bold',
-              marginBottom: '1em'
-            }}>
+            <div
+              style={{
+                color: '#d9534f',
+                padding: '5px',
+                fontSize: '14px',
+                borderRadius: '5px',
+                textAlign: 'center',
+                fontWeight: 'bold',
+                marginBottom: '1em',
+              }}
+            >
               {this.state.errorMessage}
             </div>
           )}
@@ -412,12 +472,18 @@ class RecorderView extends React.Component {
             onMouseOver={(e) => (e.target.style.backgroundColor = '#45a049')}
             onMouseOut={(e) => (e.target.style.backgroundColor = '#4CAF50')}
           >
-            <i className="fas fa-play-circle" style={{ marginRight: '0px' }}></i>
+            <i
+              className="fas fa-play-circle"
+              style={{ marginRight: '0px' }}
+            ></i>
             Start Playback
           </button>
 
           <div style={{ marginTop: '1em' }}>
-            <label htmlFor="replaySelector" style={{ fontWeight: 'bold', marginRight: '0.5em' }}>
+            <label
+              htmlFor="replaySelector"
+              style={{ fontWeight: 'bold', marginRight: '0.5em' }}
+            >
               Select Replay:
             </label>
 
@@ -435,7 +501,9 @@ class RecorderView extends React.Component {
                   border: '1px solid #ccc',
                   cursor: 'pointer',
                   marginRight: '0.5em',
-                  height: `${Math.min(this.state.savedReplays.length, 5) * 20 + 4}px`,
+                  height: `${
+                    Math.min(this.state.savedReplays.length, 5) * 20 + 4
+                  }px`,
                   width: '200px',
                 }}
               >
@@ -448,49 +516,56 @@ class RecorderView extends React.Component {
             </div>
 
             <input
-                type="file"
-                accept=".json"
-                multiple
-                ref={(input) => (this.fileInput = input)}
-                style={{ display: 'none' }}
-                onChange={this.handleUploadReplay}
-              />
+              type="file"
+              accept=".json"
+              multiple
+              ref={(input) => (this.fileInput = input)}
+              style={{ display: 'none' }}
+              onChange={this.handleUploadReplay}
+            />
 
-              <button
-                onClick={() => this.fileInput.click()}
-                className={`
+            <button
+              onClick={() => this.fileInput.click()}
+              className={`
                   border border-green-200 bg-green-100 transition-colors
                   dark:border-transparent dark:bg-green-500 dark:text-green-50 dark:highlight-white/30
                   dark:hover:border-green-300/80 dark:focus:bg-green-600
                 `}
-                style={{
-                  padding: '0.5em 1em',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.3s ease',
-                  marginLeft: '0.5em',
-                }}
-              >
-                <DownloadSVG className="h-6 w-6" style={{ transform: 'rotate(180deg)' }} />
-              </button>
+              style={{
+                padding: '0.5em 1em',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                transition: 'background-color 0.3s ease',
+                marginLeft: '0.5em',
+              }}
+            >
+              <DownloadSVG
+                className="h-6 w-6"
+                style={{ transform: 'rotate(180deg)' }}
+              />
+            </button>
 
             <button
-                onClick={this.handleDownloadSelectedReplays}
-                disabled={!(this.state.selectedReplays.length > 0)}
-                style={{
-                  padding: '0.5em 1em',
-                  backgroundColor: this.state.selectedReplays.length > 0 ? '#5bc0de' : '#ccc',
-                  color: '#fff',
-                  fontSize: '14px',
-                  fontWeight: 'bold',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: this.state.selectedReplays.length > 0 ? 'pointer' : 'not-allowed',
-                  transition: 'background-color 0.3s ease',
-                  marginLeft: '0.5em',
-                }}
-              >
-                <DownloadSVG className="h-6 w-6" />
+              onClick={this.handleDownloadSelectedReplays}
+              disabled={!(this.state.selectedReplays.length > 0)}
+              style={{
+                padding: '0.5em 1em',
+                backgroundColor:
+                  this.state.selectedReplays.length > 0 ? '#5bc0de' : '#ccc',
+                color: '#fff',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                border: 'none',
+                borderRadius: '4px',
+                cursor:
+                  this.state.selectedReplays.length > 0
+                    ? 'pointer'
+                    : 'not-allowed',
+                transition: 'background-color 0.3s ease',
+                marginLeft: '0.5em',
+              }}
+            >
+              <DownloadSVG className="h-6 w-6" />
             </button>
 
             <button
@@ -498,13 +573,17 @@ class RecorderView extends React.Component {
               disabled={!(this.state.selectedReplays.length > 0)}
               style={{
                 padding: '0.5em 1em',
-                backgroundColor: this.state.selectedReplays.length > 0 ? '#d9534f' : '#ccc',
+                backgroundColor:
+                  this.state.selectedReplays.length > 0 ? '#d9534f' : '#ccc',
                 color: '#fff',
                 fontSize: '14px',
                 fontWeight: 'bold',
                 border: 'none',
                 borderRadius: '4px',
-                cursor: this.state.selectedReplays.length > 0 ? 'pointer' : 'not-allowed',
+                cursor:
+                  this.state.selectedReplays.length > 0
+                    ? 'pointer'
+                    : 'not-allowed',
                 transition: 'background-color 0.3s ease',
                 marginLeft: '0.5em',
               }}
@@ -517,20 +596,24 @@ class RecorderView extends React.Component {
               disabled={!this.state.savedReplays.length}
               style={{
                 padding: '0.5em 1em',
-                backgroundColor: this.state.savedReplays.length > 0 ? '#d9534f' : '#ccc',
+                backgroundColor:
+                  this.state.savedReplays.length > 0 ? '#d9534f' : '#ccc',
                 color: '#fff',
                 fontSize: '14px',
                 fontWeight: 'bold',
                 border: 'none',
                 borderRadius: '4px',
-                cursor: this.state.savedReplays.length > 0 ? 'pointer' : 'not-allowed',
+                cursor:
+                  this.state.savedReplays.length > 0
+                    ? 'pointer'
+                    : 'not-allowed',
                 transition: 'background-color 0.3s ease',
                 marginLeft: '0.5em',
                 display: 'inline-flex',
                 alignItems: 'center',
               }}
             >
-              <DeleteSVG className="h-6 w-6"/>
+              <DeleteSVG className="h-6 w-6" />
               <span style={{ marginLeft: '0.3em' }}>All</span>
             </button>
           </div>
@@ -578,10 +661,9 @@ class RecorderView extends React.Component {
             />
           </div>
           <div style={{ marginTop: '0.5em' }}>
-            <label htmlFor="replayOpacity">
-              Replay Opacity:
-            </label>
-            <span>{this.state.replayOpacity}</span> {/* Display current value on the same line as the title */}
+            <label htmlFor="replayOpacity">Replay Opacity:</label>
+            <span>{this.state.replayOpacity}</span>{' '}
+            {/* Display current value on the same line as the title */}
           </div>
 
           <div>
@@ -604,6 +686,7 @@ class RecorderView extends React.Component {
 RecorderView.propTypes = {
   telemetry: PropTypes.array.isRequired,
   isUnlocked: PropTypes.bool,
+  isDraggable: PropTypes.bool,
   activeOpModeStatus: PropTypes.string,
   receiveTelemetry: PropTypes.func.isRequired,
   setReplayOverlay: PropTypes.func.isRequired,
