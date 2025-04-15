@@ -62,6 +62,12 @@ class HardwareConfigView extends Component<HardwareConfigViewProps, HardwareConf
     });
   }
 
+  componentDidUpdate(prevProps: Readonly<HardwareConfigViewProps>) {
+    if(prevProps.currentHardwareConfig !== this.props.currentHardwareConfig) {
+      this.setState({ selectedHardwareConfig: this.props.currentHardwareConfig });
+    }
+  }
+
   renderSetButton() {
     return (
       <ActionButton
@@ -92,7 +98,6 @@ class HardwareConfigView extends Component<HardwareConfigViewProps, HardwareConf
       available,
       activeOpModeStatus,
       hardwareConfigList,
-      currentHardwareConfig,
       activeOpMode,
     } = this.props;
 
@@ -126,13 +131,11 @@ class HardwareConfigView extends Component<HardwareConfigViewProps, HardwareConf
               focus:ring-primary-500 disabled:text-gray-600 disabled:shadow-none
               dark:border-slate-500/80 dark:bg-slate-700 dark:text-slate-200
             `}
-            //value={this.state.selectedHardwareConfig}
+            value={this.state.selectedHardwareConfig}
             disabled={
               activeOpModeStatus !== OpModeStatus.STOPPED && activeOpMode !== STOP_OP_MODE_TAG
             }
             onChange={this.onChange}
-            // This element is uncontrolled to be able to set a default option. I'm not sure if there's a better option here
-            defaultValue={currentHardwareConfig}
           >
             {hardwareConfigList.length === 0 ? (
               <option>Loading...</option>
