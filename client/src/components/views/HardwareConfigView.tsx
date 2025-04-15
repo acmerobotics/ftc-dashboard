@@ -11,6 +11,7 @@ import BaseView, {
 } from './BaseView';
 
 import { setHardwareConfig } from '@/store/actions/hardwareconfig';
+import { STOP_OP_MODE_TAG } from '@/store/types';
 
 type HardwareConfigViewState = {
   selectedHardwareConfig: string;
@@ -77,11 +78,11 @@ class HardwareConfigView extends Component<HardwareConfigViewProps, HardwareConf
   }
 
   renderButtons() {
-    const { activeOpModeStatus, hardwareConfigList } = this.props;
+    const { activeOpModeStatus, hardwareConfigList, activeOpMode } = this.props;
 
     if (hardwareConfigList.length === 0) {
       return null;
-    } else if (activeOpModeStatus === OpModeStatus.STOPPED) {
+    } else if (activeOpModeStatus === OpModeStatus.STOPPED || activeOpMode === STOP_OP_MODE_TAG) {
       return this.renderSetButton();
     }
   }
@@ -92,6 +93,7 @@ class HardwareConfigView extends Component<HardwareConfigViewProps, HardwareConf
       activeOpModeStatus,
       hardwareConfigList,
       currentHardwareConfig,
+      activeOpMode,
     } = this.props;
 
     if (!available) {
@@ -126,7 +128,7 @@ class HardwareConfigView extends Component<HardwareConfigViewProps, HardwareConf
             `}
             //value={this.state.selectedHardwareConfig}
             disabled={
-              activeOpModeStatus !== OpModeStatus.STOPPED
+              activeOpModeStatus !== OpModeStatus.STOPPED && activeOpMode !== STOP_OP_MODE_TAG
             }
             onChange={this.onChange}
             // This element is uncontrolled to be able to set a default option. I'm not sure if there's a better option here

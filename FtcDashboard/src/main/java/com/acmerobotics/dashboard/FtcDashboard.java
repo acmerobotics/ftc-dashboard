@@ -667,12 +667,14 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
                     activeOpMode.with(o -> {
                         // Don't allow changing the config unless stopped. Who knows what undefined behavior that would cause
-                       if(o.status != RobotStatus.OpModeStatus.STOPPED) return;
+                       if(o.status != RobotStatus.OpModeStatus.STOPPED &&
+                               !opModeManager.getActiveOpModeName().equals("$Stop$Robot$")) return;
 
                        hardwareConfigList.with(l -> {
                            hardwareConfigManager.setActiveConfig(false, l.get(hardwareConfigName));
                        });
                     });
+                    break;
                 }
                 default: {
                     Log.w(TAG, "Received unknown message of type " + msg.getType());
