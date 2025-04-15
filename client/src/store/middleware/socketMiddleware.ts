@@ -10,6 +10,7 @@ import {
   INIT_OP_MODE,
   RECEIVE_GAMEPAD_STATE,
   RECEIVE_ROBOT_STATUS,
+  SET_HARDWARE_CONFIG,
   START_OP_MODE,
   STOP_OP_MODE,
 } from '@/store/types';
@@ -65,6 +66,7 @@ const socketMiddleware: Middleware<Record<string, unknown>, RootState> =
       case 'GET_CONFIG':
       case INIT_OP_MODE:
       case START_OP_MODE:
+      case SET_HARDWARE_CONFIG:
       case STOP_OP_MODE: {
         if (socket !== undefined && socket.readyState === WebSocket.OPEN) {
           socket.send(JSON.stringify(action));

@@ -80,3 +80,12 @@ export type {
   TelemetryItem,
   ReceiveTelemetryAction,
 } from './telemetry';
+
+export { 
+  SET_HARDWARE_CONFIG, 
+  RECEIVE_HARDWARE_CONFIG_LIST, 
+} from './hardwareconfig';
+export type {
+  SetHardwareConfigAction,
+  ReceiveHardwareConfigListAction,
+} from './hardwareconfig';

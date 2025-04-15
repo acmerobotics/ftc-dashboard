@@ -114,6 +114,13 @@ const listContent = [
     customStyles: 'focus:ring-purple-600',
     iconBg: 'bg-purple-500',
   },
+  {
+    title: 'Hardware Config View',
+    view: ConfigurableView.HARDWARE_CONFIG_VIEW,
+    icon: <SettingsIcon className="h-5 w-5" />,
+    customStyles: 'focus:ring-teal-600',
+    iconBg: 'bg-teal-500',
+  },
 ];
 
 const ViewPicker = (props: ViewPickerProps) => {
