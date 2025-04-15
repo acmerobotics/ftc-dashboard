@@ -46,6 +46,8 @@ import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoWSD;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -674,6 +676,29 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                            hardwareConfigManager.setActiveConfig(false, l.get(hardwareConfigName));
                        });
                     });
+
+                    // Soft-restart to allow the new config to take effect
+                    // This is admittedly pretty sketchy so we'll do it in a try/catch
+                    try {
+                        // We can't just cast this to FtcRobotControllerActivity because that would create a dependency
+                        Activity robotControllerActivity = AppUtil.getInstance().getRootActivity();
+                        // When called, this method has the ability to perform a restart
+                        Method selectedMethod = robotControllerActivity.getClass().getMethod("onOptionsItemSelected", MenuItem.class);
+
+                        int id = robotControllerActivity.getResources().getIdentifier("action_restart_robot", "id", "com.qualcomm.ftcrobotcontroller");
+
+                        // Spoofs the MenuItem parameter to imitate a restart button-press
+                        MenuItem item = (MenuItem) Proxy.newProxyInstance(
+                                MenuItem.class.getClassLoader(),
+                                new Class<?>[] { MenuItem.class },
+                                (proxy, method, args) -> "getItemId".equals(method.getName()) ? id : null
+                        );
+
+                        selectedMethod.invoke(robotControllerActivity, item);
+                    } catch (Exception e){
+                        RobotLog.ww(TAG, "Something went wrong when reflecting to restart the robot.");
+                    }
+
                     break;
                 }
                 default: {
