@@ -67,6 +67,13 @@ public class TelemetryPacket {
     }
 
     /**
+     * Returns all telemetry within the log, sorted.
+     */
+    public Map<String, String> getAll(){
+        return data;
+    }
+
+    /**
      * Adds a line to the telemetry log.
      *
      * @param line

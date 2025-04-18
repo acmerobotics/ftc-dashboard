@@ -47,6 +47,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -207,6 +208,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     private TextView connectionStatusTextView;
     private LinearLayout parentLayout;
+
+    private boolean mirrorToDriverStation = true;
 
     private static class OpModeAndStatus {
         public OpMode opMode;
@@ -714,6 +717,15 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         updateStatusView();
     }
 
+    /**
+     * If true, data from sent telemetry packets will automatically be transmitted to the Driver
+     * Station. This transmission occurs even when the web interface is disabled, and respects set
+     * transmission intervals.
+     */
+    public void mirrorToDriverStation(boolean newValue){
+        mirrorToDriverStation = newValue;
+    }
+
     private void injectStatusView() {
         Activity activity = AppUtil.getInstance().getActivity();
 
@@ -975,18 +987,41 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * approximate period {@link #getTelemetryTransmissionInterval()}. Clients display the most
      * recent value received for each key, and the data is cleared upon op mode init or a call to
      * {@link #clearTelemetry()}.
+     * <br><br>
+     * Sent data will also be mirrored to the Driver Station unless {@link #mirrorToDriverStation(boolean)}
+     * is set to 'false'.
      *
      * @param telemetryPacket packet to send
      */
     public void sendTelemetryPacket(TelemetryPacket telemetryPacket) {
         core.sendTelemetryPacket(telemetryPacket);
+
+        if(!mirrorToDriverStation) return;
+        activeOpMode.with(o -> {
+            if(o.status == RobotStatus.OpModeStatus.STOPPED) return;
+
+            for (Map.Entry<String, String> entry: telemetryPacket.getAll().entrySet()){
+                o.opMode.telemetry.addData(entry.getKey(), entry.getValue());
+            }
+
+            o.opMode.telemetry.update();
+        });
     }
 
     /**
      * Clears telemetry data from all clients.
+     * <br><br>
+     * Data will also be cleared from the Driver Station unless {@link #mirrorToDriverStation(boolean)}
+     * is set to 'false'.
      */
     public void clearTelemetry() {
         core.clearTelemetry();
+
+        if(!mirrorToDriverStation) return;
+        activeOpMode.with(o -> {
+           if(o.status == RobotStatus.OpModeStatus.STOPPED) return;
+           o.opMode.telemetry.clear();
+        });
     }
 
     /**
@@ -1007,11 +1042,21 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     /**
      * Sets the telemetry transmission interval.
+     * <br><br>
+     * The interval will also be updated on the OpMode telemetry object unless
+     * {@link #mirrorToDriverStation(boolean)} is set to 'false'.
      *
      * @param newTransmissionInterval transmission interval in milliseconds
      */
     public void setTelemetryTransmissionInterval(int newTransmissionInterval) {
         core.setTelemetryTransmissionInterval(newTransmissionInterval);
+
+        if(!mirrorToDriverStation) return;
+        activeOpMode.with(o -> {
+            if (o.status == RobotStatus.OpModeStatus.STOPPED) return;
+
+            o.opMode.telemetry.setMsTransmissionInterval(newTransmissionInterval);
+        });
     }
 
     /**
@@ -1247,6 +1292,13 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             o.opMode = opMode;
             o.status = RobotStatus.OpModeStatus.RUNNING;
         });
+
+        if(!mirrorToDriverStation) return;
+        /*
+        This shouldn't be ran in PreInit because we need to provide the user the opportunity to
+        opt-out of DS mirroring in one OpMode after setting the interval in another.
+         */
+        opMode.telemetry.setMsTransmissionInterval(getTelemetryTransmissionInterval());
     }
 
     @Override
