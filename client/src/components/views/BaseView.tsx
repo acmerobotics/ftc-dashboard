@@ -13,10 +13,9 @@ const BaseView = forwardRef<
   <div
     ref={ref}
     className={clsx(
-      'flex h-full flex-col overflow-hidden bg-white bg-opacity-75 transition-shadow',
-      isUnlocked
-        ? 'select-none rounded-md bg-opacity-75 shadow-md dark:bg-slate-800'
-        : 'dark:bg-slate-900',
+      'flex h-full flex-col overflow-hidden bg-white transition-shadow',
+      isUnlocked ? 'select-none rounded-md shadow-md' : '',
+      'dark:bg-slate-900',
       className,
     )}
     {...props}
