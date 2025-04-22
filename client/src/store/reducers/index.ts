@@ -1,6 +1,7 @@
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
 import { Action, combineReducers } from 'redux';
 
+import replayReducer from './replay';
 import telemetryReducer from './telemetry';
 import socketReducer from './socket';
 import configReducer from './config';
@@ -12,6 +13,7 @@ import gamepadReducer from './gamepad';
 import { createDispatchHook } from 'react-redux';
 
 const rootReducer = combineReducers({
+  replay: replayReducer,
   telemetry: telemetryReducer,
   socket: socketReducer,
   config: configReducer,

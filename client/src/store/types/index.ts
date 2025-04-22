@@ -89,3 +89,6 @@ export type {
   TelemetryItem,
   ReceiveTelemetryAction,
 } from './telemetry';
+
+export { SET_REPLAY_OVERLAY } from './replay';
+export type { SetReplayOverlayAction } from './replay';
