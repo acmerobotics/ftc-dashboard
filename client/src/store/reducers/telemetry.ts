@@ -2,7 +2,7 @@ import {
   ReceiveTelemetryAction,
   RECEIVE_TELEMETRY,
   Telemetry,
-} from '@/store/types';
+} from '@/store/types/telemetry';
 
 const initialState: Telemetry = [
   {
@@ -25,6 +25,7 @@ const telemetryReducer = (
   switch (action.type) {
     case RECEIVE_TELEMETRY:
       return action.telemetry;
+
     default:
       return state;
   }

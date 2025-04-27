@@ -199,7 +199,10 @@ const LoggingView = ({
   }, [activeOpMode, activeOpModeStatus, isRecording, opModeList, telemetry]);
 
   useEffect(() => {
-    if (activeOpModeStatus === OpModeStatus.RUNNING && activeOpMode !== STOP_OP_MODE_TAG) {
+    if (
+      activeOpModeStatus === OpModeStatus.RUNNING &&
+      activeOpMode !== STOP_OP_MODE_TAG
+    ) {
       setCurrentOpModeName(activeOpMode ?? '');
     }
   }, [activeOpMode, activeOpModeStatus]);
@@ -319,7 +322,7 @@ const LoggingView = ({
               {getToolTipError()}
             </ToolTip>
           </button>
-          <div className="relative inline-block">
+          <div className="relative inline-block" style={{ zIndex: 99 }}>
             <button
               ref={keyShowingMenuButtonRef}
               className="icon-btn h-8 w-8"
@@ -340,10 +343,9 @@ const LoggingView = ({
             >
               <div
                 ref={keyShowingMenuRef}
-                className="absolute right-0 mt-2 origin-top-right rounded-md border border-gray-200 bg-white py-2 shadow-lg outline-none"
-                style={{ zIndex: 99 }}
+                className="absolute right-0 mt-2 origin-top-right rounded-md border border-gray-200 bg-white py-2 shadow-lg outline-none dark:bg-slate-700"
               >
-                <p className="mb-1 border-b border-gray-100 pb-1 pl-3 text-sm leading-5 text-gray-500">
+                <p className="mb-1 border-b border-gray-100 pb-1 pl-3 text-sm leading-5">
                   Toggle Items
                 </p>
                 <MenuItemSwitch

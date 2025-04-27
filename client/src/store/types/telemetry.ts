@@ -53,7 +53,7 @@ type Spline = {
   fy: number;
 };
 
-type DrawOp =
+export type DrawOp =
   | Fill
   | Stroke
   | StrokeWidth
@@ -81,3 +81,5 @@ export type ReceiveTelemetryAction = {
   type: typeof RECEIVE_TELEMETRY;
   telemetry: Telemetry;
 };
+
+export type TelemetryAction = ReceiveTelemetryAction;
