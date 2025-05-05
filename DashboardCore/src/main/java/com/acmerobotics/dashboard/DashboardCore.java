@@ -9,8 +9,10 @@ import com.acmerobotics.dashboard.message.Message;
 import com.acmerobotics.dashboard.message.MessageDeserializer;
 import com.acmerobotics.dashboard.message.MessageType;
 import com.acmerobotics.dashboard.message.redux.ReceiveConfig;
+import com.acmerobotics.dashboard.message.redux.ReceiveHardware;
 import com.acmerobotics.dashboard.message.redux.ReceiveTelemetry;
 import com.acmerobotics.dashboard.message.redux.SaveConfig;
+import com.acmerobotics.dashboard.message.redux.SaveHardware;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -39,6 +41,7 @@ public class DashboardCore {
     private volatile int telemetryTransmissionInterval = DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL;
 
     private final Mutex<CustomVariable> configRoot = new Mutex<>(new CustomVariable());
+    private final Mutex<CustomVariable> hardwareRoot = new Mutex<>(new CustomVariable());
 
     // NOTE: Helps to have this here for testing
     public static final Gson GSON = new GsonBuilder()
@@ -105,6 +108,9 @@ public class DashboardCore {
                 configRoot.with(v -> {
                     sendFun.send(new ReceiveConfig(v));
                 });
+                hardwareRoot.with(v -> {
+                    sendFun.send(new ReceiveHardware(v));
+                });
 
                 sockets.with(l -> {
                     l.add(sendFun);
@@ -142,6 +148,21 @@ public class DashboardCore {
 
                         return true;
                     }
+                    case GET_HARDWARE:
+                        hardwareRoot.with(v -> {
+                            sendFun.send(new ReceiveHardware(v));
+                        });
+                        return true;
+
+                    case SAVE_HARDWARE:
+                        withHardwareRoot(new CustomVariableConsumer() {
+                            @Override
+                            public void accept(CustomVariable hardwareRoot) {
+                                hardwareRoot.update(((SaveHardware) message).getHardwareDiff());
+                            }
+                        });
+                        return true;
+
                     default:
                         return false;
                 }
@@ -206,15 +227,6 @@ public class DashboardCore {
     }
 
     /**
-     * Sends updated configuration data to all instance clients.
-     */
-    public void updateConfig() {
-        configRoot.with(v -> {
-            sendAll(new ReceiveConfig(v));
-        });
-    }
-
-    /**
      * Executes {@param function} in an exclusive context for thread-safe config tree modification
      * and calls {@link #updateConfig()} to keep clients up to date.
      * <p>
@@ -264,6 +276,77 @@ public class DashboardCore {
                 v.removeVariable(category);
             }
             updateConfig();
+        });
+    }
+
+    /**
+     * Sends updated configuration data to all instance clients.
+     */
+    public void updateConfig() {
+        configRoot.with(v -> {
+            sendAll(new ReceiveConfig(v));
+        });
+    }
+
+    /**
+     * Executes {@param function} in an exclusive context for thread-safe config tree modification
+     * and calls {@link #updateConfig()} to keep clients up to date.
+     * <p>
+     * Do not leak the config tree outside the function.
+     *
+     * @param function
+     */
+    public void withHardwareRoot(CustomVariableConsumer function) {
+        hardwareRoot.with(function::accept);
+
+        updateHardware();
+    }
+
+    /**
+     * Add config variable with custom provider.
+     *
+     * @param category top-level category
+     * @param name     variable name
+     * @param provider getter/setter for the variable
+     * @param <T>      variable type
+     */
+    public <T> void addHardwareVariable(String category, String name, ValueProvider<T> provider) {
+        hardwareRoot.with(v -> {
+            CustomVariable catVar = (CustomVariable) v.getVariable(category);
+            if (catVar != null) {
+                catVar.putVariable(name, new BasicVariable<>(provider));
+            } else {
+                catVar = new CustomVariable();
+                catVar.putVariable(name, new BasicVariable<>(provider));
+                v.putVariable(category, catVar);
+            }
+            updateHardware();
+        });
+    }
+
+    /**
+     * Remove a config variable.
+     *
+     * @param category top-level category
+     * @param name     variable name
+     */
+    public void removeHardwareVariable(String category, String name) {
+        hardwareRoot.with(v -> {
+            CustomVariable catVar = (CustomVariable) v.getVariable(category);
+            catVar.removeVariable(name);
+            if (catVar.size() == 0) {
+                v.removeVariable(category);
+            }
+            updateHardware();
+        });
+    }
+
+    /**
+     * Sends updated configuration data to all instance clients.
+     */
+    public void updateHardware() {
+        hardwareRoot.with(v -> {
+            sendAll(new ReceiveHardware(v));
         });
     }
 
