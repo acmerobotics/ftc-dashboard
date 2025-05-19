@@ -22,17 +22,17 @@ Check out our [online documentation](https://acmerobotics.github.io/ftc-dashboar
 
 1. Open [`build.dependencies.gradle`](https://github.com/FIRST-Tech-Challenge/FtcRobotController/blob/master/build.dependencies.gradle)
 2. In the `repositories` section, add `maven { url = 'https://maven.brott.dev/' }`
-3. In the `dependencies` section, add `implementation 'com.acmerobotics.dashboard:dashboard:0.4.16'`
-
-    Please see [GitHub releases page](https://github.com/acmerobotics/ftc-dashboard/releases) for the latest version number
-
-4. If you’re using OpenRC or have non-standard SDK dependencies, add the following exclusion:
-
-    ```
-    implementation('com.acmerobotics.dashboard:dashboard:0.4.16') {
-      exclude group: 'org.firstinspires.ftc'
-    }
-    ```
+3. Add the dashboard implementation (see the [GitHub releases page](https://github.com/acmerobotics/ftc-dashboard/releases) for the latest version number):
+    - If you’re using a normal SDK setup, in the `dependencies` section, add the following:
+      ```gradle
+      implementation 'com.acmerobotics.dashboard:dashboard:0.4.16'
+      ```
+    - If you’re using OpenRC or have non-standard SDK dependencies, in the `dependencies` section, add the following:
+      ```gradle
+      implementation('com.acmerobotics.dashboard:dashboard:0.4.16') {
+        exclude group: 'org.firstinspires.ftc'
+      }
+      ```
 
 # Development
 
