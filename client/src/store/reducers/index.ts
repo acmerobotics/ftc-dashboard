@@ -5,6 +5,7 @@ import replayReducer from './replay';
 import telemetryReducer from './telemetry';
 import socketReducer from './socket';
 import configReducer from './config';
+import hardwareReducer from './hardware';
 import statusReducer from './status';
 import cameraReducer from './camera';
 import settingsReducer from './settings';
@@ -16,6 +17,7 @@ const rootReducer = combineReducers({
   telemetry: telemetryReducer,
   socket: socketReducer,
   config: configReducer,
+  hardware: hardwareReducer,
   status: statusReducer,
   camera: cameraReducer,
   settings: settingsReducer,

@@ -3,6 +3,7 @@ export enum ConfigurableView {
   GRAPH_VIEW,
   CONFIG_VIEW,
   TELEMETRY_VIEW,
+  HARDWARE_VIEW,
   RECORDER_VIEW,
   CAMERA_VIEW,
   OPMODE_VIEW,
