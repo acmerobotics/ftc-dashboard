@@ -8,6 +8,10 @@
  * However, gamepad-tester.com also has a number of variants that don't follow the naming scheme but still contain strings
  * in their ID's that correspond to the vendor/product ID for the Dualshocks
  * So it's probably best to identify by checking if PID/VID is in the gamepad.id
+ * 
+ * Dualsense (PS5) also reports itself as "Wireless Controller (STANDARD GAMEPAD Vendor: 054c Product: xxxx)"
+ * The product ID for the Dualsense is 0ce6 as reported by gamepad-tester.com and in the list above.
+ * The Dualsense controller can be treated the same as the Dualshock 4 controller as it has the same button layout.
  */
 
 import { Values } from '@/typeHelpers';
@@ -22,6 +26,7 @@ const GamepadType = {
 const SONY_VID = '054c';
 const DUALSHOCK_GEN_1_PID = '09cc';
 const DUALSHOCK_GEN_2_PID = '05c4';
+const DUALSENSE_PID = '0ce6';
 
 // https://github.com/OpenFTC/Extracted-RC/blob/6720cf8b4296c90b6ea4638752c2df4a52b043b9/Hardware/src/main/java/com/qualcomm/hardware/sony/SonyGamepadPS4.java#L145
 const ETPACK_VID = '7545';
@@ -38,7 +43,7 @@ export default {
     } else if (
       gamepad.id.search(SONY_VID) !== -1 &&
       gamepad.id.search(
-        new RegExp(`${DUALSHOCK_GEN_1_PID}|${DUALSHOCK_GEN_2_PID}`, 'i'),
+        new RegExp(`${DUALSHOCK_GEN_1_PID}|${DUALSHOCK_GEN_2_PID}|${DUALSENSE_PID}`, 'i'),
       ) !== -1
     ) {
       return GamepadType.SONY_DUALSHOCK_4;
