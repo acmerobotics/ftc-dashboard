@@ -63,6 +63,8 @@ const socketMiddleware: Middleware<Record<string, unknown>, RootState> =
       case GET_ROBOT_STATUS:
       case 'SAVE_CONFIG':
       case 'GET_CONFIG':
+      case 'SAVE_HARDWARE':
+      case 'GET_HARDWARE':
       case INIT_OP_MODE:
       case START_OP_MODE:
       case STOP_OP_MODE: {
