@@ -17,6 +17,8 @@ public class TestRobotConfigManager {
     }
 
     public void setHardwareConfig(String hardwareConfigName) {
-        if(testHardwareConfigs.contains(hardwareConfigName)) activeOpMode = hardwareConfigName;
+        if(testHardwareConfigs.contains(hardwareConfigName)) {
+            activeOpMode = hardwareConfigName;
+        }
     }
 }

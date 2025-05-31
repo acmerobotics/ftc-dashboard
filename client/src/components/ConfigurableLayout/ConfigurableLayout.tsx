@@ -23,6 +23,7 @@ import TelemetryView from '@/components/views/TelemetryView';
 import CameraView from '@/components/views/CameraView';
 import OpModeView from '@/components/views/OpModeView';
 import LoggingView from '@/components/views/LoggingView/LoggingView';
+import HardwareConfigView from '@/components/views/HardwareConfigView';
 
 import RadialFab from './RadialFab/RadialFab';
 import RadialFabChild from './RadialFab/RadialFabChild';
@@ -41,7 +42,6 @@ import CreateIconURL from '@/assets/icons/create.svg';
 
 import { colors } from '@/hooks/useTheme';
 import { useTheme } from '@/hooks/useTheme';
-import HardwareConfigView from '../views/HardwareConfigView';
 
 function maxArray(a: number[], b: number[]) {
   if (a.length !== b.length) {

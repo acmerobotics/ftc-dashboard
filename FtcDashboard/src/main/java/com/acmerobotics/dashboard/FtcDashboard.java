@@ -53,8 +53,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -217,7 +217,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private LinearLayout parentLayout;
 
     private RobotConfigFileManager hardwareConfigManager = new RobotConfigFileManager();
-    private final Mutex<Map<String, RobotConfigFile>> hardwareConfigList = new Mutex<>(new TreeMap<>());
+    private final Mutex<SortedMap<String, RobotConfigFile>> hardwareConfigList = new Mutex<>(new TreeMap<>());
 
     private static class OpModeAndStatus {
         public OpMode opMode;
@@ -670,7 +670,9 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                     activeOpMode.with(o -> {
                         // Don't allow changing the config unless stopped. Who knows what undefined behavior that would cause
                        if(o.status != RobotStatus.OpModeStatus.STOPPED &&
-                               !opModeManager.getActiveOpModeName().equals("$Stop$Robot$")) return;
+                               !opModeManager.getActiveOpModeName().equals(OpModeManager.DEFAULT_OP_MODE_NAME)) {
+                           return;
+                       }
 
                        hardwareConfigList.with(l -> {
                            hardwareConfigManager.setActiveConfig(false, l.get(hardwareConfigName));
