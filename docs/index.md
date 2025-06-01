@@ -11,7 +11,9 @@ layout: default
 * Camera streaming
 * Limited op mode controls and gamepad support
 
-![Dashboard screenshot](images/dashboard.png)
+|     Screenshot of custom layout     |        Screenshot with theme        |
+| :---------------------------------: | :---------------------------------: |
+| ![](images/readme-screenshot-2.jpg) | ![](images/readme-screenshot-1.jpg) |
 
 # Documentation
 
