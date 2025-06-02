@@ -97,7 +97,7 @@ class CustomVariable extends Component<Props, State> {
       <tr className="block">
         <td className="block">
           <div
-            className="option-header cursor-pointer py-1"
+            className="option-header cursor-pointer py-1 flex items-center"
             onClick={this.toggleVisibility}
           >
             <div
@@ -111,11 +111,12 @@ class CustomVariable extends Component<Props, State> {
               <ExpandedMoreIcon className="h-6 w-6" />
             </div>
             <div className="flex items-center justify-between">
-              <h3 className="select-none text-lg">{name}</h3>
+              <h3 className="select-none text-lg pr-1">{name}</h3>
             </div>
             <BaseViewIconButton
               title="Copy Config to Clipboard"
               onClick={copyConfig}
+              size={6}
             >
               <CopySVG className="h-6 w-6" />
             </BaseViewIconButton>
