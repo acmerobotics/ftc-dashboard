@@ -124,6 +124,21 @@ class HardwareConfigView extends Component<HardwareConfigViewProps, HardwareConf
           </BaseViewHeading>
         </div>
         <BaseViewBody>
+          <span
+            style={
+              this.state.selectedHardwareConfig === this.props.currentHardwareConfig
+                ? {
+                    userSelect: 'none',
+                    opacity: 0.0,
+                  }
+                : {
+                    userSelect: 'auto',
+                    opacity: 1.0,
+                  } 
+            }
+          >
+            *
+          </span>
           <select
             className={`
               m-1 mr-2 rounded border border-gray-300 bg-gray-200 p-1 pr-6 

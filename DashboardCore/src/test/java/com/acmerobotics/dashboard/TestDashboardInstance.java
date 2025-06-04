@@ -121,6 +121,13 @@ public class TestDashboardInstance {
                 case SET_HARDWARE_CONFIG:
                     SetHardwareConfig setHardwareConfig = (SetHardwareConfig) msg;
                     hardwareConfigManager.setHardwareConfig(setHardwareConfig.getHardwareConfigName());
+
+                    // In the testing instance we must resend this data manually or things will get out of sync.
+                    // In a live environment the restart will cause this data to be resent automatically.
+                    send(new ReceiveHardwareConfigList(
+                            hardwareConfigManager.getTestHardwareConfigs(),
+                            hardwareConfigManager.getActiveHardwareConfig()
+                    ));
                     break;
                 default:
                     System.out.println(msg.getType());
