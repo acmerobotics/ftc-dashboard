@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.util.Base64;
 import android.util.Log;
@@ -28,6 +29,7 @@ import com.acmerobotics.dashboard.message.redux.SetHardwareConfig;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.ftccommon.FtcEventLoop;
 import com.qualcomm.ftccommon.configuration.RobotConfigFile;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -46,8 +48,12 @@ import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoWSD;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.net.HttpURLConnection;
+import java.net.InetAddress;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -196,6 +202,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private Telemetry telemetry = new TelemetryAdapter();
 
     private ExecutorService cameraStreamExecutor;
+    private ExecutorService limelightCameraStreamExecutor;
     private int imageQuality = DEFAULT_IMAGE_QUALITY;
 
     // only modified inside withConfigRoot
@@ -525,6 +532,54 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             }
         }
     }
+
+    private class LimelightCameraStreamRunnable implements Runnable {
+        private HttpURLConnection limelightConnection;
+        private double maxFps;
+
+        private LimelightCameraStreamRunnable(String ipAddress, double maxFps) {
+            try {
+                this.limelightConnection = (HttpURLConnection) new URL("http://" + ipAddress + ":5802").openConnection();
+                limelightConnection.setRequestMethod("GET");
+                if (limelightConnection.getResponseCode() != 200) {
+                    throw new RuntimeException();
+                }
+            } catch (Exception e) {
+                RobotLog.ww(TAG, "Failed to connect to the Limelight camera stream.");
+                limelightConnection.disconnect();
+                Thread.currentThread().interrupt();
+            }
+            this.maxFps = maxFps;
+        }
+
+        @Override
+        public void run() {
+            while (!Thread.currentThread().isInterrupted()) {
+                try {
+                    final long timestamp = System.currentTimeMillis();
+
+                    if (core.clientCount() == 0) {
+                        Thread.sleep(250);
+                        continue;
+                    }
+
+                    sendAll(new ReceiveImage(bitmapToJpegString(BitmapFactory.decodeStream(limelightConnection.getInputStream()), imageQuality)));
+
+                    if (maxFps == 0) {
+                        continue;
+                    }
+
+                    long sleepTime = (long) (1000 / maxFps
+                            - (System.currentTimeMillis() - timestamp));
+                    Thread.sleep(Math.max(sleepTime, 0));
+                } catch (InterruptedException | IOException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            limelightConnection.disconnect();
+        }
+    }
+
 
     private static final Set<String> IGNORED_PACKAGES = new HashSet<>(Arrays.asList(
         "java",
@@ -1197,6 +1252,57 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         if (cameraStreamExecutor != null) {
             cameraStreamExecutor.shutdownNow();
             cameraStreamExecutor = null;
+        }
+    }
+
+    /**
+     * Sends a stream of camera frames from a Limelight3A camera at a regular interval.
+     *
+     * @param ipAddress the IP address of the Limelight
+     * @param maxFps maximum frames per second; 0 indicates unlimited
+     */
+    public void startLimelightCameraStream(String ipAddress, double maxFps) {
+        if (!core.enabled) {
+            return;
+        }
+
+        stopLimelightCameraStream();
+        stopCameraStream();
+
+        limelightCameraStreamExecutor = ThreadPool.newSingleThreadExecutor("limelight camera stream");
+        limelightCameraStreamExecutor.submit(new LimelightCameraStreamRunnable(ipAddress, maxFps));
+    }
+
+    /**
+     * Sends a stream of camera frames from a Limelight3A camera at a regular interval.
+     *
+     * @param limelight the Limelight object
+     * @param maxFps maximum frames per second; 0 indicates unlimited
+     */
+    public void startLimelightCameraStream(Limelight3A limelight, double maxFps) {
+        if (!core.enabled) {
+            return;
+        }
+
+        InetAddress address;
+        try {
+            Field f = limelight.getClass().getDeclaredField("inetAddress");
+            f.setAccessible(true);
+            address = (InetAddress) f.get(limelight);
+        } catch (Exception e) {
+            RobotLog.ww(TAG, "Failed to retrieve the inetAddress through reflection");
+            return;
+        }
+        startLimelightCameraStream(address.getHostAddress(), maxFps);
+    }
+
+    /**
+     * Stops the Limelight camera frame stream.
+     */
+    public void stopLimelightCameraStream() {
+        if (limelightCameraStreamExecutor != null) {
+            limelightCameraStreamExecutor.shutdownNow();
+            limelightCameraStreamExecutor = null;
         }
     }
 
