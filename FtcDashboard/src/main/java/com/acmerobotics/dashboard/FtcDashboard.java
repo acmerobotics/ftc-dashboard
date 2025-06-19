@@ -551,7 +551,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 }
                 byteStream = new BufferedInputStream(limelightConnection.getInputStream());
             } catch (Exception e) {
-                RobotLog.ww(TAG, "Failed to connect to the Limelight camera stream.");
+                RobotLog.ee(TAG, "Failed to connect to the Limelight camera stream.");
                 limelightConnection.disconnect();
                 limelightConnection = null;
             }
@@ -603,9 +603,10 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                     if(byteStream.read() != 0xFF || byteStream.read() != 0xD8) { // All JPEGs start with FFD8; quick sanity-check
                         RobotLog.ee(TAG, "Invalid/Unexpected Limelight JPEG data (failed at start); restarting stream");
                         byteStream.reset();
-                        limelightConnection.disconnect();
-                        restartStream(); // interrupts this thread and makes a new one
-                        return; // Can't just continue because it will parse binary data as headers next loop
+                        // Can't just continue because it will parse binary data as headers next loop
+                        // Instead, we'll live with the dropped frames and just restart the stream
+                        restartStream();
+                        return;
                     }
                     byteStream.reset();
 
@@ -651,8 +652,11 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             return buffer.toString(Charset.defaultCharset().name());
         }
 
-        private void restartStream() {
+        private void restartStream() throws InterruptedException {
+            limelightConnection.disconnect();
+            Thread.sleep(500);
             stopCameraStream();
+            Thread.interrupted(); // clear interrupt state
 
             cameraStreamExecutor = ThreadPool.newSingleThreadExecutor("camera stream");
             cameraStreamExecutor.submit(new LimelightCameraStreamRunnable(ipAddress, maxFps));
