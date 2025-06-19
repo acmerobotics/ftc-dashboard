@@ -29,7 +29,7 @@ import com.acmerobotics.dashboard.message.redux.SetHardwareConfig;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.ftccommon.FtcEventLoop;
 import com.qualcomm.ftccommon.configuration.RobotConfigFile;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
+//import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -46,14 +46,20 @@ import com.qualcomm.ftccommon.configuration.RobotConfigFileManager;
 import dalvik.system.DexFile;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoWSD;
+
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -535,25 +541,30 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     private class LimelightCameraStreamRunnable implements Runnable {
         private HttpURLConnection limelightConnection;
+        private BufferedInputStream byteStream;
         private double maxFps;
 
         private LimelightCameraStreamRunnable(String ipAddress, double maxFps) {
             try {
                 this.limelightConnection = (HttpURLConnection) new URL("http://" + ipAddress + ":5802").openConnection();
-                limelightConnection.setRequestMethod("GET");
+                limelightConnection.connect(); // limelight ip 192.168.43.207?
                 if (limelightConnection.getResponseCode() != 200) {
                     throw new RuntimeException();
                 }
+                byteStream = new BufferedInputStream(limelightConnection.getInputStream());
             } catch (Exception e) {
                 RobotLog.ww(TAG, "Failed to connect to the Limelight camera stream.");
                 limelightConnection.disconnect();
-                Thread.currentThread().interrupt();
+                limelightConnection = null;
             }
             this.maxFps = maxFps;
         }
 
         @Override
         public void run() {
+            if (limelightConnection == null) {
+                return;
+            }
             while (!Thread.currentThread().isInterrupted()) {
                 try {
                     final long timestamp = System.currentTimeMillis();
@@ -563,7 +574,51 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                         continue;
                     }
 
-                    sendAll(new ReceiveImage(bitmapToJpegString(BitmapFactory.decodeStream(limelightConnection.getInputStream()), imageQuality)));
+                    /*
+                     * MJPEG frame format reference: (note: newlines are 2 bytes, \r\n)
+                     * -boundarydonotcross
+                     * Content-Type: image/jpeg
+                     * Content-Length: 106747
+                     * X-Timestamp: 0.000000
+                     *
+                     * [Binary JPEG]
+                     */
+
+                    // Start of frame
+                    // Implementation note: Most sensible people would just use a BufferedReader here.
+                    // Unfortunately, using one will cause too many bytes to be swallowed, which we
+                    // cannot recover for the image data.
+                    // FYI: InputStreamReader is buffered behind-the-scenes. Ask me how I know and how long it took.
+                    byteStream.skip(64); // Go to the start of the Content-Length integer. 60 chars + 4 from 2x \r\n
+                    String num = readLine(byteStream); // Read the variable-length integer
+                    int length = Integer.parseInt(num);
+                    readLine(byteStream);
+                    readLine(byteStream); // Go to start of binary
+
+                    byteStream.mark(2);
+                    if(byteStream.read() != 0xFF || byteStream.read() != 0xD8) { // All JPEGs start with FFD8; quick sanity-check
+                        RobotLog.ww(TAG, "Invalid/Unexpected Limelight JPEG data (failed at start); skipping this frame.");
+                        continue; // fixme skips and then processes binary as text/numbers
+                    }
+                    byteStream.reset();
+
+                    // Get image data
+                    byte[] out = new byte[length];
+                    int sum = 0;
+                    while (sum < length){
+                        sum += byteStream.read(out, sum, length - sum); // read will read a maximum of 8192 bytes
+                        // I love that that fact isn't documented
+                    }
+
+                    // All JPEGs end with 0xFF and 0xD9.
+                    // Why not compare against those? Apparently when they go into the byte[] they
+                    // are registered as signed integers. No I don't know why. fixme later
+                    if (out[length - 2] != -1 || out[length - 1] != -39) {
+                        RobotLog.ww(TAG, "Invalid/Unexpected Limelight JPEG data (failed at end); skipping this frame.");
+                        continue; // fixme same as above
+                    }
+
+                    sendAll(new ReceiveImage(Base64.encodeToString(out, Base64.DEFAULT)));
 
                     if (maxFps == 0) {
                         continue;
@@ -578,6 +633,22 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             }
             limelightConnection.disconnect();
         }
+    }
+
+    private static String readLine(InputStream stream) throws IOException {
+        CharsetDecoder decoder = Charset.defaultCharset().newDecoder();
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        while(true) { // Read until \n
+            byte chr = (byte) stream.read();
+            if (chr == '\n') break;
+            if (chr != '\r') buffer.write(chr);
+        }
+
+        return decoder.decode(ByteBuffer.wrap(buffer.toByteArray())).toString();
+    }
+
+    private static char readChar(InputStream stream) {
+        return '\n';
     }
 
 
@@ -1279,7 +1350,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * @param limelight the Limelight object
      * @param maxFps maximum frames per second; 0 indicates unlimited
      */
-    public void startLimelightCameraStream(Limelight3A limelight, double maxFps) {
+    /*public void startLimelightCameraStream(Limelight3A limelight, double maxFps) {
         if (!core.enabled) {
             return;
         }
@@ -1294,7 +1365,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             return;
         }
         startLimelightCameraStream(address.getHostAddress(), maxFps);
-    }
+    }*/
 
     /**
      * Stops the Limelight camera frame stream.
