@@ -568,7 +568,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                     String altName = configClass.getAnnotation(Config.class).value();
 
                     // Special case for Kotlin companion objects
-                    if (configClass.getSimpleName().equals("Companion")) {
+                    if (configClass.getSimpleName().equals("Companion") && configClass.getEnclosingClass() != null) {
                         configClass = configClass.getEnclosingClass();
 
                         name = configClass.getSimpleName();
