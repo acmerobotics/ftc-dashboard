@@ -1339,7 +1339,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * Sends a stream of camera frames from a Limelight3A camera at a regular interval.
      *
      * @param limelight the Limelight object
-     * @param maxFps maximum frames per second; 0 indicates unlimited; -1 follows the camera's selected frame-rate
+     * @param maxFps maximum frames per second; 0 indicates unlimited
      */
     public void startCameraStream(Limelight3A limelight, double maxFps) {
         if (!core.enabled) {
