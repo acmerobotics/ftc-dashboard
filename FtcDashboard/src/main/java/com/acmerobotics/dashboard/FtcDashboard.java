@@ -37,6 +37,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpModeManager;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeManagerImpl;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeRegistrar;
 import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.qualcomm.robotcore.util.ThreadPool;
 import com.qualcomm.robotcore.util.WebHandlerManager;
@@ -539,6 +540,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         private BufferedInputStream byteStream;
         private double maxFps;
         private String ipAddress;
+        private ElapsedTime timeSinceLastFrame = new ElapsedTime();
         private int reinitCount = 0;
 
         private LimelightCameraStreamRunnable(String ipAddress, double maxFps) {
@@ -580,8 +582,6 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             }
             while (!Thread.currentThread().isInterrupted()) {
                 try {
-                    final long timestamp = System.currentTimeMillis();
-
                     if (core.clientCount() == 0) {
                         if (limelightConnection != null) { // Close connection to avoid backlog of frames
                             limelightConnection.disconnect();
@@ -656,15 +656,11 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                         }
                     }
 
-                    sendAll(new ReceiveImage(Base64.encodeToString(out, Base64.DEFAULT)));
-
-                    if (maxFps == 0) {
-                        continue;
+                    // Send only frames which won't exceed our max frame-rate
+                    if (maxFps == 0 || timeSinceLastFrame.milliseconds() > (1000 / maxFps)) {
+                        timeSinceLastFrame.reset();
+                        sendAll(new ReceiveImage(Base64.encodeToString(out, Base64.DEFAULT)));
                     }
-
-                    long sleepTime = (long) (1000 / maxFps
-                            - (System.currentTimeMillis() - timestamp));
-                    Thread.sleep(Math.max(sleepTime, 0));
                 } catch (InterruptedException | IOException e) {
                     Thread.currentThread().interrupt();
                 }
