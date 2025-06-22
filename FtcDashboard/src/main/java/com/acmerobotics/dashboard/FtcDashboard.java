@@ -583,8 +583,15 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                     final long timestamp = System.currentTimeMillis();
 
                     if (core.clientCount() == 0) {
+                        if (limelightConnection != null) { // Close connection to avoid backlog of frames
+                            limelightConnection.disconnect();
+                            limelightConnection = null;
+                            byteStream = null;
+                        }
                         Thread.sleep(250);
                         continue;
+                    } else if (limelightConnection == null) {
+                        initialize(); // Wake back up
                     }
 
                     /*
