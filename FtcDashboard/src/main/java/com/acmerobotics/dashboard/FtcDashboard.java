@@ -573,7 +573,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
                     /*
                      * MJPEG frame format reference: (note: newlines are 2 bytes, \r\n)
-                     * -boundarydonotcross
+                     * --boundarydonotcross
                      * Content-Type: image/jpeg
                      * Content-Length: 106747
                      * X-Timestamp: 0.000000
@@ -591,8 +591,10 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                      * into an endless void we can't retrieve from.
                      */
 
-                    byteStream.skip(64); // Go to the start of the Content-Length integer. 60 chars + 4 from 2x \r\n
-                    String num = readLine(byteStream); // Read the variable-length integer
+                    readLine(byteStream); // Skip useless headers
+                    readLine(byteStream);
+                    String contentLength = readLine(byteStream); // Get the Content-Length header.
+                    String num = contentLength.replaceAll("[^0-9]", ""); // Filter to the integer
                     int length = Integer.parseInt(num);
                     readLine(byteStream);
                     readLine(byteStream); // Go to start of binary
