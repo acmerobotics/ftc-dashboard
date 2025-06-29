@@ -541,7 +541,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         private double maxFps;
         private String ipAddress;
         private ElapsedTime timeSinceLastFrame = new ElapsedTime();
-        private int reinitCount = 0;
+        private int failureCount = 0;
 
         private LimelightCameraStreamRunnable(String ipAddress, double maxFps) {
             this.maxFps = maxFps;
@@ -550,12 +550,12 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
         private boolean initialize() {
             if (limelightConnection != null) { // Not our first initialization
-                reinitCount++;
+                failureCount++;
                 limelightConnection.disconnect();
                 limelightConnection = null; // Reset state
                 byteStream = null;
             }
-            if (reinitCount > 3) { // Something is very broken, this isn't going to work
+            if (failureCount > 3) { // Something is very broken, this isn't going to work
                 RobotLog.ee(TAG, "Limelight camera stream repeatedly failing; ending stream.");
                 return false;
             }
