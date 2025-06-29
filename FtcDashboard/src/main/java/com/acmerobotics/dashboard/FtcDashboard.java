@@ -595,6 +595,16 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                             return;
                         }
                     }
+                    /*
+                     * Limelights expose an MJPEG video-stream on port 5802. See this documentation:
+                     * https://github.com/LimelightVision/LimelightDocs/blob/master/docs/grip_software.rst
+                     *
+                     * Relevant excerpt:
+                     * "Limelight has an additional video stream on port 5802 which can be accessed
+                     * primarily for use with GRIP or other applications like it. This video stream
+                     * is uncompressed (or very lightly compressed) and has no cross-hair or other
+                     * overlays drawn on the image."
+                     */
 
                     /*
                      * MJPEG frame format reference: (note: newlines are 2 bytes, \r\n)
