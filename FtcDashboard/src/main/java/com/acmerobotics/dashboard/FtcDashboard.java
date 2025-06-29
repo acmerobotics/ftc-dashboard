@@ -625,7 +625,6 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                     byteStream.mark(2);
                     if(byteStream.read() != 0xFF || byteStream.read() != 0xD8) { // All JPEGs start with FFD8; quick sanity-check
                         RobotLog.ee(TAG, "Invalid/Unexpected Limelight JPEG data (failed at start); restarting stream");
-                        byteStream.reset();
                         // Can't just continue because it will parse binary data as headers next loop
                         // Instead, we'll live with the dropped frames and just restart the stream
                         initialize();
