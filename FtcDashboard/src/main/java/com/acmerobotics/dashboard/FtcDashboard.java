@@ -546,7 +546,6 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         private LimelightCameraStreamRunnable(String ipAddress, double maxFps) {
             this.maxFps = maxFps;
             this.ipAddress = ipAddress;
-            initialize();
         }
 
         private void initialize() {
@@ -577,6 +576,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
         @Override
         public void run() {
+            initialize();
             if (limelightConnection == null) {
                 return;
             }
