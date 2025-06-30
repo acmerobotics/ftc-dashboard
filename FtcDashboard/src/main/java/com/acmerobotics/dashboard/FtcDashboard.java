@@ -548,17 +548,10 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             this.ipAddress = ipAddress;
         }
 
+        /**
+         * @return true if the connection has been successfully established
+         */
         private boolean initialize() {
-            if (limelightConnection != null) { // Not our first initialization
-                failureCount++;
-                limelightConnection.disconnect();
-                limelightConnection = null; // Reset state
-                byteStream = null;
-            }
-            if (failureCount > 3) { // Something is very broken, this isn't going to work
-                RobotLog.ee(TAG, "Limelight camera stream repeatedly failing; ending stream.");
-                return false;
-            }
             try {
                 this.limelightConnection = (HttpURLConnection) new URL("http://" + ipAddress + ":5802").openConnection();
                 limelightConnection.connect();
@@ -575,24 +568,30 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             }
         }
 
+        private boolean needsInit = true;
         @Override
         public void run() {
-            if (!initialize()) { // Initialize returns true if everything is well
-                return;
-            }
             while (!Thread.currentThread().isInterrupted()) {
                 try {
                     if (core.clientCount() == 0) {
                         if (limelightConnection != null) { // Close connection to avoid backlog of frames
-                            limelightConnection.disconnect();
-                            limelightConnection = null;
-                            byteStream = null;
+                            reset(false);
                         }
                         Thread.sleep(250);
                         continue;
-                    } else if (limelightConnection == null) {
-                        if (!initialize()) { // Wake back up
+                    }
+
+                    if (needsInit) {
+                        if (failureCount > 3) { // Something is very broken, this isn't going to work
+                            RobotLog.ee(TAG, "Limelight camera stream repeatedly failing; ending stream.");
                             return;
+                        }
+                        if (initialize()) {
+                            needsInit = false; // Worked; done initializing
+                        } else {
+                            // Reset and try again (until we fail the check above)
+                            reset(true);
+                            continue;
                         }
                     }
                     /*
@@ -639,11 +638,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                         RobotLog.ee(TAG, "Invalid/Unexpected Limelight JPEG data (failed at start); restarting stream");
                         // Can't just continue because it will parse binary data as headers next loop
                         // Instead, we'll live with the dropped frames and just restart the stream
-                        if (initialize()) {
-                            continue;
-                        } else {
-                            return;
-                        }
+                        reset(true);
+                        continue;
                     }
                     byteStream.reset();
 
@@ -658,11 +654,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                     // All JPEGs end with 0xFF and 0xD9; sanity check.
                     if (out[length - 2] != (byte) 0xFF || out[length - 1] != (byte) 0xD9) {
                         RobotLog.ee(TAG, "Invalid/Unexpected Limelight JPEG data (failed at end); restarting stream.");
-                        if (initialize()) {
-                            continue;
-                        } else {
-                            return;
-                        }
+                        reset(true);
+                        continue;
                     }
 
                     // Send only frames which won't exceed our max frame-rate
@@ -674,7 +667,17 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                     Thread.currentThread().interrupt();
                 }
             }
+            reset(false); // Clean up resources
+        }
+
+        private void reset(boolean failure) {
+            if (failure) {
+                failureCount++;
+            }
             limelightConnection.disconnect();
+            limelightConnection = null; // Reset state
+            byteStream = null;
+            needsInit = true;
         }
 
         private String readLine(InputStream stream) throws IOException {
