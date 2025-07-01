@@ -1,6 +1,5 @@
 {
   "name": "ftc-dashboard",
-  "version": "0.4.16",
   "private": true,
   "dependencies": {
     "@headlessui/react": "^1.7.2",
