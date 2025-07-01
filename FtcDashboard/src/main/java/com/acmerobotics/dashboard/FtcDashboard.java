@@ -679,8 +679,10 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         private String readLine(InputStream stream) throws IOException {
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             while(true) { // Read until \n
-                byte chr = (byte) stream.read();
-                if (chr == '\n') break;
+                int raw = stream.read();
+                if (raw == -1) break; // End of stream
+                byte chr = (byte) raw;
+                if (chr == '\n') break; // End of line
                 if (chr != '\r') buffer.write(chr);
             }
 
