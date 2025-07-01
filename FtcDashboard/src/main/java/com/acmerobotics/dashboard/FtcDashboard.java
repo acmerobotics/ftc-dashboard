@@ -568,7 +568,6 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             }
         }
 
-        private boolean needsInit = true;
         @Override
         public void run() {
             while (!Thread.currentThread().isInterrupted()) {
@@ -581,14 +580,12 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                         continue;
                     }
 
-                    if (needsInit) {
+                    if (limelightConnection == null) {
                         if (failureCount > 3) { // Something is very broken, this isn't going to work
                             RobotLog.ee(TAG, "Limelight camera stream repeatedly failing; ending stream.");
                             return;
                         }
-                        if (initialize()) {
-                            needsInit = false; // Worked; done initializing
-                        } else {
+                        if (!initialize()) {
                             // Reset and try again (until we fail the check above)
                             reset(true);
                             continue;
@@ -677,7 +674,6 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             limelightConnection.disconnect();
             limelightConnection = null; // Reset state
             byteStream = null;
-            needsInit = true;
         }
 
         private String readLine(InputStream stream) throws IOException {
