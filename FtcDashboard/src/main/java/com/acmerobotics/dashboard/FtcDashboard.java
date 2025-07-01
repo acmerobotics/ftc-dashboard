@@ -574,7 +574,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 try {
                     if (core.clientCount() == 0) {
                         if (limelightConnection != null) { // Close connection to avoid backlog of frames
-                            reset(false);
+                            reset();
                         }
                         Thread.sleep(250);
                         continue;
@@ -587,7 +587,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                         }
                         if (!initialize()) {
                             // Reset and try again (until we fail the check above)
-                            reset(true);
+                            failureCount++;
+                            reset();
                             continue;
                         }
                     }
@@ -635,7 +636,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                         RobotLog.ee(TAG, "Invalid/Unexpected Limelight JPEG data (failed at start); restarting stream");
                         // Can't just continue because it will parse binary data as headers next loop
                         // Instead, we'll live with the dropped frames and just restart the stream
-                        reset(true);
+                        failureCount++;
+                        reset();
                         continue;
                     }
                     byteStream.reset();
@@ -651,7 +653,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                     // All JPEGs end with 0xFF and 0xD9; sanity check.
                     if (out[length - 2] != (byte) 0xFF || out[length - 1] != (byte) 0xD9) {
                         RobotLog.ee(TAG, "Invalid/Unexpected Limelight JPEG data (failed at end); restarting stream.");
-                        reset(true);
+                        failureCount++;
+                        reset();
                         continue;
                     }
 
@@ -664,13 +667,10 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                     Thread.currentThread().interrupt();
                 }
             }
-            reset(false); // Clean up resources
+            reset(); // Clean up resources
         }
 
-        private void reset(boolean failure) {
-            if (failure) {
-                failureCount++;
-            }
+        private void reset() {
             limelightConnection.disconnect();
             limelightConnection = null; // Reset state
             byteStream = null;
