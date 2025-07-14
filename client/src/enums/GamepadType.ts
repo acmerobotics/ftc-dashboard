@@ -20,6 +20,7 @@ const GamepadType = {
   LOGITECH_DUAL_ACTION: 'LOGITECH_DUAL_ACTION',
   XBOX_360: 'XBOX_360',
   SONY_DUALSHOCK_4: 'SONY_DUALSHOCK_4',
+  LOGITECH_F310: 'LOGITECH_F310',
   UNKNOWN: 'UNKNOWN',
 } as const;
 
@@ -53,6 +54,10 @@ export default {
       ) !== -1
     ) {
       return GamepadType.SONY_DUALSHOCK_4;
+    } else if(
+      gamepad.id.search("Logitech Gamepad F310") !== -1
+    ) {
+      return GamepadType.LOGITECH_F310;
     } else {
       return GamepadType.UNKNOWN;
     }
@@ -65,6 +70,8 @@ export default {
       case GamepadType.XBOX_360:
         return 0.15;
       case GamepadType.SONY_DUALSHOCK_4:
+        return 0.04;
+      case GamepadType.LOGITECH_F310:
         return 0.04;
       default:
         return 0.2;
