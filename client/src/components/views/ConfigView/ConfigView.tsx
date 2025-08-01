@@ -87,8 +87,10 @@ const ConfigView = ({
     return null;
   }
 
-  const HARDWARE_CATEGORY = "__hardware__";
-  const filteredKeys = Object.keys(rootValue).filter(key => key !== HARDWARE_CATEGORY);
+  const HARDWARE_CATEGORY = '__hardware__';
+  const filteredKeys = Object.keys(rootValue).filter(
+    (key) => key !== HARDWARE_CATEGORY,
+  );
   const sortedKeys = filteredKeys.sort();
 
   return (

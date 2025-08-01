@@ -15,13 +15,13 @@ import { ReactComponent as RefreshIcon } from '@/assets/icons/refresh.svg';
 
 import { RootState, useAppDispatch } from '@/store/reducers';
 import {
-  HardwareVar,
-  HardwareVarState,
+  ConfigVar,
+  ConfigVarState,
   CustomVarState,
-} from '@/store/types/hardware';
+} from '@/store/types/config';
 import { useEffect } from 'react';
 
-function validAndModified(state: HardwareVarState): HardwareVar | null {
+function validAndModified(state: ConfigVarState): ConfigVar | null {
   if (state.__type === 'custom') {
     const value = state.__value;
     if (value === null) {
@@ -79,14 +79,16 @@ const HardwareView = ({
 }: HardwareViewProps) => {
   const dispatch = useAppDispatch();
 
-  const HARDWARE_CATEGORY = "__hardware__";
+  const HARDWARE_CATEGORY = '__hardware__';
   const configRoot = useSelector(
     (state: RootState) => state.config.configRoot,
   ) as CustomVarState;
 
-  const hardwareRoot = configRoot.__value?.[HARDWARE_CATEGORY] as CustomVarState || {
+  const hardwareRoot = (configRoot.__value?.[
+    HARDWARE_CATEGORY
+  ] as CustomVarState) || {
     __type: 'custom' as const,
-    __value: null
+    __value: null,
   };
 
   const rootValue = hardwareRoot.__value;
@@ -109,7 +111,12 @@ const HardwareView = ({
               if (hardwareDiff != null) {
                 dispatch({
                   type: 'SAVE_CONFIG',
-                  hardwareDiff,
+                  configDiff: {
+                    __type: 'custom',
+                    __value: {
+                      [HARDWARE_CATEGORY]: hardwareDiff,
+                    },
+                  },
                 });
               }
             }}
@@ -141,25 +148,36 @@ const HardwareView = ({
                 onChange={(newState) =>
                   dispatch({
                     type: 'UPDATE_CONFIG',
-                    hardwareRoot: {
+                    configRoot: {
                       __type: 'custom',
-                      __value: sortedKeys.reduce(
-                        (acc, key2) => ({
-                          ...acc,
-                          [key2]: key === key2 ? newState : rootValue[key2],
-                        }),
-                        {},
-                      ),
+                      __value: {
+                        ...configRoot.__value,
+                        [HARDWARE_CATEGORY]: {
+                          __type: 'custom',
+                          __value: sortedKeys.reduce(
+                            (acc, key2) => ({
+                              ...acc,
+                              [key2]: key === key2 ? newState : rootValue[key2],
+                            }),
+                            {},
+                          ),
+                        },
+                      },
                     },
                   })
                 }
                 onSave={(variable) =>
                   dispatch({
                     type: 'SAVE_CONFIG',
-                    hardwareDiff: {
+                    configDiff: {
                       __type: 'custom',
                       __value: {
-                        [key]: variable,
+                        [HARDWARE_CATEGORY]: {
+                          __type: 'custom',
+                          __value: {
+                            [key]: variable,
+                          },
+                        },
                       },
                     },
                   })
