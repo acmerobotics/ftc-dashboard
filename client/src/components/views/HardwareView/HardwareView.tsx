@@ -79,11 +79,15 @@ const HardwareView = ({
 }: HardwareViewProps) => {
   const dispatch = useAppDispatch();
 
-  const hardwareRoot = useSelector(
-    (state: RootState) => state.hardware.hardwareRoot,
+  const HARDWARE_CATEGORY = "__hardware__";
+  const configRoot = useSelector(
+    (state: RootState) => state.config.configRoot,
   ) as CustomVarState;
 
-  console.log('hardwareRoot:', hardwareRoot);
+  const hardwareRoot = configRoot.__value?.[HARDWARE_CATEGORY] as CustomVarState || {
+    __type: 'custom' as const,
+    __value: null
+  };
 
   const rootValue = hardwareRoot.__value;
   if (rootValue === null) {
@@ -104,7 +108,7 @@ const HardwareView = ({
               const hardwareDiff = validAndModified(hardwareRoot);
               if (hardwareDiff != null) {
                 dispatch({
-                  type: 'SAVE_HARDWARE',
+                  type: 'SAVE_CONFIG',
                   hardwareDiff,
                 });
               }
@@ -116,7 +120,7 @@ const HardwareView = ({
             title="Reload Values"
             onClick={() =>
               dispatch({
-                type: 'REFRESH_HARDWARE',
+                type: 'REFRESH_CONFIG',
               })
             }
           >
@@ -136,7 +140,7 @@ const HardwareView = ({
                 state={rootValue[key] as CustomVarState}
                 onChange={(newState) =>
                   dispatch({
-                    type: 'UPDATE_HARDWARE',
+                    type: 'UPDATE_CONFIG',
                     hardwareRoot: {
                       __type: 'custom',
                       __value: sortedKeys.reduce(
@@ -151,7 +155,7 @@ const HardwareView = ({
                 }
                 onSave={(variable) =>
                   dispatch({
-                    type: 'SAVE_HARDWARE',
+                    type: 'SAVE_CONFIG',
                     hardwareDiff: {
                       __type: 'custom',
                       __value: {
