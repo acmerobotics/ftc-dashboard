@@ -24,6 +24,7 @@ import java.util.concurrent.Executors;
  * Main class for interacting with the instance.
  */
 public class DashboardCore {
+    private static final String HARDWARE_CATEGORY = "__hardware__";
     /*
      * Telemetry packets are batched for transmission and sent at this interval.
      */
@@ -206,15 +207,6 @@ public class DashboardCore {
     }
 
     /**
-     * Sends updated configuration data to all instance clients.
-     */
-    public void updateConfig() {
-        configRoot.with(v -> {
-            sendAll(new ReceiveConfig(v));
-        });
-    }
-
-    /**
      * Executes {@param function} in an exclusive context for thread-safe config tree modification
      * and calls {@link #updateConfig()} to keep clients up to date.
      * <p>
@@ -225,6 +217,18 @@ public class DashboardCore {
     public void withConfigRoot(CustomVariableConsumer function) {
         configRoot.with(function::accept);
 
+        updateConfig();
+    }
+
+    public void withHardwareVariables(CustomVariableConsumer function) {
+        configRoot.with(configRoot -> {
+            CustomVariable hardwareVar = (CustomVariable) configRoot.getVariable(HARDWARE_CATEGORY);
+            if (hardwareVar == null) {
+                hardwareVar = new CustomVariable();
+                configRoot.putVariable(HARDWARE_CATEGORY, hardwareVar);
+            }
+            function.accept(hardwareVar);
+        });
         updateConfig();
     }
 
@@ -264,6 +268,15 @@ public class DashboardCore {
                 v.removeVariable(category);
             }
             updateConfig();
+        });
+    }
+
+    /**
+     * Sends updated configuration data to all instance clients.
+     */
+    public void updateConfig() {
+        configRoot.with(v -> {
+            sendAll(new ReceiveConfig(v));
         });
     }
 

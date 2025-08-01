@@ -102,6 +102,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     private static FtcDashboard instance;
 
+    private boolean firstInit = true;
+
     @OpModeRegistrar
     public static void registerOpMode(OpModeManager manager) {
         if (instance != null && !suppressOpMode) {
@@ -1276,6 +1278,18 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     /**
+     * Executes {@param function} in an exclusive context for thread-safe hardware tree modification
+     * and calls updateConfig() to keep clients up to date.
+     *
+     * Hardware variables are stored as a special category under the config root.
+     *
+     * @param function custom variable consumer
+     */
+    public void withHardwareRoot(CustomVariableConsumer function) {
+        core.withHardwareVariables(function);
+    }
+
+    /**
      * Add config variable with custom provider that is automatically removed when op mode ends.
      *
      * @param category top-level category
@@ -1501,6 +1515,11 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     @Override
     public void onOpModePreInit(OpMode opMode) {
         activeOpMode.with(o -> {
+            if (firstInit) {
+                opModeManager.initOpMode("HardwareOpMode");
+                firstInit = false;
+            }
+
             o.opMode = opMode;
             o.status = RobotStatus.OpModeStatus.INIT;
         });
