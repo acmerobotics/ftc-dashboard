@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 
-import CustomVariable from '../ConfigView/CustomVariable';
+import CustomVariable from './ConfigView/CustomVariable';
 import BaseView, {
   BaseViewProps,
   BaseViewHeadingProps,
@@ -15,13 +15,12 @@ import { ReactComponent as RefreshIcon } from '@/assets/icons/refresh.svg';
 
 import { RootState, useAppDispatch } from '@/store/reducers';
 import {
-  HardwareVar,
-  HardwareVarState,
+  ConfigVar,
+  ConfigVarState,
   CustomVarState,
-} from '@/store/types/hardware';
-import { useEffect } from 'react';
+} from '@/store/types/config';
 
-function validAndModified(state: HardwareVarState): HardwareVar | null {
+function validAndModified(state: ConfigVarState): ConfigVar | null {
   if (state.__type === 'custom') {
     const value = state.__value;
     if (value === null) {
@@ -79,15 +78,28 @@ const HardwareView = ({
 }: HardwareViewProps) => {
   const dispatch = useAppDispatch();
 
-  const hardwareRoot = useSelector(
-    (state: RootState) => state.hardware.hardwareRoot,
+  const HARDWARE_CATEGORY = '__hardware__';
+  const configRoot = useSelector(
+    (state: RootState) => state.config.configRoot,
   ) as CustomVarState;
 
-  console.log('hardwareRoot:', hardwareRoot);
+  const hardwareRoot = (configRoot.__value?.[
+    HARDWARE_CATEGORY
+  ] as CustomVarState) || {
+    __type: 'custom' as const,
+    __value: null,
+  };
 
   const rootValue = hardwareRoot.__value;
   if (rootValue === null) {
-    return null;
+    return (
+      <BaseView isUnlocked={isUnlocked}>
+        <BaseViewHeading isDraggable={isDraggable}>Hardware</BaseViewHeading>
+        <BaseViewBody className="flex-center text-center text-white">
+          Run the Hardware op mode to get started
+        </BaseViewBody>
+      </BaseView>
+    );
   }
 
   const sortedKeys = Object.keys(rootValue);
@@ -104,8 +116,13 @@ const HardwareView = ({
               const hardwareDiff = validAndModified(hardwareRoot);
               if (hardwareDiff != null) {
                 dispatch({
-                  type: 'SAVE_HARDWARE',
-                  hardwareDiff,
+                  type: 'SAVE_CONFIG',
+                  configDiff: {
+                    __type: 'custom',
+                    __value: {
+                      [HARDWARE_CATEGORY]: hardwareDiff,
+                    },
+                  },
                 });
               }
             }}
@@ -116,7 +133,7 @@ const HardwareView = ({
             title="Reload Values"
             onClick={() =>
               dispatch({
-                type: 'REFRESH_HARDWARE',
+                type: 'REFRESH_CONFIG',
               })
             }
           >
@@ -136,26 +153,37 @@ const HardwareView = ({
                 state={rootValue[key] as CustomVarState}
                 onChange={(newState) =>
                   dispatch({
-                    type: 'UPDATE_HARDWARE',
-                    hardwareRoot: {
+                    type: 'UPDATE_CONFIG',
+                    configRoot: {
                       __type: 'custom',
-                      __value: sortedKeys.reduce(
-                        (acc, key2) => ({
-                          ...acc,
-                          [key2]: key === key2 ? newState : rootValue[key2],
-                        }),
-                        {},
-                      ),
+                      __value: {
+                        ...configRoot.__value,
+                        [HARDWARE_CATEGORY]: {
+                          __type: 'custom',
+                          __value: sortedKeys.reduce(
+                            (acc, key2) => ({
+                              ...acc,
+                              [key2]: key === key2 ? newState : rootValue[key2],
+                            }),
+                            {},
+                          ),
+                        },
+                      },
                     },
                   })
                 }
                 onSave={(variable) =>
                   dispatch({
-                    type: 'SAVE_HARDWARE',
-                    hardwareDiff: {
+                    type: 'SAVE_CONFIG',
+                    configDiff: {
                       __type: 'custom',
                       __value: {
-                        [key]: variable,
+                        [HARDWARE_CATEGORY]: {
+                          __type: 'custom',
+                          __value: {
+                            [key]: variable,
+                          },
+                        },
                       },
                     },
                   })

@@ -17,7 +17,6 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.config.ValueProvider;
 import com.acmerobotics.dashboard.config.reflection.ReflectionConfig;
 import com.acmerobotics.dashboard.config.variable.CustomVariable;
-import com.acmerobotics.dashboard.hardware.HardwareOpMode;
 import com.acmerobotics.dashboard.message.Message;
 import com.acmerobotics.dashboard.message.redux.InitOpMode;
 import com.acmerobotics.dashboard.message.redux.ReceiveGamepadState;
@@ -102,10 +101,6 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private static final String PREFS_AUTO_ENABLE_KEY = "autoEnable";
 
     private static FtcDashboard instance;
-
-    private boolean firstInit = true;
-    private HardwareOpMode hardwareOpMode;
-    private boolean enableDiagnostics = true;
 
     @OpModeRegistrar
     public static void registerOpMode(OpModeManager manager) {
@@ -194,7 +189,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      */
     public boolean isEnabled() { return core.enabled; }
 
-    public DashboardCore core = new DashboardCore();
+    private DashboardCore core = new DashboardCore();
 
     private NanoWSD server = new NanoWSD(8000) {
         @Override
@@ -914,7 +909,6 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         }
 
         injectStatusView();
-        enable();
     }
 
     private boolean getAutoEnable() {
@@ -1282,6 +1276,18 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     /**
+     * Executes {@param function} in an exclusive context for thread-safe hardware tree modification
+     * and calls updateConfig() to keep clients up to date.
+     *
+     * Hardware variables are stored as a special category under the config root.
+     *
+     * @param function custom variable consumer
+     */
+    public void withHardwareRoot(CustomVariableConsumer function) {
+        core.withHardwareVariables(function);
+    }
+
+    /**
      * Add config variable with custom provider that is automatically removed when op mode ends.
      *
      * @param category top-level category
@@ -1507,15 +1513,14 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     @Override
     public void onOpModePreInit(OpMode opMode) {
         activeOpMode.with(o -> {
-            if (firstInit) {
-                hardwareOpMode = new HardwareOpMode();
-                opModeManager.initOpMode("HardwareOpMode");
-                firstInit = false;
-            }
 
             o.opMode = opMode;
             o.status = RobotStatus.OpModeStatus.INIT;
         });
+
+        if (!(opMode instanceof OpModeManagerImpl.DefaultOpMode)) {
+            clearTelemetry();
+        }
     }
 
     @Override
@@ -1557,9 +1562,5 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         }).start();
 
         stopCameraStream();
-    }
-
-    public void toggleDiagnostics(boolean enabled) {
-        enableDiagnostics = enabled;
     }
 }

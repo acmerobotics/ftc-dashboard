@@ -3,9 +3,9 @@ package com.acmerobotics.dashboard.hardware;
 import static com.acmerobotics.dashboard.config.reflection.ReflectionConfig.createVariableFromValue;
 import static org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit.AMPS;
 
-import com.acmerobotics.dashboard.DashboardCore;
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.config.ValueProvider;
+import com.acmerobotics.dashboard.config.variable.BasicVariable;
 import com.acmerobotics.dashboard.config.variable.ConfigVariable;
 import com.acmerobotics.dashboard.config.variable.CustomVariable;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -15,22 +15,11 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareDevice;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@Config
 @TeleOp(name = "Hardware", group = "Dashboard")
 public class HardwareOpMode extends OpMode {
-    public static DcMotorEx.RunMode runMode = DcMotorEx.RunMode.RUN_WITHOUT_ENCODER;
-
-    private final DashboardCore core;
-    private final OpMode opMode;
-
-    public HardwareOpMode() {
-        this.core = FtcDashboard.getInstance().core;
-        this.opMode = this;
-    }
-
     @Override
     public void init() {
-        core.withHardwareRoot(hardwareRoot -> {
+        FtcDashboard.getInstance().withHardwareRoot(hardwareRoot -> {
             if (hardwareMapAvailable()) {
                 initHardware(hardwareRoot);
             }
@@ -39,7 +28,7 @@ public class HardwareOpMode extends OpMode {
 
     @Override
     public void init_loop() {
-        core.withHardwareRoot(hardwareRoot -> {
+        FtcDashboard.getInstance().withHardwareRoot(hardwareRoot -> {
             if (hardwareMapAvailable()) {
                 setHardware(hardwareRoot);
                 updateHardware(hardwareRoot);
@@ -50,7 +39,7 @@ public class HardwareOpMode extends OpMode {
 
     @Override
     public void loop() {
-        core.withHardwareRoot(hardwareRoot -> {
+        FtcDashboard.getInstance().withHardwareRoot(hardwareRoot -> {
             if (hardwareMapAvailable()) {
                 setHardware(hardwareRoot);
                 updateHardware(hardwareRoot);
@@ -62,7 +51,7 @@ public class HardwareOpMode extends OpMode {
      * Checks if hardwareMap is available.
      */
     private boolean hardwareMapAvailable() {
-        return opMode.hardwareMap != null;
+        return hardwareMap != null;
     }
 
     /**
@@ -110,7 +99,7 @@ public class HardwareOpMode extends OpMode {
 
     private void initializeMotorVariables(CustomVariable hardwareRoot) {
         CustomVariable motors = new CustomVariable();
-        for (DcMotorSimple motor : opMode.hardwareMap.getAll(DcMotorSimple.class)) {
+        for (DcMotorSimple motor : hardwareMap.getAll(DcMotorSimple.class)) {
             DcMotorEx motorEx = (DcMotorEx) motor;
             String deviceName = getDeviceName(motorEx);
             if (deviceName == null) continue;
@@ -126,10 +115,23 @@ public class HardwareOpMode extends OpMode {
         String connectionInfo = motor.getController().getConnectionInfo();
         String hubType = extractHubType(connectionInfo);
 
-        motorVar.putVariable("Power", createVariableFromValue(motor.getPower()));
+        motorVar.putVariable("Power", new BasicVariable<>(new ValueProvider<Double>() {
+            private double value = 0.0;
+
+            @Override
+            public Double get() {
+                return value;
+            }
+
+            @Override
+            public void set(Double newValue) {
+                this.value = newValue;
+                motor.setPower(newValue);
+            }
+        }));
         motorVar.putVariable("Current Position", createVariableFromValue(motor.getCurrentPosition()));
         motorVar.putVariable("Target Position", createVariableFromValue(motor.getTargetPosition()));
-        motorVar.putVariable("Run Mode", createVariableFromValue(runMode));
+        motorVar.putVariable("Run Mode", createVariableFromValue(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER));
         double current = Math.round(motor.getCurrent(AMPS) * 100) / 100.0;
         motorVar.putVariable("Current", createVariableFromValue(current));
         motorVar.putVariable(hubType + " Port", createVariableFromValue(motor.getPortNumber()));
@@ -140,7 +142,7 @@ public class HardwareOpMode extends OpMode {
     private void updateMotorsFromConfig(CustomVariable hardwareRoot) {
         CustomVariable motorsVar = (CustomVariable) hardwareRoot.getVariable("Motors");
         if (motorsVar != null) {
-            for (DcMotorSimple motor : opMode.hardwareMap.getAll(DcMotorSimple.class)) {
+            for (DcMotorSimple motor : hardwareMap.getAll(DcMotorSimple.class)) {
                 DcMotorEx motorEx = (DcMotorEx) motor;
                 String motorName = getDeviceName(motorEx);
                 if (motorName == null) continue;
@@ -157,11 +159,6 @@ public class HardwareOpMode extends OpMode {
         ConfigVariable<?> runModeVar = config.getVariable("Run Mode");
         motor.setMode((DcMotorEx.RunMode) runModeVar.getValue());
 
-        ConfigVariable<?> powerVar = config.getVariable("Power");
-        if (powerVar != null) {
-            motor.setPower((double) powerVar.getValue());
-        }
-
         ConfigVariable<?> targetPosVar = config.getVariable("Target Position");
         if (targetPosVar != null) {
             try {
@@ -176,7 +173,7 @@ public class HardwareOpMode extends OpMode {
         CustomVariable motorsVar = (CustomVariable) hardwareRoot.getVariable("Motors");
         if (motorsVar == null) return;
 
-        for (DcMotorSimple motor : opMode.hardwareMap.getAll(DcMotorSimple.class)) {
+        for (DcMotorSimple motor : hardwareMap.getAll(DcMotorSimple.class)) {
             DcMotorEx motorEx = (DcMotorEx) motor;
             String deviceName = getDeviceName(motorEx);
             if (deviceName == null) continue;
@@ -195,7 +192,7 @@ public class HardwareOpMode extends OpMode {
 
     private void initializeServoVariables(CustomVariable hardwareRoot) {
         CustomVariable servos = new CustomVariable();
-        for (Servo servo : opMode.hardwareMap.getAll(Servo.class)) {
+        for (Servo servo : hardwareMap.getAll(Servo.class)) {
             String deviceName = getDeviceName(servo);
             if (deviceName == null) continue;
 
@@ -219,7 +216,7 @@ public class HardwareOpMode extends OpMode {
     private void updateServosFromConfig(CustomVariable hardwareRoot) {
         CustomVariable servosVar = (CustomVariable) hardwareRoot.getVariable("Servos");
         if (servosVar != null) {
-            for (Servo servo : opMode.hardwareMap.getAll(Servo.class)) {
+            for (Servo servo : hardwareMap.getAll(Servo.class)) {
                 String servoName = getDeviceName(servo);
                 if (servoName == null) continue;
 
@@ -254,7 +251,7 @@ public class HardwareOpMode extends OpMode {
             if (!(device instanceof HardwareDevice)) {
                 return null;
             }
-            java.util.Set<String> names = opMode.hardwareMap.getNamesOf((HardwareDevice) device);
+            java.util.Set<String> names = hardwareMap.getNamesOf((HardwareDevice) device);
             if (!names.isEmpty()) {
                 return names.iterator().next();
             }

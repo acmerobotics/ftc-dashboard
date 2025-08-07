@@ -9,7 +9,7 @@ import CameraView from '@/components/views/CameraView';
 import GraphView from '@/components/views/GraphView/GraphView';
 import ConfigView from '@/components/views/ConfigView/ConfigView';
 import TelemetryView from '@/components/views/TelemetryView';
-import HardwareView from '@/components/views/HardwareView/HardwareView';
+import HardwareView from '@/components/views/HardwareView';
 import FieldView from '@/components/views/FieldView/FieldView';
 
 const LayoutPreset = {
