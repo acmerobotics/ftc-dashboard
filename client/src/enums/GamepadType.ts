@@ -18,7 +18,7 @@ import { Values } from '@/typeHelpers';
 
 const GamepadType = {
   LOGITECH_DUAL_ACTION: 'LOGITECH_DUAL_ACTION',
-  XBOX_360: 'XBOX_360',
+  STANDARD: 'STANDARD', // Standard as defined by W3C Gamepad spec (https://www.w3.org/TR/gamepad/#remapping)
   SONY_DUALSHOCK_4: 'SONY_DUALSHOCK_4',
   UNKNOWN: 'UNKNOWN',
 } as const;
@@ -38,8 +38,6 @@ export default {
   getFromGamepad: (gamepad: Gamepad) => {
     if (gamepad.id.search('Logitech Dual Action') !== -1) {
       return GamepadType.LOGITECH_DUAL_ACTION;
-    } else if (gamepad.id.search('Xbox 360') !== -1) {
-      return GamepadType.XBOX_360;
     } else if (
       gamepad.id.search(SONY_VID) !== -1 &&
       gamepad.id.search(
@@ -53,6 +51,10 @@ export default {
       ) !== -1
     ) {
       return GamepadType.SONY_DUALSHOCK_4;
+    } else if (gamepad.mapping.search('standard') !== -1 
+      || gamepad.id.search('Xbox 360') !== -1
+      || gamepad.id.toLowerCase().search('xinput') !== -1) {
+      return GamepadType.STANDARD;
     } else {
       return GamepadType.UNKNOWN;
     }
@@ -62,7 +64,7 @@ export default {
     switch (gamepadType) {
       case GamepadType.LOGITECH_DUAL_ACTION:
         return 0.06;
-      case GamepadType.XBOX_360:
+      case GamepadType.STANDARD:
         return 0.15;
       case GamepadType.SONY_DUALSHOCK_4:
         return 0.04;
