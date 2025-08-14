@@ -207,6 +207,15 @@ public class DashboardCore {
     }
 
     /**
+     * Sends updated configuration data to all instance clients.
+     */
+    public void updateConfig() {
+        configRoot.with(v -> {
+            sendAll(new ReceiveConfig(v));
+        });
+    }
+
+    /**
      * Executes {@param function} in an exclusive context for thread-safe config tree modification
      * and calls {@link #updateConfig()} to keep clients up to date.
      * <p>
@@ -268,15 +277,6 @@ public class DashboardCore {
                 v.removeVariable(category);
             }
             updateConfig();
-        });
-    }
-
-    /**
-     * Sends updated configuration data to all instance clients.
-     */
-    public void updateConfig() {
-        configRoot.with(v -> {
-            sendAll(new ReceiveConfig(v));
         });
     }
 

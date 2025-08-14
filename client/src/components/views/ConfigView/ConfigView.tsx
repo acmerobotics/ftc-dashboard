@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 
-import CustomVariable from '../ConfigView/CustomVariable';
+import CustomVariable from './CustomVariable';
 import BaseView, {
   BaseViewProps,
   BaseViewHeadingProps,
@@ -91,7 +91,8 @@ const ConfigView = ({
   const filteredKeys = Object.keys(rootValue).filter(
     (key) => key !== HARDWARE_CATEGORY,
   );
-  const sortedKeys = filteredKeys.sort();
+  const sortedKeys = filteredKeys;
+  sortedKeys.sort();
 
   return (
     <BaseView isUnlocked={isUnlocked}>

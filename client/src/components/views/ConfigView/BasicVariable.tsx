@@ -69,7 +69,7 @@ class BasicVariable extends React.Component<Props> {
               id={path}
               value={state.__newValue as number | string}
               valid={state.__valid}
-              validate={validateDouble}
+              validate={validateInt}
               onChange={
                 name === 'Current Position' ||
                 name === 'Control Hub Port' ||
