@@ -119,8 +119,8 @@ const listContent = [
     title: 'Hardware View',
     view: ConfigurableView.HARDWARE_VIEW,
     icon: <HardwareIcon className="h-6 w-6" />,
-    customStyles: 'focus:ring-teal-600',
-    iconBg: 'bg-teal-500',
+    customStyles: 'focus:ring-indigo-600',
+    iconBg: 'bg-indigo-500',
   },
   {
     title: 'Recorder View',

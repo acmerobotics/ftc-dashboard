@@ -1513,7 +1513,6 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     @Override
     public void onOpModePreInit(OpMode opMode) {
         activeOpMode.with(o -> {
-
             o.opMode = opMode;
             o.status = RobotStatus.OpModeStatus.INIT;
         });
