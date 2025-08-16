@@ -1276,6 +1276,18 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     /**
+     * Executes {@param function} in an exclusive context for thread-safe hardware tree modification
+     * and calls updateConfig() to keep clients up to date.
+     *
+     * Hardware variables are stored as a special category under the config root.
+     *
+     * @param function custom variable consumer
+     */
+    public void withHardwareRoot(CustomVariableConsumer function) {
+        core.withHardwareVariables(function);
+    }
+
+    /**
      * Add config variable with custom provider that is automatically removed when op mode ends.
      *
      * @param category top-level category
