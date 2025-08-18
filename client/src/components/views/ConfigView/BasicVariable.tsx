@@ -56,7 +56,6 @@ class BasicVariable extends React.Component<Props> {
 
     let input;
 
-    const noop = () => {};
     const isReadonly = (state as any).__type === 'readonly_string';
 
     if (state.__newValue === null) {
