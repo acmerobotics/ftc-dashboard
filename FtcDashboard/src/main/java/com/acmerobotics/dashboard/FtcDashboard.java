@@ -1420,35 +1420,40 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     public static void copyIntoSdkGamepad(ReceiveGamepadState.Gamepad src, Gamepad dst) {
-        dst.left_stick_x = src.left_stick_x;
-        dst.left_stick_y = src.left_stick_y;
-        dst.right_stick_x = src.right_stick_x;
-        dst.right_stick_y = src.right_stick_y;
+        // We need to copy from an intermediate so the SDK can handle the rising/falling edge detection
+        // Also, doing it like this means the SDK handles equivalencies between
+        // standard and Playstation buttons (i.e. converting A -> Cross and vice versa)
+        Gamepad intermediate = new Gamepad();
+        intermediate.left_stick_x = src.left_stick_x;
+        intermediate.left_stick_y = src.left_stick_y;
+        intermediate.right_stick_x = src.right_stick_x;
+        intermediate.right_stick_y = src.right_stick_y;
 
-        dst.dpad_up = src.dpad_up;
-        dst.dpad_down = src.dpad_down;
-        dst.dpad_left = src.dpad_left;
-        dst.dpad_right = src.dpad_right;
+        intermediate.dpad_up = src.dpad_up;
+        intermediate.dpad_down = src.dpad_down;
+        intermediate.dpad_left = src.dpad_left;
+        intermediate.dpad_right = src.dpad_right;
 
-        dst.a = src.a;
-        dst.b = src.b;
-        dst.x = src.x;
-        dst.y = src.y;
+        intermediate.a = src.a;
+        intermediate.b = src.b;
+        intermediate.x = src.x;
+        intermediate.y = src.y;
 
-        dst.guide = src.guide;
-        dst.start = src.start;
-        dst.back = src.back;
+        intermediate.guide = src.guide;
+        intermediate.start = src.start;
+        intermediate.back = src.back;
 
-        dst.left_bumper = src.left_bumper;
-        dst.right_bumper = src.right_bumper;
+        intermediate.left_bumper = src.left_bumper;
+        intermediate.right_bumper = src.right_bumper;
 
-        dst.left_stick_button = src.left_stick_button;
-        dst.right_stick_button = src.right_stick_button;
+        intermediate.left_stick_button = src.left_stick_button;
+        intermediate.right_stick_button = src.right_stick_button;
 
-        dst.left_trigger = src.left_trigger;
-        dst.right_trigger = src.right_trigger;
+        intermediate.left_trigger = src.left_trigger;
+        intermediate.right_trigger = src.right_trigger;
 
-        dst.touchpad = src.touchpad;
+        intermediate.touchpad = src.touchpad;
+        dst.copy(intermediate);
     }
 
     private void updateGamepads(ReceiveGamepadState.Gamepad gamepad1,
