@@ -110,16 +110,18 @@ const extractGamepadState = (gamepad: Gamepad) => {
         left_trigger: gamepad.buttons[6].value,
         right_trigger: gamepad.buttons[7].value,
       };
-    case GamepadType.XBOX_360:
+    case GamepadType.STANDARD:
       return {
         // same as SONY_DUALSHOCK_4 except guide and touchpad buttons
-        // tested with generic controller id='Xbox 360 Controller (XInput STANDARD GAMEPAD)' and mapping='standard'
-        // on Win10/Chrome v88 and Edge v87
-        // USB ID=24C6, PID=530A
+        // tested with generic controller reported by Chromium-based as
+        // id='Xbox 360 Controller (XInput STANDARD GAMEPAD)' and mapping='standard'
+        // on Firefox reports as id='xinput' and mapping='standard'
+        // tested on Win11/Chrome v138, Edge v139, Firefox v135
+        // USB ID=24C6, PID=543A
         left_stick_x: cleanMotionValues(gamepad.axes[0]),
         left_stick_y: cleanMotionValues(gamepad.axes[1]),
-        right_stick_x: cleanMotionValues(gamepad.axes[3]),
-        right_stick_y: cleanMotionValues(gamepad.axes[4]),
+        right_stick_x: cleanMotionValues(gamepad.axes[2]),
+        right_stick_y: cleanMotionValues(gamepad.axes[3]),
 
         dpad_up: gamepad.buttons[12].pressed,
         dpad_down: gamepad.buttons[13].pressed,
