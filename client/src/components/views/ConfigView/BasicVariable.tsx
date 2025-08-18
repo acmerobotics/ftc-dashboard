@@ -57,6 +57,7 @@ class BasicVariable extends React.Component<Props> {
     let input;
 
     const noop = () => {};
+    const isReadonly = (state as any).__type === 'readonly_string';
 
     if (state.__newValue === null) {
       input = <p>null</p>;
@@ -70,25 +71,8 @@ class BasicVariable extends React.Component<Props> {
               value={state.__newValue as number | string}
               valid={state.__valid}
               validate={validateInt}
-              onChange={
-                name === 'Current Position' ||
-                name === 'Control Hub Port' ||
-                name === 'Expansion Hub Port'
-                  ? noop
-                  : onChange
-              }
-              onSave={
-                name === 'Current Position' ||
-                name === 'Control Hub Port' ||
-                name === 'Expansion Hub Port'
-                  ? noop
-                  : onSave
-              }
-              readOnly={
-                name === 'Current Position' ||
-                name === 'Control Hub Port' ||
-                name === 'Expansion Hub Port'
-              }
+              onChange={onChange}
+              onSave={onSave}
             />
           );
           break;
@@ -109,9 +93,8 @@ class BasicVariable extends React.Component<Props> {
                   value={state.__newValue as number | string}
                   valid={state.__valid}
                   validate={validateDouble}
-                  onChange={name === 'Current' ? noop : onChange}
-                  onSave={name === 'Current' ? noop : onSave}
-                  readOnly={name === 'Current'}
+                  onChange={onChange}
+                  onSave={onSave}
                 />
                 {state.__valid && (
                   <p
@@ -136,6 +119,19 @@ class BasicVariable extends React.Component<Props> {
               validate={validateString}
               onChange={onChange}
               onSave={onSave}
+            />
+          );
+          break;
+        case 'readonly_string':
+          input = (
+            <TextInput
+              id={path}
+              value={state.__newValue as number | string}
+              valid={state.__valid}
+              validate={validateString}
+              onChange={onChange}
+              onSave={onSave}
+              readOnly={isReadonly}
             />
           );
           break;

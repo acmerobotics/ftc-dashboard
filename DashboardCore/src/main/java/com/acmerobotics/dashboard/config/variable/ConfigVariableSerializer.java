@@ -7,6 +7,7 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import java.lang.reflect.Type;
+import java.lang.reflect.Field;
 
 public class ConfigVariableSerializer implements JsonSerializer<ConfigVariable<?>> {
     @Override
@@ -35,6 +36,17 @@ public class ConfigVariableSerializer implements JsonSerializer<ConfigVariable<?
                 value.getClass().getName()));
             JsonArray values = new JsonArray();
             for (Object o : value.getClass().getEnumConstants()) {
+                try {
+                    Enum<?> e = (Enum<?>) o;
+                    String enumName = e.name();
+                    Field f = value.getClass().getField(enumName);
+                    if (f.isAnnotationPresent(Deprecated.class)) {
+                        continue;
+                    }
+                } catch (NoSuchFieldException | SecurityException ignored) {
+                    
+                }
+
                 values.add(o.toString());
             }
             obj.add(ConfigVariable.ENUM_VALUES_KEY, values);

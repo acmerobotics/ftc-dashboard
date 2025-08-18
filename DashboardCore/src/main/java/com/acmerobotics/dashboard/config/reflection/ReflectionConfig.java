@@ -130,8 +130,4 @@ public class ReflectionConfig {
                     fieldClass.getName());
         }
     }
-
-    public static <T> ConfigVariable<T> createVariableFromValue(T value) {
-        return new BasicVariable<>(new VariableProvider<>(value));
-    }
 }

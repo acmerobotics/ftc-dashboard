@@ -14,6 +14,7 @@ import { ReactComponent as SaveIcon } from '@/assets/icons/save.svg';
 import { ReactComponent as RefreshIcon } from '@/assets/icons/refresh.svg';
 
 import { RootState, useAppDispatch } from '@/store/reducers';
+import { HARDWARE_CATEGORY } from '@/store/reducers/config';
 import {
   ConfigVar,
   ConfigVarState,
@@ -78,7 +79,6 @@ const HardwareView = ({
 }: HardwareViewProps) => {
   const dispatch = useAppDispatch();
 
-  const HARDWARE_CATEGORY = '__hardware__';
   const configRoot = useSelector(
     (state: RootState) => state.config.configRoot,
   ) as CustomVarState;

@@ -8,6 +8,8 @@ import {
   UpdateConfigAction,
 } from '@/store/types/config';
 
+export const HARDWARE_CATEGORY = '__hardware__';
+
 function inflate(v: ConfigVar): ConfigVarState {
   if (v.__type === 'custom') {
     const value = v.__value;
