@@ -1,28 +1,32 @@
-import { RECEIVE_HARDWARE_CONFIG_LIST, ReceiveHardwareConfigListAction } from "@/store/types"
-import { HardwareConfigState } from "../types/hardwareconfig";
+import {
+  RECEIVE_HARDWARE_CONFIG_LIST,
+  ReceiveHardwareConfigListAction,
+} from '@/store/types';
+import { HardwareConfigState } from '@/store/types/hardwareconfig';
 
 const initialState: HardwareConfigState = {
-    hardwareConfigList: [],
-    currentHardwareConfig: '',
-}
+  hardwareConfigList: [],
+  hardwareConfigFiles: [],
+  currentHardwareConfig: '',
+};
 
 const hardwareConfigReducer = (
-    state = initialState,
-    action: 
-      | ReceiveHardwareConfigListAction,
+  state = initialState,
+  action: ReceiveHardwareConfigListAction,
 ) => {
-    switch (action.type) {
-        case RECEIVE_HARDWARE_CONFIG_LIST: {
-            return {
-                ...state,
-                hardwareConfigList: action.hardwareConfigList,
-                currentHardwareConfig: action.currentHardwareConfig,
-            };
-        }
-        default: {
-            return state;
-        }
+  switch (action.type) {
+    case RECEIVE_HARDWARE_CONFIG_LIST: {
+      return {
+        ...state,
+        hardwareConfigList: action.hardwareConfigList,
+        hardwareConfigFiles: action.hardwareConfigFiles,
+        currentHardwareConfig: action.currentHardwareConfig,
+      };
     }
-}
+    default: {
+      return state;
+    }
+  }
+};
 
 export default hardwareConfigReducer;

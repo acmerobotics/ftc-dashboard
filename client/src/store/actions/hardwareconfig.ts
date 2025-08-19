@@ -1,16 +1,44 @@
-import { RECEIVE_HARDWARE_CONFIG_LIST, SET_HARDWARE_CONFIG, SetHardwareConfigAction, ReceiveHardwareConfigListAction } from "../types/hardwareconfig";
+import {
+  RECEIVE_HARDWARE_CONFIG_LIST,
+  SET_HARDWARE_CONFIG,
+  WRITE_HARDWARE_CONFIG,
+  DELETE_HARDWARE_CONFIG,
+  DeleteHardwareConfigAction,
+  SetHardwareConfigAction,
+  WriteHardwareConfigAction,
+  ReceiveHardwareConfigListAction,
+} from '@/store/types/hardwareconfig';
 
-export const setHardwareConfig = (hardwareConfigName: string): SetHardwareConfigAction => ({
-    type: SET_HARDWARE_CONFIG,
-    hardwareConfigName,
+export const setHardwareConfig = (
+  hardwareConfigName: string,
+): SetHardwareConfigAction => ({
+  type: SET_HARDWARE_CONFIG,
+  hardwareConfigName,
+});
+
+export const writeHardwareConfig = (
+  hardwareConfigName: string,
+  hardwareConfigContents: string,
+): WriteHardwareConfigAction => ({
+  type: WRITE_HARDWARE_CONFIG,
+  hardwareConfigName,
+  hardwareConfigContents,
+});
+
+export const deleteHardwareConfig = (
+  hardwareConfigName: string,
+): DeleteHardwareConfigAction => ({
+  type: DELETE_HARDWARE_CONFIG,
+  hardwareConfigName,
 });
 
 export const receiveHardwareConfigList = (
-    hardwareConfigList: string[],
-    currentHardwareConfig: string,
+  hardwareConfigList: string[],
+  hardwareConfigFiles: string[],
+  currentHardwareConfig: string,
 ): ReceiveHardwareConfigListAction => ({
-    type: RECEIVE_HARDWARE_CONFIG_LIST,
-    hardwareConfigList,
-    currentHardwareConfig,
-}
-)
+  type: RECEIVE_HARDWARE_CONFIG_LIST,
+  hardwareConfigList,
+  hardwareConfigFiles,
+  currentHardwareConfig,
+});
