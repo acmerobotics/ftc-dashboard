@@ -9,6 +9,7 @@ import com.acmerobotics.dashboard.message.Message;
 import com.acmerobotics.dashboard.message.MessageDeserializer;
 import com.acmerobotics.dashboard.message.MessageType;
 import com.acmerobotics.dashboard.message.redux.ReceiveConfig;
+import com.acmerobotics.dashboard.message.redux.ReceiveConfigBaseline;
 import com.acmerobotics.dashboard.message.redux.ReceiveTelemetry;
 import com.acmerobotics.dashboard.message.redux.SaveConfig;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
@@ -39,6 +40,7 @@ public class DashboardCore {
     private volatile int telemetryTransmissionInterval = DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL;
 
     private final Mutex<CustomVariable> configRoot = new Mutex<>(new CustomVariable());
+    private final Mutex<CustomVariable> configBaseline = new Mutex<>(new CustomVariable());
 
     // NOTE: Helps to have this here for testing
     public static final Gson GSON = new GsonBuilder()
@@ -49,6 +51,15 @@ public class DashboardCore {
         .registerTypeAdapter(CustomVariable.class, new ConfigVariableDeserializer())
         .serializeNulls()
         .create();
+
+    /**
+     * Creates a deep copy of a CustomVariable by serializing and deserializing it.
+     * This ensures we capture the current state of all configuration values.
+     */
+    private CustomVariable deepCopyConfig(CustomVariable original) {
+        String json = GSON.toJson(original);
+        return GSON.fromJson(json, CustomVariable.class);
+    }
 
     private class TelemetryUpdateRunnable implements Runnable {
         @Override
@@ -105,6 +116,10 @@ public class DashboardCore {
                 configRoot.with(v -> {
                     sendFun.send(new ReceiveConfig(v));
                 });
+                
+                configBaseline.with(v -> {
+                    sendFun.send(new ReceiveConfigBaseline(v));
+                });
 
                 sockets.with(l -> {
                     l.add(sendFun);
@@ -129,6 +144,12 @@ public class DashboardCore {
                     case GET_CONFIG: {
                         configRoot.with(v -> {
                             sendFun.send(new ReceiveConfig(v));
+                        });
+                        return true;
+                    }
+                    case GET_CONFIG_BASELINE: {
+                        configBaseline.with(v -> {
+                            sendFun.send(new ReceiveConfigBaseline(v));
                         });
                         return true;
                     }
@@ -246,6 +267,24 @@ public class DashboardCore {
                 catVar.putVariable(name, new BasicVariable<>(provider));
                 v.putVariable(category, catVar);
             }
+            
+            // Update baseline with current configuration state if this is the first time we're adding this variable
+            configBaseline.with(baseline -> {
+                CustomVariable baselineCatVar = (CustomVariable) baseline.getVariable(category);
+                if (baselineCatVar == null || baselineCatVar.getVariable(name) == null) {
+                    // Capture the current state as baseline
+                    CustomVariable currentSnapshot = deepCopyConfig(v);
+                    
+                    // Clear and copy the new baseline
+                    List<String> keysToRemove = new ArrayList<>();
+                    baseline.entrySet().forEach(entry -> keysToRemove.add(entry.getKey()));
+                    keysToRemove.forEach(baseline::removeVariable);
+                    
+                    currentSnapshot.entrySet().forEach(entry -> 
+                        baseline.putVariable(entry.getKey(), entry.getValue()));
+                }
+            });
+            
             updateConfig();
         });
     }

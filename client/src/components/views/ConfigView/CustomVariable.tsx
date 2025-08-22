@@ -14,10 +14,15 @@ import {
 import { ReactComponent as CopySVG } from '@/assets/icons/copy.svg';
 import { BaseViewIconButton } from '@/components/views/BaseView';
 
+// Static map to track expansion states across component instances
+const expansionStates = new Map<string, boolean>();
+
 interface Props {
   name: string;
   path: string;
   state: CustomVarState;
+  baseline: ConfigVar | null;
+  showOnlyModified?: boolean;
   onChange: (state: CustomVarState) => void;
   onSave: (variable: CustomVar) => void;
 }
@@ -27,20 +32,143 @@ interface State {
 }
 
 class CustomVariable extends Component<Props, State> {
+  // Static method to clear expansion states (useful for cleanup)
+  static clearExpansionStates() {
+    expansionStates.clear();
+  }
+
+  // Static method to get current expansion states (useful for debugging)
+  static getExpansionStates() {
+    return new Map(expansionStates);
+  }
   constructor(props: Props) {
     super(props);
 
+    // Get expansion state from global map, defaulting to false
+    const initialExpanded = expansionStates.get(props.path) || false;
+
     this.state = {
-      expanded: false,
+      expanded: initialExpanded,
     };
 
     this.toggleVisibility = this.toggleVisibility.bind(this);
   }
 
   toggleVisibility() {
+    const newExpanded = !this.state.expanded;
+
+    // Save the expansion state to global map
+    expansionStates.set(this.props.path, newExpanded);
+
     this.setState({
-      expanded: !this.state.expanded,
+      expanded: newExpanded,
     });
+  }
+
+  componentDidMount() {
+    // Ensure the global state is in sync with component state
+    const globalExpanded = expansionStates.get(this.props.path) || false;
+    if (globalExpanded !== this.state.expanded) {
+      this.setState({ expanded: globalExpanded });
+    }
+  }
+
+  componentDidUpdate(prevProps: Props) {
+    // If the path changed, update to the new path's expansion state
+    if (prevProps.path !== this.props.path) {
+      const newExpanded = expansionStates.get(this.props.path) || false;
+      this.setState({ expanded: newExpanded });
+    }
+  }
+
+  // Check if any child variables are modified from their baseline values
+  hasBaselineModifications(): boolean {
+    const { state, baseline } = this.props;
+    const value = state.__value;
+
+    if (
+      !value ||
+      !baseline ||
+      baseline.__type !== 'custom' ||
+      !baseline.__value
+    ) {
+      return false;
+    }
+
+    // Check each child variable
+    for (const key of Object.keys(value)) {
+      const childState = value[key];
+      const childBaseline =
+        (typeof baseline.__value === 'object' &&
+          !Array.isArray(baseline.__value) &&
+          baseline.__value[key]) ||
+        null;
+
+      if (childState.__type === 'custom') {
+        // For custom variables, recursively check their children
+        // We'll need to create a temporary CustomVariable instance to check
+        const hasModifications = this.checkCustomVariableModifications(
+          childState,
+          childBaseline,
+        );
+        if (hasModifications) {
+          return true;
+        }
+      } else {
+        // For basic variables, check if current value differs from baseline
+        if (
+          childBaseline &&
+          childBaseline.__type !== 'custom' &&
+          childBaseline.__value !== childState.__value
+        ) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  // Helper method to recursively check custom variable modifications
+  checkCustomVariableModifications(
+    customState: CustomVarState,
+    customBaseline: ConfigVar | null,
+  ): boolean {
+    const value = customState.__value;
+
+    if (
+      !value ||
+      !customBaseline ||
+      customBaseline.__type !== 'custom' ||
+      !customBaseline.__value
+    ) {
+      return false;
+    }
+
+    for (const key of Object.keys(value)) {
+      const childState = value[key];
+      const childBaseline =
+        (typeof customBaseline.__value === 'object' &&
+          !Array.isArray(customBaseline.__value) &&
+          customBaseline.__value[key]) ||
+        null;
+
+      if (childState.__type === 'custom') {
+        if (this.checkCustomVariableModifications(childState, childBaseline)) {
+          return true;
+        }
+      } else {
+        if (
+          childBaseline &&
+          childBaseline.__type !== 'custom' &&
+          childBaseline.__value !== childState.__value
+        ) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   renderHelper(name: string, children: ReactNode) {
@@ -97,7 +225,7 @@ class CustomVariable extends Component<Props, State> {
       <tr className="block">
         <td className="block">
           <div
-            className="option-header cursor-pointer py-1 flex items-center"
+            className="option-header flex cursor-pointer items-center py-1"
             onClick={this.toggleVisibility}
           >
             <div
@@ -111,7 +239,32 @@ class CustomVariable extends Component<Props, State> {
               <ExpandedMoreIcon className="h-6 w-6" />
             </div>
             <div className="flex items-center justify-between">
-              <h3 className="select-none text-lg pr-1">{name}</h3>
+              <div className="flex items-center">
+                <span
+                  style={
+                    this.hasBaselineModifications()
+                      ? {
+                          userSelect: 'auto',
+                          opacity: 1.0,
+                          color: '#ff6b6b',
+                          fontWeight: 'bold',
+                          marginRight: '4px',
+                        }
+                      : {
+                          userSelect: 'none',
+                          opacity: 0.0,
+                        }
+                  }
+                  title={
+                    this.hasBaselineModifications()
+                      ? 'Contains variables modified from deployed baseline'
+                      : ''
+                  }
+                >
+                  !
+                </span>
+                <h3 className="select-none pr-1 text-lg">{name}</h3>
+              </div>
             </div>
             <BaseViewIconButton
               title="Copy Config to Clipboard"
@@ -145,13 +298,38 @@ class CustomVariable extends Component<Props, State> {
     }
 
     const sortedKeys = Object.keys(value);
-    sortedKeys.sort();
 
-    const children = sortedKeys.map((key) => {
+    // Filter keys if showOnlyModified is enabled
+    let filteredKeys = sortedKeys;
+    if (this.props.showOnlyModified) {
+      filteredKeys = sortedKeys.filter((key) => {
+        const child = value[key];
+        const childBaseline =
+          (this.props.baseline?.__type === 'custom' &&
+            this.props.baseline?.__value?.[key]) ||
+          null;
+
+        if (child.__type === 'custom') {
+          // For custom variables, check if they have baseline modifications
+          return this.checkCustomVariableModifications(child, childBaseline);
+        } else {
+          // For basic variables, check if current value differs from baseline
+          return (
+            childBaseline &&
+            childBaseline.__type !== 'custom' &&
+            childBaseline.__value !== child.__value
+          );
+        }
+      });
+    }
+
+    filteredKeys.sort();
+
+    const children = filteredKeys.map((key) => {
       const onChange = (newState: ConfigVarState) => {
         this.props.onChange({
           __type: 'custom',
-          __value: sortedKeys.reduce(
+          __value: Object.keys(value).reduce(
             (acc, key2) => ({
               ...acc,
               [key2]: key === key2 ? newState : value[key2],
@@ -171,6 +349,13 @@ class CustomVariable extends Component<Props, State> {
       };
 
       const child = value[key];
+
+      // Get the corresponding baseline value for this child
+      const childBaseline =
+        (this.props.baseline?.__type === 'custom' &&
+          this.props.baseline?.__value?.[key]) ||
+        null;
+
       if (child.__type === 'custom') {
         return (
           <CustomVariable
@@ -178,6 +363,8 @@ class CustomVariable extends Component<Props, State> {
             name={key}
             path={`${path}.${key}`}
             state={child}
+            baseline={childBaseline}
+            showOnlyModified={this.props.showOnlyModified}
             onChange={onChange}
             onSave={onSave}
           />
@@ -190,6 +377,7 @@ class CustomVariable extends Component<Props, State> {
           name={key}
           path={`${path}.${key}`}
           state={child}
+          baseline={childBaseline}
           onChange={onChange}
           onSave={onSave}
         />

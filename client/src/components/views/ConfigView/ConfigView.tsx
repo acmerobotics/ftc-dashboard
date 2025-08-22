@@ -1,4 +1,5 @@
 import { useSelector } from 'react-redux';
+import { useEffect, useState } from 'react';
 
 import CustomVariable from './CustomVariable';
 import BaseView, {
@@ -12,6 +13,7 @@ import BaseView, {
 
 import { ReactComponent as SaveIcon } from '@/assets/icons/save.svg';
 import { ReactComponent as RefreshIcon } from '@/assets/icons/refresh.svg';
+import { ReactComponent as FilterIcon } from '@/assets/icons/filter_alt.svg';
 
 import { RootState, useAppDispatch } from '@/store/reducers';
 import {
@@ -82,12 +84,81 @@ const ConfigView = ({
     (state: RootState) => state.config.configRoot,
   ) as CustomVarState;
 
+  const configBaseline = useSelector(
+    (state: RootState) => state.config.configBaseline,
+  );
+
+  // Request baseline when component mounts
+  useEffect(() => {
+    if (!configBaseline) {
+      dispatch({
+        type: 'GET_CONFIG_BASELINE',
+      });
+    }
+  }, [dispatch, configBaseline]);
+
+  // State for filtering only baseline-modified variables
+  const [showOnlyModified, setShowOnlyModified] = useState(false);
+
+  // Helper function to check if a configuration variable has baseline modifications
+  const hasBaselineModifications = (
+    varState: ConfigVarState,
+    varBaseline: ConfigVar | null,
+  ): boolean => {
+    if (!varBaseline) return false;
+
+    if (varState.__type === 'custom') {
+      const value = varState.__value;
+      if (!value || varBaseline.__type !== 'custom' || !varBaseline.__value) {
+        return false;
+      }
+
+      // Check each child variable
+      for (const key of Object.keys(value)) {
+        const childState = value[key];
+        const childBaseline =
+          (typeof varBaseline.__value === 'object' &&
+            !Array.isArray(varBaseline.__value) &&
+            varBaseline.__value[key]) ||
+          null;
+
+        if (hasBaselineModifications(childState, childBaseline)) {
+          return true;
+        }
+      }
+      return false;
+    } else {
+      // For basic variables, check if current value differs from baseline
+      return (
+        varBaseline.__type !== 'custom' &&
+        varBaseline.__value !== varState.__value
+      );
+    }
+  };
+
   const rootValue = configRoot.__value;
   if (rootValue === null) {
     return null;
   }
 
-  const sortedKeys = Object.keys(rootValue);
+  let sortedKeys = Object.keys(rootValue);
+
+  // Filter keys if showOnlyModified is enabled
+  if (showOnlyModified) {
+    sortedKeys = sortedKeys.filter((key) => {
+      const childState = rootValue[key];
+      const childBaseline =
+        configBaseline?.__type === 'custom' &&
+        configBaseline?.__value &&
+        typeof configBaseline.__value === 'object' &&
+        !Array.isArray(configBaseline.__value)
+          ? configBaseline.__value[key] || null
+          : null;
+
+      return hasBaselineModifications(childState, childBaseline);
+    });
+  }
+
   sortedKeys.sort();
 
   return (
@@ -97,6 +168,20 @@ const ConfigView = ({
           Configuration
         </BaseViewHeading>
         <BaseViewIcons>
+          <BaseViewIconButton
+            title={
+              showOnlyModified
+                ? 'Show all variables'
+                : 'Show only modified variables'
+            }
+            onClick={() => setShowOnlyModified(!showOnlyModified)}
+            style={{
+              backgroundColor: showOnlyModified ? '#ff6b6b' : undefined,
+              color: showOnlyModified ? 'white' : undefined,
+            }}
+          >
+            <FilterIcon className="h-6 w-6" />
+          </BaseViewIconButton>
           <BaseViewIconButton
             title="Save Changes"
             onClick={() => {
@@ -133,6 +218,15 @@ const ConfigView = ({
                 path={id ? `${id}.${key}` : key}
                 // invariant 2: children of the root are custom
                 state={rootValue[key] as CustomVarState}
+                baseline={
+                  configBaseline?.__type === 'custom' &&
+                  configBaseline?.__value &&
+                  typeof configBaseline.__value === 'object' &&
+                  !Array.isArray(configBaseline.__value)
+                    ? configBaseline.__value[key] || null
+                    : null
+                }
+                showOnlyModified={showOnlyModified}
                 onChange={(newState) =>
                   dispatch({
                     type: 'UPDATE_CONFIG',
