@@ -35,10 +35,12 @@ export const deleteHardwareConfig = (
 export const receiveHardwareConfigList = (
   hardwareConfigList: string[],
   hardwareConfigFiles: string[],
+  isReadOnlyList: boolean[],
   currentHardwareConfig: string,
 ): ReceiveHardwareConfigListAction => ({
   type: RECEIVE_HARDWARE_CONFIG_LIST,
   hardwareConfigList,
   hardwareConfigFiles,
+  isReadOnlyList,
   currentHardwareConfig,
 });

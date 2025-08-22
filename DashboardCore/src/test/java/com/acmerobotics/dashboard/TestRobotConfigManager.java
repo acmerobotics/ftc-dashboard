@@ -1,39 +1,45 @@
 package com.acmerobotics.dashboard;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 public class TestRobotConfigManager {
-    private final Map<String, String> testHardwareConfigs = new HashMap<>();
+    private final List<String> configNames = new ArrayList<>();
+    private final List<String> configXmls = new ArrayList<>();
+    private final List<Boolean> configReadOnly = new ArrayList<>();
+
     private String activeOpMode = "Default";
 
     public TestRobotConfigManager() {
-        testHardwareConfigs.put("Config One", "<xml>config one data</xml>");
-        testHardwareConfigs.put("Config Two", "<xml>config two data</xml>");
-        testHardwareConfigs.put("Default", "<xml>default data</xml>");
+        addConfig("Config One", "<xml>config one data</xml>", false);
+        addConfig("Config Two", "<xml>config two data</xml>", false);
+        addConfig("Default", "<xml>default data</xml>", false);
     }
 
-    public Map<String, String> getTestHardwareConfigsMap() {
-        return testHardwareConfigs;
+    private void addConfig(String name, String xml, boolean isReadOnly) {
+        configNames.add(name);
+        configXmls.add(xml);
+        configReadOnly.add(isReadOnly);
     }
 
-    // Keep the old method signature for now, but return keys from the map
     public List<String> getTestHardwareConfigs() {
-        return new ArrayList<>(testHardwareConfigs.keySet());
+        return new ArrayList<>(configNames);
+    }
+
+    public List<String> getActiveConfigXml() {
+        return new ArrayList<>(configXmls);
+    }
+
+    public List<Boolean> getIsReadOnly() {
+        return new ArrayList<>(configReadOnly);
     }
 
     public String getActiveHardwareConfig() {
         return activeOpMode;
     }
 
-    public List<String> getActiveConfigXml() {
-        return new ArrayList<>(testHardwareConfigs.values());
-    }
-
     public void setHardwareConfig(String hardwareConfigName) {
-        if(testHardwareConfigs.containsKey(hardwareConfigName)) {
+        if (configNames.contains(hardwareConfigName)) {
             activeOpMode = hardwareConfigName;
         }
     }

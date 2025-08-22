@@ -39,6 +39,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpModeManager;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeManagerImpl;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeManagerNotifier;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeRegistrar;
+import com.qualcomm.robotcore.exception.RobotCoreException;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
@@ -94,6 +95,7 @@ import org.firstinspires.ftc.robotcore.internal.system.Misc;
 import org.firstinspires.ftc.robotcore.internal.webserver.WebHandler;
 import org.firstinspires.ftc.robotserver.internal.webserver.MimeTypesUtil;
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 import org.xmlpull.v1.XmlSerializer;
 
@@ -296,42 +298,30 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                     l.put(file.getName(), file);
                 }
                 List<String> stringValues = new ArrayList<>();
+                List<Boolean> isReadOnly = new ArrayList<>();
                 for (RobotConfigFile value : l.values()) {
-                    stringValues.add(xmlPullParserToString(value.getXml()));
+                    try {
+                        stringValues.add(xmlPullParserToString(value.getXml()));
+                        isReadOnly.add(value.isReadOnly());
+                        RobotLog.e("Hardware Config " + value.getName() + " and is read only? " + value.isReadOnly());
+                        RobotLog.e("Hardware Config " + value.getName() + " filepath: " + value.getFullPath());
+                    } catch (java.io.FileNotFoundException | XmlPullParserException e) {
+                        RobotLog.ee(TAG, "Failed to read hardware config: " + value.getName(), e);
+                    }
                 }
+
                 sendAll(new ReceiveHardwareConfigList(
                         new ArrayList<>(l.keySet()),
                         new ArrayList<>(stringValues),
+                        new ArrayList<>(isReadOnly),
                         hardwareConfigManager.getActiveConfig().getName()
                 ));
             });
         }
     }
 
-    public void writeRobotConfigFile(String name, String contents) {
-        File targetConfig = null;
-        boolean found = false;
-        for (RobotConfigFile file : hardwareConfigManager.getXMLFiles()) {
-            if (file.getName().equals(name)) {
-                targetConfig = file.getFullPath();
-                found = true;
-            }
-        }
-        if (!found) {
-            if (!AppUtil.CONFIG_FILES_DIR.exists()) {hardwareConfigManager.createConfigFolder();}
-            targetConfig = new File( AppUtil.CONFIG_FILES_DIR.getAbsolutePath(), name + ".xml");
-        }
-
-        try (FileWriter writer = new FileWriter(targetConfig, false)) {
-            writer.write(contents);
-            writer.flush();
-            RobotLog.e(TAG, "Successfully wrote hardware config: " + name);
-        } catch (IOException e) {
-            RobotLog.ee(TAG, "Error writing hardware config: " + name, e);
-        }
-    }
     public void deleteRobotConfigFile(String name) {
-        File targetConfig = new File(AppUtil.CONFIG_FILES_DIR.getAbsolutePath(), name + ".xml");
+        File targetConfig = new File(AppUtil.CONFIG_FILES_DIR.getAbsolutePath(), RobotConfigFileManager.withExtension(name));
 
         if (targetConfig.exists()) {
             if (targetConfig.delete()) {
@@ -839,6 +829,30 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         }
     }
 
+    private void attemptRestart() {
+        // Soft-restart to allow the new config to take effect
+        // This is admittedly pretty sketchy so we'll do it in a try/catch
+        try {
+            // We can't just cast this to FtcRobotControllerActivity because that would create a dependency
+            Activity robotControllerActivity = AppUtil.getInstance().getRootActivity();
+            // When called, this method has the ability to perform a restart
+            Method selectedMethod = robotControllerActivity.getClass().getMethod("onOptionsItemSelected", MenuItem.class);
+
+            int id = robotControllerActivity.getResources().getIdentifier("action_restart_robot", "id", "com.qualcomm.ftcrobotcontroller");
+
+            // Spoofs the MenuItem parameter to imitate a restart button-press
+            MenuItem item = (MenuItem) Proxy.newProxyInstance(
+                    MenuItem.class.getClassLoader(),
+                    new Class<?>[] { MenuItem.class },
+                    (proxy, method, args) -> "getItemId".equals(method.getName()) ? id : null
+            );
+
+            selectedMethod.invoke(robotControllerActivity, item);
+        } catch (Exception e){
+            RobotLog.ww(TAG, "Something went wrong when reflecting to restart the robot.");
+        }
+    }
+
     private class DashWebSocket extends NanoWSD.WebSocket implements SendFun {
         final SocketHandler sh = core.newSocket(this);
 
@@ -871,14 +885,21 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             hardwareConfigList.with(l -> {
                 if (!l.isEmpty()){
                     List<String> stringValues = new ArrayList<>();
+                    List<Boolean> isReadOnly = new ArrayList<>();
                     for (RobotConfigFile value : l.values()) {
-                        stringValues.add(xmlPullParserToString(value.getXml()));
+                        try {
+                            stringValues.add(xmlPullParserToString(value.getXml()));
+                            isReadOnly.add(value.isReadOnly());
+                        } catch (java.io.FileNotFoundException | XmlPullParserException e) {
+                            RobotLog.ee(TAG, "Failed to read hardware config: " + value.getName(), e);
+                        }
                     }
                     send(new ReceiveHardwareConfigList(
                             new ArrayList<>(l.keySet()),
                             new ArrayList<>(stringValues),
-                            hardwareConfigManager.getActiveConfig().getName())
-                    );
+                            new ArrayList<>(isReadOnly),
+                            hardwareConfigManager.getActiveConfig().getName()
+                    ));
                 }
             });
 
@@ -939,27 +960,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                            hardwareConfigManager.setActiveConfig(false, l.get(hardwareConfigName));
                        });
 
-                        // Soft-restart to allow the new config to take effect
-                        // This is admittedly pretty sketchy so we'll do it in a try/catch
-                        try {
-                            // We can't just cast this to FtcRobotControllerActivity because that would create a dependency
-                            Activity robotControllerActivity = AppUtil.getInstance().getRootActivity();
-                            // When called, this method has the ability to perform a restart
-                            Method selectedMethod = robotControllerActivity.getClass().getMethod("onOptionsItemSelected", MenuItem.class);
-
-                            int id = robotControllerActivity.getResources().getIdentifier("action_restart_robot", "id", "com.qualcomm.ftcrobotcontroller");
-
-                            // Spoofs the MenuItem parameter to imitate a restart button-press
-                            MenuItem item = (MenuItem) Proxy.newProxyInstance(
-                                    MenuItem.class.getClassLoader(),
-                                    new Class<?>[] { MenuItem.class },
-                                    (proxy, method, args) -> "getItemId".equals(method.getName()) ? id : null
-                            );
-
-                            selectedMethod.invoke(robotControllerActivity, item);
-                        } catch (Exception e){
-                            RobotLog.ww(TAG, "Something went wrong when reflecting to restart the robot.");
-                        }
+                        attemptRestart();
                     });
                     break;
                 }
@@ -972,40 +973,27 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                                 !opModeManager.getActiveOpModeName().equals(OpModeManager.DEFAULT_OP_MODE_NAME)) {
                             return;
                         }
-                        writeRobotConfigFile(hardwareConfigName, hardwareConfigContents);
 
+                        // Write hardware config
+                        try {
+                            hardwareConfigManager.writeToFile(new RobotConfigFile(hardwareConfigManager, hardwareConfigName), false, hardwareConfigContents);
+                        } catch (RobotCoreException | IOException e) {
+                            RobotLog.ww(TAG, "Error writing hardware config: " + hardwareConfigName, e);
+                        }
+
+                        // Update the hardware config list
                         new ListHardwareConfigsRunnable().run();
 
+                        // Set active config to new config
                         hardwareConfigList.with(l -> {
                             hardwareConfigManager.setActiveConfig(false, l.get(hardwareConfigName));
                         });
 
-                        // Soft-restart to allow the new config to take effect
-                        // This is admittedly pretty sketchy so we'll do it in a try/catch
-                        try {
-                            // We can't just cast this to FtcRobotControllerActivity because that would create a dependency
-                            Activity robotControllerActivity = AppUtil.getInstance().getRootActivity();
-                            // When called, this method has the ability to perform a restart
-                            Method selectedMethod = robotControllerActivity.getClass().getMethod("onOptionsItemSelected", MenuItem.class);
-
-                            int id = robotControllerActivity.getResources().getIdentifier("action_restart_robot", "id", "com.qualcomm.ftcrobotcontroller");
-
-                            // Spoofs the MenuItem parameter to imitate a restart button-press
-                            MenuItem item = (MenuItem) Proxy.newProxyInstance(
-                                    MenuItem.class.getClassLoader(),
-                                    new Class<?>[] { MenuItem.class },
-                                    (proxy, method, args) -> "getItemId".equals(method.getName()) ? id : null
-                            );
-
-                            selectedMethod.invoke(robotControllerActivity, item);
-                        } catch (Exception e){
-                            RobotLog.ww(TAG, "Something went wrong when reflecting to restart the robot.");
-                        }
+                        attemptRestart();
                     });
                     break;
                 }
                 case DELETE_HARDWARE_CONFIG: {
-                    RobotLog.e("Delete Hardware Config Called");
                     String hardwareConfigName = ((DeleteHardwareConfig) msg).getHardwareConfigName();
                     activeOpMode.with(o -> {
                         // Don't allow deleting the config unless stopped. Who knows what undefined behavior that would cause
@@ -1018,26 +1006,10 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
                         hardwareConfigList.with(l -> {
                             l.remove(hardwareConfigName);
-                            hardwareConfigManager.setActiveConfig(false, null); // clear active config if deleted
+                            hardwareConfigManager.setActiveConfig(false, null);
                         });
 
-                        // Soft-restart to ensure deletion takes effect safely
-                        try {
-                            Activity robotControllerActivity = AppUtil.getInstance().getRootActivity();
-                            Method selectedMethod = robotControllerActivity.getClass().getMethod("onOptionsItemSelected", MenuItem.class);
-
-                            int id = robotControllerActivity.getResources().getIdentifier("action_restart_robot", "id", "com.qualcomm.ftcrobotcontroller");
-
-                            MenuItem item = (MenuItem) Proxy.newProxyInstance(
-                                    MenuItem.class.getClassLoader(),
-                                    new Class<?>[] { MenuItem.class },
-                                    (proxy, method, args) -> "getItemId".equals(method.getName()) ? id : null
-                            );
-
-                            selectedMethod.invoke(robotControllerActivity, item);
-                        } catch (Exception e){
-                            RobotLog.ww(TAG, "Something went wrong when reflecting to restart the robot.");
-                        }
+                        attemptRestart();
                     });
                     break;
                 }

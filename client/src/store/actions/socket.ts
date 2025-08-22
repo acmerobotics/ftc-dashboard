@@ -32,6 +32,6 @@ export const receiveConnectionStatus =
 
     if (!isConnected) {
       dispatch(receiveOpModeList([]));
-      dispatch(receiveHardwareConfigList([], [], ''));
+      dispatch(receiveHardwareConfigList([], [], [], ''));
     }
   };

@@ -275,11 +275,19 @@ class HardwareConfigView extends Component<
   }
 
   renderEditor() {
+    const { hardwareConfigList, isReadOnlyList } = this.props;
+    const { selectedHardwareConfig, viewMode } = this.state;
+
+    const idx = hardwareConfigList.indexOf(selectedHardwareConfig);
+    const isReadOnly = idx !== -1 && isReadOnlyList[idx];
+
     return (
       <div className="mt-4 rounded bg-gray-100 p-3 text-sm dark:bg-slate-800 dark:text-slate-200">
         <div className="mb-2 flex items-center justify-between">
           <h4 className="flex items-center text-sm font-semibold">
-            {this.state.viewMode === 'text'
+            {isReadOnly
+              ? 'Read-Only Configuration'
+              : viewMode === 'text'
               ? 'Edit Configuration (XML)'
               : 'Edit Configuration (GUI)'}
             {this.hasUnsavedChanges() && (
