@@ -43,6 +43,7 @@ export type BasicVarState = (
 
 export type ConfigState = {
   configRoot: ConfigVarState;
+  configBaseline: ConfigVar | null;
 };
 
 export type ReceiveConfigAction = {
@@ -50,8 +51,17 @@ export type ReceiveConfigAction = {
   configRoot: ConfigVar;
 };
 
+export type ReceiveConfigBaselineAction = {
+  type: 'RECEIVE_CONFIG_BASELINE';
+  configBaseline: ConfigVar;
+};
+
 export type GetConfigAction = {
   type: 'GET_CONFIG';
+};
+
+export type GetConfigBaselineAction = {
+  type: 'GET_CONFIG_BASELINE';
 };
 
 export type UpdateConfigAction = {

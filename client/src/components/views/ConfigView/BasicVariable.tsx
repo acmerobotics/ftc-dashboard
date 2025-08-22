@@ -8,21 +8,88 @@ import {
   validateInt,
   validateString,
 } from '@/components/inputs/validation';
-import { BasicVar, BasicVarState } from '@/store/types/config';
+import { BasicVar, BasicVarState, ConfigVar } from '@/store/types/config';
 
 type Props = {
   name: string;
   path: string;
   state: BasicVarState;
+  baseline: ConfigVar | null;
   onChange: (state: BasicVarState) => void;
   onSave: (state: BasicVar) => void;
 };
 
 class BasicVariable extends React.Component<Props> {
+  // Helper function to get formatted baseline value for display
+  getBaselineDisplayValue(): string | null {
+    const { baseline } = this.props;
+
+    if (!baseline || baseline.__type === 'custom') {
+      return null;
+    }
+
+    if (baseline.__value === null) {
+      return 'null';
+    }
+
+    // Format based on type
+    switch (baseline.__type) {
+      case 'boolean':
+        return String(baseline.__value);
+      case 'string':
+        return `"${baseline.__value}"`;
+      case 'enum':
+        return String(baseline.__value);
+      case 'int':
+      case 'long':
+      case 'float':
+      case 'double':
+        return String(baseline.__value);
+    }
+
+    // This should never be reached, but TypeScript needs it
+    return null;
+  }
+
+  // Helper component to display baseline value in parentheses
+  renderBaselineValue() {
+    const { state, baseline } = this.props;
+    const baselineDisplay = this.getBaselineDisplayValue();
+
+    if (!baselineDisplay || !baseline || baseline.__type === 'custom') {
+      return null;
+    }
+
+    // Show baseline if current edited value differs from baseline value
+    const currentValueDiffersFromBaseline =
+      baseline.__value !== state.__newValue;
+
+    if (!currentValueDiffersFromBaseline) {
+      return null;
+    }
+
+    return (
+      <p
+        className="mx-3"
+        style={{
+          opacity: 0.5,
+        }}
+      >
+        ({baselineDisplay})
+      </p>
+    );
+  }
+
   render() {
-    const { name, path, state } = this.props;
+    const { name, path, state, baseline } = this.props;
 
     const modified = state.__value !== state.__newValue;
+
+    // Check if the current value differs from the baseline
+    const modifiedFromBaseline =
+      baseline &&
+      baseline.__type !== 'custom' &&
+      baseline.__value !== state.__value;
 
     const onChange = (validatedValue: {
       value: string | number | boolean;
@@ -63,14 +130,22 @@ class BasicVariable extends React.Component<Props> {
         case 'int':
         case 'long':
           input = (
-            <TextInput
-              id={path}
-              value={state.__newValue as number | string}
-              valid={state.__valid}
-              validate={validateInt}
-              onChange={onChange}
-              onSave={onSave}
-            />
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <TextInput
+                id={path}
+                value={state.__newValue as number | string}
+                valid={state.__valid}
+                validate={validateInt}
+                onChange={onChange}
+                onSave={onSave}
+              />
+              {this.renderBaselineValue()}
+            </div>
           );
           break;
         case 'float':
@@ -93,51 +168,66 @@ class BasicVariable extends React.Component<Props> {
                   onChange={onChange}
                   onSave={onSave}
                 />
-                {state.__valid && (
-                  <p
-                    className="mx-3"
-                    style={{
-                      opacity: 0.5,
-                    }}
-                  >
-                    ({Number(state.__newValue)})
-                  </p>
-                )}
+                {this.renderBaselineValue()}
               </div>
             );
           }
           break;
         case 'string':
           input = (
-            <TextInput
-              id={path}
-              value={state.__newValue as number | string}
-              valid={state.__valid}
-              validate={validateString}
-              onChange={onChange}
-              onSave={onSave}
-            />
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <TextInput
+                id={path}
+                value={state.__newValue as number | string}
+                valid={state.__valid}
+                validate={validateString}
+                onChange={onChange}
+                onSave={onSave}
+              />
+              {this.renderBaselineValue()}
+            </div>
           );
           break;
         case 'boolean':
           input = (
-            <BooleanInput
-              id={path}
-              value={state.__newValue as boolean}
-              onChange={onChange}
-              onSave={onSave}
-            />
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <BooleanInput
+                id={path}
+                value={state.__newValue as boolean}
+                onChange={onChange}
+                onSave={onSave}
+              />
+              {this.renderBaselineValue()}
+            </div>
           );
           break;
         case 'enum':
           input = (
-            <EnumInput
-              id={path}
-              value={state.__newValue as string}
-              enumValues={state.__enumValues}
-              onChange={onChange}
-              onSave={onSave}
-            />
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <EnumInput
+                id={path}
+                value={state.__newValue as string}
+                enumValues={state.__enumValues}
+                onChange={onChange}
+                onSave={onSave}
+              />
+              {this.renderBaselineValue()}
+            </div>
           );
           break;
       }
@@ -161,6 +251,26 @@ class BasicVariable extends React.Component<Props> {
               }
             >
               *
+            </span>
+            <span
+              style={
+                modifiedFromBaseline
+                  ? {
+                      userSelect: 'auto',
+                      opacity: 1.0,
+                      color: '#ff6b6b',
+                      fontWeight: 'bold',
+                    }
+                  : {
+                      userSelect: 'none',
+                      opacity: 0.0,
+                    }
+              }
+              title={
+                modifiedFromBaseline ? 'Modified from deployed baseline' : ''
+              }
+            >
+              !
             </span>
             {name}
           </label>
