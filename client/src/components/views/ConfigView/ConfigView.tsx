@@ -13,7 +13,7 @@ import BaseView, {
 
 import { ReactComponent as SaveIcon } from '@/assets/icons/save.svg';
 import { ReactComponent as RefreshIcon } from '@/assets/icons/refresh.svg';
-import { ReactComponent as FilterIcon } from '@/assets/icons/filter_alt.svg';
+import { ReactComponent as FilterIcon } from '@/assets/icons/filter.svg';
 
 import { RootState, useAppDispatch } from '@/store/reducers';
 import {
