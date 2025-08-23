@@ -56,8 +56,6 @@ class BasicVariable extends React.Component<Props> {
 
     let input;
 
-    const isReadonly = (state as any).__type === 'readonly_string';
-
     if (state.__newValue === null) {
       input = <p>null</p>;
     } else {
@@ -130,7 +128,7 @@ class BasicVariable extends React.Component<Props> {
               validate={validateString}
               onChange={onChange}
               onSave={onSave}
-              readOnly={isReadonly}
+              readOnly={true}
             />
           );
           break;
