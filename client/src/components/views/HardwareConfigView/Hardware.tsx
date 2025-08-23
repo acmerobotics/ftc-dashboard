@@ -1,4 +1,6 @@
 import React from 'react';
+import { ReactComponent as RemoveCircleOutline } from '@/assets/icons/remove_circle_outline.svg';
+import { ReactComponent as ExpandMore } from '@/assets/icons/expand_more.svg';
 
 interface RobotSectionState {
   controlHubs: boolean;
@@ -26,26 +28,21 @@ export class Robot {
     const lines: string[] = [];
     lines.push(`<Robot type="FirstInspires-FTC">`);
 
-    if (this.controlHubs.length > 0 || this.expansionHubs.length > 0) {
-      lines.push(`    <LynxUsbDevice name="${this.name}" parentModuleAddress="173" serialNumber="(embedded)">`);
-      for (const hub of this.controlHubs) {
-        const moduleXml = hub.toString();
-        moduleXml.split('\n').forEach((line) => {
-          if (line.trim() !== '') lines.push(`        ${line}`);
-        });
-      }
-      for (const hub of this.expansionHubs) {
-        const moduleXml = hub.toString();
-        moduleXml.split('\n').forEach((line) => {
-          if (line.trim() !== '') lines.push(`        ${line}`);
-        });
+    if (this.controlHubs.length || this.expansionHubs.length) {
+      lines.push(
+        `    <LynxUsbDevice name="${this.name}" parentModuleAddress="173" serialNumber="(embedded)">`,
+      );
+      for (const hub of [...this.controlHubs, ...this.expansionHubs]) {
+        hub
+          .toString()
+          .split('\n')
+          .forEach((line) => lines.push(line && line.trim() ? `        ${line}` : ''));
       }
       lines.push(`    </LynxUsbDevice>`);
     }
 
     for (const device of this.devices) {
-      const deviceXml = device.toString();
-      lines.push(`    ${deviceXml}`);
+      lines.push(`    ${device.toString()}`);
     }
 
     lines.push(`</Robot>`);
@@ -56,7 +53,7 @@ export class Robot {
     this.controlHubs = [];
     this.expansionHubs = [];
     this.devices = [];
-    this.name = "Control Hub Portal";
+    this.name = 'Control Hub Portal';
     this.collapsedSections = {
       controlHubs: false,
       expansionHubs: false,
@@ -75,11 +72,12 @@ export class Robot {
       def: string | null = null,
     ): string | null => el.getAttribute(name) ?? def;
 
-    const lynxUsbDeviceElement = robotElement.getElementsByTagName('LynxUsbDevice')[0];
+    const lynxUsbDeviceElement = robotElement.getElementsByTagName(
+      'LynxUsbDevice',
+    )[0];
     if (lynxUsbDeviceElement) {
-        this.name = getAttr(lynxUsbDeviceElement, 'name') || this.name;
+      this.name = getAttr(lynxUsbDeviceElement, 'name') || this.name;
     }
-
 
     const createDeviceInstance = (
       element: Element,
@@ -119,79 +117,65 @@ export class Robot {
       return device;
     };
 
-    for (const childNode of Array.from(robotElement.children)) {
-      if (childNode.tagName === 'LynxUsbDevice') {
-        const lynxUsbDeviceElement = childNode;
-        for (const moduleNode of Array.from(lynxUsbDeviceElement.children)) {
+    for (const child of Array.from(robotElement.children)) {
+      if (child.tagName === 'LynxUsbDevice') {
+        for (const moduleNode of Array.from(child.children)) {
           if (moduleNode.tagName === 'LynxModule') {
-            const lynxModuleElement = moduleNode;
-            const hubNameAttr = getAttr(lynxModuleElement, 'name');
-            const hubPortAttr = getAttr(lynxModuleElement, 'port');
-            const hubPort = hubPortAttr ? parseInt(hubPortAttr, 10) : 0;
+            const module = moduleNode as Element;
+            const name = getAttr(module, 'name');
+            const port = parseInt(getAttr(module, 'port') || '0', 10);
 
-            let currentHub: Hub;
-            if (
-              (hubNameAttr &&
-                hubNameAttr.toLowerCase().includes('control hub')) ||
-              hubPort === 173
-            ) {
-              currentHub = new ControlHub();
-              currentHub.name = hubNameAttr || 'Control Hub';
-              currentHub.port = hubPort || 173;
-              this.controlHubs.push(currentHub as ControlHub);
-            } else {
-              currentHub = new ExpansionHub();
-              currentHub.name = hubNameAttr || `Expansion Hub ${hubPort}`;
-              currentHub.port = hubPort;
-              this.expansionHubs.push(currentHub as ExpansionHub);
-            }
+            const hub: Hub =
+              (name?.toLowerCase().includes('control hub') || port === 173)
+                ? new ControlHub()
+                : new ExpansionHub();
 
-            for (const deviceElement of Array.from(
-              lynxModuleElement.children,
-            )) {
-              if (deviceElement.nodeType !== Node.ELEMENT_NODE) continue;
+            hub.name = name || hub.name;
+            hub.port = port || hub.port;
+            (hub instanceof ControlHub
+              ? this.controlHubs
+              : this.expansionHubs
+            ).push(hub);
 
-              const tagName = deviceElement.tagName;
-              let deviceInstance: Device | null = null;
+            for (const deviceEl of Array.from(module.children)) {
+              if (deviceEl.nodeType !== Node.ELEMENT_NODE) continue;
+              const tag = deviceEl.tagName;
+              let d: Device | null = null;
 
-              if (Object.values(motorType).includes(tagName as string)) {
-                deviceInstance = createDeviceInstance(deviceElement, 'Motor');
-                currentHub.motors.push(deviceInstance as Motor);
-              } else if (Object.values(servoType).includes(tagName as string)) {
-                deviceInstance = createDeviceInstance(deviceElement, 'Servo');
-                currentHub.servos.push(deviceInstance as Servo);
-              } else if (Object.values(i2cType).includes(tagName as string)) {
-                deviceInstance = createDeviceInstance(deviceElement, 'I2c');
-                currentHub.i2cDevices.push(deviceInstance as I2c);
-              } else if (
-                Object.values(analogType).includes(tagName as string)
-              ) {
-                deviceInstance = createDeviceInstance(deviceElement, 'Analog');
-                currentHub.analogInputDevices.push(deviceInstance as Analog);
-              } else if (
-                Object.values(digitalType).includes(tagName as string)
-              ) {
-                deviceInstance = createDeviceInstance(deviceElement, 'Digital');
-                currentHub.digitalDevices.push(deviceInstance as Digital);
+              if (Object.values(motorType).includes(tag as string)) {
+                d = createDeviceInstance(deviceEl, 'Motor');
+                hub.motors.push(d as Motor);
+              } else if (Object.values(servoType).includes(tag as string)) {
+                d = createDeviceInstance(deviceEl, 'Servo');
+                hub.servos.push(d as Servo);
+              } else if (Object.values(i2cType).includes(tag as string)) {
+                d = createDeviceInstance(deviceEl, 'I2c');
+                hub.i2cDevices.push(d as I2c);
+              } else if (Object.values(analogType).includes(tag as string)) {
+                d = createDeviceInstance(deviceEl, 'Analog');
+                hub.analogInputDevices.push(d as Analog);
+              } else if (Object.values(digitalType).includes(tag as string)) {
+                d = createDeviceInstance(deviceEl, 'Digital');
+                hub.digitalDevices.push(d as Digital);
               }
             }
           }
         }
-      } else if (childNode.tagName === 'EthernetDevice') {
-        const ethDeviceElement = childNode;
-        const ethDevice = new EthernetDevice();
-        ethDevice.name = getAttr(ethDeviceElement, 'name') || '';
-        ethDevice.serialNumber =
-          getAttr(ethDeviceElement, 'serialNumber') || '';
-        ethDevice.port = parseInt(getAttr(ethDeviceElement, 'port') || '0', 10);
-        ethDevice.ipAddress = getAttr(ethDeviceElement, 'ipAddress') || '';
-        this.devices.push(ethDevice);
-      } else if (childNode.tagName === 'Webcam') {
-        const webcamElement = childNode;
-        const webcam = new Webcam();
-        webcam.name = getAttr(webcamElement, 'name') || '';
-        webcam.serialNumber = getAttr(webcamElement, 'serialNumber') || '';
-        this.devices.push(webcam);
+      } else if (
+        child.tagName === 'EthernetDevice' ||
+        child.tagName === 'Webcam'
+      ) {
+        const DeviceClass = child.tagName === 'EthernetDevice' ? EthernetDevice : Webcam;
+        const d = new DeviceClass();
+        d.name = getAttr(child, 'name') || '';
+        if (d instanceof EthernetDevice) {
+          d.serialNumber = getAttr(child, 'serialNumber') || '';
+          d.port = parseInt(getAttr(child, 'port') || '0', 10);
+          d.ipAddress = getAttr(child, 'ipAddress') || '';
+        } else {
+          d.serialNumber = getAttr(child, 'serialNumber') || '';
+        }
+        this.devices.push(d);
       }
     }
   }
@@ -204,157 +188,183 @@ export class Robot {
     const isExpansionHubsCollapsed = this.collapsedSections.expansionHubs;
     const isOtherDevicesCollapsed = this.collapsedSections.otherDevices;
 
+    const sectionTitleStyle: React.CSSProperties = {
+      margin: 0,
+      fontSize: '1rem',
+      color: '#374151',
+    };
+
     return (
-      <div
-        key={keyPrefix}
-        style={{ padding: '10px', fontFamily: 'Arial, sans-serif' }}
-      >
-        <div style={{ marginBottom: '15px' }}>
-          <label style={labelStyle}>Control Hub Portal Name: </label>
-          <input
-            style={inputStyle}
-            type="text"
-            value={this.name}
-            onChange={(e) => {
-              this.name = e.target.value;
-              configChangeCallback();
-            }}
-          />
-        </div>
-        {/* Control Hubs Section */}
+      <div key={keyPrefix} style={{ padding: '0px', fontFamily: 'Arial, sans-serif' }}>
+        <label style={labelStyle}>Control Hub Portal Name: </label>
+        <input
+          style={inputStyle}
+          type="text"
+          value={this.name}
+          onChange={(e) => {
+            this.name = e.target.value;
+            configChangeCallback();
+          }}
+        />
+
+        {/* Control Hubs */}
         <div>
           <div
-            style={sectionHeaderStyle}
+            style={{ ...sectionHeaderStyle, padding: "0.5rem" }}
             onClick={() => {
               this.collapsedSections.controlHubs = !isControlHubsCollapsed;
               configChangeCallback();
             }}
           >
-            <h4 style={sectionHeaderStyle}>Control Hubs</h4>
-            <button style={toggleButtonStyle}>
-              {isControlHubsCollapsed ? '▶' : '▼'}
-            </button>
-          </div>
-          {!isControlHubsCollapsed && (
-            <>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <h4 style={sectionTitleStyle}>Control Hubs {`(${this.controlHubs.length})`} </h4>
               <button
                 style={addButtonStyle}
                 onClick={(e) => {
                   e.stopPropagation();
+                  if (isControlHubsCollapsed) this.collapsedSections.controlHubs = false;
                   this.controlHubs.push(new ControlHub());
                   configChangeCallback();
                 }}
               >
                 +
-              </button>{' '}
-              Add Control Hub
-              {this.controlHubs.map((hub, index) =>
-                hub.renderAsGui(
-                  configChangeCallback,
-                  `${keyPrefix}-ch-${index}`,
-                  () => {
-                    this.controlHubs.splice(index, 1);
-                    configChangeCallback();
-                  },
-                ),
-              )}
-            </>
-          )}
+              </button>
+            </div>
+
+            <button style={toggleButtonStyle}>
+              <ExpandMore
+                style={{
+                  transform: isControlHubsCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.2s',
+                  width: '1rem',
+                  height: '1rem',
+                }}
+              />
+            </button>
+          </div>
+
+          {!isControlHubsCollapsed &&
+            this.controlHubs.map((hub, index) =>
+              hub.renderAsGui(
+                configChangeCallback,
+                `${keyPrefix}-ch-${index}`,
+                () => {
+                  this.controlHubs.splice(index, 1);
+                  configChangeCallback();
+                },
+              ),
+            )}
         </div>
         <hr />
 
-        {/* Expansion Hubs Section */}
+        {/* Expansion Hubs */}
         <div>
           <div
-            style={sectionHeaderStyle}
+            style={{ ...sectionHeaderStyle, padding: "0.5rem" }}
             onClick={() => {
               this.collapsedSections.expansionHubs = !isExpansionHubsCollapsed;
               configChangeCallback();
             }}
           >
-            <h4 style={sectionHeaderStyle}>Expansion Hubs</h4>
-            <button style={toggleButtonStyle}>
-              {isExpansionHubsCollapsed ? '▶' : '▼'}
-            </button>
-          </div>
-          {!isExpansionHubsCollapsed && (
-            <>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <h4 style={sectionTitleStyle}>Expansion Hubs {`(${this.expansionHubs.length})`} </h4>
               <button
                 style={addButtonStyle}
                 onClick={(e) => {
                   e.stopPropagation();
+                  if (isExpansionHubsCollapsed) this.collapsedSections.expansionHubs = false;
                   this.expansionHubs.push(new ExpansionHub());
                   configChangeCallback();
                 }}
               >
                 +
-              </button>{' '}
-              Add Expansion Hub
-              {this.expansionHubs.map((hub, index) =>
-                hub.renderAsGui(
-                  configChangeCallback,
-                  `${keyPrefix}-eh-${index}`,
-                  () => {
-                    this.expansionHubs.splice(index, 1);
-                    configChangeCallback();
-                  },
-                ),
-              )}
-            </>
-          )}
+              </button>
+            </div>
+
+            <button style={toggleButtonStyle}>
+              <ExpandMore
+                style={{
+                  transform: isExpansionHubsCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.2s',
+                  width: '1rem',
+                  height: '1rem',
+                }}
+              />
+            </button>
+          </div>
+
+          {!isExpansionHubsCollapsed &&
+            this.expansionHubs.map((hub, index) =>
+              hub.renderAsGui(
+                configChangeCallback,
+                `${keyPrefix}-eh-${index}`,
+                () => {
+                  this.expansionHubs.splice(index, 1);
+                  configChangeCallback();
+                },
+              ),
+            )}
         </div>
         <hr />
 
-        {/* Other Devices Section */}
+        {/* Other Devices */}
         <div>
           <div
-            style={sectionHeaderStyle}
+            style={{ ...sectionHeaderStyle, padding: "0.5rem" }}
             onClick={() => {
               this.collapsedSections.otherDevices = !isOtherDevicesCollapsed;
               configChangeCallback();
             }}
           >
-            <h4>Other Devices</h4>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <h4 style={sectionTitleStyle}>Other Devices</h4>
+            </div>
             <button style={toggleButtonStyle}>
-              {isOtherDevicesCollapsed ? '▶' : '▼'}
+              <ExpandMore
+                style={{
+                  transform: isOtherDevicesCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.2s',
+                  width: '1rem',
+                  height: '1rem',
+                }}
+              />
             </button>
           </div>
-          {!isOtherDevicesCollapsed && (
-            <>
-              <button
-                style={addButtonStyle}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  this.devices.push(new EthernetDevice());
+          <div style={{ display: 'flex', alignItems: 'center', padding: '8px' }}>
+            <span style={{ marginLeft: '4px'}}>Ethernet Device {`(${this.devices.filter(d=>d instanceof EthernetDevice).length})`} </span>
+            <button
+              style={addButtonStyle}
+              onClick={(e) => {
+                e.stopPropagation();
+                this.devices.push(new EthernetDevice());
+                configChangeCallback();
+              }}
+            >
+              +
+            </button>
+            <span style={{ marginLeft: '16px'}}>Webcam {`(${this.devices.filter(d=>d instanceof Webcam).length})`} </span>
+            <button
+              style={addButtonStyle}
+              onClick={(e) => {
+                e.stopPropagation();
+                this.devices.push(new Webcam());
+                configChangeCallback();
+              }}
+            >
+              +
+            </button>
+          </div>
+          {!isOtherDevicesCollapsed &&
+            this.devices.map((device, index) =>
+              device.renderAsGui(
+                configChangeCallback,
+                `${keyPrefix}-od-${index}`,
+                () => {
+                  this.devices.splice(index, 1);
                   configChangeCallback();
-                }}
-              >
-                +
-              </button>{' '}
-              Ethernet Device
-              <button
-                style={addButtonStyle}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  this.devices.push(new Webcam());
-                  configChangeCallback();
-                }}
-              >
-                +
-              </button>{' '}
-              Webcam
-              {this.devices.map((device, index) =>
-                device.renderAsGui(
-                  configChangeCallback,
-                  `${keyPrefix}-od-${index}`,
-                  () => {
-                    this.devices.splice(index, 1);
-                    configChangeCallback();
-                  },
-                ),
-              )}
-            </>
-          )}
+                },
+              ),
+            )}
         </div>
       </div>
     );
@@ -362,24 +372,10 @@ export class Robot {
 }
 
 export abstract class Device {
-  public name: string;
-  public port: number;
-  public type: string;
-  public key: string;
-
-  constructor() {
-    this.name = '';
-    this.port = 0;
-    this.type = '';
-    this.key = '';
-  }
-
-  public toString(): string {
-    return `<${this.key} name="${this.name}" port="${
-      isNaN(this.port) ? 0 : this.port
-    }" />`;
-  }
-
+  public name = '';
+  public port = 0;
+  public type = '';
+  public key = '';
   public abstract renderAsGui(
     configChangeCallback: () => void,
     keyPrefix: string,
@@ -387,72 +383,61 @@ export abstract class Device {
   ): JSX.Element;
 }
 const deviceContainerStyle: React.CSSProperties = {
+  position: 'relative',
   marginLeft: '1rem',
-  marginBottom: '1rem',
-  padding: '0.75rem 1rem',
+  padding: '0.5rem',
   backgroundColor: '#ffffff',
   border: '1px solid #e5e7eb',
   borderRadius: '0.5rem',
   boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
 };
-
 const inputStyle: React.CSSProperties = {
   marginRight: '0.5rem',
-  padding: '0.25rem 0.5rem',
+  padding: '0.15rem',
   border: '1px solid #d1d5db',
   borderRadius: '0.375rem',
   fontSize: '0.9rem',
 };
-
 const labelStyle: React.CSSProperties = {
   marginRight: '0.25rem',
-  fontWeight: 500,
   fontSize: '0.9rem',
 };
-
-const selectStyle: React.CSSProperties = { ...inputStyle };
-
+const selectStyle = { ...inputStyle } as React.CSSProperties;
 const deleteButtonStyle: React.CSSProperties = {
-  marginLeft: '0.5rem',
-  padding: '0.25rem 0.5rem',
+  width: '1.5rem',
+  height: '1.5rem',
   backgroundColor: '#fee2e2',
   border: '1px solid #ef4444',
   borderRadius: '0.375rem',
   cursor: 'pointer',
-  fontSize: '0.8rem',
-  color: '#991b1b',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  boxSizing: 'border-box',
 };
-
 const addButtonStyle: React.CSSProperties = {
   marginLeft: '0.5rem',
-  padding: '0.25rem 0.5rem',
+  width: '1.5rem',
+  height: '1.5rem',
   backgroundColor: '#dcfce7',
   border: '1px solid #22c55e',
   borderRadius: '0.375rem',
   cursor: 'pointer',
-  fontSize: '0.8rem',
+  fontSize: '1.2rem',
   color: '#166534',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
 };
-
-const hubDeleteButtonStyle: React.CSSProperties = {
-  ...deleteButtonStyle,
-  position: 'absolute',
-  top: '0.75rem',
-  right: '0.75rem',
-};
-
+const hubDeleteButtonStyle: React.CSSProperties = { ...deleteButtonStyle, position: 'absolute', top: '0.75rem', right: '0.75rem' };
 const sectionHeaderStyle: React.CSSProperties = {
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  paddingBottom: '0.5rem',
-  marginBottom: '0.75rem',
   borderBottom: '1px solid #e5e7eb',
-  fontWeight: 500,
   fontSize: '1rem',
   color: '#374151',
 };
-
 const toggleButtonStyle: React.CSSProperties = {
   background: 'none',
   border: 'none',
@@ -469,7 +454,6 @@ interface HubSectionState {
   digitalDevices: boolean;
   analogInputDevices: boolean;
 }
-
 export abstract class Hub extends Device {
   public motors: Motor[] = [];
   public servos: Servo[] = [];
@@ -490,29 +474,20 @@ export abstract class Hub extends Device {
   }
 
   public override toString(): string {
-    const lines: string[] = [];
-    lines.push(
-      `<${this.key} name="${this.name}" port="${
-        isNaN(this.port) ? 0 : this.port
-      }">`,
-    );
-
-    const addSection = (title: string, devices: Device[]) => {
-      if (devices.length > 0) {
+    const lines: string[] = [`<${this.key} name="${this.name}" port="${isNaN(this.port) ? 0 : this.port}">`];
+    const addSection = (title: string, devs: Device[]) => {
+      if (devs.length) {
         lines.push(`    <!-- ${title} -->`);
-        devices.forEach((hw) => {
-          const deviceXmlLines = hw.toString().split('\n');
-          deviceXmlLines.forEach((line) => lines.push(`    ${line}`));
-        });
+        devs.forEach((d) =>
+          d.toString().split('\n').forEach((l) => lines.push(`    ${l}`)),
+        );
       }
     };
-
     addSection('Motors', this.motors);
     addSection('Servos', this.servos);
     addSection('I2C Devices', this.i2cDevices);
     addSection('Digital Devices', this.digitalDevices);
     addSection('Analog Inputs', this.analogInputDevices);
-
     lines.push(`</${this.key}>`);
     return lines.join('\n');
   }
@@ -523,54 +498,57 @@ export abstract class Hub extends Device {
     onDelete?: () => void,
   ): JSX.Element {
     const renderCollapsibleSection = (
-      sectionName: keyof HubSectionState,
+      name: keyof HubSectionState,
       title: string,
-      devices: Device[],
-      addDeviceCallback: () => void,
-      renderDeviceCallback: (device: Device, index: number) => JSX.Element,
+      devs: Device[],
+      addCb: () => void,
+      renderCb: (d: Device, i: number) => JSX.Element,
     ) => {
-      const isCollapsed = this.collapsedSections[sectionName];
+      const collapsed = this.collapsedSections[name];
       return (
         <div>
           <div
             style={sectionHeaderStyle}
             onClick={() => {
-              this.collapsedSections[sectionName] = !isCollapsed;
+              this.collapsedSections[name] = !collapsed;
               configChangeCallback();
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              <h5 style={{ margin: '0', marginRight: '10px' }}>{title}</h5>
+              <h5 style={{ margin: '8px', marginRight: '10px' }}>{title} {`(${devs.length})`} </h5>
               <button
-                style={{...addButtonStyle, marginLeft: '0'}}
+                style={{ ...addButtonStyle, marginLeft: 0 }}
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (isCollapsed) {
-                    this.collapsedSections[sectionName] = false;
-                  }
-                  addDeviceCallback();
+                  if (collapsed) this.collapsedSections[name] = false;
+                  addCb();
                 }}
               >
                 +
               </button>
             </div>
-            {/* Collapse button */}
             <button
               style={toggleButtonStyle}
               onClick={(e) => {
                 e.stopPropagation();
-                this.collapsedSections[sectionName] = !isCollapsed;
+                this.collapsedSections[name] = !collapsed;
                 configChangeCallback();
               }}
             >
-              {isCollapsed ? '▶' : '▼'}
+              <ExpandMore
+                style={{
+                  transform: collapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.2s',
+                  width: '1rem',
+                  height: '1rem',
+                }}
+              />
             </button>
           </div>
-          {!isCollapsed && (
+
+          {!collapsed && (
             <>
-              {devices.map((device, index) =>
-                renderDeviceCallback(device, index),
-              )}
+              {devs.map((d, i) => renderCb(d, i))}
             </>
           )}
         </div>
@@ -613,7 +591,7 @@ export abstract class Hub extends Device {
           ({this.type})
           {onDelete && (
             <button style={hubDeleteButtonStyle} onClick={onDelete}>
-              X
+              <RemoveCircleOutline style={{ width: '1.25rem', height: '1.25rem', fill: '#b91c1c' }} />
             </button>
           )}
         </h4>
@@ -626,15 +604,11 @@ export abstract class Hub extends Device {
             this.motors.push(new Motor());
             configChangeCallback();
           },
-          (motor, index) =>
-            motor.renderAsGui(
-              configChangeCallback,
-              `${keyPrefix}-motor-${index}`,
-              () => {
-                this.motors.splice(index, 1);
-                configChangeCallback();
-              },
-            ),
+          (m, i) =>
+            m.renderAsGui(configChangeCallback, `${keyPrefix}-motor-${i}`, () => {
+              this.motors.splice(i, 1);
+              configChangeCallback();
+            }),
         )}
 
         {renderCollapsibleSection(
@@ -645,15 +619,11 @@ export abstract class Hub extends Device {
             this.servos.push(new Servo());
             configChangeCallback();
           },
-          (servo, index) =>
-            servo.renderAsGui(
-              configChangeCallback,
-              `${keyPrefix}-servo-${index}`,
-              () => {
-                this.servos.splice(index, 1);
-                configChangeCallback();
-              },
-            ),
+          (s, i) =>
+            s.renderAsGui(configChangeCallback, `${keyPrefix}-servo-${i}`, () => {
+              this.servos.splice(i, 1);
+              configChangeCallback();
+            }),
         )}
 
         {renderCollapsibleSection(
@@ -664,15 +634,11 @@ export abstract class Hub extends Device {
             this.i2cDevices.push(new I2c());
             configChangeCallback();
           },
-          (i2c, index) =>
-            i2c.renderAsGui(
-              configChangeCallback,
-              `${keyPrefix}-i2c-${index}`,
-              () => {
-                this.i2cDevices.splice(index, 1);
-                configChangeCallback();
-              },
-            ),
+          (i, idx) =>
+            i.renderAsGui(configChangeCallback, `${keyPrefix}-i2c-${idx}`, () => {
+              this.i2cDevices.splice(idx, 1);
+              configChangeCallback();
+            }),
         )}
 
         {renderCollapsibleSection(
@@ -683,12 +649,12 @@ export abstract class Hub extends Device {
             this.analogInputDevices.push(new Analog());
             configChangeCallback();
           },
-          (analog, index) =>
-            analog.renderAsGui(
+          (a, i) =>
+            a.renderAsGui(
               configChangeCallback,
-              `${keyPrefix}-analog-${index}`,
+              `${keyPrefix}-analog-${i}`,
               () => {
-                this.analogInputDevices.splice(index, 1);
+                this.analogInputDevices.splice(i, 1);
                 configChangeCallback();
               },
             ),
@@ -702,12 +668,12 @@ export abstract class Hub extends Device {
             this.digitalDevices.push(new Digital());
             configChangeCallback();
           },
-          (digital, index) =>
-            digital.renderAsGui(
+          (d, i) =>
+            d.renderAsGui(
               configChangeCallback,
-              `${keyPrefix}-digital-${index}`,
+              `${keyPrefix}-digital-${i}`,
               () => {
-                this.digitalDevices.splice(index, 1);
+                this.digitalDevices.splice(i, 1);
                 configChangeCallback();
               },
             ),
@@ -716,7 +682,6 @@ export abstract class Hub extends Device {
     );
   }
 }
-
 export class ControlHub extends Hub {
   constructor() {
     super();
@@ -726,7 +691,6 @@ export class ControlHub extends Hub {
     this.key = 'LynxModule';
   }
 }
-
 export class ExpansionHub extends Hub {
   constructor() {
     super();
@@ -738,25 +702,16 @@ export class ExpansionHub extends Hub {
 }
 
 export class EthernetDevice extends Device {
-  public serialNumber: string;
-  public ipAddress: string;
-
+  public serialNumber = '';
+  public ipAddress = '';
   constructor() {
     super();
-    this.serialNumber = '';
-    this.ipAddress = '';
     this.type = 'EthernetDevice';
     this.key = 'EthernetDevice';
   }
-
-  public override toString(): string {
-    return `<${this.key} name="${this.name}" serialNumber="${
-      this.serialNumber
-    }" port="${isNaN(this.port) ? 0 : this.port}" ipAddress="${
-      this.ipAddress
-    }" />`;
+  public override toString() {
+    return `<${this.key} name="${this.name}" serialNumber="${this.serialNumber}" port="${isNaN(this.port) ? 0 : this.port}" ipAddress="${this.ipAddress}" />`;
   }
-
   public renderAsGui(
     configChangeCallback: () => void,
     keyPrefix: string,
@@ -774,9 +729,10 @@ export class EthernetDevice extends Device {
             }}
             onClick={onDelete}
           >
-            X
+            <RemoveCircleOutline style={{ width: '1.25rem', height: '1.25rem', fill: '#b91c1c' }} />
           </button>
         )}
+        <label style={labelStyle}> {this.type}: </label>
         <div>
           <label style={labelStyle}>Name: </label>
           <input
@@ -831,19 +787,15 @@ export class EthernetDevice extends Device {
 }
 
 export class Webcam extends Device {
-  public serialNumber: string;
-
+  public serialNumber = '';
   constructor() {
     super();
-    this.serialNumber = '';
     this.type = 'Webcam';
     this.key = 'Webcam';
   }
-
-  public override toString(): string {
+  public override toString() {
     return `<${this.key} name="${this.name}" serialNumber="${this.serialNumber}" />`;
   }
-
   public renderAsGui(
     configChangeCallback: () => void,
     keyPrefix: string,
@@ -861,9 +813,10 @@ export class Webcam extends Device {
             }}
             onClick={onDelete}
           >
-            X
+            <RemoveCircleOutline style={{ width: '1.25rem', height: '1.25rem', fill: '#b91c1c' }} />
           </button>
         )}
+        <label style={labelStyle}> {this.type}: </label>
         <div>
           <label style={labelStyle}>Name: </label>
           <input
@@ -946,30 +899,22 @@ export const i2cType = {
   goBILDAPinpointRR: 'goBILDAPinpointRR',
 };
 
-const clamp = (value: number, min: number, max: number): number => {
-  return Math.max(min, Math.min(max, value));
-};
+const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
 
 const renderStandardDevice = (
   device: Device,
-  typeObject: Record<string, string>,
+  typeObj: Record<string, string>,
   configChangeCallback: () => void,
   keyPrefix: string,
   onDelete?: () => void,
-  additionalFields?: JSX.Element | null,
-): JSX.Element => {
-  let minPort = 0;
-  let maxPort = 255;
-
-  if (typeObject === motorType) {
-    maxPort = 3;
-  } else if (typeObject === servoType) {
-    maxPort = 5;
-  } else if (typeObject === analogType) {
-    maxPort = 3;
-  } else if (typeObject === digitalType) {
-    maxPort = 7;
-  }
+  extra?: JSX.Element | null,
+) => {
+  let min = 0,
+    max = 255;
+  if (typeObj === motorType) max = 3;
+  if (typeObj === servoType) max = 5;
+  if (typeObj === analogType) max = 3;
+  if (typeObj === digitalType) max = 7;
 
   return (
     <div key={keyPrefix} style={deviceContainerStyle}>
@@ -983,7 +928,7 @@ const renderStandardDevice = (
           }}
           onClick={onDelete}
         >
-          X
+          <RemoveCircleOutline style={{ width: '1.25rem', height: '1.25rem', fill: '#b91c1c' }} />
         </button>
       )}
       <div>
@@ -1009,9 +954,9 @@ const renderStandardDevice = (
             configChangeCallback();
           }}
         >
-          {Object.entries(typeObject).map(([displayName, xmlName]) => (
-            <option key={xmlName} value={xmlName}>
-              {displayName}
+          {Object.entries(typeObj).map(([display, xml]) => (
+            <option key={xml} value={xml}>
+              {display}
             </option>
           ))}
         </select>
@@ -1024,18 +969,15 @@ const renderStandardDevice = (
           value={isNaN(device.port) ? '' : device.port}
           onChange={(e) => {
             const val = parseInt(e.target.value, 10);
-            if (isNaN(val)) {
-              device.port = 0;
-            } else {
-              device.port = clamp(val, minPort, maxPort);
-            }
+            if (!isNaN(val)) device.port = clamp(val, min, max);
+            else device.port = 0;
             configChangeCallback();
           }}
-          min={minPort}
-          max={maxPort}
+          min={min}
+          max={max}
         />
       </div>
-      {additionalFields}
+      {extra}
     </div>
   );
 };
@@ -1046,122 +988,83 @@ export class Motor extends Device {
     this.type = motorType.Generic;
     this.key = motorType.Generic;
   }
-  public override toString(): string {
-    return `<${this.key} name="${this.name}" port="${
-      isNaN(this.port) ? 0 : this.port
-    }" />`;
+  public override toString() {
+    return `<${this.key} name="${this.name}" port="${isNaN(this.port) ? 0 : this.port}" />`;
   }
   public renderAsGui(
     configChangeCallback: () => void,
     keyPrefix: string,
     onDelete?: () => void,
-  ): JSX.Element {
-    return renderStandardDevice(
-      this,
-      motorType,
-      configChangeCallback,
-      keyPrefix,
-      onDelete,
-    );
+  ) {
+    return renderStandardDevice(this, motorType, configChangeCallback, keyPrefix, onDelete);
   }
 }
-
 export class Servo extends Device {
   constructor() {
     super();
     this.type = servoType.Servo;
     this.key = servoType.Servo;
   }
-  public override toString(): string {
-    return `<${this.key} name="${this.name}" port="${
-      isNaN(this.port) ? 0 : this.port
-    }" />`;
+  public override toString() {
+    return `<${this.key} name="${this.name}" port="${isNaN(this.port) ? 0 : this.port}" />`;
   }
   public renderAsGui(
     configChangeCallback: () => void,
     keyPrefix: string,
     onDelete?: () => void,
-  ): JSX.Element {
-    return renderStandardDevice(
-      this,
-      servoType,
-      configChangeCallback,
-      keyPrefix,
-      onDelete,
-    );
+  ) {
+    return renderStandardDevice(this, servoType, configChangeCallback, keyPrefix, onDelete);
   }
 }
-
 export class Analog extends Device {
   constructor() {
     super();
     this.type = analogType.AnalogDevice;
     this.key = analogType.AnalogDevice;
   }
-  public override toString(): string {
-    return `<${this.key} name="${this.name}" port="${
-      isNaN(this.port) ? 0 : this.port
-    }" />`;
+  public override toString() {
+    return `<${this.key} name="${this.name}" port="${isNaN(this.port) ? 0 : this.port}" />`;
   }
   public renderAsGui(
     configChangeCallback: () => void,
     keyPrefix: string,
     onDelete?: () => void,
-  ): JSX.Element {
-    return renderStandardDevice(
-      this,
-      analogType,
-      configChangeCallback,
-      keyPrefix,
-      onDelete,
-    );
+  ) {
+    return renderStandardDevice(this, analogType, configChangeCallback, keyPrefix, onDelete);
   }
 }
-
 export class Digital extends Device {
   constructor() {
     super();
     this.type = digitalType.DigitalDevice;
     this.key = digitalType.DigitalDevice;
   }
-  public override toString(): string {
-    return `<${this.key} name="${this.name}" port="${
-      isNaN(this.port) ? 0 : this.port
-    }" />`;
+  public override toString() {
+    return `<${this.key} name="${this.name}" port="${isNaN(this.port) ? 0 : this.port}" />`;
   }
   public renderAsGui(
     configChangeCallback: () => void,
     keyPrefix: string,
     onDelete?: () => void,
-  ): JSX.Element {
-    return renderStandardDevice(
-      this,
-      digitalType,
-      configChangeCallback,
-      keyPrefix,
-      onDelete,
-    );
+  ) {
+    return renderStandardDevice(this, digitalType, configChangeCallback, keyPrefix, onDelete);
   }
 }
-
 export class I2c extends Device {
-  public bus: number;
+  public bus = 0;
   constructor() {
     super();
-    this.bus = 0;
     this.type = i2cType.AdafruitBNO055;
     this.key = i2cType.AdafruitBNO055;
   }
-  public override toString(): string {
-    return `<${this.key} name="${this.name}" port="${
-      isNaN(this.port) ? 0 : this.port
-    }" bus="${isNaN(this.bus) ? 0 : this.bus}" />`;
+  public override toString() {
+    return `<${this.key} name="${this.name}" port="${isNaN(this.port) ? 0 : this.port}" bus="${isNaN(this.bus) ? 0 : this.bus}" />`;
   }
   public renderAsGui(
     configChangeCallback: () => void,
     keyPrefix: string,
     onDelete?: () => void,
-  ): JSX.Element {
+  ) {
     const busField = (
       <div>
         <label style={labelStyle}>Bus: </label>
@@ -1176,13 +1079,6 @@ export class I2c extends Device {
         />
       </div>
     );
-    return renderStandardDevice(
-      this,
-      i2cType,
-      configChangeCallback,
-      keyPrefix,
-      onDelete,
-      busField,
-    );
+    return renderStandardDevice(this, i2cType, configChangeCallback, keyPrefix, onDelete, busField);
   }
 }

@@ -284,7 +284,7 @@ class HardwareConfigView extends Component<
     return (
       <div className="mt-4 rounded bg-gray-100 p-3 text-sm dark:bg-slate-800 dark:text-slate-200">
         <div className="mb-2 flex items-center justify-between">
-          <h4 className="flex items-center text-sm font-semibold">
+          <h4 className="flex items-center text-base font-semibold">
             {isReadOnly
               ? 'Read-Only Configuration'
               : viewMode === 'text'
@@ -297,7 +297,7 @@ class HardwareConfigView extends Component<
           <div className="flex items-center">
             <input
               type="text"
-              placeholder="Filename to save..."
+              placeholder="Enter Filename..."
               value={this.state.saveFilename}
               onChange={(e) => this.setState({ saveFilename: e.target.value })}
               className="mr-2 rounded-md border py-1 px-2 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
