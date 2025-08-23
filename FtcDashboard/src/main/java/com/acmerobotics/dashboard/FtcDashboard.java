@@ -100,6 +100,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private static final String PREFS_NAME = "FtcDashboard";
     private static final String PREFS_AUTO_ENABLE_KEY = "autoEnable";
 
+    private static final String HARDWARE_CATEGORY = "__hardware__";
+
     private static FtcDashboard instance;
 
     @OpModeRegistrar
@@ -1273,6 +1275,30 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      */
     public void withConfigRoot(CustomVariableConsumer function) {
         core.withConfigRoot(function);
+    }
+
+    /**
+     * Runs {@code function} with the hardware subtree of the configuration root.
+     *
+     * <p>If the top-level hardware category ("{@value #HARDWARE_CATEGORY}") does not
+     * yet exist it will be created. The provided {@link CustomVariableConsumer} is
+     * invoked while holding the same exclusive config-root lock used by
+     * {@link #withConfigRoot(CustomVariableConsumer)}, so callers may safely modify the
+     * hardware config tree inside the consumer. Do not leak references to the
+     * config tree outside the consumer.</p>
+     *
+     * @param function consumer that receives the {@link CustomVariable} representing the
+     *                 hardware category and may modify it as needed
+     */
+    public void withHardwareRoot(CustomVariableConsumer function) {
+        withConfigRoot(root -> {
+            CustomVariable hardwareVar = (CustomVariable) root.getVariable(HARDWARE_CATEGORY);
+            if (hardwareVar == null) {
+                hardwareVar = new CustomVariable();
+                root.putVariable(HARDWARE_CATEGORY, hardwareVar);
+            }
+            function.accept(hardwareVar);
+        });
     }
 
     /**

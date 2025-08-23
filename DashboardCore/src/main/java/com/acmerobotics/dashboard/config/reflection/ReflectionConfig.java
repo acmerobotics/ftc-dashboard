@@ -1,5 +1,6 @@
 package com.acmerobotics.dashboard.config.reflection;
 
+import com.acmerobotics.dashboard.config.VariableProvider;
 import com.acmerobotics.dashboard.config.variable.BasicVariable;
 import com.acmerobotics.dashboard.config.variable.ConfigVariable;
 import com.acmerobotics.dashboard.config.variable.CustomVariable;
