@@ -183,6 +183,66 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
     }
   }
 
+  renderOpModeOptions() {
+    const { opModeList, opModeInfoList } = this.props;
+
+    if (opModeList.length === 0) {
+      return <option>Loading...</option>;
+    }
+
+    // Separate grouped and ungrouped op modes
+    const groupedOpModes: Record<string, string[]> = {};
+    const ungroupedOpModes: string[] = [];
+
+    opModeInfoList.forEach((opModeInfo) => {
+      if (
+        opModeInfo.group &&
+        opModeInfo.group !== '$$$$$$$' &&
+        opModeInfo.group.trim() !== ''
+      ) {
+        // Has a valid group
+        if (!groupedOpModes[opModeInfo.group]) {
+          groupedOpModes[opModeInfo.group] = [];
+        }
+        groupedOpModes[opModeInfo.group].push(opModeInfo.name);
+      } else {
+        // No group or default group - add to ungrouped
+        ungroupedOpModes.push(opModeInfo.name);
+      }
+    });
+
+    const result = [];
+
+    // Add grouped op modes first
+    const sortedGroups = Object.keys(groupedOpModes).sort();
+    sortedGroups.forEach((group) => {
+      const sortedOpModes = groupedOpModes[group].sort();
+      result.push(
+        <optgroup key={group} label={group}>
+          {sortedOpModes.map((opMode) => (
+            <option key={opMode} value={opMode}>
+              {opMode}
+            </option>
+          ))}
+        </optgroup>,
+      );
+    });
+
+    // Add ungrouped op modes at the bottom (sorted)
+    if (ungroupedOpModes.length > 0) {
+      const sortedUngrouped = ungroupedOpModes.sort();
+      result.push(
+        ...sortedUngrouped.map((opMode) => (
+          <option key={opMode} value={opMode}>
+            {opMode}
+          </option>
+        )),
+      );
+    }
+
+    return result;
+  }
+
   render() {
     const {
       available,
@@ -273,13 +333,7 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
             }
             onChange={this.onChange}
           >
-            {opModeList.length === 0 ? (
-              <option>Loading...</option>
-            ) : (
-              opModeList
-                .sort()
-                .map((opMode: string) => <option key={opMode}>{opMode}</option>)
-            )}
+            {this.renderOpModeOptions()}
           </select>
           {this.renderButtons()}
           {errorMessage !== '' && (

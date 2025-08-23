@@ -17,6 +17,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.config.ValueProvider;
 import com.acmerobotics.dashboard.config.reflection.ReflectionConfig;
 import com.acmerobotics.dashboard.config.variable.CustomVariable;
+import com.acmerobotics.dashboard.OpModeInfo;
 import com.acmerobotics.dashboard.message.Message;
 import com.acmerobotics.dashboard.message.redux.InitOpMode;
 import com.acmerobotics.dashboard.message.redux.ReceiveGamepadState;
@@ -216,6 +217,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private final Mutex<OpModeAndStatus> activeOpMode = new Mutex<>(new OpModeAndStatus());
 
     private final Mutex<List<String>> opModeList = new Mutex<>(new ArrayList<>());
+    private final Mutex<List<OpModeInfo>> opModeInfoList = new Mutex<>(new ArrayList<>());
 
     private ExecutorService gamepadWatchdogExecutor;
     private long lastGamepadTimestamp;
@@ -265,13 +267,32 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
             opModeList.with(l -> {
                 l.clear();
+                List<OpModeInfo> infoList = new ArrayList<>();
+                
                 for (OpModeMeta opModeMeta : RegisteredOpModes.getInstance().getOpModes()) {
                     if (opModeMeta.flavor != OpModeMeta.Flavor.SYSTEM) {
                         l.add(opModeMeta.name);
+                        infoList.add(new OpModeInfo(opModeMeta.name, opModeMeta.group));
                     }
                 }
                 Collections.sort(l);
-                sendAll(new ReceiveOpModeList(l));
+                
+                // Sort op mode info list by group, then by name
+                infoList.sort((a, b) -> {
+                    int groupComparison = a.getGroup().compareToIgnoreCase(b.getGroup());
+                    if (groupComparison != 0) {
+                        return groupComparison;
+                    }
+                    return a.getName().compareToIgnoreCase(b.getName());
+                });
+                
+                // Update the shared opModeInfoList
+                opModeInfoList.with(infoListShared -> {
+                    infoListShared.clear();
+                    infoListShared.addAll(infoList);
+                });
+                
+                sendAll(new ReceiveOpModeList(l, infoList));
             });
         }
     }
@@ -772,7 +793,9 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
             opModeList.with(l -> {
                 if (l.size() > 0) {
-                    send(new ReceiveOpModeList(l));
+                    opModeInfoList.with(infoList -> {
+                        send(new ReceiveOpModeList(l, new ArrayList<>(infoList)));
+                    });
                 }
             });
 
