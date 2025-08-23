@@ -409,8 +409,8 @@ class HardwareConfigView extends Component<
                   this.state.selectedHardwareConfig ===
                     this.props.currentHardwareConfig ||
                   !this.state.selectedHardwareConfig
-                    ? 'opacity-0 select-none'
-                    : 'opacity-100 select-auto'
+                    ? 'select-none opacity-0'
+                    : 'select-auto opacity-100'
                 }
               `}
             >
