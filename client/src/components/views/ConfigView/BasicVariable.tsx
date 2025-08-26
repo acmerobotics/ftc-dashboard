@@ -119,6 +119,19 @@ class BasicVariable extends React.Component<Props> {
             />
           );
           break;
+        case 'readonly_string':
+          input = (
+            <TextInput
+              id={path}
+              value={state.__newValue as number | string}
+              valid={state.__valid}
+              validate={validateString}
+              onChange={onChange}
+              onSave={onSave}
+              readOnly={true}
+            />
+          );
+          break;
         case 'boolean':
           input = (
             <BooleanInput
