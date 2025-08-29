@@ -1,4 +1,4 @@
-import { Component, ChangeEvent } from 'react';
+import React, { Component, ChangeEvent, createRef, RefObject } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
 import { RootState } from '@/store/reducers';
@@ -66,6 +66,8 @@ class HardwareConfigView extends Component<
   HardwareConfigViewProps,
   HardwareConfigViewState
 > {
+  textareaRef: RefObject<HTMLTextAreaElement>;
+
   constructor(props: HardwareConfigViewProps) {
     super(props);
 
@@ -77,10 +79,64 @@ class HardwareConfigView extends Component<
       saveFilename: '',
     };
 
+    this.textareaRef = createRef<HTMLTextAreaElement>();
     this.onChange = this.onChange.bind(this);
     this.toggleViewMode = this.toggleViewMode.bind(this);
     this.handleRobotGuiChange = this.handleRobotGuiChange.bind(this);
     this.parseEditedXmlToRobot = this.parseEditedXmlToRobot.bind(this);
+    this.adjustTextareaHeight = this.adjustTextareaHeight.bind(this);
+  }
+
+  adjustTextareaHeight() {
+    const textarea = this.textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  }
+
+  componentDidMount() {
+    this.adjustTextareaHeight();
+  }
+
+  componentDidUpdate(
+    prevProps: Readonly<HardwareConfigViewProps>,
+    prevState: Readonly<HardwareConfigViewState>,
+  ) {
+    const { currentHardwareConfig, hardwareConfigFiles, hardwareConfigList } =
+      this.props;
+    const { selectedHardwareConfig } = this.state;
+
+    if (prevProps.currentHardwareConfig !== currentHardwareConfig) {
+      const idx = hardwareConfigList.indexOf(currentHardwareConfig);
+      const newText = idx !== -1 ? hardwareConfigFiles[idx] : '';
+      this.parseEditedXmlToRobot(newText);
+      this.setState({
+        selectedHardwareConfig: currentHardwareConfig,
+        editedConfigText: newText,
+        saveFilename: currentHardwareConfig,
+      });
+      return;
+    }
+
+    if (
+      prevProps.hardwareConfigFiles !== hardwareConfigFiles &&
+      selectedHardwareConfig
+    ) {
+      const idx = hardwareConfigList.indexOf(selectedHardwareConfig);
+      if (idx !== -1) {
+        const newText = hardwareConfigFiles[idx];
+        this.parseEditedXmlToRobot(newText);
+        this.setState({ editedConfigText: newText });
+      }
+    }
+
+    if (
+      prevState.editedConfigText !== this.state.editedConfigText ||
+      prevState.viewMode !== this.state.viewMode
+    ) {
+      this.adjustTextareaHeight();
+    }
   }
 
   parseEditedXmlToRobot(xmlText?: string): boolean {
@@ -135,36 +191,6 @@ class HardwareConfigView extends Component<
       saveFilename: selected,
       viewMode: parseSuccess ? this.state.viewMode : 'text',
     });
-  }
-
-  componentDidUpdate(prevProps: Readonly<HardwareConfigViewProps>) {
-    const { currentHardwareConfig, hardwareConfigFiles, hardwareConfigList } =
-      this.props;
-    const { selectedHardwareConfig } = this.state;
-
-    if (prevProps.currentHardwareConfig !== currentHardwareConfig) {
-      const idx = hardwareConfigList.indexOf(currentHardwareConfig);
-      const newText = idx !== -1 ? hardwareConfigFiles[idx] : '';
-      this.parseEditedXmlToRobot(newText);
-      this.setState({
-        selectedHardwareConfig: currentHardwareConfig,
-        editedConfigText: newText,
-        saveFilename: currentHardwareConfig,
-      });
-      return;
-    }
-
-    if (
-      prevProps.hardwareConfigFiles !== hardwareConfigFiles &&
-      selectedHardwareConfig
-    ) {
-      const idx = hardwareConfigList.indexOf(selectedHardwareConfig);
-      if (idx !== -1) {
-        const newText = hardwareConfigFiles[idx];
-        this.parseEditedXmlToRobot(newText);
-        this.setState({ editedConfigText: newText });
-      }
-    }
   }
 
   toggleViewMode() {
@@ -287,7 +313,7 @@ class HardwareConfigView extends Component<
           <h4 className="flex items-center text-base font-semibold">
             <span
               className={`
-                inline-block w-3 text-500 ml-1
+                text-500 ml-1 inline-block w-3
                 ${this.hasUnsavedChanges() ? 'opacity-100' : 'opacity-0'}
               `}
             >
@@ -318,19 +344,20 @@ class HardwareConfigView extends Component<
             >
               {this.state.viewMode === 'text'
                 ? 'Switch to GUI'
-                : 'Switch to Text Editor'}
+                : 'Switch to Text'}
             </ActionButton>
           </div>
         </div>
 
         {this.state.viewMode === 'text' ? (
           <textarea
+            ref={this.textareaRef}
             className="w-full rounded border bg-white p-2 font-mono text-sm shadow-inner dark:bg-slate-700 dark:text-slate-100"
-            rows={20}
             value={this.state.editedConfigText}
             onChange={(e) =>
               this.setState({ editedConfigText: e.target.value })
             }
+            style={{ resize: 'none', overflow: 'hidden' }}
             placeholder=""
           />
         ) : (
