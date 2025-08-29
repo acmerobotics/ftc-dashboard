@@ -285,14 +285,19 @@ class HardwareConfigView extends Component<
       <div className="mt-4 rounded bg-gray-100 p-3 text-sm dark:bg-slate-800 dark:text-slate-200">
         <div className="mb-2 flex items-center justify-between">
           <h4 className="flex items-center text-base font-semibold">
+            <span
+              className={`
+                inline-block w-3 text-500 ml-1
+                ${this.hasUnsavedChanges() ? 'opacity-100' : 'opacity-0'}
+              `}
+            >
+              *
+            </span>
             {isReadOnly
               ? 'Read-Only Configuration'
               : viewMode === 'text'
               ? 'Edit Configuration (XML)'
               : 'Edit Configuration (GUI)'}
-            {this.hasUnsavedChanges() && (
-              <span className="text-500 ml-1">*</span>
-            )}
           </h4>
           <div className="flex items-center">
             <input
@@ -369,6 +374,20 @@ class HardwareConfigView extends Component<
         </div>
         <BaseViewBody>
           <div className="flex items-center space-x-2">
+            <span
+              className={`
+                ml-0.5
+                ${
+                  this.state.selectedHardwareConfig ===
+                    this.props.currentHardwareConfig ||
+                  !this.state.selectedHardwareConfig
+                    ? 'select-none opacity-0'
+                    : 'select-auto opacity-100'
+                }
+              `}
+            >
+              *
+            </span>
             <select
               className={`
                 m-1 rounded border border-gray-300 bg-gray-200 p-1 pr-6
@@ -401,22 +420,6 @@ class HardwareConfigView extends Component<
                 ]
               )}
             </select>
-
-            <span
-              className={`
-                ml-0.5
-                ${
-                  this.state.selectedHardwareConfig ===
-                    this.props.currentHardwareConfig ||
-                  !this.state.selectedHardwareConfig
-                    ? 'select-none opacity-0'
-                    : 'select-auto opacity-100'
-                }
-              `}
-            >
-              *
-            </span>
-
             <div className="flex space-x-1">
               {this.renderSetButton()}
               {this.renderDeleteButton()}

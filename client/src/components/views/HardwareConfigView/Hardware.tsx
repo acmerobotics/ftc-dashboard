@@ -2,6 +2,24 @@ import React from 'react';
 import { ReactComponent as RemoveCircleOutline } from '@/assets/icons/remove_circle_outline.svg';
 import { ReactComponent as ExpandMore } from '@/assets/icons/expand_more.svg';
 
+export interface MaxDevices {
+  controlHubs: number;
+  expansionHubs: number;
+  motors: number;
+  servos: number;
+  digitalDevices: number;
+  analogInputDevices: number;
+}
+
+export const maxDevices: MaxDevices = {
+  controlHubs: 1,
+  expansionHubs: 1,
+  motors: 4,
+  servos: 6,
+  digitalDevices: 8,
+  analogInputDevices: 4,
+};
+
 interface RobotSectionState {
   controlHubs: boolean;
   expansionHubs: boolean;
@@ -186,6 +204,9 @@ export class Robot {
     configChangeCallback: () => void,
     keyPrefix: string,
   ): JSX.Element {
+    const canAddControlHub = this.controlHubs.length >= maxDevices.controlHubs;
+    const canAddExpansionHub = this.expansionHubs.length >= maxDevices.expansionHubs;
+
     const isControlHubsCollapsed = this.collapsedSections.controlHubs;
     const isExpansionHubsCollapsed = this.collapsedSections.expansionHubs;
     const isOtherDevicesCollapsed = this.collapsedSections.otherDevices;
@@ -226,7 +247,7 @@ export class Robot {
                 Control Hubs {`(${this.controlHubs.length})`}{' '}
               </h4>
               <button
-                style={addButtonStyle}
+                style={canAddControlHub ? addButtonDisabledStyle : addButtonStyle}
                 onClick={(e) => {
                   e.stopPropagation();
                   if (isControlHubsCollapsed)
@@ -234,6 +255,7 @@ export class Robot {
                   this.controlHubs.push(new ControlHub());
                   configChangeCallback();
                 }}
+                disabled={canAddControlHub}
               >
                 +
               </button>
@@ -281,7 +303,7 @@ export class Robot {
                 Expansion Hubs {`(${this.expansionHubs.length})`}{' '}
               </h4>
               <button
-                style={addButtonStyle}
+                style={canAddExpansionHub ? addButtonDisabledStyle : addButtonStyle}
                 onClick={(e) => {
                   e.stopPropagation();
                   if (isExpansionHubsCollapsed)
@@ -289,6 +311,7 @@ export class Robot {
                   this.expansionHubs.push(new ExpansionHub());
                   configChangeCallback();
                 }}
+                disabled={canAddExpansionHub}
               >
                 +
               </button>
@@ -456,6 +479,13 @@ const addButtonStyle: React.CSSProperties = {
   alignItems: 'center',
   justifyContent: 'center',
 };
+const addButtonDisabledStyle: React.CSSProperties = {
+  ...addButtonStyle,
+  backgroundColor: '#e5e7eb',
+  border: '1px solid #9ca3af',
+  color: '#6b7280',
+  cursor: 'not-allowed',
+};
 const hubDeleteButtonStyle: React.CSSProperties = {
   ...deleteButtonStyle,
   position: 'absolute',
@@ -474,7 +504,6 @@ const toggleButtonStyle: React.CSSProperties = {
   background: 'none',
   border: 'none',
   fontSize: '1rem',
-  cursor: 'pointer',
   padding: '0 0.25rem',
   color: '#4b5563',
 };
@@ -542,6 +571,7 @@ export abstract class Hub extends Device {
       devs: Device[],
       addCb: () => void,
       renderCb: (d: Device, i: number) => JSX.Element,
+      canAdd: boolean,
     ) => {
       const collapsed = this.collapsedSections[name];
       return (
@@ -558,12 +588,16 @@ export abstract class Hub extends Device {
                 {title} {`(${devs.length})`}{' '}
               </h5>
               <button
-                style={{ ...addButtonStyle, marginLeft: 0 }}
+                style={{
+                    ...(canAdd ? addButtonStyle : addButtonDisabledStyle),
+                    marginLeft: 0,
+                  }}
                 onClick={(e) => {
                   e.stopPropagation();
                   if (collapsed) this.collapsedSections[name] = false;
                   addCb();
                 }}
+                disabled={!canAdd}
               >
                 +
               </button>
@@ -652,6 +686,7 @@ export abstract class Hub extends Device {
                 configChangeCallback();
               },
             ),
+          this.motors.length < maxDevices.motors,
         )}
 
         {renderCollapsibleSection(
@@ -671,6 +706,7 @@ export abstract class Hub extends Device {
                 configChangeCallback();
               },
             ),
+          this.servos.length < maxDevices.servos,
         )}
 
         {renderCollapsibleSection(
@@ -690,6 +726,7 @@ export abstract class Hub extends Device {
                 configChangeCallback();
               },
             ),
+          true,
         )}
 
         {renderCollapsibleSection(
@@ -709,6 +746,7 @@ export abstract class Hub extends Device {
                 configChangeCallback();
               },
             ),
+          this.analogInputDevices.length < maxDevices.analogInputDevices,
         )}
 
         {renderCollapsibleSection(
@@ -728,6 +766,7 @@ export abstract class Hub extends Device {
                 configChangeCallback();
               },
             ),
+          this.digitalDevices.length < maxDevices.digitalDevices,
         )}
       </div>
     );
@@ -971,10 +1010,10 @@ const renderStandardDevice = (
 ) => {
   const min = 0;
   let max = 255;
-  if (typeObj === motorType) max = 3;
-  if (typeObj === servoType) max = 5;
-  if (typeObj === analogType) max = 3;
-  if (typeObj === digitalType) max = 7;
+  if (typeObj === motorType) max = maxDevices.motors - 1;
+  if (typeObj === servoType) max = maxDevices.servos - 1;
+  if (typeObj === analogType) max = maxDevices.analogInputDevices - 1;
+  if (typeObj === digitalType) max = maxDevices.digitalDevices - 1;
 
   return (
     <div key={keyPrefix} style={deviceContainerStyle}>
