@@ -11,9 +11,8 @@ public class TestRobotConfigManager {
     private String activeOpMode = "Default";
 
     public TestRobotConfigManager() {
-        addConfig("Config One", "<xml>config one data</xml>", false);
-        addConfig("testreadonly", "<xml>config two data</xml>", true);
-        addConfig("Default", "<xml>default data</xml>", false);
+        addConfig("Test Read Only", "<xml>read only</xml>", true);
+        addConfig("Default", "<xml>default</xml>", false);
     }
 
     private void addConfig(String name, String xml, boolean isReadOnly) {

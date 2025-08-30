@@ -88,15 +88,14 @@ class HardwareConfigView extends Component<
   }
 
   adjustTextareaHeight() {
-    const textarea = this.textareaRef.current;
-    if (textarea) {
-      textarea.style.height = 'auto';
-      textarea.style.height = `${textarea.scrollHeight}px`;
-    }
-  }
+    const textarea = this.textareaRef.current
+    if (!textarea) return
 
-  componentDidMount() {
-    this.adjustTextareaHeight();
+    const newHeight = textarea.scrollHeight
+    if (textarea.offsetHeight !== newHeight) {
+      textarea.style.height = 'auto'
+      textarea.style.height = `${newHeight}px`
+    }
   }
 
   componentDidUpdate(
@@ -105,7 +104,9 @@ class HardwareConfigView extends Component<
   ) {
     const { currentHardwareConfig, hardwareConfigFiles, hardwareConfigList } =
       this.props;
-    const { selectedHardwareConfig } = this.state;
+    const { selectedHardwareConfig, editedConfigText, viewMode } = this.state;
+
+    this.adjustTextareaHeight();
 
     if (prevProps.currentHardwareConfig !== currentHardwareConfig) {
       const idx = hardwareConfigList.indexOf(currentHardwareConfig);
@@ -127,16 +128,9 @@ class HardwareConfigView extends Component<
       if (idx !== -1) {
         const newText = hardwareConfigFiles[idx];
         this.parseEditedXmlToRobot(newText);
-        this.setState({ editedConfigText: newText });
-        this.adjustTextareaHeight();
+        this.setState({ editedConfigText: newText }, () => {
+        });
       }
-    }
-
-    if (
-      prevState.editedConfigText !== this.state.editedConfigText ||
-      prevState.viewMode !== this.state.viewMode
-    ) {
-      this.adjustTextareaHeight();
     }
   }
 
