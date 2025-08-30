@@ -12,7 +12,7 @@ public class TestRobotConfigManager {
 
     public TestRobotConfigManager() {
         addConfig("Config One", "<xml>config one data</xml>", false);
-        addConfig("Config Two", "<xml>config two data</xml>", false);
+        addConfig("testreadonly", "<xml>config two data</xml>", true);
         addConfig("Default", "<xml>default data</xml>", false);
     }
 

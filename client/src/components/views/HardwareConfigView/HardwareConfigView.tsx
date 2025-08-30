@@ -128,6 +128,7 @@ class HardwareConfigView extends Component<
         const newText = hardwareConfigFiles[idx];
         this.parseEditedXmlToRobot(newText);
         this.setState({ editedConfigText: newText });
+        this.adjustTextareaHeight();
       }
     }
 
@@ -236,41 +237,62 @@ class HardwareConfigView extends Component<
       viewMode,
       robotInstance,
       saveFilename,
-    } = this.state;
-    const trimmedSaveFilename = saveFilename.trim();
-    const filenameToUseForSave = trimmedSaveFilename || selectedHardwareConfig;
-    const canSave =
-      !!filenameToUseForSave && filenameToUseForSave !== '<No Config Set>';
+    } = this.state
+    const { hardwareConfigList, isReadOnlyList } = this.props
 
-    let xmlContentToSave: string;
+    const trimmedSaveFilename = saveFilename.trim()
+    const idx = hardwareConfigList.indexOf(trimmedSaveFilename)
+    const isReadOnly = idx !== -1 && isReadOnlyList[idx]
+
+    const isInvalid =
+      !trimmedSaveFilename ||
+      trimmedSaveFilename === '<No Config Set>' ||
+      isReadOnly
+
+    const canSave = !isInvalid
+
+    let xmlContentToSave: string
     if (viewMode === 'gui') {
-      xmlContentToSave = robotInstance.toString();
+      xmlContentToSave = robotInstance.toString()
     } else {
-      xmlContentToSave = editedConfigText;
+      xmlContentToSave = editedConfigText
     }
 
     return (
       <ActionButton
-        className="border-green-400 bg-green-300 transition-colors dark:border-transparent dark:bg-green-600 dark:text-white dark:hover:border-green-400/80 dark:focus:bg-green-700"
+        className={`
+          ${canSave
+            ? 'border-green-400 bg-green-300 dark:border-transparent dark:bg-green-600 dark:text-white dark:hover:border-green-400/80 dark:focus:bg-green-700'
+            : 'border-red-400 bg-red-300 dark:border-transparent dark:bg-red-600 dark:text-white dark:hover:border-red-500/80 dark:focus:bg-red-700'
+          }
+        `}
         onClick={() => {
-          this.props.writeHardwareConfig(
-            filenameToUseForSave,
-            xmlContentToSave,
-          );
+          if (!canSave) {
+            if (!trimmedSaveFilename || trimmedSaveFilename === '<No Config Set>') {
+              window.alert('Please enter a new filename to save changes.')
+            } else if (isReadOnly) {
+              window.alert('This filename is read-only. Please enter a new filename to save.')
+            }
+            return
+          }
+          this.props.writeHardwareConfig(trimmedSaveFilename, xmlContentToSave)
           this.setState({
-            selectedHardwareConfig: filenameToUseForSave,
-            saveFilename: filenameToUseForSave,
-          });
+            selectedHardwareConfig: trimmedSaveFilename,
+            saveFilename: trimmedSaveFilename,
+          })
         }}
-        disabled={!canSave}
       >
         Save
       </ActionButton>
-    );
+    )
   }
 
   renderDeleteButton() {
-    const { selectedHardwareConfig } = this.state;
+    const { selectedHardwareConfig } = this.state
+    const { hardwareConfigList, isReadOnlyList } = this.props
+
+    const idx = hardwareConfigList.indexOf(selectedHardwareConfig)
+    const isReadOnly = idx !== -1 && isReadOnlyList[idx]
 
     return (
       <ActionButton
@@ -281,23 +303,24 @@ class HardwareConfigView extends Component<
               `Are you sure you want to delete "${selectedHardwareConfig}"? This action cannot be undone.`,
             )
           ) {
-            this.props.deleteHardwareConfig(selectedHardwareConfig);
+            this.props.deleteHardwareConfig(selectedHardwareConfig)
             this.setState({
               selectedHardwareConfig: '',
               editedConfigText: '',
               saveFilename: '',
               robotInstance: new Robot(),
-            });
+            })
           }
         }}
         disabled={
           !this.state.selectedHardwareConfig ||
-          this.state.selectedHardwareConfig === '<No Config Set>'
+          this.state.selectedHardwareConfig === '<No Config Set>' ||
+          isReadOnly
         }
       >
         Delete
       </ActionButton>
-    );
+    )
   }
 
   renderEditor() {
@@ -320,7 +343,9 @@ class HardwareConfigView extends Component<
               *
             </span>
             {isReadOnly
-              ? 'Read-Only Configuration'
+              ? viewMode === 'text'
+              ? 'Read-Only Configuration (XML)'
+              : 'Read-Only Configuration (GUI)'
               : viewMode === 'text'
               ? 'Edit Configuration (XML)'
               : 'Edit Configuration (GUI)'}
@@ -439,11 +464,16 @@ class HardwareConfigView extends Component<
                   ...hardwareConfigList
                     .slice()
                     .sort()
-                    .map((configName: string) => (
-                      <option key={configName} value={configName}>
-                        {configName}
-                      </option>
-                    )),
+                    .map((configName: string) => {
+                      const idx = this.props.hardwareConfigList.indexOf(configName)
+                      const isReadOnly =
+                        idx !== -1 && this.props.isReadOnlyList[idx]
+                      return (
+                        <option key={configName} value={configName}>
+                          {configName} {isReadOnly ? '(Read-Only)' : ''}
+                        </option>
+                      )
+                    }),
                 ]
               )}
             </select>
