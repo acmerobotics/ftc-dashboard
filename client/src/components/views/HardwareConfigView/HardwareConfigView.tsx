@@ -224,6 +224,36 @@ class HardwareConfigView extends Component<
     );
   }
 
+renderResetButton() {
+  const { selectedHardwareConfig } = this.state
+  const { hardwareConfigList, hardwareConfigFiles } = this.props
+
+  const idx = hardwareConfigList.indexOf(selectedHardwareConfig)
+  const originalText = idx !== -1 ? hardwareConfigFiles[idx] : ''
+
+  return (
+    <ActionButton
+      className="ml-2 border-yellow-400 bg-yellow-300 transition-colors dark:border-transparent dark:bg-yellow-600 dark:text-white dark:hover:border-yellow-500/80 dark:focus:bg-yellow-700"
+      onClick={() => {
+        if (!selectedHardwareConfig || selectedHardwareConfig === '<No Config Set>') {
+          return
+        }
+        this.parseEditedXmlToRobot(originalText)
+        this.setState({
+          editedConfigText: originalText,
+          saveFilename: selectedHardwareConfig,
+        }, () => this.adjustTextareaHeight())
+      }}
+      disabled={
+        !selectedHardwareConfig ||
+        selectedHardwareConfig === '<No Config Set>'
+      }
+    >
+      Reset
+    </ActionButton>
+  )
+}
+
   renderSaveButton() {
     const {
       selectedHardwareConfig,
@@ -343,6 +373,9 @@ class HardwareConfigView extends Component<
               : viewMode === 'text'
               ? 'Edit Configuration (XML)'
               : 'Edit Configuration (GUI)'}
+            <span className="font-normal">
+              {this.renderResetButton()}
+            </span>
           </h4>
           <div className="flex items-center">
             <input
