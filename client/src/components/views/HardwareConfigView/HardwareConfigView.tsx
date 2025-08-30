@@ -248,12 +248,10 @@ class HardwareConfigView extends Component<
             return;
           }
           this.parseEditedXmlToRobot(originalText);
-          this.setState(
-            {
-              editedConfigText: originalText,
-              saveFilename: selectedHardwareConfig,
-            },
-          );
+          this.setState({
+            editedConfigText: originalText,
+            saveFilename: selectedHardwareConfig,
+          });
         }}
         disabled={
           !selectedHardwareConfig ||
@@ -417,7 +415,10 @@ class HardwareConfigView extends Component<
             className="w-full rounded border bg-white p-2 font-mono text-sm shadow-inner dark:bg-slate-700 dark:text-slate-100"
             value={this.state.editedConfigText}
             onChange={(e) => {
-              this.setState({ editedConfigText: e.target.value }, this.adjustTextareaHeight);
+              this.setState(
+                { editedConfigText: e.target.value },
+                this.adjustTextareaHeight,
+              );
             }}
             style={{ resize: 'none', overflow: 'hidden' }}
             placeholder=""
