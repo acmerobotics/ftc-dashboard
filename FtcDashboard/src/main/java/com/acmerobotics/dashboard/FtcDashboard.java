@@ -113,6 +113,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private static final String PREFS_NAME = "FtcDashboard";
     private static final String PREFS_AUTO_ENABLE_KEY = "autoEnable";
 
+    private static final String HARDWARE_CATEGORY = "__hardware__";
+
     private static FtcDashboard instance;
 
     @OpModeRegistrar
@@ -1423,6 +1425,30 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     /**
+     * Runs {@code function} with the hardware subtree of the configuration root.
+     *
+     * <p>If the top-level hardware category ("{@value #HARDWARE_CATEGORY}") does not
+     * yet exist it will be created. The provided {@link CustomVariableConsumer} is
+     * invoked while holding the same exclusive config-root lock used by
+     * {@link #withConfigRoot(CustomVariableConsumer)}, so callers may safely modify the
+     * hardware config tree inside the consumer. Do not leak references to the
+     * config tree outside the consumer.</p>
+     *
+     * @param function consumer that receives the {@link CustomVariable} representing the
+     *                 hardware category and may modify it as needed
+     */
+    public void withHardwareRoot(CustomVariableConsumer function) {
+        withConfigRoot(root -> {
+            CustomVariable hardwareVar = (CustomVariable) root.getVariable(HARDWARE_CATEGORY);
+            if (hardwareVar == null) {
+                hardwareVar = new CustomVariable();
+                root.putVariable(HARDWARE_CATEGORY, hardwareVar);
+            }
+            function.accept(hardwareVar);
+        });
+    }
+
+    /**
      * Add config variable with custom provider that is automatically removed when op mode ends.
      *
      * @param category top-level category
@@ -1555,35 +1581,40 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     public static void copyIntoSdkGamepad(ReceiveGamepadState.Gamepad src, Gamepad dst) {
-        dst.left_stick_x = src.left_stick_x;
-        dst.left_stick_y = src.left_stick_y;
-        dst.right_stick_x = src.right_stick_x;
-        dst.right_stick_y = src.right_stick_y;
+        // We need to copy from an intermediate so the SDK can handle the rising/falling edge detection
+        // Also, doing it like this means the SDK handles equivalencies between
+        // standard and Playstation buttons (i.e. converting A -> Cross and vice versa)
+        Gamepad intermediate = new Gamepad();
+        intermediate.left_stick_x = src.left_stick_x;
+        intermediate.left_stick_y = src.left_stick_y;
+        intermediate.right_stick_x = src.right_stick_x;
+        intermediate.right_stick_y = src.right_stick_y;
 
-        dst.dpad_up = src.dpad_up;
-        dst.dpad_down = src.dpad_down;
-        dst.dpad_left = src.dpad_left;
-        dst.dpad_right = src.dpad_right;
+        intermediate.dpad_up = src.dpad_up;
+        intermediate.dpad_down = src.dpad_down;
+        intermediate.dpad_left = src.dpad_left;
+        intermediate.dpad_right = src.dpad_right;
 
-        dst.a = src.a;
-        dst.b = src.b;
-        dst.x = src.x;
-        dst.y = src.y;
+        intermediate.a = src.a;
+        intermediate.b = src.b;
+        intermediate.x = src.x;
+        intermediate.y = src.y;
 
-        dst.guide = src.guide;
-        dst.start = src.start;
-        dst.back = src.back;
+        intermediate.guide = src.guide;
+        intermediate.start = src.start;
+        intermediate.back = src.back;
 
-        dst.left_bumper = src.left_bumper;
-        dst.right_bumper = src.right_bumper;
+        intermediate.left_bumper = src.left_bumper;
+        intermediate.right_bumper = src.right_bumper;
 
-        dst.left_stick_button = src.left_stick_button;
-        dst.right_stick_button = src.right_stick_button;
+        intermediate.left_stick_button = src.left_stick_button;
+        intermediate.right_stick_button = src.right_stick_button;
 
-        dst.left_trigger = src.left_trigger;
-        dst.right_trigger = src.right_trigger;
+        intermediate.left_trigger = src.left_trigger;
+        intermediate.right_trigger = src.right_trigger;
 
-        dst.touchpad = src.touchpad;
+        intermediate.touchpad = src.touchpad;
+        dst.copy(intermediate);
     }
 
     private void updateGamepads(ReceiveGamepadState.Gamepad gamepad1,

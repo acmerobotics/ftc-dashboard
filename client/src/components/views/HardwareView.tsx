@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 
-import CustomVariable from './CustomVariable';
+import CustomVariable from './ConfigView/CustomVariable';
 import BaseView, {
   BaseViewProps,
   BaseViewHeadingProps,
@@ -70,44 +70,59 @@ function validAndModified(state: ConfigVarState): ConfigVar | null {
   }
 }
 
-type ConfigViewProps = BaseViewProps & BaseViewHeadingProps;
+type HardwareViewProps = BaseViewProps & BaseViewHeadingProps;
 
-const ConfigView = ({
+const HardwareView = ({
   id,
   isDraggable = false,
   isUnlocked = false,
-}: ConfigViewProps) => {
+}: HardwareViewProps) => {
   const dispatch = useAppDispatch();
 
   const configRoot = useSelector(
     (state: RootState) => state.config.configRoot,
   ) as CustomVarState;
 
-  const rootValue = configRoot.__value;
+  const hardwareRoot = (configRoot.__value?.[
+    HARDWARE_CATEGORY
+  ] as CustomVarState) || {
+    __type: 'custom' as const,
+    __value: null,
+  };
+
+  const rootValue = hardwareRoot.__value;
   if (rootValue === null) {
-    return null;
+    return (
+      <BaseView isUnlocked={isUnlocked}>
+        <BaseViewHeading isDraggable={isDraggable}>Hardware</BaseViewHeading>
+        <BaseViewBody className="flex-center text-center text-white">
+          Run the Hardware op mode to get started
+        </BaseViewBody>
+      </BaseView>
+    );
   }
 
-  const sortedKeys = Object.keys(rootValue).filter(
-    (key) => key !== HARDWARE_CATEGORY,
-  );
+  const sortedKeys = Object.keys(rootValue);
   sortedKeys.sort();
 
   return (
     <BaseView isUnlocked={isUnlocked}>
       <div className="flex">
-        <BaseViewHeading isDraggable={isDraggable}>
-          Configuration
-        </BaseViewHeading>
+        <BaseViewHeading isDraggable={isDraggable}>Hardware</BaseViewHeading>
         <BaseViewIcons>
           <BaseViewIconButton
             title="Save Changes"
             onClick={() => {
-              const configDiff = validAndModified(configRoot);
-              if (configDiff != null) {
+              const hardwareDiff = validAndModified(hardwareRoot);
+              if (hardwareDiff != null) {
                 dispatch({
                   type: 'SAVE_CONFIG',
-                  configDiff,
+                  configDiff: {
+                    __type: 'custom',
+                    __value: {
+                      [HARDWARE_CATEGORY]: hardwareDiff,
+                    },
+                  },
                 });
               }
             }}
@@ -141,13 +156,19 @@ const ConfigView = ({
                     type: 'UPDATE_CONFIG',
                     configRoot: {
                       __type: 'custom',
-                      __value: sortedKeys.reduce(
-                        (acc, key2) => ({
-                          ...acc,
-                          [key2]: key === key2 ? newState : rootValue[key2],
-                        }),
-                        {},
-                      ),
+                      __value: {
+                        ...configRoot.__value,
+                        [HARDWARE_CATEGORY]: {
+                          __type: 'custom',
+                          __value: sortedKeys.reduce(
+                            (acc, key2) => ({
+                              ...acc,
+                              [key2]: key === key2 ? newState : rootValue[key2],
+                            }),
+                            {},
+                          ),
+                        },
+                      },
                     },
                   })
                 }
@@ -157,7 +178,12 @@ const ConfigView = ({
                     configDiff: {
                       __type: 'custom',
                       __value: {
-                        [key]: variable,
+                        [HARDWARE_CATEGORY]: {
+                          __type: 'custom',
+                          __value: {
+                            [key]: variable,
+                          },
+                        },
                       },
                     },
                   })
@@ -171,4 +197,4 @@ const ConfigView = ({
   );
 };
 
-export default ConfigView;
+export default HardwareView;
