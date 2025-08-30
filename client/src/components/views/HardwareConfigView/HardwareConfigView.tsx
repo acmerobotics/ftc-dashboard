@@ -88,23 +88,20 @@ class HardwareConfigView extends Component<
   }
 
   adjustTextareaHeight() {
-    const textarea = this.textareaRef.current
-    if (!textarea) return
+    const textarea = this.textareaRef.current;
+    if (!textarea) return;
 
-    const newHeight = textarea.scrollHeight
+    const newHeight = textarea.scrollHeight;
     if (textarea.offsetHeight !== newHeight) {
-      textarea.style.height = 'auto'
-      textarea.style.height = `${newHeight}px`
+      textarea.style.height = 'auto';
+      textarea.style.height = `${newHeight}px`;
     }
   }
 
-  componentDidUpdate(
-    prevProps: Readonly<HardwareConfigViewProps>,
-    prevState: Readonly<HardwareConfigViewState>,
-  ) {
+  componentDidUpdate(prevProps: Readonly<HardwareConfigViewProps>) {
     const { currentHardwareConfig, hardwareConfigFiles, hardwareConfigList } =
       this.props;
-    const { selectedHardwareConfig, editedConfigText, viewMode } = this.state;
+    const { selectedHardwareConfig } = this.state;
 
     this.adjustTextareaHeight();
 
@@ -128,8 +125,7 @@ class HardwareConfigView extends Component<
       if (idx !== -1) {
         const newText = hardwareConfigFiles[idx];
         this.parseEditedXmlToRobot(newText);
-        this.setState({ editedConfigText: newText }, () => {
-        });
+        this.setState({ editedConfigText: newText });
       }
     }
   }
@@ -224,99 +220,106 @@ class HardwareConfigView extends Component<
     );
   }
 
-renderResetButton() {
-  const { selectedHardwareConfig } = this.state
-  const { hardwareConfigList, hardwareConfigFiles } = this.props
+  renderResetButton() {
+    const { selectedHardwareConfig } = this.state;
+    const { hardwareConfigList, hardwareConfigFiles } = this.props;
 
-  const idx = hardwareConfigList.indexOf(selectedHardwareConfig)
-  const originalText = idx !== -1 ? hardwareConfigFiles[idx] : ''
+    const idx = hardwareConfigList.indexOf(selectedHardwareConfig);
+    const originalText = idx !== -1 ? hardwareConfigFiles[idx] : '';
 
-  return (
-    <ActionButton
-      className="ml-2 border-yellow-400 bg-yellow-300 transition-colors dark:border-transparent dark:bg-yellow-600 dark:text-white dark:hover:border-yellow-500/80 dark:focus:bg-yellow-700"
-      onClick={() => {
-        if (!selectedHardwareConfig || selectedHardwareConfig === '<No Config Set>') {
-          return
+    return (
+      <ActionButton
+        className="ml-2 border-yellow-400 bg-yellow-300 transition-colors dark:border-transparent dark:bg-yellow-600 dark:text-white dark:hover:border-yellow-500/80 dark:focus:bg-yellow-700"
+        onClick={() => {
+          if (
+            !selectedHardwareConfig ||
+            selectedHardwareConfig === '<No Config Set>'
+          ) {
+            return;
+          }
+          this.parseEditedXmlToRobot(originalText);
+          this.setState(
+            {
+              editedConfigText: originalText,
+              saveFilename: selectedHardwareConfig,
+            },
+            () => this.adjustTextareaHeight(),
+          );
+        }}
+        disabled={
+          !selectedHardwareConfig ||
+          selectedHardwareConfig === '<No Config Set>'
         }
-        this.parseEditedXmlToRobot(originalText)
-        this.setState({
-          editedConfigText: originalText,
-          saveFilename: selectedHardwareConfig,
-        }, () => this.adjustTextareaHeight())
-      }}
-      disabled={
-        !selectedHardwareConfig ||
-        selectedHardwareConfig === '<No Config Set>'
-      }
-    >
-      Reset
-    </ActionButton>
-  )
-}
+      >
+        Reset
+      </ActionButton>
+    );
+  }
 
   renderSaveButton() {
-    const {
-      selectedHardwareConfig,
-      editedConfigText,
-      viewMode,
-      robotInstance,
-      saveFilename,
-    } = this.state
-    const { hardwareConfigList, isReadOnlyList } = this.props
+    const { viewMode, editedConfigText, robotInstance, saveFilename } =
+      this.state;
+    const { hardwareConfigList, isReadOnlyList } = this.props;
 
-    const trimmedSaveFilename = saveFilename.trim()
-    const idx = hardwareConfigList.indexOf(trimmedSaveFilename)
-    const isReadOnly = idx !== -1 && isReadOnlyList[idx]
+    const trimmedSaveFilename = saveFilename.trim();
+    const idx = hardwareConfigList.indexOf(trimmedSaveFilename);
+    const isReadOnly = idx !== -1 && isReadOnlyList[idx];
 
     const isInvalid =
       !trimmedSaveFilename ||
       trimmedSaveFilename === '<No Config Set>' ||
-      isReadOnly
+      isReadOnly;
 
-    const canSave = !isInvalid
+    const canSave = !isInvalid;
 
-    let xmlContentToSave: string
+    let xmlContentToSave: string;
     if (viewMode === 'gui') {
-      xmlContentToSave = robotInstance.toString()
+      xmlContentToSave = robotInstance.toString();
     } else {
-      xmlContentToSave = editedConfigText
+      xmlContentToSave = editedConfigText;
     }
 
     return (
       <ActionButton
         className={`
-          ${canSave
-            ? 'border-green-400 bg-green-300 dark:border-transparent dark:bg-green-600 dark:text-white dark:hover:border-green-400/80 dark:focus:bg-green-700'
-            : 'border-red-400 bg-red-300 dark:border-transparent dark:bg-red-600 dark:text-white dark:hover:border-red-500/80 dark:focus:bg-red-700'
+          ${
+            canSave
+              ? 'border-green-400 bg-green-300 dark:border-transparent dark:bg-green-600 dark:text-white dark:hover:border-green-400/80 dark:focus:bg-green-700'
+              : 'border-red-400 bg-red-300 dark:border-transparent dark:bg-red-600 dark:text-white dark:hover:border-red-500/80 dark:focus:bg-red-700'
           }
         `}
         onClick={() => {
           if (!canSave) {
-            if (!trimmedSaveFilename || trimmedSaveFilename === '<No Config Set>') {
-              window.alert('Please enter a new filename to save changes.')
+            if (
+              !trimmedSaveFilename ||
+              trimmedSaveFilename === '<No Config Set>'
+            ) {
+              window.alert('Please enter a new filename to save changes.');
             } else if (isReadOnly) {
-              window.alert('This filename is read-only. Please enter a new filename to save.')
+              window.alert(
+                'This filename is read-only. Please enter a new filename to save.',
+              );
             }
-            return
+            return;
           }
-          this.props.writeHardwareConfig(trimmedSaveFilename, xmlContentToSave)
+          this.props.writeHardwareConfig(trimmedSaveFilename, xmlContentToSave);
           this.setState({
             selectedHardwareConfig: trimmedSaveFilename,
             saveFilename: trimmedSaveFilename,
-          })
+          });
         }}
       >
         Save
       </ActionButton>
-    )
+    );
   }
 
   renderDeleteButton() {
-    const { selectedHardwareConfig } = this.state
-    const { hardwareConfigList, isReadOnlyList } = this.props
+    const { selectedHardwareConfig } = this.state;
+    const { hardwareConfigList, isReadOnlyList } = this.props;
 
-    const idx = hardwareConfigList.indexOf(selectedHardwareConfig)
-    const isReadOnly = idx !== -1 && isReadOnlyList[idx]
+    const idx = hardwareConfigList.indexOf(selectedHardwareConfig);
+    const isReadOnly = idx !== -1 && isReadOnlyList[idx];
 
     return (
       <ActionButton
@@ -327,13 +330,13 @@ renderResetButton() {
               `Are you sure you want to delete "${selectedHardwareConfig}"? This action cannot be undone.`,
             )
           ) {
-            this.props.deleteHardwareConfig(selectedHardwareConfig)
+            this.props.deleteHardwareConfig(selectedHardwareConfig);
             this.setState({
               selectedHardwareConfig: '',
               editedConfigText: '',
               saveFilename: '',
               robotInstance: new Robot(),
-            })
+            });
           }
         }}
         disabled={
@@ -344,7 +347,7 @@ renderResetButton() {
       >
         Delete
       </ActionButton>
-    )
+    );
   }
 
   renderEditor() {
@@ -368,14 +371,12 @@ renderResetButton() {
             </span>
             {isReadOnly
               ? viewMode === 'text'
-              ? 'Read-Only Configuration (XML)'
-              : 'Read-Only Configuration (GUI)'
+                ? 'Read-Only Configuration (XML)'
+                : 'Read-Only Configuration (GUI)'
               : viewMode === 'text'
               ? 'Edit Configuration (XML)'
               : 'Edit Configuration (GUI)'}
-            <span className="font-normal">
-              {this.renderResetButton()}
-            </span>
+            <span className="font-normal">{this.renderResetButton()}</span>
           </h4>
           <div className="flex items-center">
             <input
@@ -492,14 +493,15 @@ renderResetButton() {
                     .slice()
                     .sort()
                     .map((configName: string) => {
-                      const idx = this.props.hardwareConfigList.indexOf(configName)
+                      const idx =
+                        this.props.hardwareConfigList.indexOf(configName);
                       const isReadOnly =
-                        idx !== -1 && this.props.isReadOnlyList[idx]
+                        idx !== -1 && this.props.isReadOnlyList[idx];
                       return (
                         <option key={configName} value={configName}>
                           {configName} {isReadOnly ? '(Read-Only)' : ''}
                         </option>
-                      )
+                      );
                     }),
                 ]
               )}

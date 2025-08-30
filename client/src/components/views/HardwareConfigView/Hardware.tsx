@@ -205,7 +205,8 @@ export class Robot {
     keyPrefix: string,
   ): JSX.Element {
     const canAddControlHub = this.controlHubs.length >= maxDevices.controlHubs;
-    const canAddExpansionHub = this.expansionHubs.length >= maxDevices.expansionHubs;
+    const canAddExpansionHub =
+      this.expansionHubs.length >= maxDevices.expansionHubs;
 
     const isControlHubsCollapsed = this.collapsedSections.controlHubs;
     const isExpansionHubsCollapsed = this.collapsedSections.expansionHubs;
@@ -247,7 +248,9 @@ export class Robot {
                 Control Hubs {`(${this.controlHubs.length})`}{' '}
               </h4>
               <button
-                style={canAddControlHub ? addButtonDisabledStyle : addButtonStyle}
+                style={
+                  canAddControlHub ? addButtonDisabledStyle : addButtonStyle
+                }
                 onClick={(e) => {
                   e.stopPropagation();
                   if (isControlHubsCollapsed)
@@ -303,7 +306,9 @@ export class Robot {
                 Expansion Hubs {`(${this.expansionHubs.length})`}{' '}
               </h4>
               <button
-                style={canAddExpansionHub ? addButtonDisabledStyle : addButtonStyle}
+                style={
+                  canAddExpansionHub ? addButtonDisabledStyle : addButtonStyle
+                }
                 onClick={(e) => {
                   e.stopPropagation();
                   if (isExpansionHubsCollapsed)
@@ -589,9 +594,9 @@ export abstract class Hub extends Device {
               </h5>
               <button
                 style={{
-                    ...(canAdd ? addButtonStyle : addButtonDisabledStyle),
-                    marginLeft: 0,
-                  }}
+                  ...(canAdd ? addButtonStyle : addButtonDisabledStyle),
+                  marginLeft: 0,
+                }}
                 onClick={(e) => {
                   e.stopPropagation();
                   if (collapsed) this.collapsedSections[name] = false;
