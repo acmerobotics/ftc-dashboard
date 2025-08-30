@@ -91,24 +91,22 @@ class HardwareConfigView extends Component<
     const textarea = this.textareaRef.current;
     if (!textarea) return;
 
-    const newHeight = textarea.scrollHeight;
-    if (textarea.offsetHeight !== newHeight) {
-      textarea.style.height = 'auto';
-      textarea.style.height = `${newHeight}px`;
-    }
+    textarea.style.height = 'auto';
+    textarea.style.height = `${textarea.scrollHeight}px`;
   }
 
   componentDidMount() {
-    const { currentHardwareConfig, hardwareConfigFiles, hardwareConfigList } = this.props
+    const { currentHardwareConfig, hardwareConfigFiles, hardwareConfigList } =
+      this.props;
     if (currentHardwareConfig) {
-      const idx = hardwareConfigList.indexOf(currentHardwareConfig)
-      const newText = idx !== -1 ? hardwareConfigFiles[idx] : ''
-      this.parseEditedXmlToRobot(newText)
+      const idx = hardwareConfigList.indexOf(currentHardwareConfig);
+      const newText = idx !== -1 ? hardwareConfigFiles[idx] : '';
+      this.parseEditedXmlToRobot(newText);
       this.setState({
         selectedHardwareConfig: currentHardwareConfig,
         editedConfigText: newText,
         saveFilename: currentHardwareConfig,
-      })
+      });
     }
   }
 
@@ -116,8 +114,6 @@ class HardwareConfigView extends Component<
     const { currentHardwareConfig, hardwareConfigFiles, hardwareConfigList } =
       this.props;
     const { selectedHardwareConfig } = this.state;
-
-    this.adjustTextareaHeight();
 
     if (prevProps.currentHardwareConfig !== currentHardwareConfig) {
       const idx = hardwareConfigList.indexOf(currentHardwareConfig);
@@ -257,7 +253,6 @@ class HardwareConfigView extends Component<
               editedConfigText: originalText,
               saveFilename: selectedHardwareConfig,
             },
-            () => this.adjustTextareaHeight(),
           );
         }}
         disabled={
@@ -421,9 +416,9 @@ class HardwareConfigView extends Component<
             ref={this.textareaRef}
             className="w-full rounded border bg-white p-2 font-mono text-sm shadow-inner dark:bg-slate-700 dark:text-slate-100"
             value={this.state.editedConfigText}
-            onChange={(e) =>
-              this.setState({ editedConfigText: e.target.value })
-            }
+            onChange={(e) => {
+              this.setState({ editedConfigText: e.target.value }, this.adjustTextareaHeight);
+            }}
             style={{ resize: 'none', overflow: 'hidden' }}
             placeholder=""
           />

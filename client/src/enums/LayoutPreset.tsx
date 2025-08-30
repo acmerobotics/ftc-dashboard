@@ -85,15 +85,15 @@ const LAYOUT_DETAILS: { [key in Values<typeof LayoutPreset>]: Layout } = {
     ),
   },
   [LayoutPreset.HARDWARE_CONFIG]: {
-      name: 'Hardware Config',
-      content: (
-        <TileGrid gridTemplate="100% / 100%">
-          <Tile row={1} col={1}>
-            <HardwareConfigView />
-          </Tile>
-        </TileGrid>
-      ),
-    },
+    name: 'Hardware Config',
+    content: (
+      <TileGrid gridTemplate="100% / 100%">
+        <Tile row={1} col={1}>
+          <HardwareConfigView />
+        </Tile>
+      </TileGrid>
+    ),
+  },
   [LayoutPreset.ORIGINAL]: {
     name: 'Original',
     content: (
