@@ -20,5 +20,4 @@ public class WriteHardwareConfig extends Message {
     public String getHardwareConfigContents() {
         return hardwareConfigContents;
     }
-
 }

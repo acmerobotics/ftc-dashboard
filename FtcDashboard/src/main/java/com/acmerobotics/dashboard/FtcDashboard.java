@@ -37,7 +37,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeManager;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeManagerImpl;
-import com.qualcomm.robotcore.eventloop.opmode.OpModeManagerNotifier;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeRegistrar;
 import com.qualcomm.robotcore.exception.RobotCoreException;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -53,7 +52,6 @@ import fi.iki.elonen.NanoWSD;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -74,8 +72,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
-
 import org.firstinspires.ftc.ftccommon.external.OnCreate;
 import org.firstinspires.ftc.ftccommon.external.OnCreateEventLoop;
 import org.firstinspires.ftc.ftccommon.external.OnCreateMenu;
@@ -980,7 +976,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                         try {
                             hardwareConfigManager.writeToFile(new RobotConfigFile(hardwareConfigManager, hardwareConfigName), false, hardwareConfigContents);
                         } catch (RobotCoreException | IOException e) {
-                            RobotLog.ww(TAG, "Error writing hardware config: " + hardwareConfigName, e);
+                            Log.w(TAG, "Error writing hardware config: " + hardwareConfigName, e);
                         }
 
                         // Update the hardware config list

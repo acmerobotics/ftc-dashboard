@@ -14,5 +14,4 @@ public class DeleteHardwareConfig extends Message {
     public String getHardwareConfigName() {
         return hardwareConfigName;
     }
-
 }
