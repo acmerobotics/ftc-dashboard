@@ -98,6 +98,20 @@ class HardwareConfigView extends Component<
     }
   }
 
+  componentDidMount() {
+    const { currentHardwareConfig, hardwareConfigFiles, hardwareConfigList } = this.props
+    if (currentHardwareConfig) {
+      const idx = hardwareConfigList.indexOf(currentHardwareConfig)
+      const newText = idx !== -1 ? hardwareConfigFiles[idx] : ''
+      this.parseEditedXmlToRobot(newText)
+      this.setState({
+        selectedHardwareConfig: currentHardwareConfig,
+        editedConfigText: newText,
+        saveFilename: currentHardwareConfig,
+      })
+    }
+  }
+
   componentDidUpdate(prevProps: Readonly<HardwareConfigViewProps>) {
     const { currentHardwareConfig, hardwareConfigFiles, hardwareConfigList } =
       this.props;
