@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<Robot type="FirstInspires-FTC">
+    <LynxUsbDevice name="Control Hub Portal" parentModuleAddress="173" serialNumber="(embedded)">
+        <LynxModule name="Control Hub" port="173">
+            <!-- Motors -->
+            <goBILDA5202SeriesMotor name="fl" port="0" />
+            <goBILDA5202SeriesMotor name="bl" port="1" />
+            <goBILDA5202SeriesMotor name="extensionBottom" port="2" />
+            <goBILDA5202SeriesMotor name="extensionTop" port="3" />
+            <!-- Servos -->
+            <Servo name="rightPTO" port="0" />
+            <Servo name="flipper" port="1" />
+            <Servo name="leftSweeper" port="3" />
+            <Servo name="rightPitch" port="4" />
+            <!-- I2C -->
+            <LynxEmbeddedIMU name="imu" bus="0" port="0" />
+            <goBILDAPinpointRR name="odo" bus="0" port="1" />
+            <RevColorSensorV3 name="colorSensorLeft" bus="1" port="0" />
+            <RevColorSensorV3 name="colorSensorRight" bus="3" port="0" />
+        </LynxModule>
+        <LynxModule name="Expansion Hub 2" port="2">
+            <!-- Motors -->
+            <goBILDA5202SeriesMotor name="intake" port="0" />
+            <goBILDA5202SeriesMotor name="pivot" port="1" />
+            <goBILDA5202SeriesMotor name="br" port="2" />
+            <goBILDA5202SeriesMotor name="fr" port="3" />
+            <!-- Servos -->
+            <Servo name="leftPTO" port="0" />
+            <Servo name="rightSweeper" port="2" />
+            <Servo name="wrist" port="3" />
+            <Servo name="leftPitch" port="4" />
+            <Servo name="claw" port="5"/>
+            <!-- Analog -->
+            <AnalogInput name="elc" port="0" />
+            <AnalogInput name="wristAnalog" port="2" />
+        </LynxModule>
+    </LynxUsbDevice>
+    <EthernetDevice name="limelight" serialNumber="EthernetOverUsb:eth0:172.29.0.22" port="0" ipAddress="172.29.0.1" />
+</Robot>
