@@ -20,6 +20,9 @@ export const maxDevices: MaxDevices = {
   analogInputDevices: 4,
 };
 
+const clamp = (val: number, min: number, max: number) =>
+  Math.max(min, Math.min(max, val));
+
 interface RobotSectionState {
   controlHubs: boolean;
   expansionHubs: boolean;
@@ -1002,9 +1005,6 @@ export const i2cType = {
   goBILDAPinpointRR: 'goBILDAPinpointRR',
 };
 
-const clamp = (value: number, min: number, max: number) =>
-  Math.max(min, Math.min(max, value));
-
 const renderStandardDevice = (
   device: Device,
   typeObj: Record<string, string>,
@@ -1013,13 +1013,11 @@ const renderStandardDevice = (
   onDelete?: () => void,
   extra?: JSX.Element | null,
 ) => {
-  const min = 0;
-  let max = 255;
+  let max: number;
   if (typeObj === motorType) max = maxDevices.motors - 1;
   if (typeObj === servoType) max = maxDevices.servos - 1;
   if (typeObj === analogType) max = maxDevices.analogInputDevices - 1;
   if (typeObj === digitalType) max = maxDevices.digitalDevices - 1;
-
   return (
     <div key={keyPrefix} style={deviceContainerStyle}>
       {onDelete && (
@@ -1074,12 +1072,9 @@ const renderStandardDevice = (
           type="number"
           value={isNaN(device.port) ? '' : device.port}
           onChange={(e) => {
-            const val = parseInt(e.target.value, 10);
-            if (!isNaN(val)) device.port = clamp(val, min, max);
+            device.port = max ? clamp(parseInt(e.target.value, 10), 0, max) : parseInt(e.target.value, 10);
             configChangeCallback();
           }}
-          min={min}
-          max={max}
         />
       </div>
       {extra}

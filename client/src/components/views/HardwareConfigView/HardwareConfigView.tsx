@@ -74,7 +74,7 @@ class HardwareConfigView extends Component<
     this.state = {
       selectedHardwareConfig: '',
       editedConfigText: '',
-      viewMode: 'text',
+      viewMode: 'gui',
       robotInstance: new Robot(),
       saveFilename: '',
     };
@@ -148,7 +148,7 @@ class HardwareConfigView extends Component<
       this.state.robotInstance.fromXml(text);
       this.setState((prevState) => ({
         robotInstance: prevState.robotInstance,
-        viewMode: prevState.viewMode === 'gui' ? 'gui' : 'text',
+        viewMode: prevState.viewMode,
       }));
     } catch (err) {
       parseSuccess = false;
@@ -201,7 +201,10 @@ class HardwareConfigView extends Component<
       }
     } else {
       const newXmlText = this.state.robotInstance.toString();
-      this.setState({ viewMode: 'text', editedConfigText: newXmlText });
+      this.setState(
+        { viewMode: 'text', editedConfigText: newXmlText },
+        this.adjustTextareaHeight,
+      );
     }
   }
 
