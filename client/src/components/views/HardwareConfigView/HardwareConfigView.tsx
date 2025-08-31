@@ -110,10 +110,17 @@ class HardwareConfigView extends Component<
     }
   }
 
-  componentDidUpdate(prevProps: Readonly<HardwareConfigViewProps>) {
+  componentDidUpdate(
+      prevProps: Readonly<HardwareConfigViewProps>,
+      prevState: Readonly<HardwareConfigViewState>
+    ) {
     const { currentHardwareConfig, hardwareConfigFiles, hardwareConfigList } =
       this.props;
     const { selectedHardwareConfig } = this.state;
+
+    if (prevState.editedConfigText !== this.state.editedConfigText) {
+      this.adjustTextareaHeight();
+    }
 
     if (prevProps.currentHardwareConfig !== currentHardwareConfig) {
       const idx = hardwareConfigList.indexOf(currentHardwareConfig);
@@ -232,12 +239,14 @@ class HardwareConfigView extends Component<
 
     const parseSuccess = this.parseEditedXmlToRobot(text);
 
-    this.setState({
-      selectedHardwareConfig: selected,
-      editedConfigText: text,
-      saveFilename: selected,
-      viewMode: parseSuccess ? this.state.viewMode : 'text',
-    });
+    this.setState(
+      {
+        selectedHardwareConfig: selected,
+        editedConfigText: text,
+        saveFilename: selected,
+        viewMode: parseSuccess ? this.state.viewMode : 'text',
+      },
+    );
   }
 
   toggleViewMode() {
@@ -464,10 +473,7 @@ class HardwareConfigView extends Component<
             className="w-full rounded border bg-white p-2 font-mono text-sm shadow-inner dark:bg-slate-700 dark:text-slate-100"
             value={this.state.editedConfigText}
             onChange={(e) => {
-              this.setState(
-                { editedConfigText: e.target.value },
-                this.adjustTextareaHeight,
-              );
+              this.setState({ editedConfigText: e.target.value });
             }}
             style={{ resize: 'none', overflow: 'hidden' }}
             placeholder=""
