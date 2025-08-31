@@ -158,6 +158,54 @@ class HardwareConfigView extends Component<
     return parseSuccess;
   }
 
+  private normalizeXml(xmlString: string): string {
+    const parser = new DOMParser();
+    const serializer = new XMLSerializer();
+    const doc = parser.parseFromString(xmlString, 'application/xml');
+
+    const removeComments = (node: Node) => {
+      for (let i = node.childNodes.length - 1; i >= 0; i--) {
+        const child = node.childNodes[i];
+        if (child.nodeType === Node.COMMENT_NODE) {
+          node.removeChild(child);
+        } else {
+          removeComments(child);
+        }
+      }
+    };
+
+    removeComments(doc);
+
+    const sortAttributes = (el: Element) => {
+      const attrs = Array.from(el.attributes).sort((a, b) =>
+        a.name.localeCompare(b.name),
+      );
+      while (el.attributes.length > 0) {
+        el.removeAttribute(el.attributes[0].name);
+      }
+      for (const attr of attrs) {
+        el.setAttribute(attr.name, attr.value);
+      }
+      for (const child of Array.from(el.children)) {
+        sortAttributes(child);
+      }
+    };
+
+    sortAttributes(doc.documentElement);
+
+    return serializer.serializeToString(doc).replace(/\s+/g, ' ').trim();
+  }
+
+  private configChanged(xml1: string, xml2: string): boolean {
+    try {
+      const norm1 = this.normalizeXml(xml1);
+      const norm2 = this.normalizeXml(xml2);
+      return norm1 !== norm2;
+    } catch {
+      return true;
+    }
+  }
+
   hasUnsavedChanges() {
     const {
       selectedHardwareConfig,
@@ -172,11 +220,9 @@ class HardwareConfigView extends Component<
     const idx = hardwareConfigList.indexOf(selectedHardwareConfig);
     if (idx === -1) return false;
 
-    const savedText = hardwareConfigFiles[idx] ?? '';
-
     const currentText =
       viewMode === 'gui' ? robotInstance.toString() : editedConfigText;
-    return currentText !== savedText;
+    return this.configChanged(hardwareConfigFiles[idx] ?? '', currentText);
   }
 
   onChange(evt: ChangeEvent<HTMLSelectElement>) {

@@ -1072,7 +1072,9 @@ const renderStandardDevice = (
           type="number"
           value={isNaN(device.port) ? '' : device.port}
           onChange={(e) => {
-            device.port = max ? clamp(parseInt(e.target.value, 10), 0, max) : parseInt(e.target.value, 10);
+            device.port = max
+              ? clamp(parseInt(e.target.value, 10), 0, max)
+              : parseInt(e.target.value, 10);
             configChangeCallback();
           }}
         />
