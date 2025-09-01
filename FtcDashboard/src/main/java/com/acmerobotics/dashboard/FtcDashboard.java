@@ -1004,7 +1004,9 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
                         hardwareConfigList.with(l -> {
                             l.remove(hardwareConfigName);
-                            hardwareConfigManager.setActiveConfig(false, null);
+                            if (hardwareConfigManager.getActiveConfig().getName().equals(hardwareConfigName)) {
+                                hardwareConfigManager.setActiveConfig(false, null);
+                            }
                         });
 
                         attemptRestart();
