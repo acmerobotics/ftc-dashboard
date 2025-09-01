@@ -37,6 +37,9 @@ public class ConfigVariableDeserializer implements JsonDeserializer<ConfigVariab
             case STRING:
                 return new BasicVariable<>(varType,
                     new ConstantProvider<>(valueEl.isJsonNull() ? null : valueEl.getAsString()));
+            case READONLY_STRING:
+                return new BasicVariable<>(varType,
+                    new ConstantProvider<>(valueEl.isJsonNull() ? null : valueEl.getAsString()));
             case ENUM:
                 if (valueEl.isJsonNull()) {
                     return new BasicVariable<>(varType, new ConstantProvider<>(null));

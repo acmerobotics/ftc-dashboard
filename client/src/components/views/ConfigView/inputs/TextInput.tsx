@@ -11,6 +11,7 @@ interface Props<T> {
   onSave?: () => void;
   showArrows?: boolean;
   step?: number;
+  readOnly?: boolean;
 }
 
 const TextInput = <T,>({
@@ -22,6 +23,7 @@ const TextInput = <T,>({
   onSave,
   showArrows = false,
   step = 1,
+  readOnly = false,
 }: Props<T>) => {
   const [inputValue, setInputValue] = React.useState(`${value}`);
 
@@ -118,6 +120,7 @@ const TextInput = <T,>({
         value={inputValue}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
+        readOnly={readOnly}
       />
 
       {showArrows && (

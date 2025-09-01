@@ -24,6 +24,9 @@ public enum VariableType {
     @SerializedName("string")
     STRING,
 
+    @SerializedName("readonly_string")
+    READONLY_STRING,
+
     @SerializedName("enum")
     ENUM,
 
