@@ -218,7 +218,6 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     private final Mutex<OpModeAndStatus> activeOpMode = new Mutex<>(new OpModeAndStatus());
 
-    private final Mutex<List<String>> opModeList = new Mutex<>(new ArrayList<>());
     private final Mutex<List<OpModeInfo>> opModeInfoList = new Mutex<>(new ArrayList<>());
 
     private ExecutorService gamepadWatchdogExecutor;
@@ -267,35 +266,30 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         public void run() {
             RegisteredOpModes.getInstance().waitOpModesRegistered();
 
-            opModeList.with(l -> {
-                l.clear();
-                List<OpModeInfo> infoList = new ArrayList<>();
-                
-                for (OpModeMeta opModeMeta : RegisteredOpModes.getInstance().getOpModes()) {
-                    if (opModeMeta.flavor != OpModeMeta.Flavor.SYSTEM) {
-                        l.add(opModeMeta.name);
-                        infoList.add(new OpModeInfo(opModeMeta.name, opModeMeta.group));
-                    }
+            List<OpModeInfo> infoList = new ArrayList<>();
+            
+            for (OpModeMeta opModeMeta : RegisteredOpModes.getInstance().getOpModes()) {
+                if (opModeMeta.flavor != OpModeMeta.Flavor.SYSTEM) {
+                    infoList.add(new OpModeInfo(opModeMeta.name, opModeMeta.group));
                 }
-                Collections.sort(l);
-                
-                // Sort op mode info list by group, then by name
-                infoList.sort((a, b) -> {
-                    int groupComparison = a.getGroup().compareToIgnoreCase(b.getGroup());
-                    if (groupComparison != 0) {
-                        return groupComparison;
-                    }
-                    return a.getName().compareToIgnoreCase(b.getName());
-                });
-                
-                // Update the shared opModeInfoList
-                opModeInfoList.with(infoListShared -> {
-                    infoListShared.clear();
-                    infoListShared.addAll(infoList);
-                });
-                
-                sendAll(new ReceiveOpModeList(l, infoList));
+            }
+            
+            // Sort op mode info list by group, then by name
+            infoList.sort((a, b) -> {
+                int groupComparison = a.getGroup().compareToIgnoreCase(b.getGroup());
+                if (groupComparison != 0) {
+                    return groupComparison;
+                }
+                return a.getName().compareToIgnoreCase(b.getName());
             });
+            
+            // Update the shared opModeInfoList
+            opModeInfoList.with(infoListShared -> {
+                infoListShared.clear();
+                infoListShared.addAll(infoList);
+            });
+            
+            sendAll(new ReceiveOpModeList(infoList));
         }
     }
 
@@ -793,11 +787,9 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         protected void onOpen() {
             sh.onOpen();
 
-            opModeList.with(l -> {
-                if (l.size() > 0) {
-                    opModeInfoList.with(infoList -> {
-                        send(new ReceiveOpModeList(l, new ArrayList<>(infoList)));
-                    });
+            opModeInfoList.with(infoList -> {
+                if (!infoList.isEmpty()) {
+                    send(new ReceiveOpModeList(new ArrayList<>(infoList)));
                 }
             });
 

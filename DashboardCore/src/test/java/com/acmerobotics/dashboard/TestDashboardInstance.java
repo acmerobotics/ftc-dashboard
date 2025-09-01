@@ -9,7 +9,6 @@ import com.acmerobotics.dashboard.message.redux.ReceiveRobotStatus;
 import com.acmerobotics.dashboard.message.redux.SetHardwareConfig;
 import com.acmerobotics.dashboard.OpModeInfo;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.acmerobotics.dashboard.testopmode.TestOpMode;
 import com.acmerobotics.dashboard.testopmode.TestOpModeManager;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoWSD;
@@ -64,17 +63,12 @@ public class TestDashboardInstance {
 
             opModeManager.setSendFun(this);
             
-            List<String> opModeNames = opModeManager
-                .getTestOpModes()
-                .stream().map(TestOpMode::getName)
-                .collect(Collectors.toList());
-            
             List<OpModeInfo> opModeInfoList = opModeManager
                 .getTestOpModes()
                 .stream().map(testOpMode -> new OpModeInfo(testOpMode.getName(), "Test"))
                 .collect(Collectors.toList());
             
-            send(new ReceiveOpModeList(opModeNames, opModeInfoList));
+            send(new ReceiveOpModeList(opModeInfoList));
             send(new ReceiveHardwareConfigList(
                 hardwareConfigManager.getTestHardwareConfigs(),
                 hardwareConfigManager.getActiveHardwareConfig()

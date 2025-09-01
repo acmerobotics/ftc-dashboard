@@ -99,10 +99,10 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
       };
     } else if (
       state.selectedOpMode === '' ||
-      props.opModeList.indexOf(state.selectedOpMode) === -1
+      !props.opModeInfoList.some(info => info.name === state.selectedOpMode)
     ) {
       return {
-        selectedOpMode: props.opModeList[0] || '',
+        selectedOpMode: props.opModeInfoList[0]?.name || '',
       };
     } else {
       return {};
@@ -161,9 +161,9 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
   }
 
   renderButtons() {
-    const { activeOpMode, activeOpModeStatus, opModeList } = this.props;
+    const { activeOpMode, activeOpModeStatus, opModeInfoList } = this.props;
 
-    if (opModeList.length === 0) {
+    if (opModeInfoList.length === 0) {
       return null;
     } else if (activeOpMode === STOP_OP_MODE_TAG) {
       return this.renderInitButton();
@@ -184,9 +184,9 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
   }
 
   renderOpModeOptions() {
-    const { opModeList, opModeInfoList } = this.props;
+    const { opModeInfoList } = this.props;
 
-    if (opModeList.length === 0) {
+    if (opModeInfoList.length === 0) {
       return <option>Loading...</option>;
     }
 
@@ -247,7 +247,7 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
     const {
       available,
       activeOpMode,
-      opModeList,
+      opModeInfoList,
       warningMessage,
       errorMessage,
       gamepadsSupported,
@@ -329,7 +329,7 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
             `}
             value={this.state.selectedOpMode}
             disabled={
-              activeOpMode !== STOP_OP_MODE_TAG || opModeList.length === 0
+              activeOpMode !== STOP_OP_MODE_TAG || opModeInfoList.length === 0
             }
             onChange={this.onChange}
           >

@@ -29,7 +29,6 @@ export type StatusState = {
   warningMessage: string;
   errorMessage: string;
   batteryVoltage: number;
-  opModeList: string[];
   opModeInfoList: OpModeInfo[];
   gamepadsSupported: boolean;
 };
@@ -45,8 +44,7 @@ export type ReceiveRobotStatusAction = {
 
 export type ReceiveOpModeListAction = {
   type: typeof RECEIVE_OP_MODE_LIST;
-  opModeList: string[];
-  opModeInfoList?: OpModeInfo[];
+  opModeInfoList: OpModeInfo[];
 };
 
 export type GamepadSupportedStatus = {
