@@ -217,8 +217,7 @@ export class Robot {
 
     const sectionTitleStyle: React.CSSProperties = {
       margin: 0,
-      fontSize: '1rem',
-      color: '#374151',
+      fontSize: '0.9rem',
     };
 
     return (
@@ -228,7 +227,13 @@ export class Robot {
       >
         <label style={labelStyle}>Control Hub Portal Name: </label>
         <input
-          style={inputStyle}
+          className="
+            ml-2 rounded-md border border-gray-300 bg-white
+            px-2 py-1 text-sm text-gray-900
+            transition-colors focus:outline-none focus:ring-2
+            focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800
+            dark:text-gray-100
+          "
           type="text"
           value={this.name}
           onChange={(e) => {
@@ -440,27 +445,10 @@ export abstract class Device {
     onDelete?: () => void,
   ): JSX.Element;
 }
-const deviceContainerStyle: React.CSSProperties = {
-  position: 'relative',
-  marginLeft: '1rem',
-  padding: '0.5rem',
-  backgroundColor: '#ffffff',
-  border: '1px solid #e5e7eb',
-  borderRadius: '0.5rem',
-  boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-};
-const inputStyle: React.CSSProperties = {
-  marginRight: '0.5rem',
-  padding: '0.15rem',
-  border: '1px solid #d1d5db',
-  borderRadius: '0.375rem',
-  fontSize: '0.9rem',
-};
 const labelStyle: React.CSSProperties = {
   marginRight: '0.25rem',
   fontSize: '0.9rem',
 };
-const selectStyle = { ...inputStyle } as React.CSSProperties;
 const deleteButtonStyle: React.CSSProperties = {
   width: '1.5rem',
   height: '1.5rem',
@@ -506,7 +494,6 @@ const sectionHeaderStyle: React.CSSProperties = {
   alignItems: 'center',
   borderBottom: '1px solid #e5e7eb',
   fontSize: '1rem',
-  color: '#374151',
 };
 const toggleButtonStyle: React.CSSProperties = {
   background: 'none',
@@ -592,7 +579,7 @@ export abstract class Hub extends Device {
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              <h5 style={{ margin: '8px', marginRight: '10px' }}>
+              <h5 className="m-2 mr-3 text-sm font-medium">
                 {title} {`(${devs.length})`}{' '}
               </h5>
               <button
@@ -637,19 +624,23 @@ export abstract class Hub extends Device {
     return (
       <div
         key={keyPrefix}
-        style={{
-          border: '2px solid #007bff',
-          padding: '15px',
-          margin: '15px',
-          borderRadius: '8px',
-          backgroundColor: '#e7f3ff',
-          position: 'relative',
-        }}
+        className="
+          relative m-4 rounded-lg border
+          border-gray-300 bg-white p-4
+          transition-colors dark:border-gray-700 dark:bg-gray-800
+          dark:text-gray-100
+        "
       >
         <h4>
           <label style={labelStyle}>Hub Name: </label>
           <input
-            style={inputStyle}
+            className="
+                ml-2 rounded-md border border-gray-300 bg-white
+                px-2 py-1 text-sm text-gray-900
+                transition-colors focus:outline-none focus:ring-2
+                focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800
+                dark:text-gray-100
+              "
             type="text"
             value={this.name}
             onChange={(e) => {
@@ -659,7 +650,13 @@ export abstract class Hub extends Device {
           />
           <label style={labelStyle}>Port: </label>
           <input
-            style={inputStyle}
+            className="
+                ml-2 rounded-md border border-gray-300 bg-white
+                px-2 py-1 text-sm text-gray-900
+                transition-colors focus:outline-none focus:ring-2
+                focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800
+                dark:text-gray-100
+              "
             type="number"
             value={isNaN(this.port) ? '' : this.port}
             onChange={(e) => {
@@ -820,7 +817,15 @@ export class EthernetDevice extends Device {
     onDelete?: () => void,
   ): JSX.Element {
     return (
-      <div key={keyPrefix} style={deviceContainerStyle}>
+      <div
+        key={keyPrefix}
+        className="
+          relative my-2 rounded-md border
+          border-gray-200 bg-gray-50
+          p-3 transition-colors dark:border-gray-600
+          dark:bg-gray-700 dark:text-gray-100
+        "
+      >
         {onDelete && (
           <button
             style={{
@@ -836,54 +841,80 @@ export class EthernetDevice extends Device {
             />
           </button>
         )}
-        <label style={labelStyle}> {this.type}: </label>
-        <div>
-          <label style={labelStyle}>Name: </label>
-          <input
-            style={inputStyle}
-            type="text"
-            value={this.name}
-            onChange={(e) => {
-              this.name = e.target.value;
-              configChangeCallback();
-            }}
-          />
-        </div>
-        <div>
-          <label style={labelStyle}>Port: </label>
-          <input
-            style={inputStyle}
-            type="number"
-            value={isNaN(this.port) ? '' : this.port}
-            onChange={(e) => {
-              this.port = parseInt(e.target.value, 10);
-              configChangeCallback();
-            }}
-          />
-        </div>
-        <div>
-          <label style={labelStyle}>Serial: </label>
-          <input
-            style={inputStyle}
-            type="text"
-            value={this.serialNumber}
-            onChange={(e) => {
-              this.serialNumber = e.target.value;
-              configChangeCallback();
-            }}
-          />
-        </div>
-        <div>
-          <label style={labelStyle}>IP Address: </label>
-          <input
-            style={inputStyle}
-            type="text"
-            value={this.ipAddress}
-            onChange={(e) => {
-              this.ipAddress = e.target.value;
-              configChangeCallback();
-            }}
-          />
+        <div className="space-y-1">
+          <label style={labelStyle}> {this.type}: </label>
+          <div>
+            <label style={labelStyle}>Name: </label>
+            <input
+              className="
+                  ml-2 rounded-md border border-gray-300 bg-white
+                  px-2 py-1 text-sm text-gray-900
+                  transition-colors focus:outline-none focus:ring-2
+                  focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800
+                  dark:text-gray-100
+                "
+              type="text"
+              value={this.name}
+              onChange={(e) => {
+                this.name = e.target.value;
+                configChangeCallback();
+              }}
+            />
+          </div>
+          <div>
+            <label style={labelStyle}>Port: </label>
+            <input
+              className="
+                  ml-2 rounded-md border border-gray-300 bg-white
+                  px-2 py-1 text-sm text-gray-900
+                  transition-colors focus:outline-none focus:ring-2
+                  focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800
+                  dark:text-gray-100
+                "
+              type="number"
+              value={isNaN(this.port) ? '' : this.port}
+              onChange={(e) => {
+                this.port = parseInt(e.target.value, 10);
+                configChangeCallback();
+              }}
+            />
+          </div>
+          <div>
+            <label style={labelStyle}>Serial: </label>
+            <input
+              className="
+                  ml-2 rounded-md border border-gray-300 bg-white
+                  px-2 py-1 text-sm text-gray-900
+                  transition-colors focus:outline-none focus:ring-2
+                  focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800
+                  dark:text-gray-100
+                "
+              type="text"
+              value={this.serialNumber}
+              onChange={(e) => {
+                this.serialNumber = e.target.value;
+                configChangeCallback();
+              }}
+            />
+          </div>
+          <div>
+            <label style={labelStyle}>IP Address: </label>
+            <input
+              className="
+                  ml-2 rounded-md border border-gray-300 bg-white
+                  px-2 py-1 text-sm text-gray-900
+                  transition-colors focus:outline-none focus:ring-2
+                  focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800
+                  dark:text-gray-100
+                "
+              type="text"
+              value={this.ipAddress}
+              onChange={(e) => {
+                this.ipAddress = e.target.value;
+                configChangeCallback();
+              }}
+            />
+          </div>
         </div>
       </div>
     );
@@ -906,7 +937,15 @@ export class Webcam extends Device {
     onDelete?: () => void,
   ): JSX.Element {
     return (
-      <div key={keyPrefix} style={deviceContainerStyle}>
+      <div
+        key={keyPrefix}
+        className="
+          relative my-2 rounded-md border
+          border-gray-200 bg-gray-50
+          p-3 transition-colors dark:border-gray-600
+          dark:bg-gray-700 dark:text-gray-100
+        "
+      >
         {onDelete && (
           <button
             style={{
@@ -922,30 +961,44 @@ export class Webcam extends Device {
             />
           </button>
         )}
-        <label style={labelStyle}> {this.type}: </label>
-        <div>
-          <label style={labelStyle}>Name: </label>
-          <input
-            style={inputStyle}
-            type="text"
-            value={this.name}
-            onChange={(e) => {
-              this.name = e.target.value;
-              configChangeCallback();
-            }}
-          />
-        </div>
-        <div>
-          <label style={labelStyle}>Serial: </label>
-          <input
-            style={inputStyle}
-            type="text"
-            value={this.serialNumber}
-            onChange={(e) => {
-              this.serialNumber = e.target.value;
-              configChangeCallback();
-            }}
-          />
+        <div className="space-y-1">
+          <label style={labelStyle}> {this.type}: </label>
+          <div>
+            <label style={labelStyle}>Name: </label>
+            <input
+              className="
+                  ml-2 rounded-md border border-gray-300 bg-white
+                  px-2 py-1 text-sm text-gray-900
+                  transition-colors focus:outline-none focus:ring-2
+                  focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800
+                  dark:text-gray-100
+                "
+              type="text"
+              value={this.name}
+              onChange={(e) => {
+                this.name = e.target.value;
+                configChangeCallback();
+              }}
+            />
+          </div>
+          <div>
+            <label style={labelStyle}>Serial: </label>
+            <input
+              className="
+                  ml-2 rounded-md border border-gray-300 bg-white
+                  px-2 py-1 text-sm text-gray-900
+                  transition-colors focus:outline-none focus:ring-2
+                  focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800
+                  dark:text-gray-100
+                "
+              type="text"
+              value={this.serialNumber}
+              onChange={(e) => {
+                this.serialNumber = e.target.value;
+                configChangeCallback();
+              }}
+            />
+          </div>
         </div>
       </div>
     );
@@ -1019,7 +1072,16 @@ const renderStandardDevice = (
   if (typeObj === analogType) max = maxDevices.analogInputDevices - 1;
   if (typeObj === digitalType) max = maxDevices.digitalDevices - 1;
   return (
-    <div key={keyPrefix} style={deviceContainerStyle}>
+    <div
+      key={keyPrefix}
+      className="
+        relative
+        my-2 rounded-md border border-gray-200
+        bg-gray-50 p-3
+        transition-colors dark:border-gray-600 dark:bg-gray-700
+        dark:text-gray-100
+      "
+    >
       {onDelete && (
         <button
           style={{
@@ -1035,51 +1097,71 @@ const renderStandardDevice = (
           />
         </button>
       )}
-      <div>
-        <label style={labelStyle}>Name: </label>
-        <input
-          style={inputStyle}
-          type="text"
-          value={device.name}
-          onChange={(e) => {
-            device.name = e.target.value;
-            configChangeCallback();
-          }}
-        />
+      <div className="space-y-1">
+        <div>
+          <label style={labelStyle}>Name: </label>
+          <input
+            className="
+                ml-2 rounded-md border border-gray-300 bg-white
+                px-2 py-1 text-sm text-gray-900
+                transition-colors focus:outline-none focus:ring-2
+                focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800
+                dark:text-gray-100
+              "
+            type="text"
+            value={device.name}
+            onChange={(e) => {
+              device.name = e.target.value;
+              configChangeCallback();
+            }}
+          />
+        </div>
+        <div>
+          <label style={labelStyle}>Type: </label>
+          <select
+            className="
+                ml-2 rounded-md border border-gray-300 bg-white
+                px-2 py-1 text-sm text-gray-900
+                transition-colors focus:outline-none focus:ring-2
+                focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800
+                dark:text-gray-100
+              "
+            value={device.type}
+            onChange={(e) => {
+              device.type = e.target.value;
+              device.key = e.target.value;
+              configChangeCallback();
+            }}
+          >
+            {Object.entries(typeObj).map(([display, xml]) => (
+              <option key={xml} value={xml}>
+                {display}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label style={labelStyle}>Port: </label>
+          <input
+            className="
+                          ml-2 rounded-md border border-gray-300 bg-white
+                          px-2 py-1 text-sm text-gray-900
+                          transition-colors focus:outline-none focus:ring-2
+                          focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800
+                          dark:text-gray-100
+                        "
+            type="number"
+            value={isNaN(device.port) ? '' : device.port}
+            onChange={(e) => {
+              device.port = max
+                ? clamp(parseInt(e.target.value, 10), 0, max)
+                : parseInt(e.target.value, 10);
+              configChangeCallback();
+            }}
+          />
+        </div>
+        {extra}
       </div>
-      <div>
-        <label style={labelStyle}>Type: </label>
-        <select
-          style={selectStyle}
-          value={device.type}
-          onChange={(e) => {
-            device.type = e.target.value;
-            device.key = e.target.value;
-            configChangeCallback();
-          }}
-        >
-          {Object.entries(typeObj).map(([display, xml]) => (
-            <option key={xml} value={xml}>
-              {display}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <label style={labelStyle}>Port: </label>
-        <input
-          style={inputStyle}
-          type="number"
-          value={isNaN(device.port) ? '' : device.port}
-          onChange={(e) => {
-            device.port = max
-              ? clamp(parseInt(e.target.value, 10), 0, max)
-              : parseInt(e.target.value, 10);
-            configChangeCallback();
-          }}
-        />
-      </div>
-      {extra}
     </div>
   );
 };
@@ -1205,7 +1287,13 @@ export class I2c extends Device {
       <div>
         <label style={labelStyle}>Bus: </label>
         <input
-          style={inputStyle}
+          className="
+                        ml-2 rounded-md border border-gray-300 bg-white
+                        px-2 py-1 text-sm text-gray-900
+                        transition-colors focus:outline-none focus:ring-2
+                        focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800
+                        dark:text-gray-100
+                      "
           type="number"
           value={isNaN(this.bus) ? '' : this.bus}
           onChange={(e) => {
