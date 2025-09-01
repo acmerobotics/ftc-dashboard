@@ -64,6 +64,7 @@ const socketMiddleware: Middleware<Record<string, unknown>, RootState> =
       case GET_ROBOT_STATUS:
       case 'SAVE_CONFIG':
       case 'GET_CONFIG':
+      case 'GET_CONFIG_BASELINE':
       case INIT_OP_MODE:
       case START_OP_MODE:
       case SET_HARDWARE_CONFIG:
