@@ -69,6 +69,8 @@ public class TestDashboardInstance {
             ));
             send(new ReceiveHardwareConfigList(
                 hardwareConfigManager.getTestHardwareConfigs(),
+                hardwareConfigManager.getActiveConfigXml(),
+                hardwareConfigManager.getIsReadOnly(),
                 hardwareConfigManager.getActiveHardwareConfig()
             ));
         }
@@ -126,6 +128,8 @@ public class TestDashboardInstance {
                     // In a live environment the restart will cause this data to be resent automatically.
                     send(new ReceiveHardwareConfigList(
                             hardwareConfigManager.getTestHardwareConfigs(),
+                            hardwareConfigManager.getActiveConfigXml(),
+                            hardwareConfigManager.getIsReadOnly(),
                             hardwareConfigManager.getActiveHardwareConfig()
                     ));
                     break;
