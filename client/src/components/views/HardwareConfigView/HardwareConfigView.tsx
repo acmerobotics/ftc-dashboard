@@ -111,9 +111,9 @@ class HardwareConfigView extends Component<
   }
 
   componentDidUpdate(
-      prevProps: Readonly<HardwareConfigViewProps>,
-      prevState: Readonly<HardwareConfigViewState>
-    ) {
+    prevProps: Readonly<HardwareConfigViewProps>,
+    prevState: Readonly<HardwareConfigViewState>,
+  ) {
     const { currentHardwareConfig, hardwareConfigFiles, hardwareConfigList } =
       this.props;
     const { selectedHardwareConfig } = this.state;
@@ -239,14 +239,12 @@ class HardwareConfigView extends Component<
 
     const parseSuccess = this.parseEditedXmlToRobot(text);
 
-    this.setState(
-      {
-        selectedHardwareConfig: selected,
-        editedConfigText: text,
-        saveFilename: selected,
-        viewMode: parseSuccess ? this.state.viewMode : 'text',
-      },
-    );
+    this.setState({
+      selectedHardwareConfig: selected,
+      editedConfigText: text,
+      saveFilename: selected,
+      viewMode: parseSuccess ? this.state.viewMode : 'text',
+    });
   }
 
   toggleViewMode() {
