@@ -9,6 +9,7 @@ interface Props<T> {
   validate: (rawValue: string) => ValResult<T>;
   onChange: (arg: ValResult<T>) => void;
   onSave?: () => void;
+  readOnly?: boolean;
 }
 
 const TextInput = <T,>({
@@ -18,6 +19,7 @@ const TextInput = <T,>({
   validate,
   onChange,
   onSave,
+  readOnly = false,
 }: Props<T>) => {
   const [inputValue, setInputValue] = React.useState(`${value}`);
 
@@ -59,6 +61,7 @@ const TextInput = <T,>({
       value={inputValue}
       onChange={handleChange}
       onKeyDown={handleKeyDown}
+      readOnly={readOnly}
     />
   );
 };

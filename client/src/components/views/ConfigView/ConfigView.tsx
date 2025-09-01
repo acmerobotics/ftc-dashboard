@@ -16,6 +16,7 @@ import { ReactComponent as RefreshIcon } from '@/assets/icons/refresh.svg';
 import { ReactComponent as FilterIcon } from '@/assets/icons/filter.svg';
 
 import { RootState, useAppDispatch } from '@/store/reducers';
+import { HARDWARE_CATEGORY } from '@/store/reducers/config';
 import {
   ConfigVar,
   ConfigVarState,
@@ -141,7 +142,9 @@ const ConfigView = ({
     return null;
   }
 
-  let sortedKeys = Object.keys(rootValue);
+  let sortedKeys = Object.keys(rootValue).filter(
+    (key) => key !== HARDWARE_CATEGORY,
+  );
 
   // Filter keys if showOnlyModified is enabled
   if (showOnlyModified) {
@@ -154,7 +157,6 @@ const ConfigView = ({
         !Array.isArray(configBaseline.__value)
           ? configBaseline.__value[key] || null
           : null;
-
       return hasBaselineModifications(childState, childBaseline);
     });
   }
