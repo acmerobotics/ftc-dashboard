@@ -468,12 +468,11 @@ class HardwareConfigView extends Component<
         {this.state.viewMode === 'text' ? (
           <textarea
             ref={this.textareaRef}
-            className="w-full rounded border bg-white p-2 font-mono text-sm shadow-inner dark:bg-slate-700 dark:text-slate-100"
+            className="w-full resize-none overflow-hidden rounded border bg-white p-2 font-mono text-sm shadow-inner dark:bg-slate-700 dark:text-slate-100"
             value={this.state.editedConfigText}
-            onChange={(e) => {
-              this.setState({ editedConfigText: e.target.value });
-            }}
-            style={{ resize: 'none', overflow: 'hidden' }}
+            onChange={(e) =>
+              this.setState({ editedConfigText: e.target.value })
+            }
             placeholder=""
           />
         ) : (
