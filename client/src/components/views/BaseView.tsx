@@ -82,7 +82,7 @@ const BaseViewIconButton = ({
   children,
   size = 8,
   ...props
-}: JSX.IntrinsicElements['button'] & { size?: number; }) => (
+}: JSX.IntrinsicElements['button'] & { size?: number }) => (
   <button className={`icon-btn h-${size} w-${size} ${className}`} {...props}>
     {children}
   </button>

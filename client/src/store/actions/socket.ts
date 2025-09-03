@@ -19,7 +19,11 @@ export const receivePingTime = (pingTime: number): ReceivePingTimeAction => ({
 export const receiveConnectionStatus =
   (isConnected: boolean) =>
   (
-    dispatch: Dispatch<ReceiveConnectionStatusAction | ReceiveOpModeListAction | ReceiveHardwareConfigListAction>,
+    dispatch: Dispatch<
+      | ReceiveConnectionStatusAction
+      | ReceiveOpModeListAction
+      | ReceiveHardwareConfigListAction
+    >,
   ) => {
     dispatch({
       type: RECEIVE_CONNECTION_STATUS,
