@@ -16,7 +16,7 @@ const initialState: StatusState = {
   activeOpModeStatus: OpModeStatus.STOPPED,
   warningMessage: '',
   errorMessage: '',
-  opModeList: [],
+  opModeInfoList: [],
   gamepadsSupported: true,
   batteryVoltage: -1.0,
 };
@@ -37,7 +37,7 @@ const statusReducer = (
     case RECEIVE_OP_MODE_LIST:
       return {
         ...state,
-        opModeList: action.opModeList,
+        opModeInfoList: action.opModeInfoList,
       };
     case GAMEPAD_SUPPORTED_STATUS:
       return {
