@@ -23,7 +23,8 @@ const mapStateToProps = ({ status, hardwareConfig }: RootState) => ({
 });
 
 const mapDispatchToProps = {
-  setHardwareConfig: (hardwareConfig: string) => setHardwareConfig(hardwareConfig),
+  setHardwareConfig: (hardwareConfig: string) =>
+    setHardwareConfig(hardwareConfig),
 };
 
 const connector = connect(mapStateToProps, mapDispatchToProps);
@@ -45,7 +46,10 @@ const ActionButton = ({
   </button>
 );
 
-class HardwareConfigView extends Component<HardwareConfigViewProps, HardwareConfigViewState> {
+class HardwareConfigView extends Component<
+  HardwareConfigViewProps,
+  HardwareConfigViewState
+> {
   constructor(props: HardwareConfigViewProps) {
     super(props);
 
@@ -63,8 +67,10 @@ class HardwareConfigView extends Component<HardwareConfigViewProps, HardwareConf
   }
 
   componentDidUpdate(prevProps: Readonly<HardwareConfigViewProps>) {
-    if(prevProps.currentHardwareConfig !== this.props.currentHardwareConfig) {
-      this.setState({ selectedHardwareConfig: this.props.currentHardwareConfig });
+    if (prevProps.currentHardwareConfig !== this.props.currentHardwareConfig) {
+      this.setState({
+        selectedHardwareConfig: this.props.currentHardwareConfig,
+      });
     }
   }
 
@@ -76,7 +82,9 @@ class HardwareConfigView extends Component<HardwareConfigViewProps, HardwareConf
           dark:border-transparent dark:bg-blue-600 dark:text-blue-50 dark:highlight-white/30
           dark:hover:border-blue-400/80 dark:focus:bg-blue-700
         `}
-        onClick={() => this.props.setHardwareConfig(this.state.selectedHardwareConfig)}
+        onClick={() =>
+          this.props.setHardwareConfig(this.state.selectedHardwareConfig)
+        }
       >
         Set
       </ActionButton>
@@ -88,28 +96,27 @@ class HardwareConfigView extends Component<HardwareConfigViewProps, HardwareConf
 
     if (hardwareConfigList.length === 0) {
       return null;
-    } else if (activeOpModeStatus === OpModeStatus.STOPPED || activeOpMode === STOP_OP_MODE_TAG) {
+    } else if (
+      activeOpModeStatus === OpModeStatus.STOPPED ||
+      activeOpMode === STOP_OP_MODE_TAG
+    ) {
       return this.renderSetButton();
     }
   }
 
   render() {
-    const {
-      available,
-      activeOpModeStatus,
-      hardwareConfigList,
-      activeOpMode,
-    } = this.props;
+    const { available, activeOpModeStatus, hardwareConfigList, activeOpMode } =
+      this.props;
 
     if (!available) {
       return (
         <BaseView isUnlocked={this.props.isUnlocked}>
           <BaseViewHeading isDraggable={this.props.isDraggable}>
-          Hardware Config
+            Hardware Config
           </BaseViewHeading>
           <BaseViewBody className="flex-center">
             <h3 className="text-md text-center">
-            Hardware Config controls have not initialized
+              Hardware Config controls have not initialized
             </h3>
           </BaseViewBody>
         </BaseView>
@@ -126,7 +133,8 @@ class HardwareConfigView extends Component<HardwareConfigViewProps, HardwareConf
         <BaseViewBody>
           <span
             style={
-              this.state.selectedHardwareConfig === this.props.currentHardwareConfig
+              this.state.selectedHardwareConfig ===
+              this.props.currentHardwareConfig
                 ? {
                     userSelect: 'none',
                     opacity: 0.0,
@@ -134,7 +142,7 @@ class HardwareConfigView extends Component<HardwareConfigViewProps, HardwareConf
                 : {
                     userSelect: 'auto',
                     opacity: 1.0,
-                  } 
+                  }
             }
           >
             *
@@ -148,7 +156,8 @@ class HardwareConfigView extends Component<HardwareConfigViewProps, HardwareConf
             `}
             value={this.state.selectedHardwareConfig}
             disabled={
-              activeOpModeStatus !== OpModeStatus.STOPPED && activeOpMode !== STOP_OP_MODE_TAG
+              activeOpModeStatus !== OpModeStatus.STOPPED &&
+              activeOpMode !== STOP_OP_MODE_TAG
             }
             onChange={this.onChange}
           >
