@@ -195,52 +195,43 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
     const ungroupedOpModes: string[] = [];
 
     opModeInfoList.forEach((opModeInfo) => {
-      if (
-        opModeInfo.group &&
-        opModeInfo.group !== '$$$$$$$' &&
-        opModeInfo.group.trim() !== ''
-      ) {
+      if (opModeInfo.group !== '') {
         // Has a valid group
         if (!groupedOpModes[opModeInfo.group]) {
           groupedOpModes[opModeInfo.group] = [];
         }
         groupedOpModes[opModeInfo.group].push(opModeInfo.name);
       } else {
-        // No group or default group - add to ungrouped
+        // No group - add to ungrouped
         ungroupedOpModes.push(opModeInfo.name);
       }
     });
 
-    const result = [];
-
     // Add grouped op modes first
     const sortedGroups = Object.keys(groupedOpModes).sort();
-    sortedGroups.forEach((group) => {
+    const groupedElements = sortedGroups.map((group) => {
       const sortedOpModes = groupedOpModes[group].sort();
-      result.push(
+      return (
         <optgroup key={group} label={group}>
           {sortedOpModes.map((opMode) => (
             <option key={opMode} value={opMode}>
               {opMode}
             </option>
           ))}
-        </optgroup>,
+        </optgroup>
       );
     });
 
     // Add ungrouped op modes at the bottom (sorted)
-    if (ungroupedOpModes.length > 0) {
-      const sortedUngrouped = ungroupedOpModes.sort();
-      result.push(
-        ...sortedUngrouped.map((opMode) => (
+    const ungroupedElements = ungroupedOpModes.length > 0
+      ? ungroupedOpModes.sort().map((opMode) => (
           <option key={opMode} value={opMode}>
             {opMode}
           </option>
-        )),
-      );
-    }
+        ))
+      : [];
 
-    return result;
+    return [...groupedElements, ...ungroupedElements];
   }
 
   render() {
