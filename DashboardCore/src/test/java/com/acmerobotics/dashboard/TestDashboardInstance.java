@@ -7,12 +7,13 @@ import com.acmerobotics.dashboard.message.redux.ReceiveHardwareConfigList;
 import com.acmerobotics.dashboard.message.redux.ReceiveOpModeList;
 import com.acmerobotics.dashboard.message.redux.ReceiveRobotStatus;
 import com.acmerobotics.dashboard.message.redux.SetHardwareConfig;
+import com.acmerobotics.dashboard.OpModeInfo;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.acmerobotics.dashboard.testopmode.TestOpMode;
 import com.acmerobotics.dashboard.testopmode.TestOpModeManager;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoWSD;
 import java.io.IOException;
+import java.util.List;
 import java.util.stream.Collectors;
 
 enum TestEnum {
@@ -61,12 +62,13 @@ public class TestDashboardInstance {
             sh.onOpen();
 
             opModeManager.setSendFun(this);
-            send(new ReceiveOpModeList(
-                opModeManager
-                    .getTestOpModes()
-                    .stream().map(TestOpMode::getName)
-                    .collect(Collectors.toList())
-            ));
+            
+            List<OpModeInfo> opModeInfoList = opModeManager
+                .getTestOpModes()
+                .stream().map(testOpMode -> new OpModeInfo(testOpMode.getName(), "Test"))
+                .collect(Collectors.toList());
+            
+            send(new ReceiveOpModeList(opModeInfoList));
             send(new ReceiveHardwareConfigList(
                 hardwareConfigManager.getTestHardwareConfigs(),
                 hardwareConfigManager.getActiveHardwareConfig()

@@ -4,7 +4,8 @@ import {
   ReceiveRobotStatusAction,
   RECEIVE_OP_MODE_LIST,
   RECEIVE_ROBOT_STATUS,
-} from '@/store/types';
+  OpModeInfo,
+} from '@/store/types/status';
 
 export const receiveRobotStatus = (
   status: StatusState,
@@ -14,8 +15,8 @@ export const receiveRobotStatus = (
 });
 
 export const receiveOpModeList = (
-  opModeList: string[],
+  opModeInfoList: OpModeInfo[],
 ): ReceiveOpModeListAction => ({
   type: RECEIVE_OP_MODE_LIST,
-  opModeList,
+  opModeInfoList,
 });
