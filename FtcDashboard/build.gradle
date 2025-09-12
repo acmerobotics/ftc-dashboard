@@ -9,6 +9,7 @@ plugins {
 apply plugin: "com.android.library"
 apply plugin: "maven-publish"
 apply plugin: "checkstyle"
+apply plugin: "kotlin-android"
 
 android {
     namespace = "com.acmerobotics.dashboard"

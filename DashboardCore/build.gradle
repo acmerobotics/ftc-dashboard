@@ -1,6 +1,7 @@
 apply plugin: "java"
 apply plugin: "maven-publish"
 apply plugin: "checkstyle"
+apply plugin: "kotlin"
 
 java {
     // TODO: add javadoc jar
