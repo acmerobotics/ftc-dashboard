@@ -1,15 +1,18 @@
 package com.acmerobotics.dashboard.testopmode;
 
-import com.acmerobotics.dashboard.SendFun;
-import com.acmerobotics.dashboard.TestFieldVersatilityOpMode;
-import com.acmerobotics.dashboard.TestSineWaveOpMode;
-import com.acmerobotics.dashboard.TestStructTelemetryOpMode;
+import com.acmerobotics.dashboard.*;
+
 import java.util.Arrays;
 import java.util.List;
 
 public class TestOpModeManager {
     private final List<TestOpMode> testOpModes =
-        Arrays.asList(new TestSineWaveOpMode(), new TestFieldVersatilityOpMode(), new TestStructTelemetryOpMode());
+        Arrays.asList(
+                new TestSineWaveOpMode(),
+                new TestFieldVersatilityOpMode(),
+                new TestStructTelemetryOpMode(),
+                new TestPrimitiveStructTelemetryOpMode()
+        );
     private TestOpMode activeOpMode = null;
 
     SendFun sendFun;
