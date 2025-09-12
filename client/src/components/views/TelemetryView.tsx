@@ -56,7 +56,7 @@ function dataToUint8Array(input: any): Uint8Array {
 }
 
 // Very small schema parser/decoder supporting:
-// - primitives: double
+// - primitives: bool, char, int8/16/32/64, uint8/16/32/64, float/float32, double/float64
 // - nested user types supplied in sample.nested (by name)
 // Grammar: "<Type> <name>; <Type> <name>; ..."
 // Example: "double x;double y" or "Vector2d position;Rotation2d heading"
@@ -89,29 +89,76 @@ function decodeBySchema(
   let offset = 0;
   const out: any = {};
 
+  const need = (n: number) => offset + n <= dv.byteLength;
+  const toNum = (v: bigint) => {
+    const num = Number(v);
+    return Number.isSafeInteger(num) ? num : v; // keep BigInt if not safe
+  };
+
   for (const f of fields) {
-    if (f.type === 'double' || f.type === 'float64') {
-      if (offset + 8 > dv.byteLength) {
-        // can't decode more; stop without marking as truncated to avoid noise
-        break;
-      }
-      const val = dv.getFloat64(offset, littleEndian);
-      out[f.name] = val;
+    const t = f.type;
+    if (t === 'double' || t === 'float64') {
+      if (!need(8)) break;
+      out[f.name] = dv.getFloat64(offset, littleEndian);
       offset += 8;
-    } else if (nestedMap[f.type]) {
-      const nestedSchema = nestedMap[f.type];
+    } else if (t === 'float' || t === 'float32') {
+      if (!need(4)) break;
+      out[f.name] = dv.getFloat32(offset, littleEndian);
+      offset += 4;
+    } else if (t === 'bool' || t === 'boolean') {
+      if (!need(1)) break;
+      out[f.name] = dv.getUint8(offset) !== 0;
+      offset += 1;
+    } else if (t === 'char') {
+      if (!need(1)) break;
+      const code = dv.getUint8(offset);
+      out[f.name] = String.fromCharCode(code);
+      offset += 1;
+    } else if (t === 'int8') {
+      if (!need(1)) break;
+      out[f.name] = dv.getInt8(offset);
+      offset += 1;
+    } else if (t === 'uint8') {
+      if (!need(1)) break;
+      out[f.name] = dv.getUint8(offset);
+      offset += 1;
+    } else if (t === 'int16') {
+      if (!need(2)) break;
+      out[f.name] = dv.getInt16(offset, littleEndian);
+      offset += 2;
+    } else if (t === 'uint16') {
+      if (!need(2)) break;
+      out[f.name] = dv.getUint16(offset, littleEndian);
+      offset += 2;
+    } else if (t === 'int32') {
+      if (!need(4)) break;
+      out[f.name] = dv.getInt32(offset, littleEndian);
+      offset += 4;
+    } else if (t === 'uint32') {
+      if (!need(4)) break;
+      out[f.name] = dv.getUint32(offset, littleEndian);
+      offset += 4;
+    } else if (t === 'int64') {
+      if (!need(8)) break;
+      const v = dv.getBigInt64(offset, littleEndian);
+      out[f.name] = toNum(v);
+      offset += 8;
+    } else if (t === 'uint64') {
+      if (!need(8)) break;
+      const v = dv.getBigUint64(offset, littleEndian);
+      out[f.name] = toNum(v);
+      offset += 8;
+    } else if (nestedMap[t]) {
+      const nestedSchema = nestedMap[t];
       if (offset >= dv.byteLength) {
-        // no bytes left for nested
         break;
       }
-      const slice = bytes.subarray(offset); // pass remaining bytes and let child consume what it can
+      const slice = bytes.subarray(offset);
       const res = decodeBySchema(slice, nestedSchema, nestedMap, littleEndian);
-      // Only set the field if child decoded anything
       if (res.used > 0) {
         out[f.name] = res.value;
         offset += res.used;
       } else {
-        // zero bytes consumed; stop
         break;
       }
     } else {
@@ -216,8 +263,18 @@ const TelemetryView = ({
     for (const f of fields) {
       const v = obj[f.name];
       if (v == null) continue;
-      if (f.type === 'double' || f.type === 'float64') {
+      const t = f.type;
+      if (t === 'double' || t === 'float64' || t === 'float' || t === 'float32') {
         parts.push(`${f.name}=${formatNumber(v as number)}`);
+      } else if (t === 'bool' || t === 'boolean') {
+        parts.push(`${f.name}=${v ? 'true' : 'false'}`);
+      } else if (t === 'char') {
+        parts.push(`${f.name}='${String(v)}'`);
+      } else if (t === 'int8' || t === 'uint8' || t === 'int16' || t === 'uint16' || t === 'int32' || t === 'uint32') {
+        parts.push(`${f.name}=${String(v)}`);
+      } else if (t === 'int64' || t === 'uint64') {
+        const str = typeof v === 'bigint' ? (v as bigint).toString() : String(v);
+        parts.push(`${f.name}=${str}`);
       } else if (nestedMap[f.type]) {
         const childSchema = nestedMap[f.type];
         parts.push(
