@@ -114,8 +114,8 @@ public class TestStructTelemetryOpMode extends TestOpMode {
         Rotation2d rot = new Rotation2d(Math.cos(heading), Math.sin(heading));
         Pose2d pose = new Pose2d(new Vector2d(x, y), rot);
 
-        StructTelemetryPacket<Pose2d> pkt = new StructTelemetryPacket<>();
-        pkt.put(poseStruct, pose);
+        StructTelemetryPacket<Pose2d> pkt = new StructTelemetryPacket<>(poseStruct);
+        pkt.put("pose", pose);
         pkt.put("x", String.format("%.2f", x));
         pkt.put("y", String.format("%.2f", y));
         pkt.put("headingDeg", String.format("%.1f", Math.toDegrees(heading)));

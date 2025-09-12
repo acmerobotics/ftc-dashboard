@@ -109,30 +109,35 @@ public class StructTelemetryPacketTests {
 
         StructTelemetryPacket<Pose2d> pkt = new StructTelemetryPacket<>(struct, pose); // little-endian
         assertNotNull(pkt);
-        assertEquals("test.Pose2d", pkt.structType);
-        assertEquals(struct.getSchema(), pkt.structSchema);
+        assertSame(struct, pkt.struct);
         assertNotNull(pkt.structData);
         assertEquals(1, pkt.structData.size());
-        assertEquals(struct.getSize(), pkt.structData.get(0).length);
-        // Ensure nested includes Vector2d and Rotation2d
-        List<String> nestedTypes = Arrays.stream(pkt.structNested).map(n -> n.type).collect(java.util.stream.Collectors.toList());
+        assertTrue(pkt.structData.containsKey("initial"));
+        byte[] bytes = pkt.structData.get("initial");
+        assertEquals(struct.getSize(), bytes.length);
+        // Ensure nested includes Vector2d and Rotation2d via struct descriptor
+        Struct<?>[] nested = struct.getNested();
+        assertEquals(2, nested.length);
+        List<String> nestedTypes = Arrays.asList(nested[0].getTypeName(), nested[1].getTypeName());
         assertTrue(nestedTypes.contains("test.Vector2d"));
         assertTrue(nestedTypes.contains("test.Rotation2d"));
 
         // Unpack with little-endian and check equality
-        Pose2d decoded = struct.unpack(ByteBuffer.wrap(pkt.structData.get(0)).order(ByteOrder.LITTLE_ENDIAN));
+        Pose2d decoded = struct.unpack(ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN));
         assertEquals(pose, decoded);
     }
 
     @Test
     void putApiAccumulatesMultipleStructs() {
         Vector2dStruct vec = new Vector2dStruct();
-        StructTelemetryPacket<Vector2d> pkt = new StructTelemetryPacket<>();
-        pkt.put(vec, new Vector2d(3.0, 4.0));
-        pkt.put(vec, new Vector2d(-1.0, 2.5));
+        StructTelemetryPacket<Vector2d> pkt = new StructTelemetryPacket<>(vec);
+        pkt.put("first", new Vector2d(3.0, 4.0), ByteOrder.LITTLE_ENDIAN);
+        pkt.put("second", new Vector2d(-1.0, 2.5), ByteOrder.LITTLE_ENDIAN);
 
-        assertEquals("test.Vector2d", pkt.structType);
+        assertSame(vec, pkt.struct);
         assertEquals(2, pkt.structData.size());
+        assertTrue(pkt.structData.containsKey("first"));
+        assertTrue(pkt.structData.containsKey("second"));
     }
 
     @Test
@@ -145,8 +150,9 @@ public class StructTelemetryPacketTests {
         // Simple sanity checks on JSON content
         assertTrue(json.contains("\"RECEIVE_TELEMETRY\""), json);
         assertTrue(json.contains("\"structData\""), json);
-        assertTrue(json.contains("\"structType\""), json);
-        assertTrue(json.contains("\"structSchema\""), json);
+        assertTrue(json.contains("\"initial\""), json);
+        // New format also includes a struct descriptor object at key "struct"
+        assertTrue(json.contains("\"struct\""), json);
         assertTrue(json.contains(struct.getTypeName()), json);
         assertTrue(json.contains(struct.getSchema()), json);
     }

@@ -1,10 +1,14 @@
 package com.acmerobotics.dashboard.struct;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.google.gson.annotations.SerializedName;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Telemetry packet carrying compact raw bytes for one or more values packed by Struct<T> implementations.
@@ -12,20 +16,44 @@ import java.util.List;
  * <p>The packet exposes a `put(struct, value)` API mirroring TelemetryPacket.put so callers can
  * add struct values without relying on constructors. This packet is restricted to a single struct
  * type; its descriptor (type, schema, nested) lives on the packet itself and the payloads are a
- * list of byte arrays in {@code structData}.</p>
+ * map of base64-encoded byte arrays in {@code structData}.</p>
  */
 public class StructTelemetryPacket<T> extends TelemetryPacket {
-    /** Struct type name for all samples in this packet. */
-    public String structType;
-    /** Schema string for {@link #structType}. */
-    public String structSchema;
-    /** Optional nested struct descriptors referenced by {@link #structSchema}. */
-    public NestedType[] structNested;
+    /** Struct used at runtime for packing/unpacking. Not serialized. */
+    public transient final Struct<T> struct;
     /** Packed samples for this struct type. Each entry is one value. */
-    public final List<byte[]> structData;
+    public final Map<String, byte[]> structData;
 
-    // Optional reference to the struct type for this packet (helps with type inference/clarity)
-    private final Struct<T> typeStruct;
+    /**
+     * Minimal serializable descriptor for the struct type, exposed to the frontend as `struct`.
+     */
+    public static class StructDescriptor {
+        public final String type;
+        public final String schema;
+        public final List<NestedType> nested;
+
+        public StructDescriptor(Struct<?> s) {
+            this.type = s.getTypeName();
+            this.schema = s.getSchema();
+            // Build nested list if available
+            Struct<?>[] nestedArr;
+            try {
+                nestedArr = s.getNested();
+            } catch (Throwable t) {
+                nestedArr = null;
+            }
+            if (nestedArr == null) {
+                this.nested = new ArrayList<>();
+            } else {
+                this.nested = new ArrayList<>(nestedArr.length);
+                for (Struct<?> n : nestedArr) {
+                    if (n != null) {
+                        this.nested.add(new NestedType(n.getTypeName(), n.getSchema()));
+                    }
+                }
+            }
+        }
+    }
 
     public static class NestedType {
         public final String type;
@@ -37,35 +65,25 @@ public class StructTelemetryPacket<T> extends TelemetryPacket {
         }
     }
 
-    /**
-     * Creates an empty struct telemetry packet. Use put(struct, value) to add entries.
-     */
-    public StructTelemetryPacket() {
-        super();
-        this.structData = new ArrayList<>();
-        this.typeStruct = null;
-        this.structNested = new NestedType[0];
-    }
+    /** Serializable view of the struct descriptor for the frontend. */
+    @SerializedName("struct")
+    public final StructDescriptor structDescriptor;
 
     /**
      * Creates an empty struct telemetry packet bound to a specific struct type.
      */
     public StructTelemetryPacket(Struct<T> struct) {
         super();
-        this.structData = new ArrayList<>();
-        this.typeStruct = struct;
-        this.structType = struct.getTypeName();
-        this.structSchema = struct.getSchema();
-        // Fill nested now for convenience
-        setNestedFrom(struct);
+        this.structData = new TreeMap<>();
+        this.struct = struct;
+        this.structDescriptor = new StructDescriptor(struct);
     }
 
     /**
      * Creates a struct telemetry packet, packing the provided value using LITTLE_ENDIAN order.
      */
     public StructTelemetryPacket(Struct<T> struct, T value) {
-        this(struct);
-        put(struct, value, ByteOrder.LITTLE_ENDIAN);
+        this(struct, value, ByteOrder.LITTLE_ENDIAN);
     }
 
     /**
@@ -73,48 +91,22 @@ public class StructTelemetryPacket<T> extends TelemetryPacket {
      */
     public StructTelemetryPacket(Struct<T> struct, T value, ByteOrder order) {
         this(struct);
-        put(struct, value, order);
+        put("initial", value, order);
     }
 
-    private void setNestedFrom(Struct<?> struct) {
-        Struct<?>[] nestedStructs = struct.getNested();
-        if (nestedStructs != null && nestedStructs.length > 0) {
-            NestedType[] nested = new NestedType[nestedStructs.length];
-            for (int i = 0; i < nestedStructs.length; i++) {
-                nested[i] = new NestedType(
-                    nestedStructs[i].getTypeName(),
-                    nestedStructs[i].getSchema()
-                );
-            }
-            this.structNested = nested;
-        } else {
-            this.structNested = new NestedType[0];
-        }
-    }
-
-    /**
-     * Appends a struct-packed value using LITTLE_ENDIAN order.
-     */
-    public void put(Struct<T> struct, T value) {
-        put(struct, value, ByteOrder.LITTLE_ENDIAN);
-    }
-
-    /**
-     * Appends a struct-packed value with explicit byte order.
-     */
-    public void put(Struct<T> struct, T value, ByteOrder order) {
-        // On first use, initialize the descriptor if not already set
-        if (this.structType == null) {
-            this.structType = struct.getTypeName();
-            this.structSchema = struct.getSchema();
-            setNestedFrom(struct);
-        }
-
-        // Pack value into bytes
+    public void put(String key, T value, ByteOrder order) {
         ByteBuffer bb = ByteBuffer.allocate(struct.getSize()).order(order);
         struct.pack(bb, value);
-        byte[] bytes = bb.array();
+        this.structData.put(key, bb.array());
+    }
 
-        this.structData.add(bytes);
+    @SuppressWarnings("unchecked")
+    public void put(String key, Object value) {
+        if (struct.getTypeClass().isInstance(value)) {
+            T trueValue = (T) value;
+            put(key, trueValue, ByteOrder.LITTLE_ENDIAN);
+        } else {
+            super.put(key, value);
+        }
     }
 }
