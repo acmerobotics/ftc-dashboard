@@ -75,6 +75,11 @@ export type TelemetryItem = {
   };
   log: string[];
   timestamp: number;
+  // Struct telemetry: a single struct descriptor on the packet with multiple samples
+  structType?: string;
+  structSchema?: string;
+  structNested?: { type: string; schema: string }[];
+  structData?: string[]; // base64 payloads (each entry is one packed sample)
 };
 
 export type ReceiveTelemetryAction = {
