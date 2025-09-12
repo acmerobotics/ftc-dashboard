@@ -60,7 +60,8 @@ function dataToUint8Array(input: any): Uint8Array {
 // - nested user types supplied in sample.nested (by name)
 // Grammar: "<Type> <name>; <Type> <name>; ..."
 // Example: "double x;double y" or "Vector2d position;Rotation2d heading"
-function parseSchema(schema: string): { type: string; name: string }[] {
+function parseSchema(schema?: string): { type: string; name: string }[] {
+  if (!schema || typeof schema !== 'string') return [];
   return schema
     .split(';')
     .map((s) => s.trim())
@@ -76,10 +77,13 @@ function parseSchema(schema: string): { type: string; name: string }[] {
 type DecodedResult = { value: any; used: number };
 function decodeBySchema(
   bytes: Uint8Array,
-  schema: string,
+  schema: string | undefined,
   nestedMap: Record<string, string>,
   littleEndian = true,
 ): DecodedResult {
+  if (!schema) {
+    return { value: {}, used: 0 };
+  }
   const fields = parseSchema(schema);
   const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   let offset = 0;
@@ -129,7 +133,7 @@ const TelemetryView = ({
       type: string;
       schema: string;
       nested?: { type: string; schema: string }[];
-      data: string[];
+      data: { key: string; data: string }[];
     } | null>(null);
 
   const packets = useSelector((state: RootState) => state.telemetry);
@@ -159,20 +163,23 @@ const TelemetryView = ({
       ),
     );
 
-    // Determine latest struct descriptor from top-level struct fields
-    setStructDesc(() => {
-      let latest: { type: string; schema: string; nested?: { type: string; schema: string }[]; data: string[] } | null = null;
+    // Determine latest struct descriptor from top-level struct fields (new format)
+    setStructDesc((prev) => {
+      let latest: { type: string; schema: string; nested?: { type: string; schema: string }[]; data: { key: string; data: string }[] } | null = null;
       for (const p of packets) {
-        if (p.structType && p.structSchema && p.structData && p.structData.length) {
-          latest = {
-            type: p.structType,
-            schema: p.structSchema,
-            nested: p.structNested || [],
-            data: p.structData,
-          };
+        if (p.struct && p.structData) {
+          const entries = Object.entries(p.structData).map(([k, v]) => ({ key: k, data: v }));
+          if (entries.length > 0) {
+            latest = {
+              type: p.struct.type,
+              schema: p.struct.schema,
+              nested: p.struct.nested || [],
+              data: entries,
+            };
+          }
         }
       }
-      return latest;
+      return latest || prev;
     });
   }, [packets]);
 
@@ -187,12 +194,49 @@ const TelemetryView = ({
     <span key={i} dangerouslySetInnerHTML={{ __html: `${line}<br />` }} />
   ));
 
+  // Helpers to compactly format decoded structs
+  function formatNumber(n: number): string {
+    if (!isFinite(n)) return String(n);
+    const s = Math.abs(n) >= 1000 || (Math.abs(n) > 0 && Math.abs(n) < 0.001)
+      ? n.toExponential(3)
+      : n.toFixed(3);
+    return s.replace(/\.0+($|e)/, '$1').replace(/(\.\d*?)0+($|e)/, '$1$2');
+  }
+  function shortTypeName(t: string): string {
+    return t.includes('.') ? t.substring(t.lastIndexOf('.') + 1) : t;
+  }
+  function formatStructCompact(
+    obj: any,
+    typeName: string,
+    schemaStr: string,
+    nestedMap: Record<string, string>,
+  ): string {
+    const fields = parseSchema(schemaStr);
+    const parts: string[] = [];
+    for (const f of fields) {
+      const v = obj[f.name];
+      if (v == null) continue;
+      if (f.type === 'double' || f.type === 'float64') {
+        parts.push(`${f.name}=${formatNumber(v as number)}`);
+      } else if (nestedMap[f.type]) {
+        const childSchema = nestedMap[f.type];
+        parts.push(
+          `${f.name}=${formatStructCompact(v, shortTypeName(f.type), childSchema, nestedMap)}`,
+        );
+      } else {
+        parts.push(`${f.name}=?`);
+      }
+    }
+    return `${shortTypeName(typeName)}(${parts.join(', ')})`;
+  }
+
   // Render struct samples from latest descriptor
   const structBlocks = (() => {
     if (!structDesc) return [] as JSX.Element[];
     const { type, schema, nested, data: samples } = structDesc;
     const nestedMap: Record<string, string> = {};
-    const addType = (t: string, s: string) => {
+    const addType = (t?: string, s?: string) => {
+      if (!t || !s) return; // defensively ignore malformed entries
       nestedMap[t] = s; // fully-qualified
       const short = t.includes('.') ? t.substring(t.lastIndexOf('.') + 1) : t;
       nestedMap[short] = s; // simple name for unqualified refs in schema
@@ -200,15 +244,13 @@ const TelemetryView = ({
     (nested || []).forEach((n) => addType(n.type, n.schema));
     addType(type, schema);
 
-    return samples.map((d, idx) => {
-      const bytes = dataToUint8Array(d as any);
+    return samples.map((entry, idx) => {
+      const bytes = dataToUint8Array(entry.data as any);
       const res = decodeBySchema(bytes, schema, nestedMap, true);
       const decoded = res.value;
+      const compact = formatStructCompact(decoded, type, schema, nestedMap);
       return (
-        <div key={`struct_${idx}`} className="mt-2">
-          <strong>{type}</strong>
-          <pre>{JSON.stringify(decoded, null, 2)}</pre>
-        </div>
+        <span key={`struct_${idx}`} dangerouslySetInnerHTML={{ __html: `${entry.key}: ${compact}<br />` }} />
       );
     });
   })();
@@ -217,15 +259,8 @@ const TelemetryView = ({
     <BaseView isUnlocked={isUnlocked}>
       <BaseViewHeading isDraggable={isDraggable}>Telemetry</BaseViewHeading>
       <BaseViewBody>
-        <p>{telemetryLines}</p>
+        <p>{telemetryLines}{structBlocks}</p>
         <p>{telemetryLog}</p>
-        {structBlocks.length > 0 && (
-          <div className="mt-2">
-            <hr className="my-2" />
-            <h3 className="font-semibold">Structs</h3>
-            {structBlocks}
-          </div>
-        )}
       </BaseViewBody>
     </BaseView>
   );
