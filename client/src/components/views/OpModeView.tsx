@@ -99,10 +99,10 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
       };
     } else if (
       state.selectedOpMode === '' ||
-      props.opModeList.indexOf(state.selectedOpMode) === -1
+      !props.opModeInfoList.some(info => info.name === state.selectedOpMode)
     ) {
       return {
-        selectedOpMode: props.opModeList[0] || '',
+        selectedOpMode: props.opModeInfoList[0]?.name || '',
       };
     } else {
       return {};
@@ -161,9 +161,9 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
   }
 
   renderButtons() {
-    const { activeOpMode, activeOpModeStatus, opModeList } = this.props;
+    const { activeOpMode, activeOpModeStatus, opModeInfoList } = this.props;
 
-    if (opModeList.length === 0) {
+    if (opModeInfoList.length === 0) {
       return null;
     } else if (activeOpMode === STOP_OP_MODE_TAG) {
       return this.renderInitButton();
@@ -183,11 +183,62 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
     }
   }
 
+  renderOpModeOptions() {
+    const { opModeInfoList } = this.props;
+
+    if (opModeInfoList.length === 0) {
+      return <option>Loading...</option>;
+    }
+
+    // Separate grouped and ungrouped op modes
+    const groupedOpModes: Record<string, string[]> = {};
+    const ungroupedOpModes: string[] = [];
+
+    opModeInfoList.forEach((opModeInfo) => {
+      if (opModeInfo.group !== '') {
+        // Has a valid group
+        if (!groupedOpModes[opModeInfo.group]) {
+          groupedOpModes[opModeInfo.group] = [];
+        }
+        groupedOpModes[opModeInfo.group].push(opModeInfo.name);
+      } else {
+        // No group - add to ungrouped
+        ungroupedOpModes.push(opModeInfo.name);
+      }
+    });
+
+    // Add grouped op modes first
+    const sortedGroups = Object.keys(groupedOpModes).sort();
+    const groupedElements = sortedGroups.map((group) => {
+      const sortedOpModes = groupedOpModes[group].sort();
+      return (
+        <optgroup key={group} label={group}>
+          {sortedOpModes.map((opMode) => (
+            <option key={opMode} value={opMode}>
+              {opMode}
+            </option>
+          ))}
+        </optgroup>
+      );
+    });
+
+    // Add ungrouped op modes at the bottom (sorted)
+    const ungroupedElements = ungroupedOpModes.length > 0
+      ? ungroupedOpModes.sort().map((opMode) => (
+          <option key={opMode} value={opMode}>
+            {opMode}
+          </option>
+        ))
+      : [];
+
+    return [...groupedElements, ...ungroupedElements];
+  }
+
   render() {
     const {
       available,
       activeOpMode,
-      opModeList,
+      opModeInfoList,
       warningMessage,
       errorMessage,
       gamepadsSupported,
@@ -269,17 +320,11 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
             `}
             value={this.state.selectedOpMode}
             disabled={
-              activeOpMode !== STOP_OP_MODE_TAG || opModeList.length === 0
+              activeOpMode !== STOP_OP_MODE_TAG || opModeInfoList.length === 0
             }
             onChange={this.onChange}
           >
-            {opModeList.length === 0 ? (
-              <option>Loading...</option>
-            ) : (
-              opModeList
-                .sort()
-                .map((opMode: string) => <option key={opMode}>{opMode}</option>)
-            )}
+            {this.renderOpModeOptions()}
           </select>
           {this.renderButtons()}
           {errorMessage !== '' && (
