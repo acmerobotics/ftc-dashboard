@@ -741,19 +741,30 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 try {
                     Class<?> configClass = Class.forName(className, false, classLoader);
 
-                    if (!configClass.isAnnotationPresent(Config.class)
-                        || configClass.isAnnotationPresent(Disabled.class)) {
+                    if (!configClass.isAnnotationPresent(Config.class)) {
                         continue;
                     }
 
                     String name = configClass.getSimpleName();
                     String altName = configClass.getAnnotation(Config.class).value();
+
+                    // Special case for Kotlin companion objects
+                    if (configClass.getSimpleName().equals("Companion") && configClass.getEnclosingClass() != null) {
+                        configClass = configClass.getEnclosingClass();
+
+                        name = configClass.getSimpleName();
+                    }
+
+                    if (configClass.isAnnotationPresent(Disabled.class)) {
+                        continue;
+                    }
+
                     if (!altName.isEmpty()) {
                         name = altName;
                     }
 
                     customVariable.putVariable(name,
-                        ReflectionConfig.createVariableFromClass(configClass));
+                            ReflectionConfig.createVariableFromClass(configClass));
                 } catch (ClassNotFoundException | NoClassDefFoundError ignored) {
                     // dash is unable to access many classes and reporting every instance
                     // only clutters the logs
