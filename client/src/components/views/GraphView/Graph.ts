@@ -161,9 +161,15 @@ function getScalingFactors(ctx: CanvasRenderingContext2D): Scaling {
   let transform;
   if (typeof ctx.getTransform === 'function') {
     transform = ctx.getTransform();
-  } else if (typeof (ctx as any).mozCurrentTransform !== 'undefined') {
+  } else if (
+    typeof (ctx as unknown as { mozCurrentTransform?: number[] })
+      .mozCurrentTransform !== 'undefined'
+  ) {
     transform = window.DOMMatrix.fromFloat64Array(
-      Float64Array.from((ctx as any).mozCurrentTransform),
+      Float64Array.from(
+        (ctx as unknown as { mozCurrentTransform: number[] })
+          .mozCurrentTransform,
+      ),
     );
   } else {
     throw new Error('unable to find canvas transform');
@@ -211,7 +217,11 @@ export default class Graph {
 
   constructor(canvas: HTMLCanvasElement, options: Options) {
     this.canvas = canvas;
-    this.ctx = canvas.getContext('2d')!;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      throw new Error('Failed to get 2d context from canvas');
+    }
+    this.ctx = ctx;
 
     this.options = cloneDeep(DEFAULT_OPTIONS);
     Object.assign(this.options, options || {});
