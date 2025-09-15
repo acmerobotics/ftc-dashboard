@@ -24,7 +24,6 @@ import { OpModeStatus } from '@/enums/OpModeStatus';
 import { colors, ThemeConsumer } from '@/hooks/useTheme';
 import { DEFAULT_OPTIONS } from './Graph';
 import { validateInt, ValResult } from '@/components/inputs/validation';
-import { saveGraphVariables, getGraphVariables } from '@/store/actions/graph';
 
 type GraphViewState = {
   graphing: boolean;
@@ -39,13 +38,9 @@ type GraphViewState = {
 const mapStateToProps = (state: RootState) => ({
   telemetry: state.telemetry,
   status: state.status,
-  graph: state.graph,
 });
 
-const mapDispatchToProps = {
-  saveGraphVariables,
-  getGraphVariables,
-};
+const mapDispatchToProps = {};
 
 const connector = connect(mapStateToProps, mapDispatchToProps);
 
@@ -65,9 +60,9 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
       userPaused: false,
       pausedTime: 0,
       availableKeys: [],
-      selectedKeys: props.graph.selectedKeys,
+      selectedKeys: [],
       windowMs: {
-        value: props.graph.windowMs,
+        value: DEFAULT_OPTIONS.windowMs,
         valid: true,
       },
     };
@@ -86,9 +81,6 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
   }
 
   componentDidMount() {
-    // Load saved graph variables
-    this.props.getGraphVariables();
-    
     if (this.containerRef.current) {
       this.containerRef.current.addEventListener(
         'keydown',
@@ -112,17 +104,6 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
     }
     if (!this.noOpmodeRunning(this.props) && this.noOpmodeRunning(prevProps)) {
       this.opmodePlay();
-    }
-
-    // Update local state when Redux state changes
-    if (this.props.graph !== prevProps.graph) {
-      this.setState({
-        selectedKeys: this.props.graph.selectedKeys,
-        windowMs: {
-          value: this.props.graph.windowMs,
-          valid: true,
-        },
-      });
     }
 
     if (this.props.telemetry === prevProps.telemetry) return;
@@ -221,17 +202,10 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
 
   handleSelectedKeysChange(selectedKeys: string[]) {
     this.setState({ selectedKeys });
-    // Save to Redux store - ensure windowMs is a valid number
-    const windowMs = this.state.windowMs.valid ? this.state.windowMs.value : DEFAULT_OPTIONS.windowMs;
-    this.props.saveGraphVariables(selectedKeys, windowMs);
   }
 
   handleWindowMsChange(windowMs: ValResult<number>) {
     this.setState({ windowMs });
-    // Save to Redux store if valid
-    if (windowMs.valid) {
-      this.props.saveGraphVariables(this.state.selectedKeys, windowMs.value);
-    }
   }
 
   render() {
