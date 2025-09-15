@@ -148,15 +148,12 @@ class HardwareConfigView extends Component<
   }
 
   parseEditedXmlToRobot(xmlText?: string): boolean {
-    const text = xmlText ?? this.state.editedConfigText;
+    const { editedConfigText, robotInstance } = this.state;
+    const text = xmlText ?? editedConfigText;
     let parseSuccess = true;
 
     try {
-      this.state.robotInstance.fromXml(text);
-      this.setState((prevState) => ({
-        robotInstance: prevState.robotInstance,
-        viewMode: prevState.viewMode,
-      }));
+      robotInstance.fromXml(text);
     } catch (err) {
       parseSuccess = false;
       this.setState({ viewMode: 'text' });
@@ -248,12 +245,14 @@ class HardwareConfigView extends Component<
   }
 
   toggleViewMode() {
-    if (this.state.viewMode === 'text') {
+    const { viewMode, robotInstance } = this.state;
+
+    if (viewMode === 'text') {
       if (this.parseEditedXmlToRobot()) {
         this.setState({ viewMode: 'gui' });
       }
     } else {
-      const newXmlText = this.state.robotInstance.toString();
+      const newXmlText = robotInstance.toString();
       this.setState(
         { viewMode: 'text', editedConfigText: newXmlText },
         this.adjustTextareaHeight,
@@ -322,35 +321,39 @@ class HardwareConfigView extends Component<
   renderSaveButton() {
     const { viewMode, editedConfigText, robotInstance, saveFilename } =
       this.state;
-    const { hardwareConfigList, isReadOnlyList } = this.props;
+    const { hardwareConfigList, isReadOnlyList, writeHardwareConfig } =
+      this.props;
 
     const trimmedSaveFilename = saveFilename.trim();
     const idx = hardwareConfigList.indexOf(trimmedSaveFilename);
     const isReadOnly = idx !== -1 && isReadOnlyList[idx];
 
+    let validate: string[];
+    if (viewMode === 'gui') {
+      validate = robotInstance.validate();
+    } else {
+      const tempRobot = new Robot();
+      tempRobot.fromXml(editedConfigText);
+      validate = tempRobot.validate();
+    }
+
     const isInvalid =
       !trimmedSaveFilename ||
       trimmedSaveFilename === '<No Config Set>' ||
-      isReadOnly;
+      isReadOnly ||
+      validate.length !== 0;
 
     const canSave = !isInvalid;
-
-    let xmlContentToSave: string;
-    if (viewMode === 'gui') {
-      xmlContentToSave = robotInstance.toString();
-    } else {
-      xmlContentToSave = editedConfigText;
-    }
+    const xmlContentToSave =
+      viewMode === 'gui' ? robotInstance.toString() : editedConfigText;
 
     return (
       <ActionButton
-        className={`
-          ${
-            canSave
-              ? 'border-green-400 bg-green-300 dark:border-transparent dark:bg-green-600 dark:text-white dark:hover:border-green-400/80 dark:focus:bg-green-700'
-              : 'border-red-400 bg-red-300 dark:border-transparent dark:bg-red-600 dark:text-white dark:hover:border-red-500/80 dark:focus:bg-red-700'
-          }
-        `}
+        className={`${
+          canSave
+            ? 'border-green-400 bg-green-300 dark:border-transparent dark:bg-green-600 dark:text-white dark:hover:border-green-400/80 dark:focus:bg-green-700'
+            : 'border-red-400 bg-red-300 dark:border-transparent dark:bg-red-600 dark:text-white dark:hover:border-red-500/80 dark:focus:bg-red-700'
+        }`}
         onClick={() => {
           if (!canSave) {
             if (
@@ -362,10 +365,12 @@ class HardwareConfigView extends Component<
               window.alert(
                 'This filename is read-only. Please enter a new filename to save.',
               );
+            } else if (validate.length !== 0) {
+              robotInstance.invalidPopup(validate);
             }
             return;
           }
-          this.props.writeHardwareConfig(trimmedSaveFilename, xmlContentToSave);
+          writeHardwareConfig(trimmedSaveFilename, xmlContentToSave);
           this.setState({
             selectedHardwareConfig: trimmedSaveFilename,
             saveFilename: trimmedSaveFilename,

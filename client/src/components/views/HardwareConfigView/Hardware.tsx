@@ -57,7 +57,7 @@ export const motorType = {
   NeveRest3_7V1: 'NeveRest3.7v1Gearmotor',
   NeveRest20: 'NeveRest20Gearmotor',
   NeveRest40: 'NeveRest40Gearmotor',
-  NeverRest60: 'NeveRest60Gearmotor',
+  NeveRest60: 'NeveRest60Gearmotor',
   REV20HDHex: 'RevRobotics20HDHexMotor',
   REV40HDHex: 'RevRobotics40HDHexMotor',
   REVCoreHex: 'RevRoboticsCoreHexMotor',
@@ -103,6 +103,43 @@ export const i2cType = {
   goBILDAPinpointRR: 'goBILDAPinpointRR',
 };
 
+const typeCollections = {
+  Motor: motorType,
+  Servo: servoType,
+  Analog: analogType,
+  Digital: digitalType,
+  I2c: i2cType,
+};
+
+const inputClasses =
+  'ml-2 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100';
+
+const DeleteButton = ({ onClick }: { onClick?: () => void }) => (
+  <button
+    className="absolute top-1 right-1 flex h-6 w-6 items-center justify-center rounded-md border border-red-400 bg-red-200 text-red-600"
+    onClick={onClick}
+  >
+    <RemoveCircleOutline className="h-5 w-5 fill-red-800" />
+  </button>
+);
+
+const Input = ({
+  value,
+  onChange,
+  type = 'text',
+}: {
+  value: string | number;
+  onChange: (v: string) => void;
+  type?: string;
+}) => (
+  <input
+    className={inputClasses}
+    type={type}
+    value={value === undefined || value === null ? '' : String(value)}
+    onChange={(e) => onChange(e.target.value)}
+  />
+);
+
 const renderStandardDevice = (
   device: Device,
   typeObj: Record<string, string>,
@@ -119,38 +156,16 @@ const renderStandardDevice = (
   return (
     <div
       key={keyPrefix}
-      className="
-        relative
-        my-2 rounded-md border border-gray-200
-        bg-gray-50 p-3
-        transition-colors dark:border-gray-600 dark:bg-gray-700
-        dark:text-gray-100
-      "
+      className="relative my-2 rounded-md border border-gray-200 bg-gray-50 p-3 transition-colors dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
     >
-      {onDelete && (
-        <button
-          className="
-            absolute top-1 right-1 flex h-6 w-6 items-center justify-center rounded-md border
-            border-red-400 bg-red-200 text-red-600
-          "
-          onClick={onDelete}
-        >
-          <RemoveCircleOutline className="h-5 w-5 fill-red-800" />
-        </button>
-      )}
+      {onDelete && <DeleteButton onClick={onDelete} />}
       <div className="space-y-1">
         <div>
           <label className="mr-1 text-sm">Name:</label>
-          <input
-            className="
-              ml-2 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm
-              transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500
-              dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100
-            "
-            type="text"
+          <Input
             value={device.name}
-            onChange={(e) => {
-              device.name = e.target.value;
+            onChange={(v) => {
+              device.name = v;
               configChangeCallback();
             }}
           />
@@ -158,11 +173,7 @@ const renderStandardDevice = (
         <div>
           <label className="mr-1 text-sm">Type:</label>
           <select
-            className="
-              ml-2 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm
-              transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500
-              dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100
-            "
+            className={inputClasses}
             value={device.type}
             onChange={(e) => {
               device.type = e.target.value;
@@ -179,18 +190,12 @@ const renderStandardDevice = (
         </div>
         <div>
           <label className="mr-1 text-sm">Port:</label>
-          <input
-            className="
-              ml-2 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm
-              transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500
-              dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100
-            "
+          <Input
             type="number"
             value={isNaN(device.port) ? '' : device.port}
-            onChange={(e) => {
-              device.port = max
-                ? clamp(parseInt(e.target.value, 10), 0, max)
-                : parseInt(e.target.value, 10);
+            onChange={(v) => {
+              const parsed = parseInt(v || '0', 10);
+              device.port = max ? clamp(parsed, 0, max) : parsed;
               configChangeCallback();
             }}
           />
@@ -201,11 +206,13 @@ const renderStandardDevice = (
   );
 };
 
-export class Motor extends Device {
-  constructor() {
+export class StandardDevice extends Device {
+  private typeObj: Record<string, string>;
+  constructor(defaultKey: string, typeObj: Record<string, string>) {
     super();
-    this.type = motorType.Generic;
-    this.key = motorType.Generic;
+    this.type = defaultKey;
+    this.key = defaultKey;
+    this.typeObj = typeObj;
   }
   public override toString() {
     return `<${this.key} name="${this.name}" port="${
@@ -219,7 +226,7 @@ export class Motor extends Device {
   ): JSX.Element {
     return renderStandardDevice(
       this,
-      motorType,
+      this.typeObj,
       configChangeCallback,
       keyPrefix,
       onDelete,
@@ -227,81 +234,27 @@ export class Motor extends Device {
   }
 }
 
-export class Servo extends Device {
+export class Motor extends StandardDevice {
   constructor() {
-    super();
-    this.type = servoType.Servo;
-    this.key = servoType.Servo;
-  }
-  public override toString() {
-    return `<${this.key} name="${this.name}" port="${
-      isNaN(this.port) ? 0 : this.port
-    }" />`;
-  }
-  public override renderAsGui(
-    configChangeCallback: () => void,
-    keyPrefix: string,
-    onDelete?: () => void,
-  ): JSX.Element {
-    return renderStandardDevice(
-      this,
-      servoType,
-      configChangeCallback,
-      keyPrefix,
-      onDelete,
-    );
+    super(motorType.Generic, motorType);
   }
 }
 
-export class Analog extends Device {
+export class Servo extends StandardDevice {
   constructor() {
-    super();
-    this.type = analogType.AnalogDevice;
-    this.key = analogType.AnalogDevice;
-  }
-  public override toString() {
-    return `<${this.key} name="${this.name}" port="${
-      isNaN(this.port) ? 0 : this.port
-    }" />`;
-  }
-  public override renderAsGui(
-    configChangeCallback: () => void,
-    keyPrefix: string,
-    onDelete?: () => void,
-  ): JSX.Element {
-    return renderStandardDevice(
-      this,
-      analogType,
-      configChangeCallback,
-      keyPrefix,
-      onDelete,
-    );
+    super(servoType.Servo, servoType);
   }
 }
 
-export class Digital extends Device {
+export class Analog extends StandardDevice {
   constructor() {
-    super();
-    this.type = digitalType.DigitalDevice;
-    this.key = digitalType.DigitalDevice;
+    super(analogType.AnalogDevice, analogType);
   }
-  public override toString() {
-    return `<${this.key} name="${this.name}" port="${
-      isNaN(this.port) ? 0 : this.port
-    }" />`;
-  }
-  public override renderAsGui(
-    configChangeCallback: () => void,
-    keyPrefix: string,
-    onDelete?: () => void,
-  ): JSX.Element {
-    return renderStandardDevice(
-      this,
-      digitalType,
-      configChangeCallback,
-      keyPrefix,
-      onDelete,
-    );
+}
+
+export class Digital extends StandardDevice {
+  constructor() {
+    super(digitalType.DigitalDevice, digitalType);
   }
 }
 
@@ -325,16 +278,11 @@ export class I2c extends Device {
     const busField = (
       <div>
         <label className="mr-1 text-sm">Bus:</label>
-        <input
-          className="
-            ml-2 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm
-            transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500
-            dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100
-          "
+        <Input
           type="number"
           value={isNaN(this.bus) ? '' : this.bus}
-          onChange={(e) => {
-            this.bus = parseInt(e.target.value, 10);
+          onChange={(v) => {
+            this.bus = parseInt(v || '0', 10);
             configChangeCallback();
           }}
         />
@@ -374,84 +322,48 @@ export class EthernetDevice extends Device {
     return (
       <div
         key={keyPrefix}
-        className="
-          relative my-2 rounded-md border border-gray-200 bg-gray-50 p-3
-          transition-colors dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100
-        "
+        className="relative my-2 rounded-md border border-gray-200 bg-gray-50 p-3 transition-colors dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
       >
-        {onDelete && (
-          <button
-            className="
-              absolute top-1 right-1 flex h-6 w-6 items-center justify-center rounded-md border
-              border-red-400 bg-red-200 text-red-600
-            "
-            onClick={onDelete}
-          >
-            <RemoveCircleOutline className="h-5 w-5 fill-red-800" />
-          </button>
-        )}
+        {onDelete && <DeleteButton onClick={onDelete} />}
         <div className="space-y-1">
           <label className="mr-1 text-sm">{this.type}:</label>
           <div>
             <label className="mr-1 text-sm">Name:</label>
-            <input
-              className="
-                ml-2 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm
-                transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500
-                dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100
-              "
-              type="text"
+            <Input
               value={this.name}
-              onChange={(e) => {
-                this.name = e.target.value;
+              onChange={(v) => {
+                this.name = v;
                 configChangeCallback();
               }}
             />
           </div>
           <div>
             <label className="mr-1 text-sm">Port:</label>
-            <input
-              className="
-                ml-2 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm
-                transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500
-                dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100
-              "
+            <Input
               type="number"
               value={isNaN(this.port) ? '' : this.port}
-              onChange={(e) => {
-                this.port = parseInt(e.target.value, 10);
+              onChange={(v) => {
+                this.port = parseInt(v || '0', 10);
                 configChangeCallback();
               }}
             />
           </div>
           <div>
             <label className="mr-1 text-sm">Serial:</label>
-            <input
-              className="
-                ml-2 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm
-                transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500
-                dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100
-              "
-              type="text"
+            <Input
               value={this.serialNumber}
-              onChange={(e) => {
-                this.serialNumber = e.target.value;
+              onChange={(v) => {
+                this.serialNumber = v;
                 configChangeCallback();
               }}
             />
           </div>
           <div>
             <label className="mr-1 text-sm">IP Address:</label>
-            <input
-              className="
-                ml-2 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm
-                transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500
-                dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100
-              "
-              type="text"
+            <Input
               value={this.ipAddress}
-              onChange={(e) => {
-                this.ipAddress = e.target.value;
+              onChange={(v) => {
+                this.ipAddress = v;
                 configChangeCallback();
               }}
             />
@@ -480,52 +392,27 @@ export class Webcam extends Device {
     return (
       <div
         key={keyPrefix}
-        className="
-          relative my-2 rounded-md border border-gray-200 bg-gray-50 p-3
-          transition-colors dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100
-        "
+        className="relative my-2 rounded-md border border-gray-200 bg-gray-50 p-3 transition-colors dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
       >
-        {onDelete && (
-          <button
-            className="
-              absolute top-1 right-1 flex h-6 w-6 items-center justify-center rounded-md border
-              border-red-400 bg-red-200 text-red-600
-            "
-            onClick={onDelete}
-          >
-            <RemoveCircleOutline className="h-5 w-5 fill-red-800" />
-          </button>
-        )}
+        {onDelete && <DeleteButton onClick={onDelete} />}
         <div className="space-y-1">
           <label className="mr-1 text-sm">{this.type}:</label>
           <div>
             <label className="mr-1 text-sm">Name:</label>
-            <input
-              className="
-                ml-2 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm
-                transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500
-                dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100
-              "
-              type="text"
+            <Input
               value={this.name}
-              onChange={(e) => {
-                this.name = e.target.value;
+              onChange={(v) => {
+                this.name = v;
                 configChangeCallback();
               }}
             />
           </div>
           <div>
             <label className="mr-1 text-sm">Serial:</label>
-            <input
-              className="
-                ml-2 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm
-                transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500
-                dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100
-              "
-              type="text"
+            <Input
               value={this.serialNumber}
-              onChange={(e) => {
-                this.serialNumber = e.target.value;
+              onChange={(v) => {
+                this.serialNumber = v;
                 configChangeCallback();
               }}
             />
@@ -537,16 +424,19 @@ export class Webcam extends Device {
 }
 
 export class CustomDevice extends Device {
-  constructor(public key: string) {
+  constructor(public key: string = 'Custom') {
     super();
+    this.key = key;
     this.type = key;
-    this.name = key;
+    this.name = 'Custom Device';
   }
+
   public override toString() {
     return `<${this.key} name="${this.name}" port="${
       isNaN(this.port) ? 0 : this.port
     }" />`;
   }
+
   public override renderAsGui(
     configChangeCallback: () => void,
     keyPrefix: string,
@@ -555,69 +445,38 @@ export class CustomDevice extends Device {
     return (
       <div
         key={keyPrefix}
-        className="
-          relative my-2 rounded-md border border-gray-200 bg-gray-50 p-3
-          transition-colors dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100
-        "
+        className="relative my-2 rounded-md border border-gray-200 bg-gray-50 p-3 transition-colors dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
       >
-        {onDelete && (
-          <button
-            className="
-              absolute top-1 right-1 flex h-6 w-6 items-center justify-center rounded-md border
-              border-red-400 bg-red-200 text-red-600
-            "
-            onClick={onDelete}
-          >
-            <RemoveCircleOutline className="h-5 w-5 fill-red-800" />
-          </button>
-        )}
-        <div className="space-y-1">
+        {onDelete && <DeleteButton onClick={onDelete} />}
+        <div className="space-y-2">
           <div>
             <label className="mr-1 text-sm">Name:</label>
-            <input
-              className="
-                ml-2 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm
-                transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500
-                dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100
-              "
-              type="text"
+            <Input
               value={this.name}
-              onChange={(e) => {
-                this.name = e.target.value;
+              onChange={(v) => {
+                this.name = v;
                 configChangeCallback();
               }}
             />
           </div>
           <div>
             <label className="mr-1 text-sm">Type:</label>
-            <input
-              className="
-                ml-2 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm
-                transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500
-                dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100
-              "
-              type="text"
-              value={this.key}
-              onChange={(e) => {
-                const newValue = e.target.value;
-                this.key = newValue;
-                this.type = newValue;
+            <Input
+              value={this.type}
+              onChange={(v) => {
+                this.type = v;
+                this.key = v;
                 configChangeCallback();
               }}
             />
           </div>
           <div>
             <label className="mr-1 text-sm">Port:</label>
-            <input
-              className="
-                ml-2 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm
-                transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500
-                dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100
-              "
+            <Input
               type="number"
               value={isNaN(this.port) ? '' : this.port}
-              onChange={(e) => {
-                this.port = parseInt(e.target.value, 10);
+              onChange={(v) => {
+                this.port = parseInt(v || '0', 10);
                 configChangeCallback();
               }}
             />
@@ -719,17 +578,14 @@ export abstract class Hub extends Device {
                 +
               </button>
             </div>
-
             <button className="bg-transparent p-0">
               <ExpandMore
-                className={`
-                  ${collapsed ? '-rotate-90' : 'rotate-0'}
-                  h-4 w-4 transition-transform
-                `}
+                className={`${
+                  collapsed ? '-rotate-90' : 'rotate-0'
+                } h-4 w-4 transition-transform`}
               />
             </button>
           </div>
-
           {!collapsed && <>{devs.map((d, i) => renderCb(d, i))}</>}
         </div>
       );
@@ -738,46 +594,30 @@ export abstract class Hub extends Device {
     return (
       <div
         key={keyPrefix}
-        className="
-          relative m-4 rounded-lg border border-gray-300 bg-white p-4
-          transition-colors dark:border-gray-700 dark:bg-gray-800
-          dark:text-gray-100
-        "
+        className="relative m-4 rounded-lg border border-gray-300 bg-white p-4 transition-colors dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
       >
         <h4 className="flex items-center">
           <label className="mr-1 text-sm">Hub Name:</label>
-          <input
-            className="
-              ml-2 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm
-              transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500
-              dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100
-            "
-            type="text"
+          <Input
             value={this.name}
-            onChange={(e) => {
-              this.name = e.target.value;
+            onChange={(v) => {
+              this.name = v;
               configChangeCallback();
             }}
           />
           <label className="ml-1 mr-1 text-sm">Port:</label>
-          <input
-            className="
-              ml-2 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm
-              transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500
-              dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100
-            "
+          <Input
             type="number"
             value={isNaN(this.port) ? '' : this.port}
-            onChange={(e) => {
-              this.port = parseInt(e.target.value, 10);
+            onChange={(v) => {
+              this.port = parseInt(v || '0', 10);
               configChangeCallback();
             }}
           />
           ({this.type})
           {onDelete && (
             <button
-              className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-md border
-              border-red-400 bg-red-200 text-red-600"
+              className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-md border border-red-400 bg-red-200 text-red-600"
               onClick={onDelete}
             >
               <RemoveCircleOutline className="h-5 w-5 fill-red-800" />
@@ -890,7 +730,7 @@ export abstract class Hub extends Device {
           'Custom Devices',
           this.customDevices,
           () => {
-            const tag = '';
+            const tag = 'Custom';
             this.customDevices.push(new CustomDevice(tag));
             configChangeCallback();
           },
@@ -933,12 +773,21 @@ export class ExpansionHub extends Hub {
 export class Custom extends Hub {
   public attributes: Array<{ key: string; val: string }> = [];
 
-  constructor(tagName = 'CustomHub') {
+  constructor(tagName = 'CustomDevice', type = 'Custom') {
     super();
     this.key = tagName;
-    this.type = tagName;
-    this.name = tagName;
-    this.attributes.push({ key: 'name', val: this.name });
+    this.type = type;
+    this.name = 'Custom Device';
+  }
+
+  private getNextAttributeKey(): string {
+    const existing = this.attributes
+      .map((a) => a.key)
+      .filter((k) => k.startsWith('attr'))
+      .map((k) => parseInt(k.replace('attr', ''), 10))
+      .filter((n) => !isNaN(n));
+    const next = existing.length > 0 ? Math.max(...existing) + 1 : 1;
+    return `attr${next}`;
   }
 
   public override toString() {
@@ -958,37 +807,17 @@ export class Custom extends Hub {
     return (
       <div
         key={keyPrefix}
-        className="
-          relative my-2 rounded-md border border-gray-200 bg-gray-50 p-3
-          transition-colors dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100
-        "
+        className="relative my-2 rounded-md border border-gray-200 bg-gray-50 p-3 transition-colors dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
       >
-        {onDelete && (
-          <button
-            className="
-              absolute top-1 right-1 flex h-6 w-6 items-center justify-center rounded-md border
-              border-red-400 bg-red-200 text-red-600
-            "
-            onClick={onDelete}
-          >
-            <RemoveCircleOutline className="h-5 w-5 fill-red-800" />
-          </button>
-        )}
+        {onDelete && <DeleteButton onClick={onDelete} />}
         <div className="space-y-2">
           <div>
             <label className="mr-1 text-sm">Type:</label>
-            <input
-              className="
-                ml-2 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm
-                transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500
-                dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100
-              "
-              type="text"
-              value={this.key}
-              onChange={(e) => {
-                this.key = e.target.value;
-                this.type = e.target.value;
-                this.name = e.target.value;
+            <Input
+              value={this.type}
+              onChange={(v) => {
+                this.type = v;
+                this.key = v;
                 configChangeCallback();
               }}
             />
@@ -996,45 +825,24 @@ export class Custom extends Hub {
 
           {this.attributes.map(({ key, val }, idx) => (
             <div key={idx} className="flex items-center space-x-2">
-              <input
-                className="
-                  flex-1 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm
-                  transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500
-                  dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100
-                "
-                type="text"
+              <Input
                 value={key}
-                onChange={(e) => {
-                  const newKey = e.target.value;
-                  this.attributes = this.attributes.map((a, i) =>
-                    i === idx ? { ...a, key: newKey } : a,
-                  );
+                onChange={(newKey) => {
+                  this.attributes[idx].key = newKey;
                   configChangeCallback();
                 }}
               />
-              <input
-                className="
-                  flex-1 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm
-                  transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500
-                  dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100
-                "
-                type="text"
+              <Input
                 value={val}
-                onChange={(e) => {
-                  const newVal = e.target.value;
-                  this.attributes = this.attributes.map((a, i) =>
-                    i === idx ? { ...a, val: newVal } : a,
-                  );
+                onChange={(newVal) => {
+                  this.attributes[idx].val = newVal;
                   configChangeCallback();
                 }}
               />
               <button
-                className="
-                  flex h-6 w-6 items-center justify-center rounded-md border
-                  border-red-400 bg-red-200 text-red-600
-                "
+                className="flex h-6 w-6 items-center justify-center rounded-md border border-red-400 bg-red-200 text-red-600"
                 onClick={() => {
-                  this.attributes = this.attributes.filter((_, i) => i !== idx);
+                  this.attributes.splice(idx, 1);
                   configChangeCallback();
                 }}
               >
@@ -1044,12 +852,10 @@ export class Custom extends Hub {
           ))}
 
           <button
-            className="
-              flex h-6 w-6 items-center justify-center rounded-md border
-              border-green-600 bg-green-200 text-green-600
-            "
+            className="flex h-6 w-6 items-center justify-center rounded-md border border-green-600 bg-green-200 text-green-600"
             onClick={() => {
-              this.attributes.push({ key: '', val: '' });
+              const nextKey = this.getNextAttributeKey();
+              this.attributes.push({ key: nextKey, val: '' });
               configChangeCallback();
             }}
           >
@@ -1060,6 +866,7 @@ export class Custom extends Hub {
     );
   }
 }
+
 export class Robot {
   public controlHubs: ControlHub[] = [];
   public expansionHubs: ExpansionHub[] = [];
@@ -1076,13 +883,19 @@ export class Robot {
     };
   }
 
+  public invalidPopup(validationErrors: string[]): void {
+    if (validationErrors.length > 0) {
+      window.alert('Configuration errors:\n' + validationErrors.join('\n'));
+    }
+  }
+
   public toString(): string {
     const lines: string[] = [];
     lines.push(`<Robot type="FirstInspires-FTC">`);
+    lines.push(
+      `    <LynxUsbDevice name="${this.name}" parentModuleAddress="173" serialNumber="(embedded)">`,
+    );
     if (this.controlHubs.length || this.expansionHubs.length) {
-      lines.push(
-        `    <LynxUsbDevice name="${this.name}" parentModuleAddress="173" serialNumber="(embedded)">`,
-      );
       for (const hub of [...this.controlHubs, ...this.expansionHubs]) {
         hub
           .toString()
@@ -1091,8 +904,8 @@ export class Robot {
             lines.push(line && line.trim() ? `        ${line}` : ''),
           );
       }
-      lines.push(`    </LynxUsbDevice>`);
     }
+    lines.push(`    </LynxUsbDevice>`);
     for (const device of this.otherDevices) {
       lines.push(`    ${device.toString()}`);
     }
@@ -1104,7 +917,6 @@ export class Robot {
     this.controlHubs = [];
     this.expansionHubs = [];
     this.otherDevices = [];
-    this.name = 'Control Hub Portal';
     this.collapsedSections = {
       controlHubs: false,
       expansionHubs: false,
@@ -1116,153 +928,133 @@ export class Robot {
     const robotElement = xmlDoc.getElementsByTagName('Robot')[0];
     if (!robotElement) return;
 
-    const getAttr = (
-      el: Element,
-      name: string,
-      def?: string | null,
-    ): string | null => el.getAttribute(name) ?? def ?? null;
+    this.name = robotElement.getAttribute('name') || 'Control Hub Portal';
+
+    const getAttr = (el: Element, name: string, def = ''): string =>
+      el.getAttribute(name) ?? def;
 
     const lynxUsbDeviceElement =
       robotElement.getElementsByTagName('LynxUsbDevice')[0];
     if (lynxUsbDeviceElement) {
-      this.name = getAttr(lynxUsbDeviceElement, 'name') ?? this.name;
-    }
+      this.name = getAttr(lynxUsbDeviceElement, 'name') || this.name;
 
-    const createDeviceInstance = (
-      element: Element,
-      category: 'Motor' | 'Servo' | 'Analog' | 'Digital' | 'I2c',
-    ): Device => {
-      let device: Device;
-      switch (category) {
-        case 'Motor':
-          device = new Motor();
-          break;
-        case 'Servo':
-          device = new Servo();
-          break;
-        case 'Analog':
-          device = new Analog();
-          break;
-        case 'Digital':
-          device = new Digital();
-          break;
-        case 'I2c':
-          device = new I2c();
-          break;
-        default:
-          throw new Error(`Unknown device category: ${category}`);
-      }
-      device.name = getAttr(element, 'name') ?? '';
-      device.port = parseInt(getAttr(element, 'port') ?? '0', 10);
-      device.key = element.tagName;
-      device.type = element.tagName;
-      if (device instanceof I2c) {
-        device.bus = parseInt(getAttr(element, 'bus') ?? '0', 10);
-      }
-      return device;
-    };
+      for (const moduleNode of Array.from(lynxUsbDeviceElement.children)) {
+        if (moduleNode.tagName !== 'LynxModule') continue;
 
-    for (const child of Array.from(robotElement.children)) {
-      if (child.tagName === 'LynxUsbDevice') {
-        for (const moduleNode of Array.from(child.children)) {
-          if (moduleNode.tagName === 'LynxModule') {
-            const module = moduleNode as Element;
-            const name = getAttr(module, 'name');
-            const port = parseInt(getAttr(module, 'port') ?? '0', 10);
-            const isControlHub =
-              name?.toLowerCase().includes('control hub') || port === 173;
-            const isCustomHub =
-              name?.toLowerCase().includes('custom hub') ||
-              (name?.toLowerCase().includes('custom') &&
-                !isControlHub &&
-                port !== 173);
-            let hub: Hub;
-            if (isControlHub) {
-              hub = new ControlHub();
-              this.controlHubs.push(hub as ControlHub);
-            } else if (isCustomHub) {
-              hub = new Custom(name ?? 'Custom Hub');
-              this.otherDevices.push(hub as Custom);
-            } else {
-              hub = new ExpansionHub();
-              this.expansionHubs.push(hub as ExpansionHub);
+        const port = parseInt(getAttr(moduleNode, 'port', '0'), 10);
+        let hub: Hub;
+        if (port === 173) {
+          hub = new ControlHub();
+          this.controlHubs.push(hub as ControlHub);
+        } else {
+          hub = new ExpansionHub();
+          this.expansionHubs.push(hub as ExpansionHub);
+        }
+
+        hub.name = getAttr(moduleNode, 'name', hub.name);
+        hub.port = port;
+
+        for (const deviceEl of Array.from(moduleNode.children)) {
+          if (deviceEl.nodeType !== Node.ELEMENT_NODE) continue;
+          const tag = deviceEl.tagName;
+          const category = Object.keys(typeCollections).find((k) =>
+            Object.values(
+              typeCollections[k as keyof typeof typeCollections],
+            ).includes(tag),
+          ) as keyof typeof typeCollections | undefined;
+
+          let dev: Device;
+          if (category) {
+            switch (category) {
+              case 'Motor':
+                dev = new Motor();
+                break;
+              case 'Servo':
+                dev = new Servo();
+                break;
+              case 'Analog':
+                dev = new Analog();
+                break;
+              case 'Digital':
+                dev = new Digital();
+                break;
+              case 'I2c':
+                dev = new I2c();
+                break;
+              default:
+                dev = new CustomDevice(tag);
+                break;
             }
-            hub.name = name ?? hub.name;
-            hub.port = port || hub.port;
-            for (const deviceEl of Array.from(module.children)) {
-              if (deviceEl.nodeType !== Node.ELEMENT_NODE) continue;
-              const tag = deviceEl.tagName;
-              if (Object.values(motorType).includes(tag as string)) {
-                const motor = createDeviceInstance(deviceEl, 'Motor') as Motor;
-                hub.motors.push(motor);
-              } else if (Object.values(servoType).includes(tag as string)) {
-                const servo = createDeviceInstance(deviceEl, 'Servo') as Servo;
-                hub.servos.push(servo);
-              } else if (Object.values(i2cType).includes(tag as string)) {
-                const i2c = createDeviceInstance(deviceEl, 'I2c') as I2c;
-                hub.i2cDevices.push(i2c);
-              } else if (Object.values(analogType).includes(tag as string)) {
-                const analog = createDeviceInstance(
-                  deviceEl,
-                  'Analog',
-                ) as Analog;
-                hub.analogInputDevices.push(analog);
-              } else if (Object.values(digitalType).includes(tag as string)) {
-                const digital = createDeviceInstance(
-                  deviceEl,
-                  'Digital',
-                ) as Digital;
-                hub.digitalDevices.push(digital);
-              } else {
-                const custom = new CustomDevice(tag);
-                for (const attr of Array.from(deviceEl.attributes)) {
-                  (custom as CustomDevice & Record<string, string>)[attr.name] =
-                    attr.value;
-                }
-                custom.port = parseInt(getAttr(deviceEl, 'port') ?? '0', 10);
-                hub.customDevices.push(custom);
-              }
-            }
+            dev.name = getAttr(deviceEl, 'name', dev.name);
+            if (deviceEl.hasAttribute('port'))
+              dev.port = parseInt(
+                getAttr(deviceEl, 'port', String(dev.port || 0)),
+                10,
+              );
+            dev.key = tag;
+            dev.type = tag;
+            if (dev instanceof I2c && deviceEl.hasAttribute('bus'))
+              (dev as I2c).bus = parseInt(
+                getAttr(deviceEl, 'bus', String((dev as I2c).bus || 0)),
+                10,
+              );
+
+            if (category === 'Motor') hub.motors.push(dev as Motor);
+            else if (category === 'Servo') hub.servos.push(dev as Servo);
+            else if (category === 'Analog')
+              hub.analogInputDevices.push(dev as Analog);
+            else if (category === 'Digital')
+              hub.digitalDevices.push(dev as Digital);
+            else if (category === 'I2c') hub.i2cDevices.push(dev as I2c);
+          } else {
+            const custom = new CustomDevice(tag);
+            custom.name = getAttr(deviceEl, 'name', 'Custom');
+            if (deviceEl.hasAttribute('port'))
+              custom.port = parseInt(
+                getAttr(deviceEl, 'port', String(custom.port || 0)),
+                10,
+              );
+            custom.key = tag;
+            custom.type = tag;
+            hub.customDevices.push(custom);
           }
         }
-      } else if (
-        child.tagName === 'EthernetDevice' ||
-        child.tagName === 'Webcam'
-      ) {
-        const DeviceClass =
-          child.tagName === 'EthernetDevice' ? EthernetDevice : Webcam;
-        const d = new DeviceClass();
-        d.name = getAttr(child, 'name') ?? '';
-        if (d instanceof EthernetDevice) {
-          d.serialNumber = getAttr(child, 'serialNumber') ?? '';
-          d.port = parseInt(getAttr(child, 'port') ?? '0', 10);
-          d.ipAddress = getAttr(child, 'ipAddress') ?? '';
-        } else {
-          d.serialNumber = getAttr(child, 'serialNumber') ?? '';
-        }
-        this.otherDevices.push(d);
-      } else if (
-        child.tagName !== 'EthernetDevice' &&
-        child.tagName !== 'Webcam'
-      ) {
-        const tagName = child.tagName;
-        const hub = new Custom(tagName);
-        hub.name = child.getAttribute('name') ?? tagName;
-        hub.attributes = hub.attributes.map((a) =>
-          a.key === 'name' ? { ...a, val: hub.name } : a,
-        );
+      }
+    }
+
+    for (const child of Array.from(robotElement.children)) {
+      if (child.tagName === 'LynxUsbDevice') continue;
+
+      const tagName = child.tagName;
+      if (tagName === 'EthernetDevice') {
+        const device = new EthernetDevice();
+        device.name = getAttr(child, 'name', '');
+        device.serialNumber = getAttr(child, 'serialNumber', '');
+        device.ipAddress = getAttr(child, 'ipAddress', '');
+        if (child.hasAttribute('port'))
+          device.port = parseInt(getAttr(child, 'port', '0'), 10);
+        this.otherDevices.push(device);
+      } else if (tagName === 'Webcam') {
+        const device = new Webcam();
+        device.name = getAttr(child, 'name', '');
+        device.serialNumber = getAttr(child, 'serialNumber', '');
+        this.otherDevices.push(device);
+      } else {
+        const parsedType = child.getAttribute('type') || tagName;
+        const customHub = new Custom(tagName, parsedType);
+        customHub.name = getAttr(child, 'name', 'CustomDevice');
         for (const attr of Array.from(child.attributes)) {
-          if (attr.name === 'name') continue;
-          hub.attributes.push({ key: attr.name, val: attr.value });
+          customHub.attributes.push({
+            key: attr.name || 'unknown',
+            val: attr.value,
+          });
+          if (attr.name === 'port') {
+            const p = parseInt(attr.value, 10);
+            if (!isNaN(p)) customHub.port = p;
+          }
         }
-        if (tagName.toLowerCase().includes('control hub')) {
-          this.controlHubs.push(hub as unknown as ControlHub);
-        } else if (tagName.toLowerCase().includes('expansion hub')) {
-          this.expansionHubs.push(hub as unknown as ExpansionHub);
-        } else {
-          this.otherDevices.push(hub as Custom);
-        }
-        continue;
+        if (!customHub.type) customHub.type = tagName;
+        this.otherDevices.push(customHub);
       }
     }
   }
@@ -1271,9 +1063,9 @@ export class Robot {
     configChangeCallback: () => void,
     keyPrefix: string,
   ): JSX.Element {
-    const canAddControlHub = this.controlHubs.length >= maxDevices.controlHubs;
+    const canAddControlHub = this.controlHubs.length < maxDevices.controlHubs;
     const canAddExpansionHub =
-      this.expansionHubs.length >= maxDevices.expansionHubs;
+      this.expansionHubs.length < maxDevices.expansionHubs;
 
     const isControlHubsCollapsed = this.collapsedSections.controlHubs;
     const isExpansionHubsCollapsed = this.collapsedSections.expansionHubs;
@@ -1282,17 +1074,14 @@ export class Robot {
     return (
       <div key={keyPrefix} className="font-sans">
         <label className="mr-1 text-sm">Control Hub Portal Name:</label>
-        <input
-          className="ml-2 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-          type="text"
+        <Input
           value={this.name}
-          onChange={(e) => {
-            this.name = e.target.value;
+          onChange={(v) => {
+            this.name = v;
             configChangeCallback();
           }}
         />
 
-        {/* Control Hubs */}
         <div>
           <div
             className="flex items-center justify-between border-b p-2"
@@ -1307,7 +1096,7 @@ export class Robot {
               </h4>
               <button
                 className={`ml-1 flex h-6 w-6 items-center justify-center rounded-md font-medium ${
-                  !canAddControlHub
+                  canAddControlHub
                     ? 'border border-green-600 bg-green-200 text-green-600'
                     : 'bg-gray-200 text-gray-600'
                 }`}
@@ -1318,12 +1107,11 @@ export class Robot {
                   this.controlHubs.push(new ControlHub());
                   configChangeCallback();
                 }}
-                disabled={canAddControlHub}
+                disabled={!canAddControlHub}
               >
                 +
               </button>
             </div>
-
             <button className="bg-transparent p-0">
               <ExpandMore
                 className={`${
@@ -1347,7 +1135,6 @@ export class Robot {
         </div>
         <hr />
 
-        {/* Expansion Hubs */}
         <div>
           <div
             className="flex items-center justify-between border-b p-2"
@@ -1362,7 +1149,7 @@ export class Robot {
               </h4>
               <button
                 className={`ml-1 flex h-6 w-6 items-center justify-center rounded-md font-medium ${
-                  !canAddExpansionHub
+                  canAddExpansionHub
                     ? 'border border-green-600 bg-green-200 text-green-600'
                     : 'bg-gray-200 text-gray-600'
                 }`}
@@ -1373,12 +1160,11 @@ export class Robot {
                   this.expansionHubs.push(new ExpansionHub());
                   configChangeCallback();
                 }}
-                disabled={canAddExpansionHub}
+                disabled={!canAddExpansionHub}
               >
                 +
               </button>
             </div>
-
             <button className="bg-transparent p-0">
               <ExpandMore
                 className={`${
@@ -1402,7 +1188,6 @@ export class Robot {
         </div>
         <hr />
 
-        {/* Other Devices */}
         <div>
           <div
             className="flex items-center justify-between border-b p-2"
@@ -1414,7 +1199,6 @@ export class Robot {
             <div className="flex items-center">
               <h4 className="m-1 text-sm">Other Devices</h4>
             </div>
-
             <button className="bg-transparent p-0">
               <ExpandMore
                 className={`${
@@ -1464,7 +1248,12 @@ export class Robot {
               className="flex h-6 w-6 items-center justify-center rounded-md border border-green-600 bg-green-200 font-medium text-green-600"
               onClick={(e) => {
                 e.stopPropagation();
-                this.otherDevices.push(new Custom());
+                const newCustomHub = new Custom();
+                newCustomHub.attributes.push({
+                  key: 'name',
+                  val: newCustomHub.name,
+                });
+                this.otherDevices.push(newCustomHub);
                 configChangeCallback();
               }}
             >
@@ -1486,5 +1275,120 @@ export class Robot {
         </div>
       </div>
     );
+  }
+
+  public validate(): string[] {
+    const errors: string[] = [];
+
+    const checkDuplicatePorts = (
+      devices: Device[],
+      typeName: string,
+      hubName: string,
+    ) => {
+      const portMap: Record<number, string[]> = {};
+      devices.forEach((d) => {
+        if (!portMap[d.port]) portMap[d.port] = [];
+        portMap[d.port].push(d.name || '(unnamed)');
+      });
+      for (const port in portMap) {
+        if (portMap[port].length > 1) {
+          errors.push(
+            `Duplicate ${typeName} port ${port} in hub "${hubName}": ${portMap[
+              port
+            ].join(', ')}`,
+          );
+        }
+      }
+    };
+
+    const checkDuplicateNames = (
+      devices: Device[],
+      typeName: string,
+      hubName: string,
+    ) => {
+      const nameMap: Record<string, number[]> = {};
+      devices.forEach((d, idx) => {
+        const name = d.name || '(unnamed)';
+        if (!nameMap[name]) nameMap[name] = [];
+        nameMap[name].push(idx);
+      });
+      for (const name in nameMap) {
+        if (nameMap[name].length > 1) {
+          errors.push(
+            `Duplicate ${typeName} name "${name}" in hub "${hubName}"`,
+          );
+        }
+      }
+    };
+
+    const hubs = [...this.controlHubs, ...this.expansionHubs];
+    hubs.forEach((hub) => {
+      if (!hub.name) errors.push(`Hub of type ${hub.type} has an empty name.`);
+      if (hub instanceof ControlHub && hub.port !== 173) {
+        errors.push(
+          `Control Hub "${hub.name}" must have port 173, currently ${hub.port}.`,
+        );
+      }
+
+      const deviceGroups: [Device[], string][] = [
+        [hub.motors, 'Motor'],
+        [hub.servos, 'Servo'],
+        [hub.digitalDevices, 'Digital'],
+        [hub.analogInputDevices, 'Analog'],
+        [hub.i2cDevices, 'I2C'],
+      ];
+
+      for (const [group, typeName] of deviceGroups) {
+        checkDuplicatePorts(group, typeName, hub.name);
+        checkDuplicateNames(group, typeName, hub.name);
+      }
+
+      hub.customDevices.forEach((d) => {
+        if (!d.name)
+          errors.push(`Custom device in hub "${hub.name}" has empty name.`);
+        if (!d.key)
+          errors.push(
+            `Custom device "${d.name}" in hub "${hub.name}" has empty key.`,
+          );
+        if (!d.type)
+          errors.push(
+            `Custom device "${d.name}" in hub "${hub.name}" has empty type.`,
+          );
+      });
+
+      [
+        ...hub.motors,
+        ...hub.servos,
+        ...hub.digitalDevices,
+        ...hub.analogInputDevices,
+        ...hub.i2cDevices,
+      ].forEach((d) => {
+        if (!d.name)
+          errors.push(
+            `Device of type ${d.type} in hub "${hub.name}" has empty name.`,
+          );
+      });
+    });
+
+    this.otherDevices.forEach((d) => {
+      if (!d.name) errors.push(`Device of type ${d.type} has empty name.`);
+      if (d instanceof Custom) {
+        if (!d.type) errors.push(`Custom hub "${d.name}" has empty type.`);
+        d.attributes.forEach((attr, idx) => {
+          if (!attr.key)
+            errors.push(
+              `Attribute #${idx + 1} in custom hub "${d.name}" has empty key.`,
+            );
+        });
+      }
+      if (d instanceof EthernetDevice) {
+        if (!d.serialNumber)
+          errors.push(`Ethernet device "${d.name}" has empty serial number.`);
+        if (!d.ipAddress)
+          errors.push(`Ethernet device "${d.name}" has empty IP address.`);
+      }
+    });
+
+    return errors;
   }
 }
