@@ -144,7 +144,7 @@ const LoggingView = ({
   isDraggable = false,
   isUnlocked = false,
 }: LoggingViewProps) => {
-  const { activeOpMode, activeOpModeStatus, opModeList } = useSelector(
+  const { activeOpMode, activeOpModeStatus, opModeInfoList } = useSelector(
     (state: RootState) => state.status,
   );
 
@@ -183,7 +183,7 @@ const LoggingView = ({
   );
 
   useEffect(() => {
-    if (opModeList?.length === 0) {
+    if (opModeInfoList?.length === 0) {
       setIsRecording(false);
     } else if (activeOpMode === STOP_OP_MODE_TAG) {
       setIsRecording(false);
@@ -196,7 +196,7 @@ const LoggingView = ({
     } else if (activeOpModeStatus === OpModeStatus.STOPPED) {
       setIsRecording(false);
     }
-  }, [activeOpMode, activeOpModeStatus, isRecording, opModeList, telemetry]);
+  }, [activeOpMode, activeOpModeStatus, isRecording, opModeInfoList, telemetry]);
 
   useEffect(() => {
     if (

@@ -110,9 +110,8 @@ public class TestFieldVersatilityOpMode extends TestOpMode {
         dashboard.addData("theta", angleAnim);
         dashboard.update();
 
-        //draw the field overlay - supply false if we want to suppress the default field image
-        //TelemetryPacket packet = new TelemetryPacket(false);
-        TelemetryPacket packet = new TelemetryPacket();
+        //draw the field overlay - supply false to suppress the default field image
+        TelemetryPacket packet = new TelemetryPacket(false);
 
         packet.fieldOverlay()
             //explicitly draw another field image
@@ -133,7 +132,7 @@ public class TestFieldVersatilityOpMode extends TestOpMode {
             //.drawGrid(GRIDX, GRIDY, GRIDW, GRIDH, GRID_LINESX, GRID_LINESY, angleAnim, GRID_PIVOTX, GRID_PIVOTY, GRID_USE_PAGE_FRAME)
 
             //you can draw multiple images and can rotate them around a specified anchor/pivot point and draw them in the current transform instead of the page frame
-            .drawImage("/dash/ftc.jpg", 24, 24, 48, 48, 0, 0, 0, false)
+            .drawImage("/dash/decode.webp", 24, 24, 48, 48, 0, 0, 0, false)
 
             //demonstrate an alternate transform to move the origin and orientation
             //default origin for dashboard is in the center of the field with X axis pointing up
@@ -169,7 +168,7 @@ public class TestFieldVersatilityOpMode extends TestOpMode {
             .fillText("15 deg CC", bx - 10, by, "8px Arial", Math.toRadians(90 - 15), false)
             .setAlpha(.25)
             //you can draw multiple images and can rotate them around a specified pivot point, and draw them in the current transform instead of the page frame
-            .drawImage("/dash/powerplay.png", 24, 24, 48, 48, angleAnim, 24, 24, false)
+            .drawImage("/dash/decode.webp", 24, 24, 48, 48, angleAnim, 24, 24, false)
             .setAlpha(1.0)
             .fillText("baseline", 48, 48, "8px Arial", Math.toRadians(90), false);
 
