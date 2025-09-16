@@ -21,14 +21,13 @@ class TestLogFile {
     fun testLogChannel() {
         val outputStream = ByteArrayOutputStream()
         val writer = LogWriter(outputStream)
-        val channel = LogChannel("test", IntSchema, writer)
+        val channel = LogChannel("test", IntSchema)
 
         assertEquals("test", channel.name)
         assertEquals(IntSchema, channel.schema)
-        assertEquals(writer, channel.writer)
 
         assertDoesNotThrow {
-            channel.write(42)
+            writer.write(channel, 42)
         }
     }
 
@@ -40,7 +39,6 @@ class TestLogFile {
 
         assertEquals("simple", channel.name)
         assertTrue(channel.schema is StructSchema<*>)
-        assertEquals(writer, channel.writer)
     }
 
     @Test
@@ -60,22 +58,15 @@ class TestLogFile {
     fun testLogWriterAddChannel() {
         val outputStream = ByteArrayOutputStream()
         val writer = LogWriter(outputStream)
-        val channel = LogChannel("test", IntSchema, writer)
+        val channel = LogChannel("test", IntSchema)
 
         val addedChannel = writer.addChannel(channel)
         assertEquals(channel, addedChannel)
 
         // Test duplicate name rejection
-        val duplicateChannel = LogChannel("test", LongSchema, writer)
+        val duplicateChannel = LogChannel("test", LongSchema)
         assertThrows(IllegalArgumentException::class.java) {
             writer.addChannel(duplicateChannel)
-        }
-
-        // Test wrong writer rejection
-        val anotherWriter = LogWriter(ByteArrayOutputStream())
-        val wrongWriterChannel = LogChannel("other", IntSchema, anotherWriter)
-        assertThrows(IllegalArgumentException::class.java) {
-            writer.addChannel(wrongWriterChannel)
         }
     }
 
@@ -83,7 +74,7 @@ class TestLogFile {
     fun testLogWriterWrite() {
         val outputStream = ByteArrayOutputStream()
         val writer = LogWriter(outputStream)
-        val channel = LogChannel("test", IntSchema, writer)
+        val channel = LogChannel("test", IntSchema)
 
         // Writing should auto-register the channel
         assertDoesNotThrow {
@@ -113,13 +104,13 @@ class TestLogFile {
         val structChannel = LogChannel.createFromClass("structs", SimpleStruct::class.java, writer)
 
         writer.use {
-            intChannel.write(42)
-            stringChannel.write("Hello")
-            structChannel.write(SimpleStruct(1, "test", true))
+            writer.write(intChannel, 42)
+            writer.write(stringChannel, "Hello")
+            writer.write(structChannel, SimpleStruct(1, "test", true))
 
-            intChannel.write(84)
-            stringChannel.write("World")
-            structChannel.write(SimpleStruct(2, "another", false))
+            writer.write(intChannel, 84)
+            writer.write(stringChannel, "World")
+            writer.write(structChannel, SimpleStruct(2, "another", false))
         }
 
         assertTrue(logFile.exists())
@@ -130,10 +121,10 @@ class TestLogFile {
     fun testLogWriterChannelAutoRegistration() {
         val outputStream = ByteArrayOutputStream()
         val writer = LogWriter(outputStream)
-        val channel = LogChannel("autoRegister", StringSchema, writer)
+        val channel = LogChannel("autoRegister", StringSchema)
 
         // Channel should be auto-registered on first write
-        channel.write("test message")
+        writer.write(channel, "test message")
 
         val writtenData = outputStream.toByteArray()
         assertTrue(writtenData.size > 4) // Header + schema entry + message entry
@@ -144,17 +135,17 @@ class TestLogFile {
         val outputStream = ByteArrayOutputStream()
         val writer = LogWriter(outputStream)
 
-        val intChannel = LogChannel("ints", IntSchema, writer)
-        val stringChannel = LogChannel("strings", StringSchema, writer)
-        val boolChannel = LogChannel("bools", BooleanSchema, writer)
+        val intChannel = LogChannel("ints", IntSchema)
+        val stringChannel = LogChannel("strings", StringSchema)
+        val boolChannel = LogChannel("bools", BooleanSchema)
 
         // Write data to multiple channels
-        intChannel.write(42)
-        stringChannel.write("hello")
-        boolChannel.write(true)
-        intChannel.write(84)
-        stringChannel.write("world")
-        boolChannel.write(false)
+        writer.write(intChannel, 42)
+        writer.write(stringChannel, "hello")
+        writer.write(boolChannel, true)
+        writer.write(intChannel, 84)
+        writer.write(stringChannel, "world")
+        writer.write(boolChannel, false)
 
         val writtenData = outputStream.toByteArray()
         assertTrue(writtenData.size > 4) // Should contain header, schemas, and messages
@@ -165,8 +156,8 @@ class TestLogFile {
         val outputStream = ByteArrayOutputStream()
         val writer = LogWriter(outputStream)
 
-        val channel1 = LogChannel("first", IntSchema, writer)
-        val channel2 = LogChannel("second", StringSchema, writer)
+        val channel1 = LogChannel("first", IntSchema)
+        val channel2 = LogChannel("second", StringSchema)
 
         // Add channels explicitly to test indexing
         writer.addChannel(channel1)
@@ -183,12 +174,12 @@ class TestLogFile {
     fun testLogWriterBufferSizeCalculation() {
         val outputStream = ByteArrayOutputStream()
         val writer = LogWriter(outputStream)
-        val channel = LogChannel("test", StringSchema, writer)
+        val channel = LogChannel("test", StringSchema)
 
         val testString = "This is a test string with UTF-8 characters: 🚀"
 
         assertDoesNotThrow {
-            channel.write(testString)
+            writer.write(channel, testString)
         }
 
         val writtenData = outputStream.toByteArray()
@@ -199,11 +190,11 @@ class TestLogFile {
     fun testLogWriterCloseAndFlush() {
         val outputStream = ByteArrayOutputStream()
         val writer = LogWriter(outputStream)
-        val channel = LogChannel("test", IntSchema, writer)
+        val channel = LogChannel("test", IntSchema)
 
         writer.use {
-            channel.write(42)
-            channel.write(84)
+            writer.write(channel, 42)
+            writer.write(channel, 84)
         }
 
         // After closing, data should be available in the output stream
@@ -243,10 +234,50 @@ class TestLogFile {
         val testData = ComplexStruct(1, "test", arrayOf(1.0, 2.0, 3.14))
 
         assertDoesNotThrow {
-            channel.write(testData)
+            writer.write(channel, testData)
         }
 
         val writtenData = outputStream.toByteArray()
         assertTrue(writtenData.size > 4)
+    }
+
+    @Test
+    fun testLogWriterChannelNotFound() {
+        val outputStream = ByteArrayOutputStream()
+        val writer = LogWriter(outputStream)
+
+        // Writing to a non-existent channel by name should create it automatically
+        assertDoesNotThrow {
+            writer.write("autoCreated", 42)
+        }
+
+        val writtenData = outputStream.toByteArray()
+        assertTrue(writtenData.size > 4) // Should contain header, schema, and message
+    }
+
+    @Test
+    fun testLogWriterAutoClose() {
+        val outputStream = ByteArrayOutputStream()
+        val channel = LogChannel("test", IntSchema)
+
+        LogWriter(outputStream).use { writer ->
+            writer.write(channel, 42)
+        }
+
+        // Data should be written even after auto-close
+        val writtenData = outputStream.toByteArray()
+        assertTrue(writtenData.size > 4)
+    }
+
+    @Test
+    fun testLogChannelEquality() {
+        val channel1 = LogChannel("test", IntSchema)
+        val channel2 = LogChannel("test", IntSchema)
+        val channel3 = LogChannel("different", IntSchema)
+
+        // Channels with same name and schema should be equal in terms of functionality
+        assertEquals(channel1.name, channel2.name)
+        assertEquals(channel1.schema, channel2.schema)
+        assertNotEquals(channel1.name, channel3.name)
     }
 }
