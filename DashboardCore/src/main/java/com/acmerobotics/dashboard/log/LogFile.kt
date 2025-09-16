@@ -8,7 +8,7 @@ import java.nio.ByteBuffer
 const val MAGIC = "RR"
 const val VERSION: Short = 1
 
-class LogChannel<T>(
+data class LogChannel<T>(
     val name: String,
     val schema: EntrySchema<T>,
 ) {
