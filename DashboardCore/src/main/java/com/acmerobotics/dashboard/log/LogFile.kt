@@ -11,19 +11,13 @@ const val VERSION: Short = 1
 class LogChannel<T>(
     val name: String,
     val schema: EntrySchema<T>,
-    val writer: LogWriter
 ) {
-    /**
-     * Writes a message to the log.
-     */
-    fun write(obj: T) = writer.write(this, obj)
-
     companion object {
         fun <T> createFromClass(
             name: String,
             clazz: Class<T>,
             writer: LogWriter
-        ) = LogChannel(name, EntrySchema.schemaOfClass(clazz), writer)
+        ) = LogChannel(name, EntrySchema.schemaOfClass(clazz))
     }
 }
 
@@ -39,8 +33,6 @@ class LogWriter(val stream: OutputStream) : AutoCloseable {
     private val channels = mutableListOf<LogChannel<*>>()
 
     fun <T> addChannel(channel: LogChannel<T>): LogChannel<T> {
-        require(channel.writer == this) { "Channel belongs to a different log writer" }
-
         // Check for duplicate names
         require(channels.none { it.name == channel.name }) {
             "Channel with name '${channel.name}' already exists"
@@ -102,7 +94,7 @@ class LogWriter(val stream: OutputStream) : AutoCloseable {
             val schema = EntrySchema.schemaOfClass(obj.javaClass)
 
             @Suppress("UNCHECKED_CAST")
-            val newChannel = LogChannel(channelName, schema as EntrySchema<Any>, this)
+            val newChannel = LogChannel(channelName, schema)
             addChannel(newChannel)
             write(newChannel, obj)
         }
