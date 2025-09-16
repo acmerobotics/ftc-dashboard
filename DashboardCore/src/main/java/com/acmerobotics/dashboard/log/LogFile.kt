@@ -2,8 +2,8 @@ package com.acmerobotics.dashboard.log
 
 import java.io.File
 import java.io.FileOutputStream
+import java.io.OutputStream
 import java.nio.ByteBuffer
-import java.nio.channels.FileChannel
 
 const val MAGIC = "RR"
 const val VERSION: Short = 1
@@ -13,15 +13,27 @@ class LogChannel<T>(
     val schema: EntrySchema<T>,
     val writer: LogWriter
 ) {
+    /**
+     * Writes a message to the log.
+     */
+    fun write(obj: T) = writer.write(this, obj)
+
+    companion object {
+        fun <T> createFromClass(
+            name: String,
+            clazz: Class<T>,
+            writer: LogWriter
+        ) = LogChannel(name, EntrySchema.schemaOfClass(clazz), writer)
+    }
 }
 
-class LogWriter(val channel: FileChannel) : AutoCloseable {
+class LogWriter(val stream: OutputStream) : AutoCloseable {
     init {
         val headerBuffer = ByteBuffer.allocate(4)
             .put(MAGIC.toByteArray(Charsets.UTF_8))
             .putShort(VERSION)
         headerBuffer.flip()
-        channel.write(headerBuffer)
+        stream.write(headerBuffer)
     }
 
     private val channels = mutableListOf<LogChannel<*>>()
@@ -47,7 +59,7 @@ class LogWriter(val channel: FileChannel) : AutoCloseable {
             "encoded schema does not match reported size: ${buffer.remaining()} bytes remaining"
         }
         buffer.flip()
-        this.channel.write(buffer)
+        this.stream.write(buffer)
 
         return channel
     }
@@ -72,7 +84,7 @@ class LogWriter(val channel: FileChannel) : AutoCloseable {
             "encoded object does not match reported size: ${buffer.remaining()} bytes remaining"
         }
         buffer.flip()
-        this.channel.write(buffer)
+        this.stream.write(buffer)
     }
 
     /**
@@ -97,7 +109,7 @@ class LogWriter(val channel: FileChannel) : AutoCloseable {
     }
 
     override fun close() {
-        channel.close()
+        stream.close()
     }
 
     companion object {
@@ -106,8 +118,7 @@ class LogWriter(val channel: FileChannel) : AutoCloseable {
          * Android-friendly factory method.
          */
         fun create(file: File): LogWriter {
-            val fileOutputStream = FileOutputStream(file)
-            return LogWriter(fileOutputStream.channel)
+            return LogWriter(FileOutputStream(file))
         }
 
         /**
@@ -118,4 +129,12 @@ class LogWriter(val channel: FileChannel) : AutoCloseable {
             return create(File(filePath))
         }
     }
+}
+
+internal fun OutputStream.write(buffer: ByteBuffer) {
+    if (!buffer.hasArray()) {
+        error { "LogWriter only supports direct byte buffer access" }
+    }
+
+    write(buffer.array())
 }
