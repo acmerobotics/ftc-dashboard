@@ -39,25 +39,24 @@ sealed interface EntrySchema<T> {
         /**
          * Returns the schema for [clazz].
          */
-        fun schemaOfClass(clazz: Class<*>): EntrySchema<*> {
-            return when (clazz) {
-                Int::class.java, Integer::class.java -> IntSchema
-                Long::class.java, java.lang.Long::class.java -> LongSchema
-                Double::class.java, java.lang.Double::class.java -> DoubleSchema
-                String::class.java -> StringSchema
-                Boolean::class.java, java.lang.Boolean::class.java -> BooleanSchema
-                else -> {
-                    if (clazz.isEnum) {
-                        @Suppress("UNCHECKED_CAST")
-                        EnumSchema(clazz as Class<out Enum<*>>)
-                    } else if (clazz.isArray) {
-                        ArraySchema(schemaOfClass(clazz.componentType!!))
-                    } else {
-                        StructSchema.createFromClass(clazz)
-                    }
+        @Suppress("UNCHECKED_CAST")
+        fun <T> schemaOfClass(clazz: Class<T>): EntrySchema<T> = when (clazz) {
+            Int::class.java, Integer::class.java -> IntSchema
+            Long::class.java, java.lang.Long::class.java -> LongSchema
+            Double::class.java, java.lang.Double::class.java -> DoubleSchema
+            String::class.java -> StringSchema
+            Boolean::class.java, java.lang.Boolean::class.java -> BooleanSchema
+            else -> {
+                if (clazz.isEnum) {
+                    @Suppress("UNCHECKED_CAST")
+                    EnumSchema(clazz as Class<out Enum<*>>)
+                } else if (clazz.isArray) {
+                    ArraySchema(schemaOfClass(clazz.componentType!!))
+                } else {
+                    StructSchema.createFromClass(clazz)
                 }
             }
-        }
+        } as EntrySchema<T>
     }
 }
 
@@ -179,7 +178,7 @@ class ArraySchema<T>(val elementSchema: EntrySchema<T>) : EntrySchema<Array<T>> 
 class StructSchema<T>(
     val fields: Map<String, EntrySchema<*>>,
 ) : EntrySchema<T> {
-    override val tag: Int = 8
+    override val tag: Int = 0
 
     override val schemaSize: Int = Int.SIZE_BYTES + Int.SIZE_BYTES + fields.map { (name, schema) ->
         Int.SIZE_BYTES + name.toByteArray(Charsets.UTF_8).size + schema.schemaSize
@@ -213,7 +212,7 @@ class StructSchema<T>(
     }
 
     companion object {
-        fun createFromClass(cls: Class<*>): StructSchema<Any> {
+        fun <T> createFromClass(cls: Class<T>): StructSchema<T> {
             //only use public instance fields
             val fields = cls.fields.filter {
                     !Modifier.isStatic(it.modifiers)
