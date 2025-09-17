@@ -21,11 +21,9 @@ let statusSentTime: number;
 export function startSocketWatcher(dispatch: AppThunkDispatch) {
   setInterval(() => {
     if (socket === undefined || socket.readyState === WebSocket.CLOSED) {
-      socket = new WebSocket(
-        `ws://${
-          import.meta.env['VITE_REACT_APP_HOST'] || window.location.hostname
-        }:${import.meta.env['VITE_REACT_APP_PORT']}`,
-      );
+      const host = (import.meta.env['VITE_REACT_APP_HOST'] as string) || window.location.hostname;
+      const port = (import.meta.env['VITE_REACT_APP_PORT'] as string) || window.location.port || '8000';
+      socket = new WebSocket(`ws://${host}:${port}`);
 
       socket.onmessage = (evt) => {
         const msg = JSON.parse(evt.data);
