@@ -38,6 +38,12 @@ class LogWriter(val stream: OutputStream) : AutoCloseable {
             "Channel with name '${channel.name}' already exists"
         }
 
+        // this uses referential equality (as equals isn't overridden) because we want to make sure
+        //that we are only adding channels that belong to this log writer
+        require(channel.writer == this) {
+            "Channel belongs to a different log writer"
+        }
+
         channels.add(channel)
         // Write schema entry immediately
 
@@ -108,6 +114,7 @@ class LogWriter(val stream: OutputStream) : AutoCloseable {
     }
 
     override fun close() {
+        stream.flush()
         stream.close()
     }
 
@@ -118,11 +125,13 @@ class LogWriter(val stream: OutputStream) : AutoCloseable {
         override val name: String,
         override val schema: EntrySchema<T>
     ) : LogChannel<T> {
+        val writer: LogWriter get() = this@LogWriter
+
         override fun put(obj: T) = write(this, obj)
 
         fun write(obj: T) = put(obj)
 
-        override fun toString() = "Channel($name, $schema, ${this@LogWriter})"
+        override fun toString() = "Channel($name, $schema, $writer)"
     }
 
     fun <T> boundChannel(channel: LogChannel<T>): WriterChannel<T> {
@@ -137,6 +146,8 @@ class LogWriter(val stream: OutputStream) : AutoCloseable {
     }
 
     override fun toString() = "LogWriter($stream)"
+
+    operator fun contains(channel: LogChannel<*>) = channels.any { it.name == channel.name }
 
     companion object {
         /**
