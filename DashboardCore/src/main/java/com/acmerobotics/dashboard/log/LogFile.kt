@@ -77,7 +77,7 @@ class LogWriter(val stream: OutputStream) : AutoCloseable {
     /**
      * Creates a new log channel and adds it to the log.
      */
-    fun <T> createChannel(name: String, cls: Class<T>) =
+    fun <T : Any> createChannel(name: String, cls: Class<T>) =
         createChannel(name, EntrySchema.schemaOfClass(cls))
 
     /**

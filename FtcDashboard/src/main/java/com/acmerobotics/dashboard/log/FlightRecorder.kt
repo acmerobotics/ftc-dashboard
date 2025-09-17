@@ -122,7 +122,7 @@ object FlightRecorder : OpModeManagerNotifier.Notifications {
      * Creates a new log channel attached to the current OpMode's writer.
      */
     @JvmStatic
-    fun <T> createChannel(name: String, clazz: Class<T>): FlightLogChannel<T> {
+    fun <T : Any> createChannel(name: String, clazz: Class<T>): FlightLogChannel<T> {
         return createChannel(name, EntrySchema.schemaOfClass(clazz))
     }
 }

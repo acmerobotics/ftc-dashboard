@@ -2,6 +2,9 @@ package com.acmerobotics.dashboard.log
 
 import java.lang.reflect.Modifier
 import java.nio.ByteBuffer
+import kotlin.jvm.kotlin
+import kotlin.reflect.KClass
+import kotlin.reflect.full.memberProperties
 
 sealed interface EntrySchema<T> {
 
@@ -40,7 +43,7 @@ sealed interface EntrySchema<T> {
          * Returns the schema for [clazz].
          */
         @Suppress("UNCHECKED_CAST")
-        fun <T> schemaOfClass(clazz: Class<T>): EntrySchema<T> = when (clazz) {
+        fun <T : Any> schemaOfClass(clazz: Class<T>): EntrySchema<T> = when (clazz) {
             Int::class.java, Integer::class.java -> IntSchema
             Long::class.java, java.lang.Long::class.java -> LongSchema
             Double::class.java, java.lang.Double::class.java -> DoubleSchema
@@ -53,7 +56,7 @@ sealed interface EntrySchema<T> {
                 } else if (clazz.isArray) {
                     ArraySchema(schemaOfClass(clazz.componentType!!))
                 } else {
-                    StructSchema.createFromClass(clazz)
+                    ReflectedClassSchema.createFromClass(clazz.kotlin)
                 }
             }
         } as EntrySchema<T>
@@ -175,7 +178,7 @@ class ArraySchema<T>(val elementSchema: EntrySchema<T>) : EntrySchema<Array<T>> 
     }
 }
 
-class StructSchema<T>(
+class ReflectedClassSchema<T>(
     val fields: Map<String, EntrySchema<*>>,
 ) : EntrySchema<T> {
     override val tag: Int = 0
@@ -211,15 +214,15 @@ class StructSchema<T>(
         }
     }
 
-    companion object {
-        fun <T> createFromClass(cls: Class<T>): StructSchema<T> {
+    companion object Companion {
+        fun <T : Any> createFromClass(cls: KClass<T>): ReflectedClassSchema<T> {
             //only use public instance fields
-            val fields = cls.fields.filter {
-                    !Modifier.isStatic(it.modifiers)
-                }.associate { field ->
-                    field.name to EntrySchema.schemaOfClass(field.type)
+            val fields = cls.memberProperties.associate { field ->
+                    field.name to EntrySchema.schemaOfClass((field.returnType.classifier as KClass<*>).java)
                 }
-            return StructSchema(fields)
+            return ReflectedClassSchema(fields)
         }
+
+        fun <T : Any> createFromClass(cls: Class<T>): ReflectedClassSchema<T> = createFromClass(cls.kotlin)
     }
 }

@@ -210,8 +210,8 @@ class TestLogSchemas {
     }
 
     @Test
-    fun testStructSchema() {
-        val schema = StructSchema.createFromClass(SimpleStruct::class.java)
+    fun testReflectedClassSchema() {
+        val schema = ReflectedClassSchema.createFromClass(SimpleStruct::class.java)
         val testStruct = SimpleStruct(42, "test", true)
 
         assertEquals(0, schema.tag)
@@ -252,8 +252,8 @@ class TestLogSchemas {
     }
 
     @Test
-    fun testComplexStructSchema() {
-        val schema = StructSchema.createFromClass(ComplexStruct::class.java)
+    fun testComplexReflectedClassSchema() {
+        val schema = ReflectedClassSchema.createFromClass(ComplexStruct::class.java)
         val testStruct = ComplexStruct(3.14, TestEnum.SECOND, arrayOf(1, 2, 3))
 
         assertEquals(0, schema.tag)
@@ -287,7 +287,7 @@ class TestLogSchemas {
         assertTrue(EntrySchema.schemaOfClass(Array<Int>::class.java) is ArraySchema<*>)
 
         // Test struct
-        assertTrue(EntrySchema.schemaOfClass(SimpleStruct::class.java) is StructSchema<*>)
+        assertTrue(EntrySchema.schemaOfClass(SimpleStruct::class.java) is ReflectedClassSchema<*>)
     }
 
     @Test
@@ -339,13 +339,13 @@ class TestLogSchemas {
         // Test struct type cast - this tests the final `as EntrySchema<T>` cast
         assertDoesNotThrow {
             val schema = EntrySchema.schemaOfClass(SimpleStruct::class.java)
-            assertTrue(schema is StructSchema<*>)
+            assertTrue(schema is ReflectedClassSchema<*>)
             assertEquals(0, schema.tag)
         }
 
         assertDoesNotThrow {
             val schema = EntrySchema.schemaOfClass(ComplexStruct::class.java)
-            assertTrue(schema is StructSchema<*>)
+            assertTrue(schema is ReflectedClassSchema<*>)
         }
 
         // Test that the returned schemas can actually be used without casting issues
@@ -383,7 +383,7 @@ class TestLogSchemas {
     @Test
     fun testSchemaConsistency() {
         // Test that objSize is consistent for the same type
-        val schema = StructSchema.createFromClass(SimpleStruct::class.java)
+        val schema = ReflectedClassSchema.createFromClass(SimpleStruct::class.java)
         val obj1 = SimpleStruct(1, "test", true)
         val obj2 = SimpleStruct(2, "test", false)
 
@@ -488,13 +488,13 @@ class TestLogSchemas {
     }
 
     @Test
-    fun testNestedStructSchema() {
+    fun testNestedReflectedClassSchema() {
         data class NestedStruct(
             @JvmField val simple: SimpleStruct,
             @JvmField val id: Int
         )
 
-        val schema = StructSchema.createFromClass(NestedStruct::class.java)
+        val schema = ReflectedClassSchema.createFromClass(NestedStruct::class.java)
         val testObj = NestedStruct(SimpleStruct(1, "nested", true), 42)
 
         assertEquals(0, schema.tag)
