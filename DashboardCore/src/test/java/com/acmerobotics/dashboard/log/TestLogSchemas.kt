@@ -41,7 +41,7 @@ class TestLogSchemas {
     @Test
     fun testIntSchema() {
         val schema = IntSchema
-        assertEquals(0, schema.tag)
+        assertEquals(1, schema.tag)
         assertEquals(4, schema.schemaSize)
         assertEquals(4, schema.objSize(42))
 
@@ -50,7 +50,7 @@ class TestLogSchemas {
         schema.encodeObject(buffer, 42)
         buffer.flip()
 
-        assertEquals(0, buffer.int) // tag
+        assertEquals(1, buffer.int) // tag
         assertEquals(42, buffer.int) // value
     }
 
@@ -180,7 +180,7 @@ class TestLogSchemas {
         buffer.flip()
 
         assertEquals(7, buffer.int) // tag
-        assertEquals(0, buffer.int) // element schema tag (IntSchema)
+        assertEquals(1, buffer.int) // element schema tag (IntSchema)
         assertEquals(5, buffer.int) // array length
         for (i in testArray.indices) {
             assertEquals(testArray[i], buffer.int)

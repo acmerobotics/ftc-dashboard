@@ -64,7 +64,7 @@ sealed interface EntrySchema<T> {
 }
 
 object IntSchema : EntrySchema<Int> {
-    override val tag: Int = 0
+    override val tag: Int = 1
     override val schemaSize: Int = Int.SIZE_BYTES
 
     override fun objSize(obj: Int): Int = Int.SIZE_BYTES
