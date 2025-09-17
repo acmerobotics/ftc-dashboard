@@ -4,6 +4,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
 import java.nio.ByteBuffer
+import kotlin.reflect.KClass
 
 const val MAGIC = "RR"
 const val VERSION: Short = 1
@@ -63,11 +64,27 @@ class LogWriter(val stream: OutputStream) : AutoCloseable {
     }
 
     /**
-     * Adds a channel to the log, creating a [WriterChannel] from the given [LogChannel].
+     * Adds a channel to the log, creating a [WriterChannel] from the given [LogChannel] if necessary.
      */
-    fun <T> addChannel(channel: LogChannel<T>) = addChannel(
-        boundChannel(channel)
-    )
+    fun <T> addChannel(channel: LogChannel<T>) = boundChannel(channel)
+
+    /**
+     * Creates a new log channel and adds it to the log.
+     */
+    fun <T> createChannel(name: String, schema: EntrySchema<T>) =
+        addChannel(WriterChannel(name, schema))
+
+    /**
+     * Creates a new log channel and adds it to the log.
+     */
+    fun <T> createChannel(name: String, cls: Class<T>) =
+        createChannel(name, EntrySchema.schemaOfClass(cls))
+
+    /**
+     * Creates a new log channel and adds it to the log.
+     */
+    fun <T : Any> createChannel(name: String, cls: KClass<T>) =
+        createChannel(name, EntrySchema.schemaOfClass(cls.java))
 
     /**
      * Writes a message to the log.
@@ -121,7 +138,7 @@ class LogWriter(val stream: OutputStream) : AutoCloseable {
     /**
      * A log channel backed by a [LogWriter].
      */
-    inner class WriterChannel<T>(
+    inner class WriterChannel<T> internal constructor(
         override val name: String,
         override val schema: EntrySchema<T>
     ) : LogChannel<T> {
@@ -134,7 +151,10 @@ class LogWriter(val stream: OutputStream) : AutoCloseable {
         override fun toString() = "Channel($name, $schema, $writer)"
     }
 
-    fun <T> boundChannel(channel: LogChannel<T>): WriterChannel<T> {
+    /**
+     * Returns the [WriterChannel] associated with [channel] or a newly created one if it doesn't exist.
+     */
+    private fun <T> boundChannel(channel: LogChannel<T>): WriterChannel<T> {
         val found = channels.find { it.name == channel.name }
 
         if (found != null) {
