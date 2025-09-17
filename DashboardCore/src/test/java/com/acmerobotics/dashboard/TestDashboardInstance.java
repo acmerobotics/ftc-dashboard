@@ -1,6 +1,9 @@
 package com.acmerobotics.dashboard;
 
 import com.acmerobotics.dashboard.config.ValueProvider;
+import com.acmerobotics.dashboard.log.FakeFlightRecorder;
+import com.acmerobotics.dashboard.log.FlightLogChannel;
+import com.acmerobotics.dashboard.log.LogWriter;
 import com.acmerobotics.dashboard.message.Message;
 import com.acmerobotics.dashboard.message.redux.InitOpMode;
 import com.acmerobotics.dashboard.message.redux.ReceiveHardwareConfigList;
@@ -217,13 +220,14 @@ public class TestDashboardInstance {
         if (files == null || files.length == 0) {
             // Create a few sample .log files
             for (int i = 0; i < 3; i++) {
-                File f = new File(LOG_ROOT, String.format("%1$tY_%1$tm_%1$td__%1$tH_%1$tM_%1$tS_%1$tL__TestOpMode_%2$d.log", System.currentTimeMillis() - i * 60000L, i + 1));
+                File f = new File(LOG_ROOT, String.format("%1$tY_%1$tm_%1$td__%1$tH_%1$tM_%1$tS_%1$tL__Sample_%2$d.log", System.currentTimeMillis() - i * 60000L, i + 1));
                 try (FileOutputStream fos = new FileOutputStream(f)) {
+                    FakeFlightRecorder.setWriter(new LogWriter(fos));
+                    FlightLogChannel<Double> channel = FakeFlightRecorder.createChannel("Test/RandomNumber", Double.class);
                     Random rand = new Random();
-                    byte[] buf = new byte[256];
-                    rand.nextBytes(buf);
-                    fos.write(buf);
-                    fos.flush();
+                    for (int j = 0; j < 1000; j++) {
+                        channel.write(rand.nextDouble());
+                    }
                 } catch (IOException ignored) {
                 }
                 // Update last modified to simulate different times
