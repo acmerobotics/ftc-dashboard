@@ -42,7 +42,7 @@ public class TestDashboardInstance {
 
     DashboardCore core = new DashboardCore();
 
-    private final File LOG_ROOT = new File(System.getProperty("java.io.tmpdir"), "FTCDashboard/testlogs");
+    public static final File LOG_ROOT = new File(System.getProperty("java.io.tmpdir"), "FTCDashboard/testlogs");
 
     private NanoWSD server = new NanoWSD(8000) {
         @Override

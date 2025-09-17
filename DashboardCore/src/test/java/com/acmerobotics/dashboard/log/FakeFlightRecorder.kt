@@ -1,13 +1,39 @@
 package com.acmerobotics.dashboard.log
 
+import com.acmerobotics.dashboard.TestDashboardInstance
+import java.io.File
+import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+
 /**
  * A lightweight, test-only replacement for the Android-dependent FlightRecorder.
  *
  * Placed in the DashboardCore test module so unit tests can create channels and
  * write using a LogWriter without requiring Android/FTC SDK classes.
  */
+
+private val DATE_FORMAT = SimpleDateFormat("yyyy_MM_dd__HH_mm_ss_SSS")
+
+private fun openLogFile(suffix: String): LogWriter {
+    val filename = "${DATE_FORMAT.format(System.currentTimeMillis())}__$suffix.log"
+    val file = File(TestDashboardInstance.LOG_ROOT, filename)
+    TestDashboardInstance.LOG_ROOT.mkdirs()
+    return LogWriter.create(file)
+}
+
 object FakeFlightRecorder {
     internal var writer: LogWriter? = null
+
+    @JvmStatic
+    fun start(fileName: String) {
+        setWriter(openLogFile(fileName))
+    }
+
+    @JvmStatic
+    fun stop() {
+        writer!!.close()
+        writer = null
+    }
 
     @JvmStatic
     fun setWriter(w: LogWriter?) {
