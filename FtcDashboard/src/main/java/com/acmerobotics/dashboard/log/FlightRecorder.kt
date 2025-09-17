@@ -26,6 +26,18 @@ private fun openLogFile(suffix: String): LogWriter {
     return LogWriter.create(file)
 }
 
+data class FlightLogChannel<T>(
+    override val name: String,
+    override val schema: EntrySchema<T>,
+) : LogChannel<T> {
+    override fun put(obj: T) = FlightRecorder.write(this, obj)
+    fun write(obj: T) = put(obj)
+
+    fun downsample(maxPeriod: Long): DownsampledWriter<T> {
+        return DownsampledWriter(this, maxPeriod)
+    }
+}
+
 object FlightRecorder : OpModeManagerNotifier.Notifications {
     internal var writer: LogWriter? = null
 
@@ -101,27 +113,29 @@ object FlightRecorder : OpModeManagerNotifier.Notifications {
      * Creates a new log channel attached to the current OpMode's writer.
      */
     @JvmStatic
-    fun <T> createChannel(name: String, schema: EntrySchema<T>): LogChannel<T> {
+    fun <T> createChannel(name: String, schema: EntrySchema<T>): FlightLogChannel<T> {
         check(writer != null) { "Channels can only be created during an OpMode" }
-        return LogChannel(name, schema)
+        return FlightLogChannel(name, schema)
     }
 
     /**
      * Creates a new log channel attached to the current OpMode's writer.
      */
     @JvmStatic
-    fun <T> createChannel(name: String, clazz: Class<T>): LogChannel<T> {
+    fun <T> createChannel(name: String, clazz: Class<T>): FlightLogChannel<T> {
         return createChannel(name, EntrySchema.schemaOfClass(clazz))
     }
 }
 
-class DownsampledWriter<T>(val channel: LogChannel<T>, val maxPeriod: Long) {
+class DownsampledWriter<T>(val channel: FlightLogChannel<T>, val maxPeriod: Long)
+    : LogChannel<T> by channel {
     private var nextWriteTimestamp = 0L
-    fun write(msg: T) {
+
+    override fun put(obj: T) {
         val now = System.nanoTime()
         if (now >= nextWriteTimestamp) {
             nextWriteTimestamp = (now / maxPeriod + 1) * maxPeriod
-            FlightRecorder.write(channel, msg)
+            channel.put(obj)
         }
     }
 }
