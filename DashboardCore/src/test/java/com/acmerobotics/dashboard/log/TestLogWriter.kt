@@ -8,7 +8,7 @@ import java.io.FileOutputStream
 import java.nio.ByteBuffer
 import java.nio.file.Path
 
-class TestLogFile {
+class TestLogWriter {
 
     // Test data classes for LogFile tests
     data class SimpleStruct(
