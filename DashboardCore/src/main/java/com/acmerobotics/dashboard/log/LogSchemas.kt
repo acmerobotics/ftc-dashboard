@@ -1,10 +1,11 @@
 package com.acmerobotics.dashboard.log
 
-import java.lang.reflect.Modifier
 import java.nio.ByteBuffer
 import kotlin.jvm.kotlin
 import kotlin.reflect.KClass
+import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.isAccessible
 
 sealed interface EntrySchema<T> {
 
@@ -38,6 +39,17 @@ sealed interface EntrySchema<T> {
      */
     fun encodeObject(buffer: ByteBuffer, obj: T)
 
+    enum class Registry(val value: Int) {
+        REFLECTED_CLASS(0),
+        INT(1),
+        LONG(2),
+        DOUBLE(3),
+        STRING(4),
+        BOOLEAN(5),
+        ENUM(6),
+        ARRAY(7);
+    }
+
     companion object {
         /**
          * Returns the schema for [clazz].
@@ -64,7 +76,7 @@ sealed interface EntrySchema<T> {
 }
 
 object IntSchema : EntrySchema<Int> {
-    override val tag: Int = 1
+    override val tag: Int = EntrySchema.Registry.INT.value
     override val schemaSize: Int = Int.SIZE_BYTES
 
     override fun objSize(obj: Int): Int = Int.SIZE_BYTES
@@ -74,7 +86,7 @@ object IntSchema : EntrySchema<Int> {
 }
 
 object LongSchema : EntrySchema<Long> {
-    override val tag: Int = 2
+    override val tag: Int = EntrySchema.Registry.LONG.value
     override val schemaSize: Int = Int.SIZE_BYTES
 
     override fun objSize(obj: Long): Int = Long.SIZE_BYTES
@@ -84,7 +96,7 @@ object LongSchema : EntrySchema<Long> {
 }
 
 object DoubleSchema : EntrySchema<Double> {
-    override val tag: Int = 3
+    override val tag: Int = EntrySchema.Registry.DOUBLE.value
     override val schemaSize: Int = Int.SIZE_BYTES
 
     override fun objSize(obj: Double): Int = Double.SIZE_BYTES
@@ -94,7 +106,7 @@ object DoubleSchema : EntrySchema<Double> {
 }
 
 object StringSchema : EntrySchema<String> {
-    override val tag: Int = 4
+    override val tag: Int = EntrySchema.Registry.STRING.value
     override val schemaSize: Int = Int.SIZE_BYTES
 
     override fun objSize(obj: String): Int = Int.SIZE_BYTES + obj.toByteArray(Charsets.UTF_8).size
@@ -107,7 +119,7 @@ object StringSchema : EntrySchema<String> {
 }
 
 object BooleanSchema : EntrySchema<Boolean> {
-    override val tag: Int = 5
+    override val tag: Int = EntrySchema.Registry.BOOLEAN.value
     override val schemaSize: Int = Int.SIZE_BYTES
 
     override fun objSize(obj: Boolean): Int = Byte.SIZE_BYTES
@@ -121,7 +133,7 @@ class EnumSchema(val enumClass: Class<out Enum<*>>) : EntrySchema<Enum<*>> {
         require(enumClass.isEnum) { "Class must be an enum" }
     }
 
-    override val tag: Int = 6
+    override val tag: Int = EntrySchema.Registry.ENUM.value
 
     override val schemaSize: Int = Int.SIZE_BYTES + Int.SIZE_BYTES + enumClass.enumConstants.sumOf { constant ->
         Int.SIZE_BYTES + constant.name.toByteArray(Charsets.UTF_8).size
@@ -146,7 +158,7 @@ class EnumSchema(val enumClass: Class<out Enum<*>>) : EntrySchema<Enum<*>> {
 }
 
 class ArraySchema<T>(val elementSchema: EntrySchema<T>) : EntrySchema<Array<T>> {
-    override val tag: Int = 7
+    override val tag: Int = EntrySchema.Registry.ARRAY.value
 
     override val schemaSize: Int = Int.SIZE_BYTES + elementSchema.schemaSize
 
@@ -178,10 +190,10 @@ class ArraySchema<T>(val elementSchema: EntrySchema<T>) : EntrySchema<Array<T>> 
     }
 }
 
-class ReflectedClassSchema<T>(
+class ReflectedClassSchema<T : Any>(
     val fields: Map<String, EntrySchema<*>>,
 ) : EntrySchema<T> {
-    override val tag: Int = 0
+    override val tag: Int = EntrySchema.Registry.REFLECTED_CLASS.value
 
     override val schemaSize: Int = Int.SIZE_BYTES + Int.SIZE_BYTES + fields.map { (name, schema) ->
         Int.SIZE_BYTES + name.toByteArray(Charsets.UTF_8).size + schema.schemaSize
@@ -198,28 +210,30 @@ class ReflectedClassSchema<T>(
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
+
     override fun objSize(obj: T): Int = fields.map { (name, schema) ->
-        val field = (obj as Any).javaClass.getField(name)
+        val field: KProperty1<T, *> = obj::class.memberProperties.find { it.name == name }!! as KProperty1<T, *>
         val fieldValue = field.get(obj)!!
-        @Suppress("UNCHECKED_CAST")
         (schema as EntrySchema<Any>).objSize(fieldValue)
     }.sum()
 
+    @Suppress("UNCHECKED_CAST")
     override fun encodeObject(buffer: ByteBuffer, obj: T) {
         for ((name, schema) in fields) {
-            val field = (obj as Any).javaClass.getField(name)
+            val field: KProperty1<T, *> = obj::class.memberProperties.find { it.name == name }!! as KProperty1<T, *>
             val fieldValue = field.get(obj)!!
-            @Suppress("UNCHECKED_CAST")
             (schema as EntrySchema<Any>).encodeObject(buffer, fieldValue)
         }
     }
 
     companion object Companion {
+        @Suppress("UNCHECKED_CAST")
         fun <T : Any> createFromClass(cls: KClass<T>): ReflectedClassSchema<T> {
-            //only use public instance fields
             val fields = cls.memberProperties.associate { field ->
-                    field.name to EntrySchema.schemaOfClass((field.returnType.classifier as KClass<*>).java)
-                }
+                field.isAccessible = true
+                field.name to EntrySchema.schemaOfClass((field.returnType.classifier as KClass<T>).java)
+            }
             return ReflectedClassSchema(fields)
         }
 

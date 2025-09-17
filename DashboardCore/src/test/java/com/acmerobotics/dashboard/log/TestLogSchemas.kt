@@ -41,7 +41,7 @@ class TestLogSchemas {
     @Test
     fun testIntSchema() {
         val schema = IntSchema
-        assertEquals(1, schema.tag)
+        assertEquals(EntrySchema.Registry.INT.value, schema.tag)
         assertEquals(4, schema.schemaSize)
         assertEquals(4, schema.objSize(42))
 
@@ -50,14 +50,14 @@ class TestLogSchemas {
         schema.encodeObject(buffer, 42)
         buffer.flip()
 
-        assertEquals(1, buffer.int) // tag
-        assertEquals(42, buffer.int) // value
+        assertEquals(EntrySchema.Registry.INT.value, buffer.int)
+        assertEquals(42, buffer.int)
     }
 
     @Test
     fun testLongSchema() {
         val schema = LongSchema
-        assertEquals(2, schema.tag)
+        assertEquals(EntrySchema.Registry.LONG.value, schema.tag)
         assertEquals(4, schema.schemaSize)
         assertEquals(8, schema.objSize(123456789L))
 
@@ -66,14 +66,14 @@ class TestLogSchemas {
         schema.encodeObject(buffer, 123456789L)
         buffer.flip()
 
-        assertEquals(2, buffer.int) // tag
+        assertEquals(EntrySchema.Registry.LONG.value, buffer.int) // tag
         assertEquals(123456789L, buffer.long) // value
     }
 
     @Test
     fun testDoubleSchema() {
         val schema = DoubleSchema
-        assertEquals(3, schema.tag)
+        assertEquals(EntrySchema.Registry.DOUBLE.value, schema.tag)
         assertEquals(4, schema.schemaSize)
         assertEquals(8, schema.objSize(3.14159))
 
@@ -82,7 +82,7 @@ class TestLogSchemas {
         schema.encodeObject(buffer, 3.14159)
         buffer.flip()
 
-        assertEquals(3, buffer.int) // tag
+        assertEquals(EntrySchema.Registry.DOUBLE.value, buffer.int) // tag
         assertEquals(3.14159, buffer.double, 1e-10) // value
     }
 
@@ -90,7 +90,7 @@ class TestLogSchemas {
     fun testStringSchema() {
         val schema = StringSchema
         val testString = "Hello, World!"
-        assertEquals(4, schema.tag)
+        assertEquals(EntrySchema.Registry.STRING.value, schema.tag)
         assertEquals(4, schema.schemaSize)
         assertEquals(4 + testString.toByteArray(Charsets.UTF_8).size, schema.objSize(testString))
 
@@ -99,7 +99,7 @@ class TestLogSchemas {
         schema.encodeObject(buffer, testString)
         buffer.flip()
 
-        assertEquals(4, buffer.int) // tag
+        assertEquals(EntrySchema.Registry.STRING.value, buffer.int) // tag
         val stringLength = buffer.int
         val stringBytes = ByteArray(stringLength)
         buffer.get(stringBytes)
@@ -109,7 +109,7 @@ class TestLogSchemas {
     @Test
     fun testBooleanSchema() {
         val schema = BooleanSchema
-        assertEquals(5, schema.tag)
+        assertEquals(EntrySchema.Registry.BOOLEAN.value, schema.tag)
         assertEquals(4, schema.schemaSize)
         assertEquals(1, schema.objSize(true))
         assertEquals(1, schema.objSize(false))
@@ -120,7 +120,7 @@ class TestLogSchemas {
         schema.encodeObject(bufferTrue, true)
         bufferTrue.flip()
 
-        assertEquals(5, bufferTrue.int) // tag
+        assertEquals(EntrySchema.Registry.BOOLEAN.value, bufferTrue.int) // tag
         assertEquals(1.toByte(), bufferTrue.get()) // true value
 
         // Test false
@@ -129,14 +129,14 @@ class TestLogSchemas {
         schema.encodeObject(bufferFalse, false)
         bufferFalse.flip()
 
-        assertEquals(5, bufferFalse.int) // tag
+        assertEquals(EntrySchema.Registry.BOOLEAN.value, bufferFalse.int) // tag
         assertEquals(0.toByte(), bufferFalse.get()) // false value
     }
 
     @Test
     fun testEnumSchema() {
         val schema = EnumSchema(TestEnum::class.java)
-        assertEquals(6, schema.tag)
+        assertEquals(EntrySchema.Registry.ENUM.value, schema.tag)
         assertEquals(4, schema.objSize(TestEnum.FIRST))
         assertEquals(4, schema.objSize(TestEnum.SECOND))
 
@@ -150,7 +150,7 @@ class TestLogSchemas {
         schema.encodeObject(buffer, TestEnum.SECOND)
         buffer.flip()
 
-        assertEquals(6, buffer.int) // tag
+        assertEquals(EntrySchema.Registry.ENUM.value, buffer.int) // tag
         assertEquals(3, buffer.int) // number of enum constants
 
         // Skip reading the enum constant names for brevity
@@ -170,7 +170,7 @@ class TestLogSchemas {
         val schema = ArraySchema(elementSchema)
         val testArray = arrayOf(1, 2, 3, 4, 5)
 
-        assertEquals(7, schema.tag)
+        assertEquals(EntrySchema.Registry.ARRAY.value, schema.tag)
         assertEquals(4 + elementSchema.schemaSize, schema.schemaSize)
         assertEquals(4 + testArray.size * 4, schema.objSize(testArray))
 
@@ -179,8 +179,8 @@ class TestLogSchemas {
         schema.encodeObject(buffer, testArray)
         buffer.flip()
 
-        assertEquals(7, buffer.int) // tag
-        assertEquals(1, buffer.int) // element schema tag (IntSchema)
+        assertEquals(EntrySchema.Registry.ARRAY.value, buffer.int) // tag
+        assertEquals(EntrySchema.Registry.INT.value, buffer.int) // element schema tag (IntSchema)
         assertEquals(5, buffer.int) // array length
         for (i in testArray.indices) {
             assertEquals(testArray[i], buffer.int)
@@ -214,7 +214,7 @@ class TestLogSchemas {
         val schema = ReflectedClassSchema.createFromClass(SimpleStruct::class.java)
         val testStruct = SimpleStruct(42, "test", true)
 
-        assertEquals(0, schema.tag)
+        assertEquals(EntrySchema.Registry.REFLECTED_CLASS.value, schema.tag)
         assertEquals(3, schema.fields.size)
         assertTrue(schema.fields.containsKey("intField"))
         assertTrue(schema.fields.containsKey("stringField"))
@@ -228,7 +228,7 @@ class TestLogSchemas {
         schema.encodeObject(buffer, testStruct)
         buffer.flip()
 
-        assertEquals(0, buffer.int) // tag
+        assertEquals(EntrySchema.Registry.REFLECTED_CLASS.value, buffer.int) // tag
         assertEquals(3, buffer.int) // number of fields
 
         // Verify that fields are present (order may vary)
@@ -242,9 +242,9 @@ class TestLogSchemas {
             // Skip field schema
             val fieldTag = buffer.int
             when (fieldTag) {
-                0 -> {} // IntSchema - no additional data
-                4 -> {} // StringSchema - no additional data
-                5 -> {} // BooleanSchema - no additional data
+                EntrySchema.Registry.INT.value -> {} // IntSchema - no additional data
+                EntrySchema.Registry.STRING.value -> {} // StringSchema - no additional data
+                EntrySchema.Registry.BOOLEAN.value -> {} // BooleanSchema - no additional data
             }
         }
 
@@ -256,7 +256,7 @@ class TestLogSchemas {
         val schema = ReflectedClassSchema.createFromClass(ComplexStruct::class.java)
         val testStruct = ComplexStruct(3.14, TestEnum.SECOND, arrayOf(1, 2, 3))
 
-        assertEquals(0, schema.tag)
+        assertEquals(EntrySchema.Registry.REFLECTED_CLASS.value, schema.tag)
         assertEquals(3, schema.fields.size)
 
         assertDoesNotThrow {

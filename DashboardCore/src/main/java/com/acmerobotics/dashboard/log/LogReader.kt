@@ -31,7 +31,7 @@ sealed class LogEntry {
  * A schema for enums that preserves the constant names for decoding.
  */
 class DynamicEnumSchema(val constantNames: List<String>) : EntrySchema<String> {
-    override val tag: Int = 6
+    override val tag: Int = EntrySchema.Registry.ENUM.value
     override val schemaSize: Int = Int.SIZE_BYTES + Int.SIZE_BYTES + constantNames.sumOf {
         Int.SIZE_BYTES + it.toByteArray(Charsets.UTF_8).size
     }
@@ -171,14 +171,14 @@ class LogReader(private val stream: InputStream) : AutoCloseable, Iterator<LogEn
         val tagBytes = ByteArray(4)
         stream.read(tagBytes)
         return when (val tag = ByteBuffer.wrap(tagBytes).int) {
-            0 -> readStructSchema() // ReflectedClassSchema uses tag 0
-            1 -> IntSchema
-            2 -> LongSchema
-            3 -> DoubleSchema
-            4 -> StringSchema
-            5 -> BooleanSchema
-            6 -> readEnumSchema()
-            7 -> readArraySchema()
+            EntrySchema.Registry.REFLECTED_CLASS.value -> readStructSchema()
+            EntrySchema.Registry.INT.value -> IntSchema
+            EntrySchema.Registry.LONG.value -> LongSchema
+            EntrySchema.Registry.DOUBLE.value -> DoubleSchema
+            EntrySchema.Registry.STRING.value -> StringSchema
+            EntrySchema.Registry.BOOLEAN.value -> BooleanSchema
+            EntrySchema.Registry.ENUM.value -> readEnumSchema()
+            EntrySchema.Registry.ARRAY.value -> readArraySchema()
             else -> throw IllegalArgumentException("Unknown schema tag: $tag")
         }
     }
@@ -360,6 +360,9 @@ class LogReader(private val stream: InputStream) : AutoCloseable, Iterator<LogEn
     }
 
     companion object {
+        private const val MAGIC = "RR"
+        private const val VERSION: Short = 1
+
         /**
          * Creates a LogReader for the given file.
          */
