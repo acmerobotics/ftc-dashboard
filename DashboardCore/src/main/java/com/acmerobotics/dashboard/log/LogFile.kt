@@ -8,17 +8,14 @@ import java.nio.ByteBuffer
 const val MAGIC = "RR"
 const val VERSION: Short = 1
 
-data class LogChannel<T>(
-    val name: String,
-    val schema: EntrySchema<T>,
-) {
-    companion object {
-        fun <T> createFromClass(
-            name: String,
-            clazz: Class<T>,
-            writer: LogWriter
-        ) = LogChannel(name, EntrySchema.schemaOfClass(clazz))
-    }
+/**
+ * A log channel.
+ */
+interface LogChannel<T> {
+    val name: String
+    val schema: EntrySchema<T>
+
+    fun put(obj: T)
 }
 
 class LogWriter(val stream: OutputStream) : AutoCloseable {
@@ -30,9 +27,12 @@ class LogWriter(val stream: OutputStream) : AutoCloseable {
         stream.write(headerBuffer)
     }
 
-    private val channels = mutableListOf<LogChannel<*>>()
+    private val channels = mutableListOf<WriterChannel<*>>()
 
-    fun <T> addChannel(channel: LogChannel<T>): LogChannel<T> {
+    /**
+     * Adds a channel to the log.
+     */
+    fun <T> addChannel(channel: WriterChannel<T>): WriterChannel<T> {
         // Check for duplicate names
         require(channels.none { it.name == channel.name }) {
             "Channel with name '${channel.name}' already exists"
@@ -57,10 +57,17 @@ class LogWriter(val stream: OutputStream) : AutoCloseable {
     }
 
     /**
+     * Adds a channel to the log, creating a [WriterChannel] from the given [LogChannel].
+     */
+    fun <T> addChannel(channel: LogChannel<T>) = addChannel(
+        boundChannel(channel)
+    )
+
+    /**
      * Writes a message to the log.
      */
     fun <T> write(channel: LogChannel<T>, obj: T) {
-        var index = channels.indexOf(channel)
+        var index = channels.indexOf(boundChannel(channel))
 
         if (index < 0) {
             addChannel(channel)
@@ -88,13 +95,13 @@ class LogWriter(val stream: OutputStream) : AutoCloseable {
 
         if (existingChannel != null) {
             @Suppress("UNCHECKED_CAST")
-            write(existingChannel as LogChannel<Any>, obj)
+            write(existingChannel as WriterChannel<Any>, obj)
         } else {
             // Create new channel on-demand
             val schema = EntrySchema.schemaOfClass(obj.javaClass)
 
             @Suppress("UNCHECKED_CAST")
-            val newChannel = LogChannel(channelName, schema)
+            val newChannel = WriterChannel(channelName, schema)
             addChannel(newChannel)
             write(newChannel, obj)
         }
@@ -103,6 +110,33 @@ class LogWriter(val stream: OutputStream) : AutoCloseable {
     override fun close() {
         stream.close()
     }
+
+    /**
+     * A log channel backed by a [LogWriter].
+     */
+    inner class WriterChannel<T>(
+        override val name: String,
+        override val schema: EntrySchema<T>
+    ) : LogChannel<T> {
+        override fun put(obj: T) = write(this, obj)
+
+        fun write(obj: T) = put(obj)
+
+        override fun toString() = "Channel($name, $schema, ${this@LogWriter})"
+    }
+
+    fun <T> boundChannel(channel: LogChannel<T>): WriterChannel<T> {
+        val found = channels.find { it.name == channel.name }
+
+        if (found != null) {
+            @Suppress("UNCHECKED_CAST")
+            return found as WriterChannel<T>
+        }
+
+        return addChannel(WriterChannel(channel.name, channel.schema))
+    }
+
+    override fun toString() = "LogWriter($stream)"
 
     companion object {
         /**
