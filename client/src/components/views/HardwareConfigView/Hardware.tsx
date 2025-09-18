@@ -1215,6 +1215,8 @@ export class Robot {
               className="flex h-6 w-6 items-center justify-center rounded-md border border-green-600 bg-green-200 font-medium text-green-600"
               onClick={(e) => {
                 e.stopPropagation();
+                if (this.collapsedSections.otherDevices)
+                  this.collapsedSections.otherDevices = false;
                 this.otherDevices.push(new EthernetDevice());
                 configChangeCallback();
               }}
@@ -1230,6 +1232,8 @@ export class Robot {
               className="flex h-6 w-6 items-center justify-center rounded-md border border-green-600 bg-green-200 font-medium text-green-600"
               onClick={(e) => {
                 e.stopPropagation();
+                if (this.collapsedSections.otherDevices)
+                  this.collapsedSections.otherDevices = false;
                 this.otherDevices.push(new Webcam());
                 configChangeCallback();
               }}
@@ -1247,6 +1251,8 @@ export class Robot {
                   key: 'name',
                   val: newCustomHub.name,
                 });
+                if (this.collapsedSections.otherDevices)
+                  this.collapsedSections.otherDevices = false;
                 this.otherDevices.push(newCustomHub);
                 configChangeCallback();
               }}
