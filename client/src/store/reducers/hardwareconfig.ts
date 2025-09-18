@@ -1,11 +1,13 @@
 import {
   RECEIVE_HARDWARE_CONFIG_LIST,
   ReceiveHardwareConfigListAction,
-  HardwareConfigState,
 } from '@/store/types';
+import { HardwareConfigState } from '@/store/types/hardwareconfig';
 
 const initialState: HardwareConfigState = {
   hardwareConfigList: [],
+  hardwareConfigFiles: [],
+  isReadOnlyList: [],
   currentHardwareConfig: '',
 };
 
@@ -18,6 +20,8 @@ const hardwareConfigReducer = (
       return {
         ...state,
         hardwareConfigList: action.hardwareConfigList,
+        hardwareConfigFiles: action.hardwareConfigFiles,
+        isReadOnlyList: action.isReadOnlyList,
         currentHardwareConfig: action.currentHardwareConfig,
       };
     }
