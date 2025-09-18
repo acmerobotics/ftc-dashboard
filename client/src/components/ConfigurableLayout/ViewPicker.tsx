@@ -130,6 +130,13 @@ const listContent = [
     iconBg: 'bg-green-500',
   },
   {
+    title: 'Flight Recorder Logs',
+    view: ConfigurableView.FLIGHT_RECORDER_LOGS_VIEW,
+    icon: <SubjectIcon className="h-6 w-6" />,
+    customStyles: 'focus:ring-pink-600',
+    iconBg: 'bg-pink-500',
+  },
+  {
     title: 'Hardware Config View',
     view: ConfigurableView.HARDWARE_CONFIG_VIEW,
     icon: <SettingsIcon className="h-5 w-5" />,

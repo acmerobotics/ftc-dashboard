@@ -11,12 +11,17 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
+kotlin {
+    jvmToolchain(8)
+}
+
 repositories {
     mavenCentral()
 }
 
 dependencies {
     implementation "com.google.code.gson:gson:2.8.6"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:2.2.20"
 
     testImplementation "org.junit.jupiter:junit-jupiter:5.9.1"
 

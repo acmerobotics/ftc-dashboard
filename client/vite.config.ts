@@ -11,4 +11,13 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    proxy: {
+      '/dash/logs': {
+        // Default to the TestDashboardInstance port (8000) if not provided
+        target: `http://${process.env.VITE_REACT_APP_HOST || 'localhost'}:${process.env.VITE_REACT_APP_PORT || '8000'}`,
+        changeOrigin: true,
+      },
+    },
+  },
 });
