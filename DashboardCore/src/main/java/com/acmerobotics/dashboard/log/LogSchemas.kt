@@ -211,7 +211,6 @@ class ReflectedClassSchema<T : Any>(
     }
 
     @Suppress("UNCHECKED_CAST")
-
     override fun objSize(obj: T): Int = fields.map { (name, schema) ->
         val field: KProperty1<T, *> = obj::class.memberProperties.find { it.name == name }!! as KProperty1<T, *>
         val fieldValue = field.get(obj)!!
