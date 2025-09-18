@@ -22,7 +22,7 @@ public class TelemetryPacket {
 
     static {
         DEFAULT_FIELD.setAlpha(0.4);
-        DEFAULT_FIELD.drawImage("/dash/into-the-deep.png", 0, 0, 144, 144);
+        DEFAULT_FIELD.drawImage("/dash/decode.webp", 0, 0, 144, 144);
         DEFAULT_FIELD.setAlpha(1.0);
         DEFAULT_FIELD.drawGrid(0, 0, 144, 144, 7, 7);
     }

@@ -88,6 +88,7 @@ export {
   RECEIVE_HARDWARE_CONFIG_LIST,
 } from './hardwareconfig';
 export type {
+  HardwareConfigState,
   SetHardwareConfigAction,
   ReceiveHardwareConfigListAction,
 } from './hardwareconfig';

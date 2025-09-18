@@ -26,21 +26,21 @@ const TelemetryView = ({
       return;
     }
 
-    setLog(
+    setLog((prevLog) =>
       packets.reduce(
         (acc, { log: newLog }) => (newLog.length === 0 ? acc : newLog),
-        log,
+        prevLog,
       ),
     );
 
-    setData(
+    setData((prevData) =>
       packets.reduce(
         (acc, { data: newData }) =>
           Object.keys(newData).reduce(
             (acc, k) => ({ ...acc, [k]: newData[k] }),
             acc,
           ),
-        data,
+        prevData,
       ),
     );
   }, [packets]);

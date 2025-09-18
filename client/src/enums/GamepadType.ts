@@ -8,7 +8,7 @@
  * However, gamepad-tester.com also has a number of variants that don't follow the naming scheme but still contain strings
  * in their ID's that correspond to the vendor/product ID for the Dualshocks
  * So it's probably best to identify by checking if PID/VID is in the gamepad.id
- * 
+ *
  * Dualsense (PS5) also reports itself as "Wireless Controller (STANDARD GAMEPAD Vendor: 054c Product: xxxx)"
  * The product ID for the Dualsense is 0ce6 as reported by gamepad-tester.com and in the list above.
  * The Dualsense controller can be treated the same as the Dualshock 4 controller as it has the same button layout.
@@ -41,7 +41,10 @@ export default {
     } else if (
       gamepad.id.search(SONY_VID) !== -1 &&
       gamepad.id.search(
-        new RegExp(`${DUALSHOCK_GEN_1_PID}|${DUALSHOCK_GEN_2_PID}|${DUALSENSE_PID}`, 'i'),
+        new RegExp(
+          `${DUALSHOCK_GEN_1_PID}|${DUALSHOCK_GEN_2_PID}|${DUALSENSE_PID}`,
+          'i',
+        ),
       ) !== -1
     ) {
       return GamepadType.SONY_DUALSHOCK_4;
@@ -51,9 +54,11 @@ export default {
       ) !== -1
     ) {
       return GamepadType.SONY_DUALSHOCK_4;
-    } else if (gamepad.mapping.search('standard') !== -1 
-      || gamepad.id.search('Xbox 360') !== -1
-      || gamepad.id.toLowerCase().search('xinput') !== -1) {
+    } else if (
+      gamepad.mapping.search('standard') !== -1 ||
+      gamepad.id.search('Xbox 360') !== -1 ||
+      gamepad.id.toLowerCase().search('xinput') !== -1
+    ) {
       return GamepadType.STANDARD;
     } else {
       return GamepadType.UNKNOWN;

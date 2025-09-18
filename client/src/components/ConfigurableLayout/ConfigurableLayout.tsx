@@ -10,8 +10,6 @@ import {
 import RGL, { WidthProvider, Layout } from 'react-grid-layout';
 import { v4 as uuidv4 } from 'uuid';
 
-import clsx from 'clsx';
-
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
