@@ -303,11 +303,22 @@ class HardwareConfigView extends Component<
           ) {
             return;
           }
-          this.parseEditedXmlToRobot(originalText);
-          this.setState({
-            editedConfigText: originalText,
-            saveFilename: selectedHardwareConfig,
-          });
+
+          const userInput = window.prompt(
+            `You are about to reset "${selectedHardwareConfig}" to its original configuration.\n` +
+              `All unsaved changes will be lost.\n\nType "reset" to confirm:`,
+          );
+
+          if (userInput?.toLowerCase() === 'reset') {
+            this.parseEditedXmlToRobot(originalText);
+            this.setState({
+              editedConfigText: originalText,
+              saveFilename: selectedHardwareConfig,
+            });
+            window.alert('Config Reset!');
+          } else {
+            window.alert('Reset cancelled.');
+          }
         }}
         disabled={
           !selectedHardwareConfig ||
