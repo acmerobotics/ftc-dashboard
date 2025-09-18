@@ -883,12 +883,6 @@ export class Robot {
     };
   }
 
-  public invalidPopup(validationErrors: string[]): void {
-    if (validationErrors.length > 0) {
-      window.alert('Configuration errors:\n' + validationErrors.join('\n'));
-    }
-  }
-
   public toString(): string {
     const lines: string[] = [];
     lines.push(`<Robot type="FirstInspires-FTC">`);
@@ -1279,6 +1273,10 @@ export class Robot {
 
   public validate(): string[] {
     const errors: string[] = [];
+
+    if (!this.name || this.name.trim() === '') {
+      errors.push('Control Hub Portal Name cannot be empty.');
+    }
 
     const checkDuplicatePorts = (
       devices: Device[],

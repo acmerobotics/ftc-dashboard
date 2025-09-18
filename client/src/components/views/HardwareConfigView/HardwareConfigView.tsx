@@ -272,9 +272,10 @@ class HardwareConfigView extends Component<
           dark:border-transparent dark:bg-blue-600 dark:text-blue-50 dark:highlight-white/30
           dark:hover:border-blue-400/80 dark:focus:bg-blue-700
         `}
-        onClick={() =>
-          this.props.setHardwareConfig(this.state.selectedHardwareConfig)
-        }
+        onClick={() => {
+          this.props.setHardwareConfig(this.state.selectedHardwareConfig);
+          window.alert('Config Set!');
+        }}
         disabled={
           !this.state.selectedHardwareConfig ||
           this.state.selectedHardwareConfig === '<No Config Set>'
@@ -360,21 +361,37 @@ class HardwareConfigView extends Component<
               !trimmedSaveFilename ||
               trimmedSaveFilename === '<No Config Set>'
             ) {
-              window.alert('Please enter a new filename to save changes.');
+              window.alert('Please enter a filename to save changes.');
             } else if (isReadOnly) {
               window.alert(
                 'This filename is read-only. Please enter a new filename to save.',
               );
             } else if (validate.length !== 0) {
-              robotInstance.invalidPopup(validate);
+              const userInput = window.prompt(
+                'There are validation errors:\n' +
+                  validate.join('\n') +
+                  '\n\nType "save" to save anyway:',
+              );
+              if (userInput?.toLowerCase() === 'save') {
+                writeHardwareConfig(trimmedSaveFilename, xmlContentToSave);
+                this.setState({
+                  selectedHardwareConfig: trimmedSaveFilename,
+                  saveFilename: trimmedSaveFilename,
+                });
+                window.alert('Config Saved!');
+              } else {
+                window.alert('Save cancelled.');
+              }
             }
             return;
           }
+
           writeHardwareConfig(trimmedSaveFilename, xmlContentToSave);
           this.setState({
             selectedHardwareConfig: trimmedSaveFilename,
             saveFilename: trimmedSaveFilename,
           });
+          window.alert('Config Saved!');
         }}
       >
         Save
@@ -394,10 +411,20 @@ class HardwareConfigView extends Component<
         className="ml-2 border-red-400 bg-red-300 transition-colors dark:border-transparent dark:bg-red-600 dark:text-white dark:hover:border-red-500/80 dark:focus:bg-red-700"
         onClick={() => {
           if (
-            window.confirm(
-              `Are you sure you want to delete "${selectedHardwareConfig}"? This action cannot be undone.`,
-            )
+            !selectedHardwareConfig ||
+            selectedHardwareConfig === '<No Config Set>' ||
+            isReadOnly
           ) {
+            return;
+          }
+
+          const userInput = window.prompt(
+            `Are you sure you want to delete "${selectedHardwareConfig}"?\n` +
+              `This action cannot be undone.\n\n` +
+              `Type "delete" to confirm:`,
+          );
+
+          if (userInput?.toLowerCase() === 'delete') {
             this.props.deleteHardwareConfig(selectedHardwareConfig);
             this.setState({
               selectedHardwareConfig: '',
@@ -405,6 +432,9 @@ class HardwareConfigView extends Component<
               saveFilename: '',
               robotInstance: new Robot(),
             });
+            window.alert('Config Deleted!');
+          } else {
+            window.alert('Deletion cancelled.');
           }
         }}
         disabled={
