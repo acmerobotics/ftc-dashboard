@@ -10,6 +10,7 @@ import GraphView from '@/components/views/GraphView/GraphView';
 import ConfigView from '@/components/views/ConfigView/ConfigView';
 import TelemetryView from '@/components/views/TelemetryView';
 import FieldView from '@/components/views/FieldView/FieldView';
+import FlightRecorderLogsView from '@/components/views/FlightRecorderLogsView/FlightRecorderLogsView';
 
 const LayoutPreset = {
   DEFAULT: 'DEFAULT',
@@ -17,6 +18,7 @@ const LayoutPreset = {
   GRAPH: 'GRAPH',
   ORIGINAL: 'ORIGINAL',
   CONFIGURABLE: 'CONFIGURABLE',
+  FLIGHT_RECORDER_LOGS: 'FLIGHT_RECORDER_LOGS',
 } as const;
 
 type Layout = {
@@ -101,6 +103,16 @@ const LAYOUT_DETAILS: { [key in Values<typeof LayoutPreset>]: Layout } = {
   [LayoutPreset.CONFIGURABLE]: {
     name: 'Custom',
     content: <ConfigurableLayout />,
+  },
+  [LayoutPreset.FLIGHT_RECORDER_LOGS]: {
+    name: 'Flight Recorder Logs',
+    content: (
+      <TileGrid gridTemplate="100% / 100%">
+        <Tile row={1} col={1}>
+          <FlightRecorderLogsView />
+        </Tile>
+      </TileGrid>
+    ),
   },
 };
 
