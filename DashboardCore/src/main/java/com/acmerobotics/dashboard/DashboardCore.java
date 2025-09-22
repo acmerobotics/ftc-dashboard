@@ -1,7 +1,9 @@
 package com.acmerobotics.dashboard;
 
 import com.acmerobotics.dashboard.config.ValueProvider;
+import com.acmerobotics.dashboard.config.KotlinValueProvider;
 import com.acmerobotics.dashboard.config.variable.BasicVariable;
+import com.acmerobotics.dashboard.config.variable.ConfigVariable;
 import com.acmerobotics.dashboard.config.variable.ConfigVariableDeserializer;
 import com.acmerobotics.dashboard.config.variable.ConfigVariableSerializer;
 import com.acmerobotics.dashboard.config.variable.CustomVariable;
@@ -239,11 +241,18 @@ public class DashboardCore {
     public <T> void addConfigVariable(String category, String name, ValueProvider<T> provider) {
         configRoot.with(v -> {
             CustomVariable catVar = (CustomVariable) v.getVariable(category);
+            ConfigVariable<?> variable;
+            if (provider instanceof KotlinValueProvider) {
+                // Allow KotlinValueProvider to materialize as a nested CustomVariable when needed
+                variable = ((KotlinValueProvider<?>) provider).toConfigVariable();
+            } else {
+                variable = new BasicVariable<>(provider);
+            }
             if (catVar != null) {
-                catVar.putVariable(name, new BasicVariable<>(provider));
+                catVar.putVariable(name, variable);
             } else {
                 catVar = new CustomVariable();
-                catVar.putVariable(name, new BasicVariable<>(provider));
+                catVar.putVariable(name, variable);
                 v.putVariable(category, catVar);
             }
             updateConfig();
