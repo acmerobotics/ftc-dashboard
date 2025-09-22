@@ -10,15 +10,19 @@ import java.lang.reflect.Array
 import java.lang.reflect.Field
 import java.lang.reflect.Modifier
 import kotlin.properties.ReadOnlyProperty
+import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-class KotlinValueProvider<T>(private var value: T) : ReadOnlyProperty<Any, T>, ValueProvider<T> {
+class KotlinValueProvider<T>(private var value: T) : ReadWriteProperty<Any, T>, ValueProvider<T> {
     override fun get(): T = value
     override fun set(new: T) {
         value = new
     }
 
     override fun getValue(thisRef: Any, property: KProperty<*>) = value
+    override fun setValue(thisRef: Any, property: KProperty<*>, value: T) {
+        this.value = value
+    }
 
     /**
      * Create a ConfigVariable representing this provider's value. If the value is a basic type,
