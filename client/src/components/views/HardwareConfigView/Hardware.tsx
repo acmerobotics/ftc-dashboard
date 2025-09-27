@@ -1284,6 +1284,10 @@ export class Robot {
       errors.push('Control Hub Portal Name cannot be empty.');
     }
 
+    const isInt = (n: unknown): n is number => Number.isInteger(n);
+    const inRange = (n: number, min: number, max: number) =>
+      isInt(n) && n >= min && n <= max;
+
     const checkDuplicatePorts = (
       devices: Device[],
       typeName: string,
@@ -1326,6 +1330,7 @@ export class Robot {
     };
 
     const hubs = [...this.controlHubs, ...this.expansionHubs];
+    const usedHubPorts: Record<number, string[]> = {};
     hubs.forEach((hub) => {
       if (!hub.name) errors.push(`Hub of type ${hub.type} has an empty name.`);
       if (hub instanceof ControlHub && hub.port !== 173) {
@@ -1333,6 +1338,21 @@ export class Robot {
           `Control Hub "${hub.name}" must have port 173, currently ${hub.port}.`,
         );
       }
+      if (!isInt(hub.port)) {
+        errors.push(
+          `Hub "${hub.name}" port must be an integer, currently ${hub.port}.`,
+        );
+      } else {
+        if (!(hub instanceof ControlHub)) {
+          if (!inRange(hub.port, 0, 255)) {
+            errors.push(
+              `Hub "${hub.name}" port ${hub.port} is out of range (0-255).`,
+            );
+          }
+        }
+      }
+      if (!usedHubPorts[hub.port]) usedHubPorts[hub.port] = [];
+      usedHubPorts[hub.port].push(hub.name || '(unnamed)');
 
       const deviceGroups: [Device[], string][] = [
         [hub.motors, 'Motor'],
@@ -1371,8 +1391,64 @@ export class Robot {
           errors.push(
             `Device of type ${d.type} in hub "${hub.name}" has empty name.`,
           );
+        if (!isInt(d.port)) {
+          errors.push(
+            `Device "${d.name || '(unnamed)'}" of type ${d.type} in hub "${
+              hub.name
+            }" has a non-integer port (${d.port}).`,
+          );
+        } else {
+          let maxPort: number | undefined;
+          if (d instanceof Motor) maxPort = maxDevices.motors - 1;
+          else if (d instanceof Servo) maxPort = maxDevices.servos - 1;
+          else if (d instanceof Analog)
+            maxPort = maxDevices.analogInputDevices - 1;
+          else if (d instanceof Digital)
+            maxPort = maxDevices.digitalDevices - 1;
+          if (maxPort !== undefined) {
+            if (!inRange(d.port, 0, maxPort)) {
+              errors.push(
+                `${d.type} "${d.name || '(unnamed)'}" in hub "${
+                  hub.name
+                }" has port ${d.port} outside allowed range 0-${maxPort}.`,
+              );
+            }
+          } else {
+            if (!inRange(d.port, 0, 65535)) {
+              errors.push(
+                `${d.type} "${d.name || '(unnamed)'}" in hub "${
+                  hub.name
+                }" has port ${d.port} outside allowed range 0-65535.`,
+              );
+            }
+          }
+        }
+        if (d instanceof I2c) {
+          const bus = (d as I2c).bus;
+          if (!isInt(bus)) {
+            errors.push(
+              `I2C device "${d.name || '(unnamed)'}" in hub "${
+                hub.name
+              }" has non-integer bus (${bus}).`,
+            );
+          } else if (!inRange(bus, 0, 255)) {
+            errors.push(
+              `I2C device "${d.name || '(unnamed)'}" in hub "${
+                hub.name
+              }" has bus ${bus} outside allowed range 0-255.`,
+            );
+          }
+        }
       });
     });
+
+    for (const p in usedHubPorts) {
+      if (usedHubPorts[p].length > 1) {
+        errors.push(
+          `Duplicate hub port ${p} used by hubs: ${usedHubPorts[p].join(', ')}`,
+        );
+      }
+    }
 
     this.otherDevices.forEach((d) => {
       if (!d.name) errors.push(`Device of type ${d.type} has empty name.`);
@@ -1390,6 +1466,15 @@ export class Robot {
           errors.push(`Ethernet device "${d.name}" has empty serial number.`);
         if (!d.ipAddress)
           errors.push(`Ethernet device "${d.name}" has empty IP address.`);
+        if (!isInt(d.port)) {
+          errors.push(
+            `Ethernet device "${d.name}" has non-integer port (${d.port}).`,
+          );
+        } else if (!inRange(d.port, 0, 65535)) {
+          errors.push(
+            `Ethernet device "${d.name}" has port ${d.port} outside allowed range 0-65535.`,
+          );
+        }
       }
     });
 

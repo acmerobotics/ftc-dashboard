@@ -1,6 +1,12 @@
-import React, { Component, ChangeEvent, createRef, RefObject } from 'react';
+import React, {
+  Component,
+  ChangeEvent,
+  createRef,
+  RefObject,
+  useEffect,
+  useRef,
+} from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-
 import { RootState } from '@/store/reducers';
 import OpModeStatus from '@/enums/OpModeStatus';
 import BaseView, {
@@ -9,7 +15,6 @@ import BaseView, {
   BaseViewProps,
   BaseViewHeadingProps,
 } from '@/components/views/BaseView';
-
 import {
   setHardwareConfig,
   writeHardwareConfig,
@@ -24,6 +29,18 @@ type HardwareConfigViewState = {
   viewMode: 'text' | 'gui';
   robotInstance: Robot;
   saveFilename: string;
+  dialog:
+    | null
+    | {
+        type: 'alert';
+        message: string;
+        resolve: () => void;
+      }
+    | {
+        type: 'prompt';
+        message: string;
+        resolve: (value: string | null) => void;
+      };
 };
 
 const mapStateToProps = ({ status, hardwareConfig }: RootState) => ({
@@ -38,7 +55,6 @@ const mapDispatchToProps = {
 };
 
 const connector = connect(mapStateToProps, mapDispatchToProps);
-
 type HardwareConfigViewProps = ConnectedProps<typeof connector> &
   BaseViewProps &
   BaseViewHeadingProps;
@@ -62,6 +78,106 @@ const ActionButton = ({
   </button>
 );
 
+type SimpleModalProps = {
+  message: string;
+  onClose: () => void;
+};
+
+const SimpleModal = ({ message, onClose }: SimpleModalProps) => {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    wrapperRef.current?.focus();
+  }, []);
+  const handleKey = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === 'Escape') {
+      onClose();
+    }
+  };
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      tabIndex={-1}
+      ref={wrapperRef}
+      onKeyDown={handleKey}
+    >
+      <div className="w-full max-w-md rounded bg-white p-4 shadow-lg dark:bg-slate-800">
+        <p className="mb-3 whitespace-pre-wrap text-sm">{message}</p>
+        <ActionButton
+          className="
+            w-full border-blue-300 bg-blue-200
+            transition-colors dark:border-transparent dark:bg-blue-600 dark:text-blue-50
+            dark:highlight-white/30 dark:hover:border-blue-400/80 dark:focus:bg-blue-700
+          "
+          onClick={onClose}
+        >
+          OK
+        </ActionButton>
+      </div>
+    </div>
+  );
+};
+
+type InputModalProps = {
+  message: string;
+  onConfirm: (value: string) => void;
+  onCancel: () => void;
+};
+
+const InputModal = ({ message, onConfirm, onCancel }: InputModalProps) => {
+  const inputRef = createRef<HTMLInputElement>();
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    wrapperRef.current?.focus();
+  }, []);
+  const handleKey = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      onConfirm(inputRef.current?.value ?? '');
+    } else if (e.key === 'Escape') {
+      onCancel();
+    }
+  };
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      tabIndex={-1}
+      ref={wrapperRef}
+      onKeyDown={handleKey}
+    >
+      <div className="w-full max-w-md rounded bg-white p-4 shadow-lg dark:bg-slate-800">
+        <p className="mb-3 whitespace-pre-wrap text-sm">{message}</p>
+        <input
+          ref={inputRef}
+          type="text"
+          className="mb-3 w-full rounded border p-1 text-sm dark:border-slate-600 dark:bg-slate-700"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              onConfirm(inputRef.current?.value ?? '');
+            }
+          }}
+        />
+        <div className="flex space-x-2">
+          <ActionButton
+            className="flex-1 rounded bg-gray-200 py-1 text-sm hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-600"
+            onClick={onCancel}
+          >
+            Cancel
+          </ActionButton>
+          <ActionButton
+            className="
+              flex-1 border-blue-300 bg-blue-200 transition-colors
+              dark:border-transparent dark:bg-blue-600 dark:text-blue-50 dark:highlight-white/30
+              dark:hover:border-blue-400/80 dark:focus:bg-blue-700
+            "
+            onClick={() => onConfirm(inputRef.current?.value ?? '')}
+          >
+            OK
+          </ActionButton>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 class HardwareConfigView extends Component<
   HardwareConfigViewProps,
   HardwareConfigViewState
@@ -70,27 +186,28 @@ class HardwareConfigView extends Component<
 
   constructor(props: HardwareConfigViewProps) {
     super(props);
-
     this.state = {
       selectedHardwareConfig: '',
       editedConfigText: '',
       viewMode: 'gui',
       robotInstance: new Robot(),
       saveFilename: '',
+      dialog: null,
     };
-
     this.textareaRef = createRef<HTMLTextAreaElement>();
     this.onChange = this.onChange.bind(this);
     this.toggleViewMode = this.toggleViewMode.bind(this);
     this.handleRobotGuiChange = this.handleRobotGuiChange.bind(this);
     this.parseEditedXmlToRobot = this.parseEditedXmlToRobot.bind(this);
     this.adjustTextareaHeight = this.adjustTextareaHeight.bind(this);
+    this.showAlert = this.showAlert.bind(this);
+    this.showPrompt = this.showPrompt.bind(this);
+    this.closeDialog = this.closeDialog.bind(this);
   }
 
   adjustTextareaHeight() {
     const textarea = this.textareaRef.current;
     if (!textarea) return;
-
     textarea.style.height = 'auto';
     textarea.style.height = `${textarea.scrollHeight}px`;
   }
@@ -116,12 +233,9 @@ class HardwareConfigView extends Component<
   ) {
     const { currentHardwareConfig, hardwareConfigFiles, hardwareConfigList } =
       this.props;
-    const { selectedHardwareConfig } = this.state;
-
     if (prevState.editedConfigText !== this.state.editedConfigText) {
       this.adjustTextareaHeight();
     }
-
     if (prevProps.currentHardwareConfig !== currentHardwareConfig) {
       const idx = hardwareConfigList.indexOf(currentHardwareConfig);
       const newText = idx !== -1 ? hardwareConfigFiles[idx] : '';
@@ -133,33 +247,33 @@ class HardwareConfigView extends Component<
       });
       return;
     }
+  }
 
-    if (
-      prevProps.hardwareConfigFiles !== hardwareConfigFiles &&
-      selectedHardwareConfig
-    ) {
-      const idx = hardwareConfigList.indexOf(selectedHardwareConfig);
-      if (idx !== -1) {
-        const newText = hardwareConfigFiles[idx];
-        this.parseEditedXmlToRobot(newText);
-        this.setState({ editedConfigText: newText });
-      }
-    }
+  private isValidXml(xmlText: string): { ok: boolean; message?: string } {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xmlText, 'application/xml');
+    const parseErrors = Array.from(doc.getElementsByTagName('parsererror'));
+    if (parseErrors.length === 0) return { ok: true };
+    const rawMsg = parseErrors[0].textContent || 'Unknown XML error';
+    const firstLine = rawMsg.split('\n')[0];
+    return { ok: false, message: firstLine };
   }
 
   parseEditedXmlToRobot(xmlText?: string): boolean {
     const { editedConfigText, robotInstance } = this.state;
     const text = xmlText ?? editedConfigText;
-    let parseSuccess = true;
-
+    const check = this.isValidXml(text);
+    if (!check.ok) {
+      this.setState({ viewMode: 'text' });
+      return false;
+    }
     try {
       robotInstance.fromXml(text);
-    } catch (err) {
-      parseSuccess = false;
+      return true;
+    } catch {
       this.setState({ viewMode: 'text' });
+      return false;
     }
-
-    return parseSuccess;
   }
 
   private normalizeXml(xmlString: string): string {
@@ -177,7 +291,6 @@ class HardwareConfigView extends Component<
         }
       }
     };
-
     removeComments(doc);
 
     const sortAttributes = (el: Element) => {
@@ -194,9 +307,7 @@ class HardwareConfigView extends Component<
         sortAttributes(child);
       }
     };
-
     sortAttributes(doc.documentElement);
-
     return serializer.serializeToString(doc).replace(/\s+/g, ' ').trim();
   }
 
@@ -220,7 +331,6 @@ class HardwareConfigView extends Component<
     const { hardwareConfigList, hardwareConfigFiles } = this.props;
 
     if (!selectedHardwareConfig) return false;
-
     const idx = hardwareConfigList.indexOf(selectedHardwareConfig);
     if (idx === -1) return false;
 
@@ -244,12 +354,53 @@ class HardwareConfigView extends Component<
     });
   }
 
-  toggleViewMode() {
-    const { viewMode, robotInstance } = this.state;
+  async showAlert(message: string) {
+    return new Promise<void>((resolve) => {
+      this.setState({
+        dialog: { type: 'alert', message, resolve },
+      });
+    });
+  }
 
+  async showPrompt(message: string) {
+    return new Promise<string | null>((resolve) => {
+      this.setState({
+        dialog: { type: 'prompt', message, resolve },
+      });
+    });
+  }
+
+  closeDialog() {
+    const { dialog } = this.state;
+    if (dialog) {
+      if (dialog.type === 'alert') dialog.resolve();
+      else dialog.resolve(null);
+      this.setState({ dialog: null });
+    }
+  }
+
+  async toggleViewMode() {
+    const { viewMode, robotInstance, editedConfigText } = this.state;
     if (viewMode === 'text') {
-      if (this.parseEditedXmlToRobot()) {
+      const check = this.isValidXml(editedConfigText);
+      if (!check.ok) {
+        const userInput = await this.showPrompt(
+          'XML parse errors:\n' +
+            `${check.message}\n\nType "switch" to attempt to switch to GUI anyway, or cancel to stay in text mode:`,
+        );
+        if (userInput?.toLowerCase() !== 'switch') {
+          this.setState({ viewMode: 'text' });
+          return;
+        }
+      }
+      try {
+        robotInstance.fromXml(editedConfigText);
         this.setState({ viewMode: 'gui' });
+      } catch {
+        await this.showAlert(
+          'Unable to switch to GUI: Robot.fromXml failed to parse the XML.',
+        );
+        this.setState({ viewMode: 'text' });
       }
     } else {
       const newXmlText = robotInstance.toString();
@@ -272,9 +423,9 @@ class HardwareConfigView extends Component<
           dark:border-transparent dark:bg-blue-600 dark:text-blue-50 dark:highlight-white/30
           dark:hover:border-blue-400/80 dark:focus:bg-blue-700
         `}
-        onClick={() => {
+        onClick={async () => {
           this.props.setHardwareConfig(this.state.selectedHardwareConfig);
-          window.alert('Config Set!');
+          await this.showAlert('Config Set!');
         }}
         disabled={
           !this.state.selectedHardwareConfig ||
@@ -289,35 +440,29 @@ class HardwareConfigView extends Component<
   renderResetButton() {
     const { selectedHardwareConfig } = this.state;
     const { hardwareConfigList, hardwareConfigFiles } = this.props;
-
     const idx = hardwareConfigList.indexOf(selectedHardwareConfig);
     const originalText = idx !== -1 ? hardwareConfigFiles[idx] : '';
-
     return (
       <ActionButton
         className="ml-2 border-yellow-400 bg-yellow-300 transition-colors dark:border-transparent dark:bg-yellow-600 dark:text-white dark:hover:border-yellow-500/80 dark:focus:bg-yellow-700"
-        onClick={() => {
+        onClick={async () => {
           if (
             !selectedHardwareConfig ||
             selectedHardwareConfig === '<No Config Set>'
-          ) {
+          )
             return;
-          }
-
-          const userInput = window.prompt(
-            `You are about to reset "${selectedHardwareConfig}" to its original configuration.\n` +
-              `All unsaved changes will be lost.\n\nType "reset" to confirm:`,
+          const userInput = await this.showPrompt(
+            `You are about to reset "${selectedHardwareConfig}" to its original configuration.\nAll unsaved changes will be lost.\n\nType "reset" to confirm:`,
           );
-
           if (userInput?.toLowerCase() === 'reset') {
             this.parseEditedXmlToRobot(originalText);
             this.setState({
               editedConfigText: originalText,
               saveFilename: selectedHardwareConfig,
             });
-            window.alert('Config Reset!');
+            await this.showAlert('Config Reset!');
           } else {
-            window.alert('Reset cancelled.');
+            await this.showAlert('Reset cancelled.');
           }
         }}
         disabled={
@@ -340,13 +485,29 @@ class HardwareConfigView extends Component<
     const idx = hardwareConfigList.indexOf(trimmedSaveFilename);
     const isReadOnly = idx !== -1 && isReadOnlyList[idx];
 
-    let validate: string[];
+    let validate: string[] = [];
+    let xmlWellFormed = true;
+    let xmlParseMessage: string | undefined;
+
     if (viewMode === 'gui') {
       validate = robotInstance.validate();
     } else {
-      const tempRobot = new Robot();
-      tempRobot.fromXml(editedConfigText);
-      validate = tempRobot.validate();
+      const check = this.isValidXml(editedConfigText);
+      xmlWellFormed = check.ok;
+      xmlParseMessage = check.message;
+      if (xmlWellFormed) {
+        try {
+          const tempRobot = new Robot();
+          tempRobot.fromXml(editedConfigText);
+          validate = tempRobot.validate();
+        } catch {
+          validate = ['Robot.fromXml failed to parse the document.'];
+        }
+      } else {
+        validate = [
+          `XML is not well-formed: ${xmlParseMessage ?? 'unknown error'}`,
+        ];
+      }
     }
 
     const isInvalid =
@@ -366,19 +527,19 @@ class HardwareConfigView extends Component<
             ? 'border-green-400 bg-green-300 dark:border-transparent dark:bg-green-600 dark:text-white dark:hover:border-green-400/80 dark:focus:bg-green-700'
             : 'border-red-400 bg-red-300 dark:border-transparent dark:bg-red-600 dark:text-white dark:hover:border-red-500/80 dark:focus:bg-red-700'
         }`}
-        onClick={() => {
+        onClick={async () => {
           if (!canSave) {
             if (
               !trimmedSaveFilename ||
               trimmedSaveFilename === '<No Config Set>'
             ) {
-              window.alert('Please enter a filename to save changes.');
+              await this.showAlert('Please enter a filename to save changes.');
             } else if (isReadOnly) {
-              window.alert(
+              await this.showAlert(
                 'This filename is read-only. Please enter a new filename to save.',
               );
             } else if (validate.length !== 0) {
-              const userInput = window.prompt(
+              const userInput = await this.showPrompt(
                 'There are validation errors:\n' +
                   validate.join('\n') +
                   '\n\nType "save" to save anyway:',
@@ -389,20 +550,19 @@ class HardwareConfigView extends Component<
                   selectedHardwareConfig: trimmedSaveFilename,
                   saveFilename: trimmedSaveFilename,
                 });
-                window.alert('Config Saved!');
+                await this.showAlert('Config Saved!');
               } else {
-                window.alert('Save cancelled.');
+                await this.showAlert('Save cancelled.');
               }
             }
             return;
           }
-
           writeHardwareConfig(trimmedSaveFilename, xmlContentToSave);
           this.setState({
             selectedHardwareConfig: trimmedSaveFilename,
             saveFilename: trimmedSaveFilename,
           });
-          window.alert('Config Saved!');
+          await this.showAlert('Config Saved!');
         }}
       >
         Save
@@ -413,28 +573,21 @@ class HardwareConfigView extends Component<
   renderDeleteButton() {
     const { selectedHardwareConfig } = this.state;
     const { hardwareConfigList, isReadOnlyList } = this.props;
-
     const idx = hardwareConfigList.indexOf(selectedHardwareConfig);
     const isReadOnly = idx !== -1 && isReadOnlyList[idx];
-
     return (
       <ActionButton
         className="ml-2 border-red-400 bg-red-300 transition-colors dark:border-transparent dark:bg-red-600 dark:text-white dark:hover:border-red-500/80 dark:focus:bg-red-700"
-        onClick={() => {
+        onClick={async () => {
           if (
             !selectedHardwareConfig ||
             selectedHardwareConfig === '<No Config Set>' ||
             isReadOnly
-          ) {
+          )
             return;
-          }
-
-          const userInput = window.prompt(
-            `Are you sure you want to delete "${selectedHardwareConfig}"?\n` +
-              `This action cannot be undone.\n\n` +
-              `Type "delete" to confirm:`,
+          const userInput = await this.showPrompt(
+            `Are you sure you want to delete "${selectedHardwareConfig}"?\nThis action cannot be undone.\n\nType "delete" to confirm:`,
           );
-
           if (userInput?.toLowerCase() === 'delete') {
             this.props.deleteHardwareConfig(selectedHardwareConfig);
             this.setState({
@@ -443,9 +596,9 @@ class HardwareConfigView extends Component<
               saveFilename: '',
               robotInstance: new Robot(),
             });
-            window.alert('Config Deleted!');
+            await this.showAlert('Config Deleted!');
           } else {
-            window.alert('Deletion cancelled.');
+            await this.showAlert('Deletion cancelled.');
           }
         }}
         disabled={
@@ -462,10 +615,8 @@ class HardwareConfigView extends Component<
   renderEditor() {
     const { hardwareConfigList, isReadOnlyList } = this.props;
     const { selectedHardwareConfig, viewMode } = this.state;
-
     const idx = hardwareConfigList.indexOf(selectedHardwareConfig);
     const isReadOnly = idx !== -1 && isReadOnlyList[idx];
-
     return (
       <div className="mt-4 rounded bg-gray-100 p-3 text-sm dark:bg-slate-800 dark:text-slate-200">
         <div className="mb-2 flex items-center justify-between">
@@ -519,7 +670,6 @@ class HardwareConfigView extends Component<
             onChange={(e) =>
               this.setState({ editedConfigText: e.target.value })
             }
-            placeholder=""
           />
         ) : (
           this.state.robotInstance.renderAsGui(
@@ -534,7 +684,6 @@ class HardwareConfigView extends Component<
   render() {
     const { available, activeOpModeStatus, hardwareConfigList, activeOpMode } =
       this.props;
-
     if (!available) {
       return (
         <BaseView isUnlocked={this.props.isUnlocked}>
@@ -622,6 +771,26 @@ class HardwareConfigView extends Component<
 
           {this.renderEditor()}
         </BaseViewBody>
+
+        {this.state.dialog?.type === 'alert' && (
+          <SimpleModal
+            message={this.state.dialog.message}
+            onClose={this.closeDialog}
+          />
+        )}
+        {this.state.dialog?.type === 'prompt' && (
+          <InputModal
+            message={this.state.dialog.message}
+            onConfirm={(val) => {
+              this.state.dialog?.resolve(val);
+              this.setState({ dialog: null });
+            }}
+            onCancel={() => {
+              this.state.dialog?.resolve(null);
+              this.setState({ dialog: null });
+            }}
+          />
+        )}
       </BaseView>
     );
   }
