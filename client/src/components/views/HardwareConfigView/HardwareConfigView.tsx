@@ -188,7 +188,7 @@ class HardwareConfigView extends Component<
     super(props);
     this.state = {
       selectedHardwareConfig: '',
-      editedConfigText: '',
+      editedConfigText: new Robot().toString(),
       viewMode: 'gui',
       robotInstance: new Robot(),
       saveFilename: '',
@@ -218,12 +218,24 @@ class HardwareConfigView extends Component<
     if (currentHardwareConfig) {
       const idx = hardwareConfigList.indexOf(currentHardwareConfig);
       const newText = idx !== -1 ? hardwareConfigFiles[idx] : '';
-      this.parseEditedXmlToRobot(newText);
-      this.setState({
-        selectedHardwareConfig: currentHardwareConfig,
-        editedConfigText: newText,
-        saveFilename: currentHardwareConfig,
-      });
+      if (newText.trim() === '') {
+        const r = new Robot();
+        this.setState({
+          selectedHardwareConfig: currentHardwareConfig,
+          editedConfigText: r.toString(),
+          saveFilename: currentHardwareConfig,
+          robotInstance: r,
+          viewMode: 'gui',
+        });
+      } else {
+        const parseSuccess = this.parseEditedXmlToRobot(newText);
+        this.setState({
+          selectedHardwareConfig: currentHardwareConfig,
+          editedConfigText: newText,
+          saveFilename: currentHardwareConfig,
+          viewMode: parseSuccess ? this.state.viewMode : 'text',
+        });
+      }
     }
   }
 
@@ -239,6 +251,17 @@ class HardwareConfigView extends Component<
     if (prevProps.currentHardwareConfig !== currentHardwareConfig) {
       const idx = hardwareConfigList.indexOf(currentHardwareConfig);
       const newText = idx !== -1 ? hardwareConfigFiles[idx] : '';
+      if (newText.trim() === '') {
+        const r = new Robot();
+        this.setState({
+          selectedHardwareConfig: currentHardwareConfig,
+          editedConfigText: r.toString(),
+          saveFilename: currentHardwareConfig,
+          robotInstance: r,
+          viewMode: 'gui',
+        });
+        return;
+      }
       this.parseEditedXmlToRobot(newText);
       this.setState({
         selectedHardwareConfig: currentHardwareConfig,
@@ -260,15 +283,26 @@ class HardwareConfigView extends Component<
   }
 
   parseEditedXmlToRobot(xmlText?: string): boolean {
-    const { editedConfigText, robotInstance } = this.state;
-    const text = xmlText ?? editedConfigText;
+    const { editedConfigText } = this.state;
+    const text = xmlText ?? editedConfigText ?? '';
+    if (text.trim() === '') {
+      const r = new Robot();
+      this.setState({
+        robotInstance: r,
+        editedConfigText: r.toString(),
+        viewMode: 'gui',
+      });
+      return true;
+    }
     const check = this.isValidXml(text);
     if (!check.ok) {
       this.setState({ viewMode: 'text' });
       return false;
     }
     try {
-      robotInstance.fromXml(text);
+      const r = this.state.robotInstance;
+      r.fromXml(text);
+      this.setState({ robotInstance: r });
       return true;
     } catch {
       this.setState({ viewMode: 'text' });
