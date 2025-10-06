@@ -11,6 +11,7 @@ import { ReactComponent as SubjectIcon } from '@/assets/icons/subject.svg';
 import { ReactComponent as WidgetIcon } from '@/assets/icons/widgets.svg';
 import { ReactComponent as ListIcon } from '@/assets/icons/list.svg';
 import { ReactComponent as HardwareIcon } from '@/assets/icons/hardware.svg';
+import { ReactComponent as DeleteSweepIcon } from '@/assets/icons/delete_sweep.svg';
 
 type ViewPickerProps = {
   isOpen: boolean;
@@ -135,6 +136,13 @@ const listContent = [
     icon: <SettingsIcon className="h-5 w-5" />,
     customStyles: 'focus:ring-teal-600',
     iconBg: 'bg-teal-500',
+  },
+  {
+    title: 'Error View',
+    view: ConfigurableView.ERROR_VIEW,
+    icon: <DeleteSweepIcon className="h-5 w-5" />,
+    customStyles: 'focus:ring-red-600',
+    iconBg: 'bg-red-500',
   },
 ];
 
