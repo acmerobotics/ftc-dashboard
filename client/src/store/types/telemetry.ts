@@ -75,6 +75,9 @@ export type TelemetryItem = {
   };
   log: string[];
   timestamp: number;
+  // Struct telemetry: new format
+  struct?: { type: string; schema: string; nested?: { type: string; schema: string }[] };
+  structData?: { [key: string]: string }; // base64 payloads keyed by sample name
 };
 
 export type ReceiveTelemetryAction = {
