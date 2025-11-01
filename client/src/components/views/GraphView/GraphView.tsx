@@ -74,8 +74,6 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
     this.userPause = this.userPause.bind(this);
 
     this.handleDocumentKeydown = this.handleDocumentKeydown.bind(this);
-    this.handleSelectedKeysChange = this.handleSelectedKeysChange.bind(this);
-    this.handleWindowMsChange = this.handleWindowMsChange.bind(this);
   }
 
   componentDidMount() {
@@ -108,7 +106,7 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
 
     this.setState((state) => {
       if (this.props.telemetry.length === 0) {
-        return { availableKeys: [], selectedKeys: [] };
+        return { availableKeys: [], selectedKeys: state.selectedKeys };
       }
 
       const availableKeys = [...state.availableKeys];
@@ -198,14 +196,6 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
     });
   }
 
-  handleSelectedKeysChange(selectedKeys: string[]) {
-    this.setState({ selectedKeys });
-  }
-
-  handleWindowMsChange(windowMs: ValResult<number>) {
-    this.setState({ windowMs });
-  }
-
   render() {
     const showNoNumeric =
       !this.state.graphing && this.state.availableKeys.length === 0;
@@ -285,7 +275,9 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
                 <div className="ml-3">
                   <MultipleCheckbox
                     arr={this.state.availableKeys}
-                    onChange={this.handleSelectedKeysChange}
+                    onChange={(selectedKeys: string[]) =>
+                      this.setState({ selectedKeys })
+                    }
                     selected={this.state.selectedKeys}
                   />
                 </div>
@@ -303,7 +295,11 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
                               value={this.state.windowMs.value}
                               valid={this.state.windowMs.valid}
                               validate={validateInt}
-                              onChange={this.handleWindowMsChange}
+                              onChange={(arg) =>
+                                this.setState({
+                                  windowMs: arg,
+                                })
+                              }
                             />
                           </td>
                         </tr>
