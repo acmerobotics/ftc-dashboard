@@ -244,13 +244,19 @@ class CustomVariable extends Component<Props, State> {
                   style={
                     this.hasBaselineModifications()
                       ? {
+                          display: 'inline-block',
+                          textAlign: 'center',
+                          width: '1ch',
                           userSelect: 'auto',
                           opacity: 1.0,
-                          color: '#ff6b6b',
+                          color: '#fbbf24',
                           fontWeight: 'bold',
                           marginRight: '4px',
                         }
                       : {
+                          display: 'inline-block',
+                          textAlign: 'center',
+                          width: '1ch',
                           userSelect: 'none',
                           opacity: 0.0,
                         }
@@ -261,7 +267,7 @@ class CustomVariable extends Component<Props, State> {
                       : ''
                   }
                 >
-                  !
+                  •
                 </span>
                 <h3 className="select-none pr-1 text-lg">{name}</h3>
               </div>

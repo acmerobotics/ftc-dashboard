@@ -252,38 +252,33 @@ class BasicVariable extends React.Component<Props> {
           <label htmlFor={path}>
             <span
               style={
-                modified
+                modified || modifiedFromBaseline
                   ? {
+                      display: 'inline-block',
+                      textAlign: 'center',
+                      width: '1ch',
                       userSelect: 'auto',
                       opacity: 1.0,
+                      color: modifiedFromBaseline ? '#fbbf24' : undefined,
+                      fontWeight: modifiedFromBaseline ? 'bold' : undefined,
                     }
                   : {
-                      userSelect: 'none',
-                      opacity: 0.0,
-                    }
-              }
-            >
-              *
-            </span>
-            <span
-              style={
-                modifiedFromBaseline
-                  ? {
-                      userSelect: 'auto',
-                      opacity: 1.0,
-                      color: '#ff6b6b',
-                      fontWeight: 'bold',
-                    }
-                  : {
+                      display: 'inline-block',
+                      textAlign: 'center',
+                      width: '1ch',
                       userSelect: 'none',
                       opacity: 0.0,
                     }
               }
               title={
-                modifiedFromBaseline ? 'Modified from deployed baseline' : ''
+                modifiedFromBaseline
+                  ? 'Modified from deployed baseline'
+                  : modified
+                  ? 'Unsaved changes'
+                  : ''
               }
             >
-              !
+              {modifiedFromBaseline ? '•' : modified ? '*' : ' '}
             </span>
             {name}
           </label>
