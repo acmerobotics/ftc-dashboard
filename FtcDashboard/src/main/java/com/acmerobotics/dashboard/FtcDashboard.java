@@ -1203,7 +1203,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             new OpModeMeta.Builder()
                 .setName("Enable/Disable Dashboard")
                 .setFlavor(OpModeMeta.Flavor.TELEOP)
-                .setGroup("dash")
+                .setGroup("Dashboard")
                 .build(),
             new LinearOpMode() {
                 @Override
