@@ -10,7 +10,6 @@ import cameraReducer from './camera';
 import settingsReducer from './settings';
 import gamepadReducer from './gamepad';
 import hardwareConfigReducer from './hardwareconfig';
-import graphReducer from './graph';
 import { createDispatchHook } from 'react-redux';
 
 const rootReducer = combineReducers({
@@ -23,7 +22,6 @@ const rootReducer = combineReducers({
   settings: settingsReducer,
   gamepad: gamepadReducer,
   hardwareConfig: hardwareConfigReducer,
-  graph: graphReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

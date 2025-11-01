@@ -40,9 +40,7 @@ const mapStateToProps = (state: RootState) => ({
   status: state.status,
 });
 
-const mapDispatchToProps = {};
-
-const connector = connect(mapStateToProps, mapDispatchToProps);
+const connector = connect(mapStateToProps);
 
 type GraphViewProps = ConnectedProps<typeof connector> &
   BaseViewProps &
@@ -110,7 +108,7 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
 
     this.setState((state) => {
       if (this.props.telemetry.length === 0) {
-        return { availableKeys: [], selectedKeys: state.selectedKeys };
+        return { availableKeys: [], selectedKeys: [] };
       }
 
       const availableKeys = [...state.availableKeys];
