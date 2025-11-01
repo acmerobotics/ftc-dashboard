@@ -12,6 +12,8 @@ import com.acmerobotics.dashboard.message.redux.ReceiveRobotStatus;
 import com.acmerobotics.dashboard.message.redux.ReceiveTelemetry;
 import com.acmerobotics.dashboard.message.redux.SaveConfig;
 import com.acmerobotics.dashboard.message.redux.SetHardwareConfig;
+import com.acmerobotics.dashboard.message.redux.WriteHardwareConfig;
+import com.acmerobotics.dashboard.message.redux.DeleteHardwareConfig;
 import com.acmerobotics.dashboard.message.redux.StartOpMode;
 import com.acmerobotics.dashboard.message.redux.StopOpMode;
 
@@ -45,7 +47,9 @@ public enum MessageType {
 
     /* hardware config */
     RECEIVE_HARDWARE_CONFIG_LIST(ReceiveHardwareConfigList.class),
-    SET_HARDWARE_CONFIG(SetHardwareConfig.class);
+    SET_HARDWARE_CONFIG(SetHardwareConfig.class),
+    WRITE_HARDWARE_CONFIG(WriteHardwareConfig.class),
+    DELETE_HARDWARE_CONFIG(DeleteHardwareConfig.class);
 
     final Class<? extends Message> msgClass;
 
