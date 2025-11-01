@@ -99,7 +99,7 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
       };
     } else if (
       state.selectedOpMode === '' ||
-      !props.opModeInfoList.some(info => info.name === state.selectedOpMode)
+      !props.opModeInfoList.some((info) => info.name === state.selectedOpMode)
     ) {
       return {
         selectedOpMode: props.opModeInfoList[0]?.name || '',
@@ -223,13 +223,14 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
     });
 
     // Add ungrouped op modes at the bottom (sorted)
-    const ungroupedElements = ungroupedOpModes.length > 0
-      ? ungroupedOpModes.sort().map((opMode) => (
-          <option key={opMode} value={opMode}>
-            {opMode}
-          </option>
-        ))
-      : [];
+    const ungroupedElements =
+      ungroupedOpModes.length > 0
+        ? ungroupedOpModes.sort().map((opMode) => (
+            <option key={opMode} value={opMode}>
+              {opMode}
+            </option>
+          ))
+        : [];
 
     return [...groupedElements, ...ungroupedElements];
   }
