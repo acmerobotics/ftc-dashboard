@@ -32,6 +32,10 @@ android {
     }
 }
 
+kotlin {
+    jvmToolchain(8)
+}
+
 node {
     version = "18.12.1"
     download = true
