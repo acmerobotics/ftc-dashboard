@@ -196,7 +196,13 @@ const LoggingView = ({
     } else if (activeOpModeStatus === OpModeStatus.STOPPED) {
       setIsRecording(false);
     }
-  }, [activeOpMode, activeOpModeStatus, isRecording, opModeInfoList, telemetry]);
+  }, [
+    activeOpMode,
+    activeOpModeStatus,
+    isRecording,
+    opModeInfoList,
+    telemetry,
+  ]);
 
   useEffect(() => {
     if (

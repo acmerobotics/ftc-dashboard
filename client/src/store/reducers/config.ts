@@ -3,6 +3,8 @@ import {
   ConfigVar,
   ConfigVarState,
   ReceiveConfigAction,
+  ReceiveConfigBaselineAction,
+  GetConfigBaselineAction,
   RefreshConfigAction,
   SaveConfigAction,
   UpdateConfigAction,
@@ -122,17 +124,74 @@ function revertModified(state: ConfigVarState): ConfigVarState {
   }
 }
 
+// Check if a configuration variable differs from its baseline value
+function isModifiedFromBaseline(
+  current: ConfigVarState,
+  baseline: ConfigVar | null,
+  path: string[] = [],
+): boolean {
+  if (baseline === null) {
+    return false; // No baseline to compare against
+  }
+
+  if (current.__type !== baseline.__type) {
+    return true;
+  }
+
+  if (current.__type === 'custom' && baseline.__type === 'custom') {
+    const currentValue = current.__value;
+    const baselineValue = baseline.__value;
+
+    if (currentValue === null && baselineValue === null) {
+      return false;
+    }
+    if (currentValue === null || baselineValue === null) {
+      return true;
+    }
+
+    // Check if any child variables are modified
+    const allKeys = new Set([
+      ...Object.keys(currentValue),
+      ...Object.keys(baselineValue),
+    ]);
+
+    for (const key of allKeys) {
+      const currentChild = currentValue[key];
+      const baselineChild = baselineValue[key];
+
+      if (!currentChild && !baselineChild) {
+        continue;
+      }
+      if (!currentChild || !baselineChild) {
+        return true;
+      }
+
+      if (isModifiedFromBaseline(currentChild, baselineChild, [...path, key])) {
+        return true;
+      }
+    }
+
+    return false;
+  } else {
+    // For basic variables, compare the current value with the baseline value
+    return current.__value !== baseline.__value;
+  }
+}
+
 const initialState: ConfigState = {
   configRoot: {
     __type: 'custom',
     __value: {},
   },
+  configBaseline: null,
 };
 
 const configReducer = (
   state: ConfigState = initialState,
   action:
     | ReceiveConfigAction
+    | ReceiveConfigBaselineAction
+    | GetConfigBaselineAction
     | UpdateConfigAction
     | SaveConfigAction
     | RefreshConfigAction,
@@ -143,6 +202,14 @@ const configReducer = (
         ...state,
         configRoot: mergeModified(state.configRoot, action.configRoot),
       };
+    case 'RECEIVE_CONFIG_BASELINE':
+      return {
+        ...state,
+        configBaseline: action.configBaseline,
+      };
+    case 'GET_CONFIG_BASELINE':
+      // This action is handled by middleware, no state change needed
+      return state;
     case 'UPDATE_CONFIG':
       return {
         ...state,
@@ -159,3 +226,4 @@ const configReducer = (
 };
 
 export default configReducer;
+export { isModifiedFromBaseline };

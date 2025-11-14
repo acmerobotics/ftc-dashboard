@@ -1,9 +1,11 @@
 package com.acmerobotics.dashboard.message;
 
 import com.acmerobotics.dashboard.message.redux.GetConfig;
+import com.acmerobotics.dashboard.message.redux.GetConfigBaseline;
 import com.acmerobotics.dashboard.message.redux.GetRobotStatus;
 import com.acmerobotics.dashboard.message.redux.InitOpMode;
 import com.acmerobotics.dashboard.message.redux.ReceiveConfig;
+import com.acmerobotics.dashboard.message.redux.ReceiveConfigBaseline;
 import com.acmerobotics.dashboard.message.redux.ReceiveGamepadState;
 import com.acmerobotics.dashboard.message.redux.ReceiveHardwareConfigList;
 import com.acmerobotics.dashboard.message.redux.ReceiveImage;
@@ -31,8 +33,10 @@ public enum MessageType {
 
     /* config */
     GET_CONFIG(GetConfig.class),
+    GET_CONFIG_BASELINE(GetConfigBaseline.class),
     SAVE_CONFIG(SaveConfig.class),
     RECEIVE_CONFIG(ReceiveConfig.class),
+    RECEIVE_CONFIG_BASELINE(ReceiveConfigBaseline.class),
 
     /* telemetry */
     RECEIVE_TELEMETRY(ReceiveTelemetry.class),
