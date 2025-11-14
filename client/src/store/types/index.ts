@@ -83,6 +83,8 @@ export type {
 
 export {
   SET_HARDWARE_CONFIG,
+  WRITE_HARDWARE_CONFIG,
+  DELETE_HARDWARE_CONFIG,
   RECEIVE_HARDWARE_CONFIG_LIST,
 } from './hardwareconfig';
 export type {
