@@ -7,6 +7,7 @@ import {
   SetHardwareConfigAction,
   WriteHardwareConfigAction,
   ReceiveHardwareConfigListAction,
+  HardwareConfig,
 } from '@/store/types/hardwareconfig';
 
 export const setHardwareConfig = (
@@ -33,14 +34,10 @@ export const deleteHardwareConfig = (
 });
 
 export const receiveHardwareConfigList = (
-  hardwareConfigList: string[],
-  hardwareConfigFiles: string[],
-  isReadOnlyList: boolean[],
+  hardwareConfigs: HardwareConfig[],
   currentHardwareConfig: string,
 ): ReceiveHardwareConfigListAction => ({
   type: RECEIVE_HARDWARE_CONFIG_LIST,
-  hardwareConfigList,
-  hardwareConfigFiles,
-  isReadOnlyList,
+  hardwareConfigs,
   currentHardwareConfig,
 });

@@ -3,10 +3,14 @@ export const WRITE_HARDWARE_CONFIG = 'WRITE_HARDWARE_CONFIG';
 export const DELETE_HARDWARE_CONFIG = 'DELETE_HARDWARE_CONFIG';
 export const RECEIVE_HARDWARE_CONFIG_LIST = 'RECEIVE_HARDWARE_CONFIG_LIST';
 
+export type HardwareConfig = {
+  name: string;
+  xmlContent: string;
+  readOnly: boolean;
+};
+
 export type HardwareConfigState = {
-  hardwareConfigList: string[];
-  hardwareConfigFiles: string[];
-  isReadOnlyList: boolean[];
+  hardwareConfigs: HardwareConfig[];
   currentHardwareConfig: string;
 };
 
@@ -28,8 +32,6 @@ export type DeleteHardwareConfigAction = {
 
 export type ReceiveHardwareConfigListAction = {
   type: typeof RECEIVE_HARDWARE_CONFIG_LIST;
-  hardwareConfigList: string[];
-  hardwareConfigFiles: string[];
-  isReadOnlyList: boolean[];
+  hardwareConfigs: HardwareConfig[];
   currentHardwareConfig: string;
 };

@@ -45,7 +45,8 @@ type HardwareConfigViewState = {
 
 const mapStateToProps = ({ status, hardwareConfig }: RootState) => ({
   ...status,
-  ...hardwareConfig,
+  hardwareConfigs: hardwareConfig.hardwareConfigs,
+  currentHardwareConfig: hardwareConfig.currentHardwareConfig,
 });
 
 const mapDispatchToProps = {
@@ -213,11 +214,12 @@ class HardwareConfigView extends Component<
   }
 
   componentDidMount() {
-    const { currentHardwareConfig, hardwareConfigFiles, hardwareConfigList } =
-      this.props;
+    const { currentHardwareConfig, hardwareConfigs } = this.props;
     if (currentHardwareConfig) {
-      const idx = hardwareConfigList.indexOf(currentHardwareConfig);
-      const newText = idx !== -1 ? hardwareConfigFiles[idx] : '';
+      const config = hardwareConfigs.find(
+        (c) => c.name === currentHardwareConfig,
+      );
+      const newText = config ? config.xmlContent : '';
       if (newText.trim() === '') {
         const r = new Robot();
         this.setState({
@@ -243,14 +245,15 @@ class HardwareConfigView extends Component<
     prevProps: Readonly<HardwareConfigViewProps>,
     prevState: Readonly<HardwareConfigViewState>,
   ) {
-    const { currentHardwareConfig, hardwareConfigFiles, hardwareConfigList } =
-      this.props;
+    const { currentHardwareConfig, hardwareConfigs } = this.props;
     if (prevState.editedConfigText !== this.state.editedConfigText) {
       this.adjustTextareaHeight();
     }
     if (prevProps.currentHardwareConfig !== currentHardwareConfig) {
-      const idx = hardwareConfigList.indexOf(currentHardwareConfig);
-      const newText = idx !== -1 ? hardwareConfigFiles[idx] : '';
+      const config = hardwareConfigs.find(
+        (c) => c.name === currentHardwareConfig,
+      );
+      const newText = config ? config.xmlContent : '';
       if (newText.trim() === '') {
         const r = new Robot();
         this.setState({
@@ -362,22 +365,23 @@ class HardwareConfigView extends Component<
       viewMode,
       robotInstance,
     } = this.state;
-    const { hardwareConfigList, hardwareConfigFiles } = this.props;
+    const { hardwareConfigs } = this.props;
 
     if (!selectedHardwareConfig) return false;
-    const idx = hardwareConfigList.indexOf(selectedHardwareConfig);
-    if (idx === -1) return false;
+    const config = hardwareConfigs.find(
+      (c) => c.name === selectedHardwareConfig,
+    );
+    if (!config) return false;
 
     const currentText =
       viewMode === 'gui' ? robotInstance.toString() : editedConfigText;
-    return this.configChanged(hardwareConfigFiles[idx] ?? '', currentText);
+    return this.configChanged(config.xmlContent ?? '', currentText);
   }
 
   onChange(evt: ChangeEvent<HTMLSelectElement>) {
     const selected = evt.target.value;
-    const index = this.props.hardwareConfigList.indexOf(selected);
-    const text = index !== -1 ? this.props.hardwareConfigFiles[index] : '';
-
+    const config = this.props.hardwareConfigs.find((c) => c.name === selected);
+    const text = config ? config.xmlContent : '';
     const parseSuccess = this.parseEditedXmlToRobot(text);
 
     this.setState({
@@ -473,9 +477,11 @@ class HardwareConfigView extends Component<
 
   renderResetButton() {
     const { selectedHardwareConfig } = this.state;
-    const { hardwareConfigList, hardwareConfigFiles } = this.props;
-    const idx = hardwareConfigList.indexOf(selectedHardwareConfig);
-    const originalText = idx !== -1 ? hardwareConfigFiles[idx] : '';
+    const { hardwareConfigs } = this.props;
+    const config = hardwareConfigs.find(
+      (c) => c.name === selectedHardwareConfig,
+    );
+    const originalText = config ? config.xmlContent : '';
     return (
       <ActionButton
         className="ml-2 border-yellow-400 bg-yellow-300 transition-colors dark:border-transparent dark:bg-yellow-600 dark:text-white dark:hover:border-yellow-500/80 dark:focus:bg-yellow-700"
@@ -512,12 +518,11 @@ class HardwareConfigView extends Component<
   renderSaveButton() {
     const { viewMode, editedConfigText, robotInstance, saveFilename } =
       this.state;
-    const { hardwareConfigList, isReadOnlyList, writeHardwareConfig } =
-      this.props;
+    const { hardwareConfigs, writeHardwareConfig } = this.props;
 
     const trimmedSaveFilename = saveFilename.trim();
-    const idx = hardwareConfigList.indexOf(trimmedSaveFilename);
-    const isReadOnly = idx !== -1 && isReadOnlyList[idx];
+    const config = hardwareConfigs.find((c) => c.name === trimmedSaveFilename);
+    const isReadOnly = config ? config.readOnly : false;
 
     let validate: string[] = [];
     let xmlWellFormed = true;
@@ -606,9 +611,11 @@ class HardwareConfigView extends Component<
 
   renderDeleteButton() {
     const { selectedHardwareConfig } = this.state;
-    const { hardwareConfigList, isReadOnlyList } = this.props;
-    const idx = hardwareConfigList.indexOf(selectedHardwareConfig);
-    const isReadOnly = idx !== -1 && isReadOnlyList[idx];
+    const { hardwareConfigs } = this.props;
+    const config = hardwareConfigs.find(
+      (c) => c.name === selectedHardwareConfig,
+    );
+    const isReadOnly = config ? config.readOnly : false;
     return (
       <ActionButton
         className="ml-2 border-red-400 bg-red-300 transition-colors dark:border-transparent dark:bg-red-600 dark:text-white dark:hover:border-red-500/80 dark:focus:bg-red-700"
@@ -647,10 +654,12 @@ class HardwareConfigView extends Component<
   }
 
   renderEditor() {
-    const { hardwareConfigList, isReadOnlyList } = this.props;
+    const { hardwareConfigs } = this.props;
     const { selectedHardwareConfig, viewMode } = this.state;
-    const idx = hardwareConfigList.indexOf(selectedHardwareConfig);
-    const isReadOnly = idx !== -1 && isReadOnlyList[idx];
+    const config = hardwareConfigs.find(
+      (c) => c.name === selectedHardwareConfig,
+    );
+    const isReadOnly = config ? config.readOnly : false;
     return (
       <div className="mt-4 rounded bg-gray-100 p-3 text-sm dark:bg-slate-800 dark:text-slate-200">
         <div className="mb-2 flex items-center justify-between">
@@ -716,7 +725,7 @@ class HardwareConfigView extends Component<
   }
 
   render() {
-    const { available, activeOpModeStatus, hardwareConfigList, activeOpMode } =
+    const { available, activeOpModeStatus, hardwareConfigs, activeOpMode } =
       this.props;
     if (!available) {
       return (
@@ -773,27 +782,21 @@ class HardwareConfigView extends Component<
               }
               onChange={this.onChange}
             >
-              {hardwareConfigList.length === 0 ? (
+              {hardwareConfigs.length === 0 ? (
                 <option value="">No configurations available</option>
               ) : (
                 [
                   <option value="<No Config Set>" key="empty-option">
                     Select a configuration...
                   </option>,
-                  ...hardwareConfigList
+                  ...hardwareConfigs
                     .slice()
-                    .sort()
-                    .map((configName: string) => {
-                      const idx =
-                        this.props.hardwareConfigList.indexOf(configName);
-                      const isReadOnly =
-                        idx !== -1 && this.props.isReadOnlyList[idx];
-                      return (
-                        <option key={configName} value={configName}>
-                          {configName} {isReadOnly ? '(Read-Only)' : ''}
-                        </option>
-                      );
-                    }),
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map((config) => (
+                      <option key={config.name} value={config.name}>
+                        {config.name} {config.readOnly ? '(Read-Only)' : ''}
+                      </option>
+                    )),
                 ]
               )}
             </select>

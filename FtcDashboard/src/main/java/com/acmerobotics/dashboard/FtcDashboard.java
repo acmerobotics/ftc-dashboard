@@ -304,29 +304,31 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
     private class ListHardwareConfigsRunnable implements Runnable {
         @Override
-        public void run(){
+        public void run() {
             hardwareConfigList.with(l -> {
                 l.clear();
-                for (RobotConfigFile file : hardwareConfigManager.getXMLFiles()){
+                for (RobotConfigFile file : hardwareConfigManager.getXMLFiles()) {
                     l.put(file.getName(), file);
                 }
-                List<String> stringValues = new ArrayList<>();
-                List<Boolean> isReadOnly = new ArrayList<>();
+                List<HardwareConfig> hardwareConfigs = new ArrayList<>();
+
                 for (RobotConfigFile value : l.values()) {
                     try {
-                        stringValues.add(xmlPullParserToString(value.getXml()));
-                        isReadOnly.add(value.isReadOnly());
-                        RobotLog.e("Hardware Config " + value.getName() + " and is read only? " + value.isReadOnly());
-                        RobotLog.e("Hardware Config " + value.getName() + " filepath: " + value.getFullPath());
+                        String name = value.getName();
+                        String xmlContent = xmlPullParserToString(value.getXml());
+                        boolean readOnly = value.isReadOnly();
+
+                        hardwareConfigs.add(new HardwareConfig(name, xmlContent, readOnly));
+
+                        RobotLog.e("Hardware Config " + name + " and is read only? " + value.isReadOnly());
+                        RobotLog.e("Hardware Config " + name + " filepath: " + value.getFullPath());
                     } catch (java.io.FileNotFoundException | XmlPullParserException e) {
                         RobotLog.ee(TAG, "Failed to read hardware config: " + value.getName(), e);
                     }
                 }
 
                 sendAll(new ReceiveHardwareConfigList(
-                        new ArrayList<>(l.keySet()),
-                        new ArrayList<>(stringValues),
-                        new ArrayList<>(isReadOnly),
+                        hardwareConfigs,
                         hardwareConfigManager.getActiveConfig().getName()
                 ));
             });
@@ -897,20 +899,20 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
             hardwareConfigList.with(l -> {
                 if (!l.isEmpty()){
-                    List<String> stringValues = new ArrayList<>();
-                    List<Boolean> isReadOnly = new ArrayList<>();
+                    List<HardwareConfig> hardwareConfigs = new ArrayList<>();
+
                     for (RobotConfigFile value : l.values()) {
                         try {
-                            stringValues.add(xmlPullParserToString(value.getXml()));
-                            isReadOnly.add(value.isReadOnly());
+                            String xmlContent = xmlPullParserToString(value.getXml());
+                            boolean readOnly = value.isReadOnly();
+
+                            hardwareConfigs.add(new HardwareConfig(value.getName(), xmlContent, readOnly));
                         } catch (java.io.FileNotFoundException | XmlPullParserException e) {
                             RobotLog.ee(TAG, "Failed to read hardware config: " + value.getName(), e);
                         }
                     }
                     send(new ReceiveHardwareConfigList(
-                            new ArrayList<>(l.keySet()),
-                            new ArrayList<>(stringValues),
-                            new ArrayList<>(isReadOnly),
+                            hardwareConfigs,
                             hardwareConfigManager.getActiveConfig().getName()
                     ));
                 }
