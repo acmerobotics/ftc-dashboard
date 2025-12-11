@@ -106,7 +106,7 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
 
     this.setState((state) => {
       if (this.props.telemetry.length === 0) {
-        return { availableKeys: [], selectedKeys: [] };
+        return { availableKeys: [], selectedKeys: state.selectedKeys };
       }
 
       const availableKeys = [...state.availableKeys];

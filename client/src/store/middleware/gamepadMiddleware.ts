@@ -112,7 +112,7 @@ const extractGamepadState = (gamepad: Gamepad) => {
       };
     case GamepadType.STANDARD:
       return {
-        // same as SONY_DUALSHOCK_4 except guide and touchpad buttons
+        // same as SONY_DUALSHOCK_4 except touchpad button
         // tested with generic controller reported by Chromium-based as
         // id='Xbox 360 Controller (XInput STANDARD GAMEPAD)' and mapping='standard'
         // on Firefox reports as id='xinput' and mapping='standard'
@@ -133,7 +133,7 @@ const extractGamepadState = (gamepad: Gamepad) => {
         x: gamepad.buttons[2].pressed,
         y: gamepad.buttons[3].pressed,
 
-        guide: false,
+        guide: gamepad.buttons[16].pressed,
         start: gamepad.buttons[9].pressed,
         back: gamepad.buttons[8].pressed,
 

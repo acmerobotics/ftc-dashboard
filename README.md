@@ -25,11 +25,11 @@ Check out our [online documentation](https://acmerobotics.github.io/ftc-dashboar
 3. Add the dashboard implementation (see the [GitHub releases page](https://github.com/acmerobotics/ftc-dashboard/releases) for the latest version number):
     - If you’re using a normal SDK setup, in the `dependencies` section, add the following:
       ```gradle
-      implementation 'com.acmerobotics.dashboard:dashboard:0.5.0'
+      implementation 'com.acmerobotics.dashboard:dashboard:0.5.1'
       ```
     - If you’re using OpenRC or have non-standard SDK dependencies, in the `dependencies` section, add the following:
       ```gradle
-      implementation('com.acmerobotics.dashboard:dashboard:0.5.0') {
+      implementation('com.acmerobotics.dashboard:dashboard:0.5.1') {
         exclude group: 'org.firstinspires.ftc'
       }
       ```

@@ -66,7 +66,8 @@ public class ReflectionConfig {
                         }
                     } else {
                         for (Field nestedField : fieldClass.getFields()) {
-                            if (Modifier.isFinal(field.getModifiers())) {
+                            if (Modifier.isFinal(field.getModifiers())
+                                || Modifier.isStatic(field.getModifiers())) {
                                 continue;
                             }
 
@@ -112,7 +113,8 @@ public class ReflectionConfig {
                         }
                     } else {
                         for (Field nestedField : fieldClass.getFields()) {
-                            if (Modifier.isFinal(field.getModifiers())) {
+                            if (Modifier.isFinal(field.getModifiers())
+                                || Modifier.isStatic(nestedField.getModifiers())) {
                                 continue;
                             }
 

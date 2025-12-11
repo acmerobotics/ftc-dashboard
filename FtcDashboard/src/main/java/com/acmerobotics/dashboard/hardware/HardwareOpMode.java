@@ -11,6 +11,7 @@ import com.acmerobotics.dashboard.config.variable.CustomVariable;
 import com.acmerobotics.dashboard.config.variable.VariableType;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareDevice;
@@ -111,6 +112,7 @@ public class HardwareOpMode extends OpMode {
     private void initHardware(CustomVariable hardwareRoot) {
         initializeMotorVariables(hardwareRoot);
         initializeServoVariables(hardwareRoot);
+        initializeCRServoVariables(hardwareRoot);
     }
 
     /**
@@ -122,6 +124,7 @@ public class HardwareOpMode extends OpMode {
     private void setHardware(CustomVariable hardwareRoot) {
         updateMotorsFromConfig(hardwareRoot);
         updateServosFromConfig(hardwareRoot);
+        updateCRServoFromConfig(hardwareRoot);
     }
 
     /**
@@ -146,6 +149,7 @@ public class HardwareOpMode extends OpMode {
         CustomVariable motors = new CustomVariable();
 
         for (DcMotorSimple motor : hardwareMap.getAll(DcMotorSimple.class)) {
+            if (motor instanceof CRServo) continue; // Handled later
             DcMotorEx motorEx = (DcMotorEx) motor;
             String deviceName = getDeviceName(motorEx);
             if (deviceName == null) continue;
@@ -204,6 +208,7 @@ public class HardwareOpMode extends OpMode {
         if (motorsVar == null) return;
 
         for (DcMotorSimple motor : hardwareMap.getAll(DcMotorSimple.class)) {
+            if (motor instanceof CRServo) continue; // Handled later
             DcMotorEx motorEx = (DcMotorEx) motor;
             String motorName = getDeviceName(motorEx);
             if (motorName == null) continue;
@@ -249,6 +254,7 @@ public class HardwareOpMode extends OpMode {
         if (motorsVar == null) return;
 
         for (DcMotorSimple motor : hardwareMap.getAll(DcMotorSimple.class)) {
+            if (motor instanceof CRServo) continue; // Handled later
             DcMotorEx motorEx = (DcMotorEx) motor;
             String deviceName = getDeviceName(motorEx);
             if (deviceName == null) continue;
@@ -338,6 +344,93 @@ public class HardwareOpMode extends OpMode {
         double newPosition = (double) positionVar.getValue();
         if (newPosition != -1.0) {
             servo.setPosition(newPosition);
+        }
+    }
+
+    /* -------------------- CRServo Handling --------------------- */
+
+    /**
+     * Discovers all CRServos in the hardware map and creates dashboard variables for them.
+     * Each motor gets variables for power and port information.
+     *
+     * @param hardwareRoot the root variable container to add CRServo variables to
+     */
+    private void initializeCRServoVariables(CustomVariable hardwareRoot) {
+        CustomVariable CRServos = new CustomVariable();
+
+        for (CRServo crservo : hardwareMap.getAll(CRServo.class)) {
+            String deviceName = getDeviceName(crservo);
+            if (deviceName == null) continue;
+
+            CRServos.putVariable(deviceName, createCRServoVariable(crservo));
+        }
+
+        hardwareRoot.putVariable("Continuous Rotation Servos", CRServos);
+    }
+
+    /**
+     * Creates a complete dashboard variable structure for a single CR Servo.
+     * Includes power control and port information.
+     *
+     * @param servo the CRServo to create variables for
+     * @return a CustomVariable containing CRServo-related dashboard controls and info
+     */
+    private CustomVariable createCRServoVariable(CRServo servo) {
+        CustomVariable servoVar = new CustomVariable();
+        String hubType = extractHubType(servo.getController().getConnectionInfo());
+
+        servoVar.putVariable("Power", new BasicVariable<>(new ValueProvider<Double>() {
+            private double value = 0.0;
+
+            @Override
+            public Double get() {
+                return value;
+            }
+
+            @Override
+            public void set(Double newValue) {
+                value = newValue;
+                servo.setPower(newValue);
+            }
+        }));
+
+        servoVar.putVariable(hubType + " Port", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(servo.getPortNumber())));
+
+        return servoVar;
+    }
+
+    /**
+     * Applies configuration changes from the dashboard to all CRServos.
+     * Updates CRServo powers based on dashboard inputs.
+     *
+     * @param hardwareRoot the root variable container containing CRServo configurations
+     */
+    private void updateCRServoFromConfig(CustomVariable hardwareRoot) {
+        CustomVariable crServosVar = (CustomVariable) hardwareRoot.getVariable("Continuous Rotation Servos");
+        if (crServosVar == null) return;
+
+        for (CRServo servo : hardwareMap.getAll(CRServo.class)) {
+            String motorName = getDeviceName(servo);
+            if (motorName == null) continue;
+
+            CustomVariable servoVar = (CustomVariable) crServosVar.getVariable(motorName);
+            if (servoVar != null) {
+                applyCRServoConfiguration(servo, servoVar);
+            }
+        }
+    }
+
+    /**
+     * Applies configuration settings from the dashboard to a specific motor.
+     * Handles power changes.
+     *
+     * @param servo  the CRServo to configure
+     * @param config the configuration variables from the dashboard
+     */
+    private void applyCRServoConfiguration(CRServo servo, CustomVariable config) {
+        ConfigVariable<?> runModeVar = config.getVariable("Power");
+        if (runModeVar != null) {
+            servo.setPower((Double) runModeVar.getValue());
         }
     }
 

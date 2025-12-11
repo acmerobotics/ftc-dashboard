@@ -41,6 +41,10 @@ stretching the smaller dimension. Firefox will fit the larger dimension to the d
 aspect ratio by centering the smaller dimension. If you want consistent behavior, edit your custom field image so
 that it is square.
 
+Custom images can be added to your project in `TeamCode/src/main/assets/images/` and can be drawn from path `/images/<image>.jpg`. Any image type supported by the browser can be used (jpg, png, webp). See [ImageOpMode](https://github.com/acmerobotics/ftc-dashboard/blob/master/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/ImageOpMode.java) and the [images folder](https://github.com/acmerobotics/ftc-dashboard/tree/master/TeamCode/src/main/assets/images) for an example.
+
+See [client/public](https://github.com/acmerobotics/ftc-dashboard/tree/master/client/public) for the list of built-in images that can be drawn from path `/dash/<image>.jpg`.
+
 ## Grids
 
 You can also override the default grid lines. There are normally 7 grid lines including the field
