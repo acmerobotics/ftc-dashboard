@@ -453,7 +453,7 @@ class HardwareConfigView extends Component<
     this.setState({});
   }
 
-  renderSetButton() {
+  renderActivateButton() {
     return (
       <ActionButton
         className={`
@@ -463,14 +463,14 @@ class HardwareConfigView extends Component<
         `}
         onClick={async () => {
           this.props.setHardwareConfig(this.state.selectedHardwareConfig);
-          await this.showAlert('Config Set!');
+          await this.showAlert('Config Activated!');
         }}
         disabled={
           !this.state.selectedHardwareConfig ||
-          this.state.selectedHardwareConfig === '<No Config Set>'
+          this.state.selectedHardwareConfig === '<No Config Activated>'
         }
       >
-        Set
+        Activate
       </ActionButton>
     );
   }
@@ -801,7 +801,7 @@ class HardwareConfigView extends Component<
               )}
             </select>
             <div className="flex space-x-1">
-              {this.renderSetButton()}
+              {this.renderActivateButton()}
               {this.renderDeleteButton()}
             </div>
           </div>

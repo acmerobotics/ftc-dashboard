@@ -50,7 +50,7 @@ public enum MessageType {
     RECEIVE_HARDWARE_CONFIG_LIST(ReceiveHardwareConfigList.class),
     SET_HARDWARE_CONFIG(SetHardwareConfig.class),
     WRITE_HARDWARE_CONFIG(WriteHardwareConfig.class),
-    DELETE_HARDWARE_CONFIG(DeleteHardwareConfig.class);
+    DELETE_HARDWARE_CONFIG(DeleteHardwareConfig.class),
 
     /* logcat errors */
     RECEIVE_LOGCAT_ERRORS(ReceiveLogcatErrors.class);

@@ -614,7 +614,6 @@ export abstract class Hub extends Device {
               configChangeCallback();
             }}
           />
-          ({this.type})
           {onDelete && (
             <button
               className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-md border border-red-400 bg-red-200 text-red-600"
