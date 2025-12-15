@@ -475,7 +475,7 @@ class HardwareConfigView extends Component<
     );
   }
 
-  renderResetButton() {
+  renderRevertButton() {
     const { selectedHardwareConfig } = this.state;
     const { hardwareConfigs } = this.props;
     const config = hardwareConfigs.find(
@@ -492,23 +492,49 @@ class HardwareConfigView extends Component<
           )
             return;
           const userInput = await this.showPrompt(
-            `You are about to reset "${selectedHardwareConfig}" to its original configuration.\nAll unsaved changes will be lost.\n\nType "reset" to confirm:`,
+            `You are about to revert "${selectedHardwareConfig}" to its original configuration.\nAll unsaved changes will be lost.\n\nType "revert" to confirm:`,
           );
-          if (userInput?.toLowerCase() === 'reset') {
+          if (userInput?.toLowerCase() === 'revert') {
             this.parseEditedXmlToRobot(originalText);
             this.setState({
               editedConfigText: originalText,
               saveFilename: selectedHardwareConfig,
             });
-            await this.showAlert('Config Reset!');
+            await this.showAlert('Config Reverted!');
           } else {
-            await this.showAlert('Reset cancelled.');
+            await this.showAlert('Revert cancelled.');
           }
         }}
         disabled={
           !selectedHardwareConfig ||
           selectedHardwareConfig === '<No Config Set>'
         }
+      >
+        Revert
+      </ActionButton>
+    );
+  }
+
+  renderResetToDefaultButton() {
+    return (
+      <ActionButton
+        className="ml-2 border-orange-400 bg-orange-300 transition-colors dark:border-transparent dark:bg-orange-600 dark:text-white dark:hover:border-orange-500/80 dark:focus:bg-orange-700"
+        onClick={async () => {
+          const userInput = await this.showPrompt(
+            'You are about to reset the current configuration to the default blank configuration.\nAll unsaved changes will be lost.\n\nType "reset" to confirm:',
+          );
+          if (userInput?.toLowerCase() === 'reset') {
+            const r = new Robot();
+            this.parseEditedXmlToRobot(r.toString());
+            this.setState({
+              editedConfigText: r.toString(),
+              robotInstance: r,
+            });
+            await this.showAlert('Config Reset to Default!');
+          } else {
+            await this.showAlert('Reset cancelled.');
+          }
+        }}
       >
         Reset
       </ActionButton>
@@ -679,7 +705,10 @@ class HardwareConfigView extends Component<
               : viewMode === 'text'
               ? 'Edit Configuration (XML)'
               : 'Edit Configuration (GUI)'}
-            <span className="font-normal">{this.renderResetButton()}</span>
+            <span className="font-normal">
+              {this.renderRevertButton()}
+              {this.renderResetToDefaultButton()}
+            </span>
           </h4>
           <div className="flex items-center">
             <input
