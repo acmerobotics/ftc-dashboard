@@ -392,6 +392,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         }
 
         return writer.toString();
+    }
+
     private class LogcatMonitorRunnable implements Runnable {
         private static final String OPMODE_MANAGER_TAG = "OpModeManager";
         private volatile boolean running = true;

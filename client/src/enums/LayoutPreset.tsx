@@ -88,7 +88,7 @@ const LAYOUT_DETAILS: { [key in Values<typeof LayoutPreset>]: Layout } = {
   [LayoutPreset.HARDWARE]: {
     name: 'Hardware',
     content: (
-      <TileGrid gridTemplate="120px 1fr / 65% 35%">
+      <TileGrid gridTemplate="110px 1fr / 65% 35%">
         <Tile row="1 / span 2" col={1}>
           <HardwareConfigView />
         </Tile>

@@ -206,6 +206,14 @@ class HardwareConfigView extends Component<
     this.closeDialog = this.closeDialog.bind(this);
   }
 
+  isOpModeRunning() {
+    const { activeOpModeStatus, activeOpMode } = this.props;
+    return (
+      activeOpModeStatus !== OpModeStatus.STOPPED &&
+      activeOpMode !== STOP_OP_MODE_TAG
+    );
+  }
+
   adjustTextareaHeight() {
     const textarea = this.textareaRef.current;
     if (!textarea) return;
@@ -453,7 +461,7 @@ class HardwareConfigView extends Component<
     this.setState({});
   }
 
-  renderActivateButton() {
+  renderActivateButton(isOpModeRunning: boolean) {
     return (
       <ActionButton
         className={`
@@ -466,8 +474,9 @@ class HardwareConfigView extends Component<
           await this.showAlert('Config Activated!');
         }}
         disabled={
+          isOpModeRunning ||
           !this.state.selectedHardwareConfig ||
-          this.state.selectedHardwareConfig === '<No Config Activated>'
+          this.state.selectedHardwareConfig === '<No Config Set>'
         }
       >
         Activate
@@ -475,7 +484,7 @@ class HardwareConfigView extends Component<
     );
   }
 
-  renderRevertButton() {
+  renderRevertButton(hasUnsavedChanges: boolean) {
     const { selectedHardwareConfig } = this.state;
     const { hardwareConfigs } = this.props;
     const config = hardwareConfigs.find(
@@ -484,7 +493,7 @@ class HardwareConfigView extends Component<
     const originalText = config ? config.xmlContent : '';
     return (
       <ActionButton
-        className="ml-2 border-yellow-400 bg-yellow-300 transition-colors dark:border-transparent dark:bg-yellow-600 dark:text-white dark:hover:border-yellow-500/80 dark:focus:bg-yellow-700"
+        className="ml-2 border-yellow-400 bg-yellow-300 transition-colors dark:border-transparent dark:bg-yellow-600 dark:highlight-white/30 dark:text-white dark:hover:border-yellow-500/80 dark:focus:bg-yellow-700"
         onClick={async () => {
           if (
             !selectedHardwareConfig ||
@@ -507,7 +516,8 @@ class HardwareConfigView extends Component<
         }}
         disabled={
           !selectedHardwareConfig ||
-          selectedHardwareConfig === '<No Config Set>'
+          selectedHardwareConfig === '<No Config Set>' ||
+          !hasUnsavedChanges
         }
       >
         Revert
@@ -518,7 +528,7 @@ class HardwareConfigView extends Component<
   renderResetToDefaultButton() {
     return (
       <ActionButton
-        className="ml-2 border-orange-400 bg-orange-300 transition-colors dark:border-transparent dark:bg-orange-600 dark:text-white dark:hover:border-orange-500/80 dark:focus:bg-orange-700"
+        className="ml-2 border-orange-400 bg-orange-300 transition-colors dark:border-transparent dark:bg-orange-600 dark:highlight-white/30 dark:text-white dark:hover:border-orange-500/80 dark:focus:bg-orange-700"
         onClick={async () => {
           const userInput = await this.showPrompt(
             'You are about to reset the current configuration to the default blank configuration.\nAll unsaved changes will be lost.\n\nType "reset" to confirm:',
@@ -541,26 +551,25 @@ class HardwareConfigView extends Component<
     );
   }
 
-  renderSaveButton() {
-    const { viewMode, editedConfigText, robotInstance, saveFilename } =
-      this.state;
+  renderSaveButton(isOpModeRunning: boolean) {
+    const { viewMode, editedConfigText, robotInstance, saveFilename } = this.state;
     const { hardwareConfigs, writeHardwareConfig } = this.props;
 
     const trimmedSaveFilename = saveFilename.trim();
+    const filenameIsValid = /^[a-zA-Z0-9_-]+$/.test(trimmedSaveFilename);
+
     const config = hardwareConfigs.find((c) => c.name === trimmedSaveFilename);
     const isReadOnly = config ? config.readOnly : false;
 
     let validate: string[] = [];
-    let xmlWellFormed = true;
-    let xmlParseMessage: string | undefined;
 
     if (viewMode === 'gui') {
       validate = robotInstance.validate();
     } else {
       const check = this.isValidXml(editedConfigText);
-      xmlWellFormed = check.ok;
-      xmlParseMessage = check.message;
-      if (xmlWellFormed) {
+      if (!check.ok) {
+        validate = [`XML is not well-formed: ${check.message ?? 'unknown error'}`];
+      } else {
         try {
           const tempRobot = new Robot();
           tempRobot.fromXml(editedConfigText);
@@ -568,60 +577,59 @@ class HardwareConfigView extends Component<
         } catch {
           validate = ['Robot.fromXml failed to parse the document.'];
         }
-      } else {
-        validate = [
-          `XML is not well-formed: ${xmlParseMessage ?? 'unknown error'}`,
-        ];
       }
     }
 
-    const isInvalid =
-      !trimmedSaveFilename ||
-      trimmedSaveFilename === '<No Config Set>' ||
-      isReadOnly ||
-      validate.length !== 0;
+    const canSaveNormally =
+      !isOpModeRunning &&
+      trimmedSaveFilename !== '' &&
+      trimmedSaveFilename !== '<No Config Set>' &&
+      filenameIsValid &&
+      !isReadOnly &&
+      validate.length === 0;
 
-    const canSave = !isInvalid;
+    const canForceSave =
+      !isOpModeRunning &&
+      trimmedSaveFilename !== '' &&
+      trimmedSaveFilename !== '<No Config Set>' &&
+      !isReadOnly;
+
+    const canClick = canSaveNormally || canForceSave;
+
     const xmlContentToSave =
       viewMode === 'gui' ? robotInstance.toString() : editedConfigText;
 
+    const buttonClass = canSaveNormally
+      ? 'border-green-400 bg-green-300 dark:border-transparent dark:bg-green-600 dark:highlight-white/30 dark:text-white dark:hover:border-green-400/80 dark:focus:bg-green-700'
+      : 'border-red-400 bg-red-300 dark:border-transparent dark:bg-red-600 dark:highlight-white/30 dark:text-white dark:hover:border-red-500/80 dark:focus:bg-red-700';
+
     return (
       <ActionButton
-        className={`${
-          canSave
-            ? 'border-green-400 bg-green-300 dark:border-transparent dark:bg-green-600 dark:text-white dark:hover:border-green-400/80 dark:focus:bg-green-700'
-            : 'border-red-400 bg-red-300 dark:border-transparent dark:bg-red-600 dark:text-white dark:hover:border-red-500/80 dark:focus:bg-red-700'
-        }`}
+        className={buttonClass}
+        disabled={!canClick}
         onClick={async () => {
-          if (!canSave) {
-            if (
-              !trimmedSaveFilename ||
-              trimmedSaveFilename === '<No Config Set>'
-            ) {
-              await this.showAlert('Please enter a filename to save changes.');
-            } else if (isReadOnly) {
-              await this.showAlert(
-                'This filename is read-only. Please enter a new filename to save.',
-              );
-            } else if (validate.length !== 0) {
-              const userInput = await this.showPrompt(
-                'There are validation errors:\n' +
-                  validate.join('\n') +
-                  '\n\nType "save" to save anyway:',
-              );
-              if (userInput?.toLowerCase() === 'save') {
-                writeHardwareConfig(trimmedSaveFilename, xmlContentToSave);
-                this.setState({
-                  selectedHardwareConfig: trimmedSaveFilename,
-                  saveFilename: trimmedSaveFilename,
-                });
-                await this.showAlert('Config Saved!');
-              } else {
-                await this.showAlert('Save cancelled.');
-              }
+          if (!filenameIsValid) {
+            const userInput = await this.showPrompt(
+              'Filename may only contain letters, numbers, dashes (-), and underscores (_).\n\nType "save" to save anyway:',
+            );
+            if (userInput?.toLowerCase() !== 'save') {
+              await this.showAlert('Save cancelled.');
+              return;
             }
-            return;
           }
+
+          if (validate.length !== 0) {
+            const userInput = await this.showPrompt(
+              'There are validation errors:\n' +
+                validate.join('\n') +
+                '\n\nType "save" to save anyway:',
+            );
+            if (userInput?.toLowerCase() !== 'save') {
+              await this.showAlert('Save cancelled.');
+              return;
+            }
+          }
+
           writeHardwareConfig(trimmedSaveFilename, xmlContentToSave);
           this.setState({
             selectedHardwareConfig: trimmedSaveFilename,
@@ -635,7 +643,7 @@ class HardwareConfigView extends Component<
     );
   }
 
-  renderDeleteButton() {
+  renderDeleteButton(isOpModeRunning: boolean) {
     const { selectedHardwareConfig } = this.state;
     const { hardwareConfigs } = this.props;
     const config = hardwareConfigs.find(
@@ -644,7 +652,7 @@ class HardwareConfigView extends Component<
     const isReadOnly = config ? config.readOnly : false;
     return (
       <ActionButton
-        className="ml-2 border-red-400 bg-red-300 transition-colors dark:border-transparent dark:bg-red-600 dark:text-white dark:hover:border-red-500/80 dark:focus:bg-red-700"
+        className="ml-2 border-red-400 bg-red-300 transition-colors dark:border-transparent dark:bg-red-600 dark:highlight-white/30 dark:text-white dark:hover:border-red-500/80 dark:focus:bg-red-700"
         onClick={async () => {
           if (
             !selectedHardwareConfig ||
@@ -669,6 +677,7 @@ class HardwareConfigView extends Component<
           }
         }}
         disabled={
+          isOpModeRunning ||
           !this.state.selectedHardwareConfig ||
           this.state.selectedHardwareConfig === '<No Config Set>' ||
           isReadOnly
@@ -679,13 +688,15 @@ class HardwareConfigView extends Component<
     );
   }
 
-  renderEditor() {
+  renderEditor(isOpModeRunning: boolean) {
     const { hardwareConfigs } = this.props;
     const { selectedHardwareConfig, viewMode } = this.state;
     const config = hardwareConfigs.find(
       (c) => c.name === selectedHardwareConfig,
     );
     const isReadOnly = config ? config.readOnly : false;
+    const hasUnsavedChanges = this.hasUnsavedChanges();
+
     return (
       <div className="mt-4 rounded bg-gray-100 p-3 text-sm dark:bg-slate-800 dark:text-slate-200">
         <div className="mb-2 flex items-center justify-between">
@@ -693,7 +704,7 @@ class HardwareConfigView extends Component<
             <span
               className={`
                 text-500 ml-1 inline-block w-3
-                ${this.hasUnsavedChanges() ? 'opacity-100' : 'opacity-0'}
+                ${hasUnsavedChanges ? 'opacity-100' : 'opacity-0'}
               `}
             >
               *
@@ -706,7 +717,7 @@ class HardwareConfigView extends Component<
               ? 'Edit Configuration (XML)'
               : 'Edit Configuration (GUI)'}
             <span className="font-normal">
-              {this.renderRevertButton()}
+              {this.renderRevertButton(hasUnsavedChanges)}
               {this.renderResetToDefaultButton()}
             </span>
           </h4>
@@ -718,7 +729,7 @@ class HardwareConfigView extends Component<
               onChange={(e) => this.setState({ saveFilename: e.target.value })}
               className="mr-2 rounded-md border py-1 px-2 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
             />
-            {this.renderSaveButton()}
+            {this.renderSaveButton(isOpModeRunning)}
             <ActionButton
               onClick={this.toggleViewMode}
               className="
@@ -754,7 +765,7 @@ class HardwareConfigView extends Component<
   }
 
   render() {
-    const { available, activeOpModeStatus, hardwareConfigs, activeOpMode } =
+    const { available, hardwareConfigs } =
       this.props;
     if (!available) {
       return (
@@ -770,6 +781,8 @@ class HardwareConfigView extends Component<
         </BaseView>
       );
     }
+
+    const isOpModeRunning = this.isOpModeRunning();
 
     return (
       <BaseView isUnlocked={this.props.isUnlocked}>
@@ -805,10 +818,6 @@ class HardwareConfigView extends Component<
                 disabled:shadow-none dark:border-slate-500/80 dark:bg-slate-700 dark:text-slate-200
               `}
               value={this.state.selectedHardwareConfig}
-              disabled={
-                activeOpModeStatus !== OpModeStatus.STOPPED &&
-                activeOpMode !== STOP_OP_MODE_TAG
-              }
               onChange={this.onChange}
             >
               {hardwareConfigs.length === 0 ? (
@@ -830,12 +839,12 @@ class HardwareConfigView extends Component<
               )}
             </select>
             <div className="flex space-x-1">
-              {this.renderActivateButton()}
-              {this.renderDeleteButton()}
+              {this.renderActivateButton(isOpModeRunning)}
+              {this.renderDeleteButton(isOpModeRunning)}
             </div>
           </div>
 
-          {this.renderEditor()}
+          {this.renderEditor(isOpModeRunning)}
         </BaseViewBody>
 
         {this.state.dialog?.type === 'alert' && (
