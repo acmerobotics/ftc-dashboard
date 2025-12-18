@@ -927,7 +927,8 @@ export class Robot {
     const getAttr = (el: Element, name: string, def = ''): string =>
       el.getAttribute(name) ?? def;
 
-    const lynxUsbDeviceElement = robotElement.getElementsByTagName('LynxUsbDevice')[0];
+    const lynxUsbDeviceElement =
+      robotElement.getElementsByTagName('LynxUsbDevice')[0];
     if (lynxUsbDeviceElement) {
       this.name = getAttr(lynxUsbDeviceElement, 'name') || this.name;
 
@@ -952,7 +953,9 @@ export class Robot {
           if (deviceEl.nodeType !== Node.ELEMENT_NODE) continue;
           const tag = deviceEl.tagName;
           const category = Object.keys(typeCollections).find((k) =>
-            Object.values(typeCollections[k as keyof typeof typeCollections]).includes(tag),
+            Object.values(
+              typeCollections[k as keyof typeof typeCollections],
+            ).includes(tag),
           ) as keyof typeof typeCollections | undefined;
 
           let dev: Device;
@@ -979,24 +982,35 @@ export class Robot {
             }
             dev.name = getAttr(deviceEl, 'name', dev.name);
             if (deviceEl.hasAttribute('port'))
-              dev.port = parseInt(getAttr(deviceEl, 'port', String(dev.port || 0)), 10);
+              dev.port = parseInt(
+                getAttr(deviceEl, 'port', String(dev.port || 0)),
+                10,
+              );
             dev.key = tag;
             dev.type = tag;
             dev.rawInnerText = deviceEl.textContent?.trim() || '';
 
             if (dev instanceof I2c && deviceEl.hasAttribute('bus'))
-              (dev as I2c).bus = parseInt(getAttr(deviceEl, 'bus', String((dev as I2c).bus || 0)), 10);
+              (dev as I2c).bus = parseInt(
+                getAttr(deviceEl, 'bus', String((dev as I2c).bus || 0)),
+                10,
+              );
 
             if (category === 'Motor') hub.motors.push(dev as Motor);
             else if (category === 'Servo') hub.servos.push(dev as Servo);
-            else if (category === 'Analog') hub.analogInputDevices.push(dev as Analog);
-            else if (category === 'Digital') hub.digitalDevices.push(dev as Digital);
+            else if (category === 'Analog')
+              hub.analogInputDevices.push(dev as Analog);
+            else if (category === 'Digital')
+              hub.digitalDevices.push(dev as Digital);
             else if (category === 'I2c') hub.i2cDevices.push(dev as I2c);
           } else {
             const custom = new CustomDevice(tag);
             custom.name = getAttr(deviceEl, 'name', 'Custom');
             if (deviceEl.hasAttribute('port'))
-              custom.port = parseInt(getAttr(deviceEl, 'port', String(custom.port || 0)), 10);
+              custom.port = parseInt(
+                getAttr(deviceEl, 'port', String(custom.port || 0)),
+                10,
+              );
             custom.key = tag;
             custom.type = tag;
             custom.rawInnerText = deviceEl.textContent?.trim() || '';
@@ -1294,7 +1308,9 @@ export class Robot {
       for (const port in portMap) {
         if (portMap[port].length > 1) {
           errors.push(
-            `Duplicate ${typeName} port ${port} in hub "${hubName}": ${portMap[port].join(', ')}`,
+            `Duplicate ${typeName} port ${port} in hub "${hubName}": ${portMap[
+              port
+            ].join(', ')}`,
           );
         }
       }
@@ -1323,7 +1339,9 @@ export class Robot {
     const checkUnexpectedInnerText = (element: any, typeName: string) => {
       if (element.rawInnerText && element.rawInnerText.trim() !== '') {
         errors.push(
-          `${typeName} "${element.name || '(unnamed)'}" has unexpected inner text: "${element.rawInnerText.trim()}"`
+          `${typeName} "${
+            element.name || '(unnamed)'
+          }" has unexpected inner text: "${element.rawInnerText.trim()}"`,
         );
       }
     };
@@ -1333,12 +1351,18 @@ export class Robot {
     hubs.forEach((hub) => {
       if (!hub.name) errors.push(`Hub of type ${hub.type} has an empty name.`);
       if (hub instanceof ControlHub && hub.port !== 173) {
-        errors.push(`Control Hub "${hub.name}" must have port 173, currently ${hub.port}.`);
+        errors.push(
+          `Control Hub "${hub.name}" must have port 173, currently ${hub.port}.`,
+        );
       }
       if (!isInt(hub.port)) {
-        errors.push(`Hub "${hub.name}" port must be an integer, currently ${hub.port}.`);
+        errors.push(
+          `Hub "${hub.name}" port must be an integer, currently ${hub.port}.`,
+        );
       } else if (!(hub instanceof ControlHub) && !inRange(hub.port, 0, 255)) {
-        errors.push(`Hub "${hub.name}" port ${hub.port} is out of range (0-255).`);
+        errors.push(
+          `Hub "${hub.name}" port ${hub.port} is out of range (0-255).`,
+        );
       }
       if (!usedHubPorts[hub.port]) usedHubPorts[hub.port] = [];
       usedHubPorts[hub.port].push(hub.name || '(unnamed)');
@@ -1436,7 +1460,9 @@ export class Robot {
 
     for (const p in usedHubPorts) {
       if (usedHubPorts[p].length > 1) {
-        errors.push(`Duplicate hub port ${p} used by hubs: ${usedHubPorts[p].join(', ')}`);
+        errors.push(
+          `Duplicate hub port ${p} used by hubs: ${usedHubPorts[p].join(', ')}`,
+        );
       }
     }
 
@@ -1445,17 +1471,26 @@ export class Robot {
       if (d instanceof Custom) {
         if (!d.type) errors.push(`Custom hub "${d.name}" has empty type.`);
         d.attributes.forEach((attr, idx) => {
-          if (!attr.key) errors.push(`Attribute #${idx + 1} in custom hub "${d.name}" has empty key.`);
+          if (!attr.key)
+            errors.push(
+              `Attribute #${idx + 1} in custom hub "${d.name}" has empty key.`,
+            );
           checkUnexpectedInnerText(attr, `Attribute #${idx + 1}`);
         });
       }
       if (d instanceof EthernetDevice) {
-        if (!d.serialNumber) errors.push(`Ethernet device "${d.name}" has empty serial number.`);
-        if (!d.ipAddress) errors.push(`Ethernet device "${d.name}" has empty IP address.`);
+        if (!d.serialNumber)
+          errors.push(`Ethernet device "${d.name}" has empty serial number.`);
+        if (!d.ipAddress)
+          errors.push(`Ethernet device "${d.name}" has empty IP address.`);
         if (!isInt(d.port)) {
-          errors.push(`Ethernet device "${d.name}" has non-integer port (${d.port}).`);
+          errors.push(
+            `Ethernet device "${d.name}" has non-integer port (${d.port}).`,
+          );
         } else if (!inRange(d.port, 0, 65535)) {
-          errors.push(`Ethernet device "${d.name}" has port ${d.port} outside allowed range 0-65535.`);
+          errors.push(
+            `Ethernet device "${d.name}" has port ${d.port} outside allowed range 0-65535.`,
+          );
         }
       }
       checkUnexpectedInnerText(d, 'Device');
@@ -1464,4 +1499,3 @@ export class Robot {
     return errors;
   }
 }
-

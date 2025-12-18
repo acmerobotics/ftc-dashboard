@@ -493,7 +493,7 @@ class HardwareConfigView extends Component<
     const originalText = config ? config.xmlContent : '';
     return (
       <ActionButton
-        className="ml-2 border-yellow-400 bg-yellow-300 transition-colors dark:border-transparent dark:bg-yellow-600 dark:highlight-white/30 dark:text-white dark:hover:border-yellow-500/80 dark:focus:bg-yellow-700"
+        className="ml-2 border-yellow-400 bg-yellow-300 transition-colors dark:border-transparent dark:bg-yellow-600 dark:text-white dark:highlight-white/30 dark:hover:border-yellow-500/80 dark:focus:bg-yellow-700"
         onClick={async () => {
           if (
             !selectedHardwareConfig ||
@@ -528,7 +528,7 @@ class HardwareConfigView extends Component<
   renderResetToDefaultButton() {
     return (
       <ActionButton
-        className="ml-2 border-orange-400 bg-orange-300 transition-colors dark:border-transparent dark:bg-orange-600 dark:highlight-white/30 dark:text-white dark:hover:border-orange-500/80 dark:focus:bg-orange-700"
+        className="ml-2 border-orange-400 bg-orange-300 transition-colors dark:border-transparent dark:bg-orange-600 dark:text-white dark:highlight-white/30 dark:hover:border-orange-500/80 dark:focus:bg-orange-700"
         onClick={async () => {
           const userInput = await this.showPrompt(
             'You are about to reset the current configuration to the default blank configuration.\nAll unsaved changes will be lost.\n\nType "reset" to confirm:',
@@ -552,7 +552,8 @@ class HardwareConfigView extends Component<
   }
 
   renderSaveButton(isOpModeRunning: boolean) {
-    const { viewMode, editedConfigText, robotInstance, saveFilename } = this.state;
+    const { viewMode, editedConfigText, robotInstance, saveFilename } =
+      this.state;
     const { hardwareConfigs, writeHardwareConfig } = this.props;
 
     const trimmedSaveFilename = saveFilename.trim();
@@ -568,7 +569,9 @@ class HardwareConfigView extends Component<
     } else {
       const check = this.isValidXml(editedConfigText);
       if (!check.ok) {
-        validate = [`XML is not well-formed: ${check.message ?? 'unknown error'}`];
+        validate = [
+          `XML is not well-formed: ${check.message ?? 'unknown error'}`,
+        ];
       } else {
         try {
           const tempRobot = new Robot();
@@ -652,7 +655,7 @@ class HardwareConfigView extends Component<
     const isReadOnly = config ? config.readOnly : false;
     return (
       <ActionButton
-        className="ml-2 border-red-400 bg-red-300 transition-colors dark:border-transparent dark:bg-red-600 dark:highlight-white/30 dark:text-white dark:hover:border-red-500/80 dark:focus:bg-red-700"
+        className="ml-2 border-red-400 bg-red-300 transition-colors dark:border-transparent dark:bg-red-600 dark:text-white dark:highlight-white/30 dark:hover:border-red-500/80 dark:focus:bg-red-700"
         onClick={async () => {
           if (
             !selectedHardwareConfig ||
@@ -765,8 +768,7 @@ class HardwareConfigView extends Component<
   }
 
   render() {
-    const { available, hardwareConfigs } =
-      this.props;
+    const { available, hardwareConfigs } = this.props;
     if (!available) {
       return (
         <BaseView isUnlocked={this.props.isUnlocked}>
