@@ -12,6 +12,7 @@ import { ReactComponent as WidgetIcon } from '@/assets/icons/widgets.svg';
 import { ReactComponent as ListIcon } from '@/assets/icons/list.svg';
 import { ReactComponent as HardwareIcon } from '@/assets/icons/hardware.svg';
 import { ReactComponent as DeleteSweepIcon } from '@/assets/icons/delete_sweep.svg';
+import { ReactComponent as ExclamationIcon } from '@/assets/icons/exclamation.svg';
 
 type ViewPickerProps = {
   isOpen: boolean;
@@ -70,14 +71,14 @@ const listContent = [
   {
     title: 'OpMode View',
     view: ConfigurableView.OPMODE_VIEW,
-    icon: <WidgetIcon className="h-6 w-6" />,
+    icon: <WidgetIcon className="h-6 w-6 text-white" />,
     customStyles: 'focus:ring-red-600',
     iconBg: 'bg-red-500',
   },
   {
     title: 'Field View',
     view: ConfigurableView.FIELD_VIEW,
-    icon: <ApiIcon className="h-7 w-7 rotate-45 transform" />,
+    icon: <ApiIcon className="h-7 w-7 rotate-45 transform text-white" />,
     customStyles: 'focus:ring-blue-600',
     iconBg: 'bg-blue-500',
   },
@@ -91,56 +92,56 @@ const listContent = [
   {
     title: 'Config View',
     view: ConfigurableView.CONFIG_VIEW,
-    icon: <SettingsIcon className="h-6 w-6" />,
+    icon: <SettingsIcon className="h-6 w-6 text-white" />,
     customStyles: 'focus:ring-orange-600',
     iconBg: 'bg-orange-500',
   },
   {
     title: 'Telemetry View',
     view: ConfigurableView.TELEMETRY_VIEW,
-    icon: <ListIcon className="h-7 w-7" />,
+    icon: <ListIcon className="h-7 w-7 text-white" />,
     customStyles: 'focus:ring-yellow-600',
     iconBg: 'bg-yellow-500',
   },
   {
     title: 'Logging View',
     view: ConfigurableView.LOGGING_VIEW,
-    icon: <SubjectIcon className="h-6 w-6" />,
+    icon: <SubjectIcon className="h-6 w-6 text-white" />,
     customStyles: 'focus:ring-ping-600',
     iconBg: 'bg-pink-500',
   },
   {
     title: 'Camera View',
     view: ConfigurableView.CAMERA_VIEW,
-    icon: <CameraIcon className="h-5 w-5" />,
+    icon: <CameraIcon className="h-5 w-5 text-white" />,
     customStyles: 'focus:ring-purple-600',
     iconBg: 'bg-purple-500',
   },
   {
     title: 'Hardware View',
     view: ConfigurableView.HARDWARE_VIEW,
-    icon: <HardwareIcon className="h-6 w-6" />,
+    icon: <HardwareIcon className="h-6 w-6 text-white" />,
     customStyles: 'focus:ring-indigo-600',
     iconBg: 'bg-indigo-500',
   },
   {
     title: 'Recorder View',
     view: ConfigurableView.RECORDER_VIEW,
-    icon: <CameraIcon className="h-6 w-6" />,
+    icon: <CameraIcon className="h-6 w-6 text-white" />,
     customStyles: 'focus:ring-green-600',
     iconBg: 'bg-green-500',
   },
   {
     title: 'Hardware Config View',
     view: ConfigurableView.HARDWARE_CONFIG_VIEW,
-    icon: <SettingsIcon className="h-6 w-6" />,
+    icon: <SettingsIcon className="h-6 w-6 text-white" />,
     customStyles: 'focus:ring-teal-600',
     iconBg: 'bg-teal-500',
   },
   {
     title: 'Error View',
     view: ConfigurableView.ERROR_VIEW,
-    icon: <DeleteSweepIcon className="h-5 w-5" />,
+    icon: <ExclamationIcon className="h-5 w-5 text-white" />,
     customStyles: 'focus:ring-red-600',
     iconBg: 'bg-red-500',
   },
