@@ -101,7 +101,8 @@ export const i2cType = {
   SparkFunLEDStick: 'QWIIC_LED_STICK',
   SparkFunOTOS: 'SparkFunOTOS',
   LynxEmbeddedIMU: 'LynxEmbeddedIMU',
-  goBILDAPinpointRR: 'goBILDAPinpointRR',
+  goBILDAPinpoint: 'goBILDAPinpoint',
+  SRSHub: 'SRSHub',
 };
 
 const typeCollections = {
@@ -425,6 +426,8 @@ export class Webcam extends Device {
 }
 
 export class CustomDevice extends Device {
+  public attributes: Array<{ key: string; val: string }> = [];
+
   constructor(public key: string = 'Custom') {
     super();
     this.key = key;
@@ -432,10 +435,21 @@ export class CustomDevice extends Device {
     this.name = 'Custom Device';
   }
 
+  private getNextAttributeKey(): string {
+    const existing = this.attributes
+      .map((a) => a.key)
+      .filter((k) => k.startsWith('attr'))
+      .map((k) => parseInt(k.replace('attr', ''), 10))
+      .filter((n) => !isNaN(n));
+    const next = existing.length > 0 ? Math.max(...existing) + 1 : 1;
+    return `attr${next}`;
+  }
+
   public override toString() {
-    return `<${this.key} name="${this.name}" port="${
-      isNaN(this.port) ? 0 : this.port
-    }" />`;
+    const attrStr = this.attributes
+      .map(({ key, val }) => `${key}="${val}"`)
+      .join(' ');
+    return `<${this.key} ${attrStr} />`;
   }
 
   public override renderAsGui(
@@ -451,16 +465,6 @@ export class CustomDevice extends Device {
         {onDelete && <DeleteButton onClick={onDelete} />}
         <div className="space-y-2">
           <div>
-            <label className="mr-1 text-sm">Name:</label>
-            <Input
-              value={this.name}
-              onChange={(v) => {
-                this.name = v;
-                configChangeCallback();
-              }}
-            />
-          </div>
-          <div>
             <label className="mr-1 text-sm">Type:</label>
             <Input
               value={this.type}
@@ -471,17 +475,48 @@ export class CustomDevice extends Device {
               }}
             />
           </div>
-          <div>
-            <label className="mr-1 text-sm">Port:</label>
-            <Input
-              type="number"
-              value={isNaN(this.port) ? '' : this.port}
-              onChange={(v) => {
-                this.port = parseInt(v || '0', 10);
-                configChangeCallback();
-              }}
-            />
-          </div>
+
+          {this.attributes.map(({ key, val }, idx) => (
+            <div key={idx} className="flex items-center space-x-2">
+              <Input
+                value={key}
+                onChange={(newKey) => {
+                  this.attributes[idx].key = newKey;
+                  configChangeCallback();
+                }}
+              />
+              <Input
+                value={val}
+                onChange={(newVal) => {
+                  this.attributes[idx].val = newVal;
+                  if (key === 'name') {
+                    this.name = newVal;
+                  }
+                  configChangeCallback();
+                }}
+              />
+              <button
+                className="flex h-6 w-6 items-center justify-center rounded-md border border-red-400 bg-red-200 text-red-600"
+                onClick={() => {
+                  this.attributes.splice(idx, 1);
+                  configChangeCallback();
+                }}
+              >
+                <RemoveCircleOutline className="h-5 w-5 fill-red-800" />
+              </button>
+            </div>
+          ))}
+
+          <button
+            className="flex h-6 w-6 items-center justify-center rounded-md border border-green-600 bg-green-200 text-green-600"
+            onClick={() => {
+              const nextKey = this.getNextAttributeKey();
+              this.attributes.push({ key: nextKey, val: '' });
+              configChangeCallback();
+            }}
+          >
+            +
+          </button>
         </div>
       </div>
     );
@@ -1005,15 +1040,22 @@ export class Robot {
             else if (category === 'I2c') hub.i2cDevices.push(dev as I2c);
           } else {
             const custom = new CustomDevice(tag);
-            custom.name = getAttr(deviceEl, 'name', 'Custom');
-            if (deviceEl.hasAttribute('port'))
-              custom.port = parseInt(
-                getAttr(deviceEl, 'port', String(custom.port || 0)),
-                10,
-              );
             custom.key = tag;
             custom.type = tag;
             custom.rawInnerText = deviceEl.textContent?.trim() || '';
+
+            for (const attr of Array.from(deviceEl.attributes)) {
+              custom.attributes.push({
+                key: attr.name || 'unknown',
+                val: attr.value,
+              });
+              if (attr.name === 'name') {
+                custom.name = attr.value;
+              } else if (attr.name === 'port') {
+                const p = parseInt(attr.value, 10);
+                if (!isNaN(p)) custom.port = p;
+              }
+            }
             hub.customDevices.push(custom);
           }
         }
@@ -1374,7 +1416,6 @@ export class Robot {
         [hub.servos, 'Servo'],
         [hub.digitalDevices, 'Digital'],
         [hub.analogInputDevices, 'Analog'],
-        [hub.i2cDevices, 'I2C'],
       ];
 
       for (const [group, typeName] of deviceGroups) {
@@ -1382,19 +1423,6 @@ export class Robot {
         checkDuplicateNames(group, typeName, hub.name);
         group.forEach((d) => checkUnexpectedInnerText(d, typeName));
       }
-
-      hub.customDevices.forEach((d) => {
-        if (!d.name)
-          errors.push(`Custom device in hub "${hub.name}" has empty name.`);
-        if (!d.key)
-          errors.push(
-            `Custom device "${d.name}" in hub "${hub.name}" has empty key.`,
-          );
-        if (!d.type)
-          errors.push(
-            `Custom device "${d.name}" in hub "${hub.name}" has empty type.`,
-          );
-      });
 
       [
         ...hub.motors,
