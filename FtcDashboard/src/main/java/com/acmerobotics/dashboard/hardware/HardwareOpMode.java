@@ -12,6 +12,7 @@ import com.acmerobotics.dashboard.config.variable.VariableType;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareDevice;
@@ -113,6 +114,7 @@ public class HardwareOpMode extends OpMode {
         initializeMotorVariables(hardwareRoot);
         initializeServoVariables(hardwareRoot);
         initializeCRServoVariables(hardwareRoot);
+        initializeColorSensorVariables(hardwareRoot);
     }
 
     /**
@@ -135,6 +137,7 @@ public class HardwareOpMode extends OpMode {
      */
     private void updateHardware(CustomVariable hardwareRoot) {
         updateMotorStateVariables(hardwareRoot);
+        updateColorSensorStateVariables(hardwareRoot);
     }
 
     /* -------------------- Motor Handling --------------------- */
@@ -431,6 +434,72 @@ public class HardwareOpMode extends OpMode {
         ConfigVariable<?> runModeVar = config.getVariable("Power");
         if (runModeVar != null) {
             servo.setPower((Double) runModeVar.getValue());
+        }
+    }
+
+    /* -------------------- Color Sensor Handling --------------------- */
+    /**
+     * Discovers all Color Sensors in the hardware map and creates dashboard variables for them.
+     * Each sensor gets variables for RGB and port information.
+     *
+     * @param hardwareRoot the root variable container to add color sensor variables to
+     */
+    private void initializeColorSensorVariables(CustomVariable hardwareRoot) {
+        CustomVariable colorSensors = new CustomVariable();
+
+        for (ColorSensor colorSensor : hardwareMap.getAll(ColorSensor.class)) {
+            String deviceName = getDeviceName(colorSensor);
+            if (deviceName == null) continue;
+
+            colorSensors.putVariable(deviceName, createColorSensorVariable(colorSensor));
+        }
+
+        hardwareRoot.putVariable("Color Sensors", colorSensors);
+    }
+
+    /**
+     * Creates a complete dashboard variable structure for a single color sensor.
+     * Includes RGB and port information.
+     *
+     * @param colorSensor the color sensor to create variables for
+     * @return a CustomVariable containing Color Sensor-related dashboard controls and info
+     */
+    private CustomVariable createColorSensorVariable(ColorSensor colorSensor) {
+        CustomVariable colorSensorVar = new CustomVariable();
+        String hubType = extractHubType(colorSensor.getConnectionInfo());
+
+        colorSensorVar.putVariable("Red", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(colorSensor.red())));
+        colorSensorVar.putVariable("Green", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(colorSensor.red())));
+        colorSensorVar.putVariable("Blue", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(colorSensor.red())));
+
+        colorSensorVar.putVariable(hubType + " Port", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(colorSensor.getConnectionInfo())));
+
+        return colorSensorVar;
+    }
+
+    /**
+     * Updates the dashboard with current color sensor telemetry data.
+     * Refreshes color readings for all color sensors.
+     *
+     * @param hardwareRoot the root variable container to update with color sensor telemetry
+     */
+    private void updateColorSensorStateVariables(CustomVariable hardwareRoot) {
+        CustomVariable colorSensorsVar = (CustomVariable) hardwareRoot.getVariable("Color Sensors");
+        if (colorSensorsVar == null) return;
+
+        for (ColorSensor colorSensor : hardwareMap.getAll(ColorSensor.class)) {
+            String deviceName = getDeviceName(colorSensor);
+            if (deviceName == null) continue;
+
+            CustomVariable stateUpdate = new CustomVariable();
+            stateUpdate.putVariable("Red", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(colorSensor.red())));
+            stateUpdate.putVariable("Green", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(colorSensor.red())));
+            stateUpdate.putVariable("Blue", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(colorSensor.red())));
+
+            CustomVariable existingConfig = (CustomVariable) colorSensorsVar.getVariable(deviceName);
+            if (existingConfig != null) {
+                existingConfig.update(stateUpdate);
+            }
         }
     }
 
