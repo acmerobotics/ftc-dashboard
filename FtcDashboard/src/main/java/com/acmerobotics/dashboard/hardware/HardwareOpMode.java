@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareDevice;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 /**
@@ -476,6 +477,14 @@ public class HardwareOpMode extends OpMode {
         colorSensorVar.putVariable("Green", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(colorSensor.red())));
         colorSensorVar.putVariable("Blue", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(colorSensor.red())));
 
+        // Additional handling for preferred methods implemented by common sensors i.e. Rev V3
+        if (colorSensor instanceof NormalizedColorSensor) {
+            NormalizedColorSensor normColorSensor = (NormalizedColorSensor) colorSensor;
+            colorSensorVar.putVariable("Normalized Red", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(normColorSensor.getNormalizedColors().red)));
+            colorSensorVar.putVariable("Normalized Green", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(normColorSensor.getNormalizedColors().green)));
+            colorSensorVar.putVariable("Normalized Blue", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(normColorSensor.getNormalizedColors().blue)));
+        }
+
         colorSensorVar.putVariable(hubType + " Port", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(colorSensor.getConnectionInfo())));
 
         return colorSensorVar;
@@ -499,6 +508,14 @@ public class HardwareOpMode extends OpMode {
             stateUpdate.putVariable("Red", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(colorSensor.red())));
             stateUpdate.putVariable("Green", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(colorSensor.red())));
             stateUpdate.putVariable("Blue", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(colorSensor.red())));
+
+            // Additional handling for preferred methods implemented by common sensors i.e. Rev V3
+            if (colorSensor instanceof NormalizedColorSensor) {
+                NormalizedColorSensor normColorSensor = (NormalizedColorSensor) colorSensor;
+                stateUpdate.putVariable("Normalized Red", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(normColorSensor.getNormalizedColors().red)));
+                stateUpdate.putVariable("Normalized Green", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(normColorSensor.getNormalizedColors().green)));
+                stateUpdate.putVariable("Normalized Blue", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(normColorSensor.getNormalizedColors().blue)));
+            }
 
             CustomVariable existingConfig = (CustomVariable) colorSensorsVar.getVariable(deviceName);
             if (existingConfig != null) {
