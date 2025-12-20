@@ -487,7 +487,7 @@ public class HardwareOpMode extends OpMode {
             colorSensorVar.putVariable("Normalized Blue", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(reading.blue)));
         }
 
-        colorSensorVar.putVariable(hubType + " Port", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(colorSensor.getConnectionInfo())));
+        colorSensorVar.putVariable(hubType + " Port", createVariableFromValue(VariableType.READONLY_STRING, extractI2CPort(colorSensor.getConnectionInfo())));
 
         return colorSensorVar;
     }
@@ -563,6 +563,18 @@ public class HardwareOpMode extends OpMode {
                 break;
             }
         }
-        return numericPart.equals("173") ? "Control Hub" : "Expansion Hub " + numericPart;
+        return numericPart.startsWith("173") ? "Control Hub" : "Expansion Hub " + numericPart;
+    }
+
+    private String extractI2CPort(String connectionInfo) {
+        String trimmedString = connectionInfo.substring(connectionInfo.indexOf("bus"));
+        String numericPart = "";
+        for (int i = 0; i < trimmedString.length(); i++) {
+            if (Character.isDigit(trimmedString.charAt(i))) {
+                numericPart = trimmedString.substring(i);
+                break;
+            }
+        }
+        return numericPart.substring(0, 1);
     }
 }
