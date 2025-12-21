@@ -142,6 +142,7 @@ class BasicVariable extends React.Component<Props> {
                 valid={state.__valid}
                 validate={validateInt}
                 onChange={onChange}
+                showArrows={true}
                 onSave={onSave}
               />
               {this.renderBaselineValue()}
@@ -166,6 +167,7 @@ class BasicVariable extends React.Component<Props> {
                   valid={state.__valid}
                   validate={validateDouble}
                   onChange={onChange}
+                  showArrows={true}
                   onSave={onSave}
                 />
                 {this.renderBaselineValue()}

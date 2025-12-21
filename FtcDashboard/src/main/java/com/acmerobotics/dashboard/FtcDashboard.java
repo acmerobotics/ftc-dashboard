@@ -23,6 +23,7 @@ import com.acmerobotics.dashboard.message.redux.InitOpMode;
 import com.acmerobotics.dashboard.message.redux.ReceiveGamepadState;
 import com.acmerobotics.dashboard.message.redux.ReceiveHardwareConfigList;
 import com.acmerobotics.dashboard.message.redux.ReceiveImage;
+import com.acmerobotics.dashboard.message.redux.ReceiveLogcatErrors;
 import com.acmerobotics.dashboard.message.redux.ReceiveOpModeList;
 import com.acmerobotics.dashboard.message.redux.ReceiveRobotStatus;
 import com.acmerobotics.dashboard.message.redux.SetHardwareConfig;
@@ -48,9 +49,11 @@ import dalvik.system.DexFile;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoWSD;
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -221,6 +224,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private final Mutex<List<OpModeInfo>> opModeInfoList = new Mutex<>(new ArrayList<>());
 
     private ExecutorService gamepadWatchdogExecutor;
+    private ExecutorService logcatMonitorExecutor;
+    private LogcatMonitorRunnable logcatMonitorRunnable;
     private long lastGamepadTimestamp;
 
     private boolean webServerAttached;
@@ -306,6 +311,120 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                         hardwareConfigManager.getActiveConfig().getName()
                 ));
             });
+        }
+    }
+
+    private class LogcatMonitorRunnable implements Runnable {
+        private static final String OPMODE_MANAGER_TAG = "OpModeManager";
+        private volatile boolean running = true;
+
+        @Override
+        public void run() {
+            Process logcatProcess = null;
+            BufferedReader reader = null;
+            
+            try {
+                // Start logcat process filtering for OpModeManager tag
+                ProcessBuilder pb = new ProcessBuilder("logcat", "-s", OPMODE_MANAGER_TAG + ":*");
+                logcatProcess = pb.start();
+                reader = new BufferedReader(new InputStreamReader(logcatProcess.getInputStream()));
+                
+                String line;
+                List<ReceiveLogcatErrors.LogcatError> errorBuffer = new ArrayList<>();
+                
+                while (running && (line = reader.readLine()) != null) {
+                    try {
+                        // Parse logcat line format: timestamp PID TID level tag: message
+                        // Example: "01-15 10:30:45.123  1234  1234 E OpModeManager: Error message"
+                        ReceiveLogcatErrors.LogcatError error = parseLogcatLine(line);
+                        if (error != null) {
+                            errorBuffer.add(error);
+                            
+                            // Send errors in batches to avoid flooding
+                            if (errorBuffer.size() >= 10) {
+                                sendAll(new ReceiveLogcatErrors(new ArrayList<>(errorBuffer)));
+                                errorBuffer.clear();
+                            }
+                        }
+                    } catch (Exception e) {
+                        // Log parsing error but continue monitoring
+                        RobotLog.ww(TAG, "Failed to parse logcat line: " + line);
+                    }
+                    
+                    // Small delay to prevent excessive CPU usage
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+                }
+                
+                // Send any remaining errors
+                if (!errorBuffer.isEmpty()) {
+                    sendAll(new ReceiveLogcatErrors(errorBuffer));
+                }
+                
+            } catch (IOException e) {
+                RobotLog.ww(TAG, "Failed to start logcat monitoring: " + e.getMessage());
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (IOException e) {
+                        // Ignore
+                    }
+                }
+                if (logcatProcess != null) {
+                    logcatProcess.destroy();
+                }
+            }
+        }
+        
+        private ReceiveLogcatErrors.LogcatError parseLogcatLine(String line) {
+            try {
+                // Skip empty or invalid lines
+                if (line == null || line.trim().isEmpty()) {
+                    return null;
+                }
+                
+                // Look for log level indicators (E, W, I, D, V)
+                String[] parts = line.split("\\s+", 6);
+                if (parts.length < 6) {
+                    return null;
+                }
+                
+                // Extract components: timestamp, level, tag, message
+                String level = parts[4]; // Log level (E, W, I, etc.)
+                String tagAndMessage = parts[5];
+                
+                // Split tag and message at the colon
+                int colonIndex = tagAndMessage.indexOf(':');
+                if (colonIndex == -1) {
+                    return null;
+                }
+                
+                String tag = tagAndMessage.substring(0, colonIndex).trim();
+                String message = tagAndMessage.substring(colonIndex + 1).trim();
+                
+                // Only process OpModeManager messages
+                if (!OPMODE_MANAGER_TAG.equals(tag)) {
+                    return null;
+                }
+                
+                return new ReceiveLogcatErrors.LogcatError(
+                    System.currentTimeMillis(),
+                    level,
+                    tag,
+                    message
+                );
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        
+        public void stop() {
+            running = false;
         }
     }
 
@@ -948,6 +1067,10 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         gamepadWatchdogExecutor = ThreadPool.newSingleThreadExecutor("gamepad watchdog");
         gamepadWatchdogExecutor.submit(new GamepadWatchdogRunnable());
 
+        logcatMonitorExecutor = ThreadPool.newSingleThreadExecutor("logcat monitor");
+        logcatMonitorRunnable = new LogcatMonitorRunnable();
+        logcatMonitorExecutor.submit(logcatMonitorRunnable);
+
         core.enabled = true;
 
         updateStatusView();
@@ -961,6 +1084,13 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         setAutoEnable(false);
 
         gamepadWatchdogExecutor.shutdownNow();
+
+        if (logcatMonitorRunnable != null) {
+            logcatMonitorRunnable.stop();
+        }
+        if (logcatMonitorExecutor != null) {
+            logcatMonitorExecutor.shutdownNow();
+        }
 
         stopCameraStream();
 

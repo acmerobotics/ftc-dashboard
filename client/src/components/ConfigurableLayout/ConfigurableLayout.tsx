@@ -24,6 +24,7 @@ import CameraView from '@/components/views/CameraView';
 import OpModeView from '@/components/views/OpModeView';
 import LoggingView from '@/components/views/LoggingView/LoggingView';
 import HardwareConfigView from '@/components/views/HardwareConfigView';
+import ErrorView from '@/components/views/ErrorView/ErrorView';
 
 import RadialFab from './RadialFab/RadialFab';
 import RadialFabChild from './RadialFab/RadialFabChild';
@@ -35,10 +36,10 @@ import useUndoHistory from '@/hooks/useUndoHistory';
 import { ReactComponent as AddIcon } from '@/assets/icons/add.svg';
 import { ReactComponent as DeleteSweepIcon } from '@/assets/icons/delete_sweep.svg';
 import { ReactComponent as DeleteXIcon } from '@/assets/icons/delete_x.svg';
-import LockIconURL from '@/assets/icons/lock.svg';
+import { ReactComponent as LockIcon } from '@/assets/icons/lock.svg';
 import { ReactComponent as RemoveCircleIcon } from '@/assets/icons/remove_circle.svg';
 import { ReactComponent as RemoveCircleOutlineIcon } from '@/assets/icons/remove_circle_outline.svg';
-import CreateIconURL from '@/assets/icons/create.svg';
+import { ReactComponent as CreateIcon } from '@/assets/icons/create.svg';
 
 import { colors } from '@/hooks/useTheme';
 import { useTheme } from '@/hooks/useTheme';
@@ -72,6 +73,7 @@ const VIEW_MAP: { [key in ConfigurableView]: ReactElement } = {
   [ConfigurableView.OPMODE_VIEW]: <OpModeView />,
   [ConfigurableView.LOGGING_VIEW]: <LoggingView />,
   [ConfigurableView.HARDWARE_CONFIG_VIEW]: <HardwareConfigView />,
+  [ConfigurableView.ERROR_VIEW]: <ErrorView />,
 };
 
 const LOCAL_STORAGE_LAYOUT_KEY = 'configurableLayoutStorage';
@@ -600,7 +602,7 @@ export default function ConfigurableLayout() {
         isOpen={!isLayoutLocked}
         isShowing={!(isFabIdle && isLayoutLocked)}
         onClick={clickFAB}
-        icon={!isLayoutLocked ? LockIconURL : CreateIconURL}
+        icon={!isLayoutLocked ? <LockIcon className="h-8 w-8" /> : <CreateIcon className="h-7 w-7" />}
         className={`${
           !isLayoutLocked
             ? `bg-gray-500 shadow-md shadow-gray-900/30 hover:shadow-lg hover:shadow-gray-900/50 focus:ring-4 focus:ring-gray-600`
@@ -632,9 +634,9 @@ export default function ConfigurableLayout() {
           onClick={() => setIsInDeleteMode(!isInDeleteMode)}
         >
           {isInDeleteMode ? (
-            <RemoveCircleOutlineIcon className="h-5 w-5" />
+            <RemoveCircleOutlineIcon className="h-5 w-5 text-white" />
           ) : (
-            <RemoveCircleIcon className="h-5 w-5" />
+            <RemoveCircleIcon className="h-5 w-5 text-white" />
           )}
         </RadialFabChild>
         <RadialFabChild
@@ -646,7 +648,7 @@ export default function ConfigurableLayout() {
           toolTipText="Clear Layout"
           onClick={() => setGrid([])}
         >
-          <DeleteSweepIcon className="h-5 w-5" />
+          <DeleteSweepIcon className="h-5 w-5 text-white" />
         </RadialFabChild>
       </RadialFab>
       <ViewPicker
