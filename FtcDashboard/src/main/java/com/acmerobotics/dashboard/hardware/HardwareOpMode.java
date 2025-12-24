@@ -474,18 +474,7 @@ public class HardwareOpMode extends OpMode {
         CustomVariable colorSensorVar = new CustomVariable();
         String hubType = extractHubType(colorSensor.getConnectionInfo());
 
-        colorSensorVar.putVariable("Red", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(colorSensor.red())));
-        colorSensorVar.putVariable("Green", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(colorSensor.red())));
-        colorSensorVar.putVariable("Blue", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(colorSensor.red())));
-
-        // Additional handling for preferred methods implemented by common sensors i.e. Rev V3
-        if (colorSensor instanceof NormalizedColorSensor) {
-            NormalizedColorSensor normColorSensor = (NormalizedColorSensor) colorSensor;
-            NormalizedRGBA reading = normColorSensor.getNormalizedColors();
-            colorSensorVar.putVariable("Normalized Red", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(reading.red)));
-            colorSensorVar.putVariable("Normalized Green", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(reading.green)));
-            colorSensorVar.putVariable("Normalized Blue", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(reading.blue)));
-        }
+        getColorSensorState(colorSensor, colorSensorVar);
 
         colorSensorVar.putVariable(hubType + " Port", createVariableFromValue(VariableType.READONLY_STRING, extractI2CPort(colorSensor.getConnectionInfo())));
 
@@ -507,23 +496,27 @@ public class HardwareOpMode extends OpMode {
             if (deviceName == null) continue;
 
             CustomVariable stateUpdate = new CustomVariable();
-            stateUpdate.putVariable("Red", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(colorSensor.red())));
-            stateUpdate.putVariable("Green", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(colorSensor.red())));
-            stateUpdate.putVariable("Blue", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(colorSensor.red())));
-
-            // Additional handling for preferred methods implemented by common sensors i.e. Rev V3
-            if (colorSensor instanceof NormalizedColorSensor) {
-                NormalizedColorSensor normColorSensor = (NormalizedColorSensor) colorSensor;
-                NormalizedRGBA reading = normColorSensor.getNormalizedColors();
-                stateUpdate.putVariable("Normalized Red", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(reading.red)));
-                stateUpdate.putVariable("Normalized Green", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(reading.green)));
-                stateUpdate.putVariable("Normalized Blue", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(reading.blue)));
-            }
+            getColorSensorState(colorSensor, stateUpdate);
 
             CustomVariable existingConfig = (CustomVariable) colorSensorsVar.getVariable(deviceName);
             if (existingConfig != null) {
                 existingConfig.update(stateUpdate);
             }
+        }
+    }
+
+    private void getColorSensorState(ColorSensor colorSensor, CustomVariable stateVariable) {
+        stateVariable.putVariable("Red", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(colorSensor.red())));
+        stateVariable.putVariable("Green", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(colorSensor.green())));
+        stateVariable.putVariable("Blue", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(colorSensor.blue())));
+
+        // Additional handling for preferred methods implemented by common sensors i.e. Rev V3
+        if (colorSensor instanceof NormalizedColorSensor) {
+            NormalizedColorSensor normColorSensor = (NormalizedColorSensor) colorSensor;
+            NormalizedRGBA reading = normColorSensor.getNormalizedColors();
+            stateVariable.putVariable("Normalized Red", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(reading.red)));
+            stateVariable.putVariable("Normalized Green", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(reading.green)));
+            stateVariable.putVariable("Normalized Blue", createVariableFromValue(VariableType.READONLY_STRING, String.valueOf(reading.blue)));
         }
     }
 
