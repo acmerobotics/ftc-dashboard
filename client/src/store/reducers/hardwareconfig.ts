@@ -1,11 +1,11 @@
 import {
   RECEIVE_HARDWARE_CONFIG_LIST,
   ReceiveHardwareConfigListAction,
-  HardwareConfigState,
 } from '@/store/types';
+import { HardwareConfigState } from '@/store/types/hardwareconfig';
 
 const initialState: HardwareConfigState = {
-  hardwareConfigList: [],
+  hardwareConfigs: [],
   currentHardwareConfig: '',
 };
 
@@ -17,7 +17,7 @@ const hardwareConfigReducer = (
     case RECEIVE_HARDWARE_CONFIG_LIST: {
       return {
         ...state,
-        hardwareConfigList: action.hardwareConfigList,
+        hardwareConfigs: action.hardwareConfigs,
         currentHardwareConfig: action.currentHardwareConfig,
       };
     }

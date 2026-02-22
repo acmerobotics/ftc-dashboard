@@ -1,10 +1,10 @@
-import { ReactElement, cloneElement, Children, PropsWithChildren } from 'react';
+import { ReactElement, ReactNode, cloneElement, Children, PropsWithChildren } from 'react';
 
 type RadialFabProps = PropsWithChildren<{
   isOpen: boolean;
   isShowing: boolean;
 
-  icon: string;
+  icon: ReactNode;
 
   className: string;
 
@@ -62,7 +62,7 @@ const RadialFab = (props: RadialFabProps) => {
         onClick={props.onClick}
         className={props.className}
       >
-        <img src={props.icon} className="w-[1.95em] text-white" />
+        <div className="text-white">{props.icon}</div>
       </FloatingButton>
       {Children.map(props.children, (e) =>
         cloneElement(e as ReactElement, { isOpen: props.isOpen }),

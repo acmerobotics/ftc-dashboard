@@ -8,13 +8,16 @@ import OpModeView from '@/components/views/OpModeView';
 import CameraView from '@/components/views/CameraView';
 import GraphView from '@/components/views/GraphView/GraphView';
 import ConfigView from '@/components/views/ConfigView/ConfigView';
+import HardwareConfigView from '@/components/views/HardwareConfigView/HardwareConfigView';
 import TelemetryView from '@/components/views/TelemetryView';
 import FieldView from '@/components/views/FieldView/FieldView';
+import HardwareView from '@/components/views/HardwareView';
 
 const LayoutPreset = {
   DEFAULT: 'DEFAULT',
   FIELD: 'FIELD',
   GRAPH: 'GRAPH',
+  HARDWARE: 'HARDWARE',
   ORIGINAL: 'ORIGINAL',
   CONFIGURABLE: 'CONFIGURABLE',
 } as const;
@@ -78,6 +81,22 @@ const LAYOUT_DETAILS: { [key in Values<typeof LayoutPreset>]: Layout } = {
         </Tile>
         <Tile row={1} col={2}>
           <GraphView />
+        </Tile>
+      </TileGrid>
+    ),
+  },
+  [LayoutPreset.HARDWARE]: {
+    name: 'Hardware',
+    content: (
+      <TileGrid gridTemplate="110px 1fr / 65% 35%">
+        <Tile row="1 / span 2" col={1}>
+          <HardwareConfigView />
+        </Tile>
+        <Tile row={1} col={2}>
+          <OpModeView />
+        </Tile>
+        <Tile row={2} col={2}>
+          <HardwareView />
         </Tile>
       </TileGrid>
     ),

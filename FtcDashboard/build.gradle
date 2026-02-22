@@ -98,6 +98,7 @@ repositories {
 // Keep them in sync manually
 dependencies {
     api(project(":DashboardCore")) {
+        exclude module: "xmlpull"
         transitive = false
     }
 
