@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { GamepadState } from '@/store/types';
 import { KeyboardMapping } from '@/store/types/keyboardMapping';
 
@@ -15,6 +15,11 @@ export const useKeyboardControls = ({
   keyboardTarget,
   updateGamepadState,
 }: UseKeyboardControlsProps) => {
+  // Use ref so the effect closure always has the latest callback
+  // without needing to re-register listeners on every state change
+  const updateGamepadStateRef = useRef(updateGamepadState);
+  useEffect(() => { updateGamepadStateRef.current = updateGamepadState; }, [updateGamepadState]);
+
   useEffect(() => {
     if (!enabled) return;
 
@@ -101,7 +106,7 @@ export const useKeyboardControls = ({
       
       // Update the state only if this key actually controls something
       if (Object.keys(newState).length > 0) {
-        updateGamepadState(keyboardTarget, newState);
+        updateGamepadStateRef.current(keyboardTarget, newState);
       }
     };
 
@@ -111,6 +116,14 @@ export const useKeyboardControls = ({
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
+      // Release all held keys to prevent stuck controls
+      if (pressedKeys.size > 0) {
+        const keysToRelease = [...pressedKeys];
+        pressedKeys.clear();
+        for (const key of keysToRelease) {
+          updateAffectedControls(key);
+        }
+      }
     };
-  }, [enabled, mapping, keyboardTarget, updateGamepadState]);
+  }, [enabled, mapping, keyboardTarget]);
 };

@@ -64,7 +64,7 @@ export const DEFAULT_KEYBOARD_MAPPING: KeyboardMapping = {
   
   // Other controls
   start: 'Enter',
-  back: 'Escape',
+  back: 'Backquote',
   guide: 'KeyG',
   
   // Bumpers and triggers

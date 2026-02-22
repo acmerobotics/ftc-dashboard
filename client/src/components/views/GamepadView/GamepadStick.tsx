@@ -88,10 +88,6 @@ export const GamepadStick: React.FC<GamepadStickProps> = ({
     onStickMove(newX, newY);
   }, [onStickMove]);
 
-  const handleStickClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    updateStickPosition(event.clientX, event.clientY);
-  };
-
   const handleMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
     setIsDragging(true);
     updateStickPosition(event.clientX, event.clientY);
@@ -202,10 +198,9 @@ export const GamepadStick: React.FC<GamepadStickProps> = ({
               ? 'border-blue-500 dark:border-blue-400' 
               : 'hover:border-blue-400 dark:hover:border-blue-500'
           )}
-          onClick={handleStickClick}
           onMouseDown={handleMouseDown}
           onDoubleClick={handleDoubleClick}
-          title="Click to move, hold and drag to control, double-click to reset"
+          title="Hold and drag to control, double-click to reset"
         >
           {/* Knob */}
           <div

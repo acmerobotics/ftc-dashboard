@@ -22,7 +22,10 @@ type GamepadViewProps = BaseViewProps & BaseViewHeadingProps;
 
 const formatKeyName = (keyCode: string) => {
   if (!keyCode) return '';
-  return keyCode.replace(/^Key/, '').replace(/^Arrow/, '').replace(/Left$|Right$/, '');
+  if (keyCode === 'ShiftLeft') return 'LShift';
+  if (keyCode === 'ShiftRight') return 'RShift';
+  if (keyCode === 'Backquote') return '`';
+  return keyCode.replace(/^Key/, '').replace(/^Arrow/, '').replace(/^Digit/, '');
 };
 
 const GamepadView: React.FC<GamepadViewProps> = ({

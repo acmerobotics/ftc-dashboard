@@ -59,26 +59,32 @@ export const useGamepadState = () => {
 
   const updateGamepadState = useCallback((gamepadNum: 1 | 2, newState: Partial<GamepadState>) => {
     if (gamepadNum === 1) {
-      const updatedState = { ...gamepad1State, ...newState };
-      setGamepad1State(updatedState);
-      dispatch(sendGamepadState(updatedState, gamepad2State));
+      setGamepad1State(prev => {
+        const updatedState = { ...prev, ...newState };
+        gamepad1StateRef.current = updatedState;
+        dispatch(sendGamepadState(updatedState, gamepad2StateRef.current));
+        return updatedState;
+      });
     } else {
-      const updatedState = { ...gamepad2State, ...newState };
-      setGamepad2State(updatedState);
-      dispatch(sendGamepadState(gamepad1State, updatedState));
+      setGamepad2State(prev => {
+        const updatedState = { ...prev, ...newState };
+        gamepad2StateRef.current = updatedState;
+        dispatch(sendGamepadState(gamepad1StateRef.current, updatedState));
+        return updatedState;
+      });
     }
-  }, [gamepad1State, gamepad2State, dispatch]);
+  }, [dispatch]);
 
   const createButtonToggleHandler = useCallback((gamepadNum: 1 | 2, buttonKey: keyof GamepadState) => {
     return () => {
-      const currentGamepadState = gamepadNum === 1 ? gamepad1State : gamepad2State;
+      const currentGamepadState = gamepadNum === 1 ? gamepad1StateRef.current : gamepad2StateRef.current;
       const currentValue = currentGamepadState[buttonKey];
       const newValue = typeof currentValue === 'number' 
         ? (currentValue > 0 ? 0 : 1) 
         : !currentValue;
       updateGamepadState(gamepadNum, { [buttonKey]: newValue });
     };
-  }, [gamepad1State, gamepad2State, updateGamepadState]);
+  }, [updateGamepadState]);
 
   const resetGamepad = useCallback((gamepadNum: 1 | 2) => {
     const neutralState = createInitialGamepadState();
