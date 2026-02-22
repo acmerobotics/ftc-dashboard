@@ -46,9 +46,7 @@ export const useGamepadState = () => {
     gamepad2StateRef.current = gamepad2State;
   }, [gamepad2State]);
   
-  // Set up continuous gamepad state sending to keep the watchdog alive.
-  // Send updates every 100ms (well within the 500ms watchdog timeout).
-  // This interval runs regardless of state changes to maintain the connection heartbeat.
+  // Send state every 100ms to keep the RC watchdog alive
   useEffect(() => {
     const intervalId = setInterval(() => {
       dispatch(sendGamepadState(gamepad1StateRef.current, gamepad2StateRef.current));
