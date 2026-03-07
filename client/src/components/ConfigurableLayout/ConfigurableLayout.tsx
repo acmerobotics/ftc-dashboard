@@ -25,6 +25,7 @@ import OpModeView from '@/components/views/OpModeView';
 import LoggingView from '@/components/views/LoggingView/LoggingView';
 import HardwareConfigView from '@/components/views/HardwareConfigView/HardwareConfigView';
 import ErrorView from '@/components/views/ErrorView/ErrorView';
+import LimelightView from '@/components/views/LimelightView';
 
 import RadialFab from './RadialFab/RadialFab';
 import RadialFabChild from './RadialFab/RadialFabChild';
@@ -74,6 +75,7 @@ const VIEW_MAP: { [key in ConfigurableView]: ReactElement } = {
   [ConfigurableView.LOGGING_VIEW]: <LoggingView />,
   [ConfigurableView.HARDWARE_CONFIG_VIEW]: <HardwareConfigView />,
   [ConfigurableView.ERROR_VIEW]: <ErrorView />,
+  [ConfigurableView.LIMELIGHT_VIEW]: <LimelightView />,
 };
 
 const LOCAL_STORAGE_LAYOUT_KEY = 'configurableLayoutStorage';
