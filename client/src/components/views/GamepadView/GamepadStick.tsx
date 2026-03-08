@@ -15,6 +15,7 @@ interface GamepadStickProps {
   leftLabel?: string;
   rightLabel?: string;
   isPressed?: boolean;
+  buttonKeyBinding?: string;
   onStickButtonClick?: () => void;
   onStickButtonPress?: () => void;
   onStickButtonRelease?: () => void;
@@ -35,6 +36,7 @@ export const GamepadStick: React.FC<GamepadStickProps> = ({
   leftLabel,
   rightLabel,
   isPressed,
+  buttonKeyBinding,
   onStickButtonClick,
   onStickButtonPress,
   onStickButtonRelease,
@@ -255,10 +257,18 @@ export const GamepadStick: React.FC<GamepadStickProps> = ({
         onMouseUp={handleStickButtonMouseUp}
         onMouseLeave={handleStickButtonMouseLeave}
         onDoubleClick={handleStickButtonDoubleClick}
-        title="Hold or double-click to lock"
+        title={buttonKeyBinding ? `Key: ${buttonKeyBinding} | Hold or double-click to lock` : 'Hold or double-click to lock'}
       >
         {label}
       </button>
+      {buttonKeyBinding && (
+        <span className={clsx(
+          'text-[9px] opacity-70 leading-none',
+          isPressed ? 'text-blue-500 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'
+        )}>
+          {buttonKeyBinding}
+        </span>
+      )}
     </div>
   );
 };

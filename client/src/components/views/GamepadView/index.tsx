@@ -196,6 +196,7 @@ const GamepadView: React.FC<GamepadViewProps> = ({
                 updateGamepadState={updateGamepadState}
                 resetGamepad={resetGamepad}
                 anyHardwareConnected={anyHardwareConnected}
+                keyboardEnabled={keyboardMappingState.enabled}
               />
             </div>
             <div>
@@ -213,6 +214,7 @@ const GamepadView: React.FC<GamepadViewProps> = ({
                 updateGamepadState={updateGamepadState}
                 resetGamepad={resetGamepad}
                 anyHardwareConnected={anyHardwareConnected}
+                keyboardEnabled={keyboardMappingState.enabled}
               />
             </div>
           </div>
@@ -232,6 +234,7 @@ const GamepadView: React.FC<GamepadViewProps> = ({
             updateGamepadState={updateGamepadState}
             resetGamepad={resetGamepad}
             anyHardwareConnected={anyHardwareConnected}
+            keyboardEnabled={keyboardMappingState.enabled}
           />
         )}
       </BaseViewBody>

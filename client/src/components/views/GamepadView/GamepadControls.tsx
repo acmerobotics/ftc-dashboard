@@ -17,6 +17,7 @@ interface GamepadControlsProps {
   updateGamepadState: (gamepadNum: 1 | 2, newState: Partial<GamepadState>) => void;
   resetGamepad: (gamepadNum: 1 | 2) => void;
   anyHardwareConnected: boolean;
+  keyboardEnabled: boolean;
 }
 
 export const GamepadControls: React.FC<GamepadControlsProps> = ({
@@ -30,8 +31,9 @@ export const GamepadControls: React.FC<GamepadControlsProps> = ({
   updateGamepadState,
   resetGamepad,
   anyHardwareConnected,
+  keyboardEnabled,
 }) => {
-  const showKeyBindings = gamepadNum === keyboardTarget;
+  const showKeyBindings = keyboardEnabled && gamepadNum === keyboardTarget;
 
   // Helper to create press handler (set button to true) - disabled if hardware connected
   const createButtonPressHandler = (buttonKey: keyof GamepadState) => () => {
@@ -144,6 +146,7 @@ export const GamepadControls: React.FC<GamepadControlsProps> = ({
               leftLabel="Left"
               rightLabel="Right"
               isPressed={gamepadState.left_stick_button}
+              buttonKeyBinding={showKeyBindings ? formatKeyName(keyboardMapping.left_stick_button || '') : ''}
               onStickButtonClick={createButtonToggleHandler(gamepadNum, 'left_stick_button')}
               onStickButtonPress={createButtonPressHandler('left_stick_button')}
               onStickButtonRelease={createButtonReleaseHandler('left_stick_button')}
@@ -280,6 +283,7 @@ export const GamepadControls: React.FC<GamepadControlsProps> = ({
               leftLabel="Left"
               rightLabel="Right"
               isPressed={gamepadState.right_stick_button}
+              buttonKeyBinding={showKeyBindings ? formatKeyName(keyboardMapping.right_stick_button || '') : ''}
               onStickButtonClick={createButtonToggleHandler(gamepadNum, 'right_stick_button')}
               onStickButtonPress={createButtonPressHandler('right_stick_button')}
               onStickButtonRelease={createButtonReleaseHandler('right_stick_button')}
