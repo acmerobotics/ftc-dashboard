@@ -258,7 +258,7 @@ class BasicVariable extends React.Component<Props> {
                   ? {
                       display: 'inline-block',
                       textAlign: 'center',
-                      width: '1ch',
+                      width: '1em',
                       userSelect: 'auto',
                       opacity: 1.0,
                       color:
@@ -271,7 +271,7 @@ class BasicVariable extends React.Component<Props> {
                   : {
                       display: 'inline-block',
                       textAlign: 'center',
-                      width: '1ch',
+                      width: '1em',
                       userSelect: 'none',
                       opacity: 0.0,
                     }

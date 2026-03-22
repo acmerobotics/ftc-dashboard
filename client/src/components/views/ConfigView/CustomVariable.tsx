@@ -281,7 +281,7 @@ class CustomVariable extends Component<Props, State> {
           >
             <div
               className={clsx(
-                'flex-center mr-2 h-7 w-7 transform rounded-full border transition',
+                'flex-center h-7 w-7 transform rounded-full border transition',
                 'border-gray-200 bg-gray-100 hover:border-gray-400 hover:bg-gray-200',
                 'dark:border-slate-500/80 dark:bg-slate-700 dark:text-slate-200',
                 !this.state.expanded && '-rotate-90',
@@ -297,7 +297,7 @@ class CustomVariable extends Component<Props, State> {
                       ? {
                           display: 'inline-block',
                           textAlign: 'center',
-                          width: '1ch',
+                          width: '1em',
                           userSelect: 'auto',
                           opacity: 1.0,
                           color:
@@ -314,7 +314,7 @@ class CustomVariable extends Component<Props, State> {
                       : {
                           display: 'inline-block',
                           textAlign: 'center',
-                          width: '1ch',
+                          width: '1em',
                           userSelect: 'none',
                           opacity: 0.0,
                         }
