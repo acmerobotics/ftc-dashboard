@@ -20,7 +20,7 @@ import java.io.IOException;
  * the Control Hub's Wi-Fi address.
  */
 public class LimelightProxyManager {
-    private static final String TAG = "dashboard:LLProxy";
+    private static final String TAG = "FtcDashboard";
     private static final String LL_ADDR = "172.29.0.1";
 
     private HttpForwarder mjpegForwarder;   // :5800  (streamed)

@@ -18,7 +18,7 @@ import java.net.SocketException;
  * the browser through the Control Hub.
  */
 class TcpForwarder {
-    private static final String TAG = "dashboard:TcpFwd";
+    private static final String TAG = "FtcDashboard";
 
     private final int listenPort;
     private final String targetHost;

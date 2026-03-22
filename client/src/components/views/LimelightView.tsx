@@ -48,22 +48,19 @@ export default function LimelightView({
       setStatus(null);
       return;
     }
+    let available = false;
+    let data: LimelightStatus | null = null;
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 2000);
       const resp = await fetch(statusUrl, { signal: controller.signal });
       clearTimeout(timeout);
-      if (resp.ok) {
-        const data = await resp.json();
-        setAvailable(true);
-        setStatus(data);
-      } else {
-        setAvailable(false);
-        setStatus(null);
-      }
-    } catch {
-      setAvailable(false);
-      setStatus(null);
+      if (!resp.ok) return;
+      data = await resp.json();
+      available = true;
+    } finally {
+      setAvailable(available);
+      setStatus(data);
     }
   }, [isConnected, statusUrl]);
 

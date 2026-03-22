@@ -20,7 +20,7 @@ import java.util.Map;
  * the Limelight MJPEG feed on port 5800).
  */
 class HttpForwarder extends NanoHTTPD {
-    private static final String TAG = "dashboard:HttpFwd";
+    private static final String TAG = "FtcDashboard";
 
     private final String targetHost;
     private final int targetPort;
