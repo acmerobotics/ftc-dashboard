@@ -21,7 +21,7 @@ interface Props {
   name: string;
   path: string;
   state: CustomVarState;
-  baseline: ConfigVar | null;
+  baseline?: ConfigVar | null;
   showOnlyModified?: boolean;
   onChange: (state: CustomVarState) => void;
   onSave: (variable: CustomVar) => void;
@@ -121,6 +121,57 @@ class CustomVariable extends Component<Props, State> {
           childBaseline.__type !== 'custom' &&
           childBaseline.__value !== childState.__value
         ) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  // Check if any child variables have unsaved changes
+  hasUnsavedChanges(): boolean {
+    const { state } = this.props;
+    const value = state.__value;
+
+    if (!value) {
+      return false;
+    }
+
+    for (const key of Object.keys(value)) {
+      const childState = value[key];
+
+      if (childState.__type === 'custom') {
+        if (this.checkCustomVariableUnsaved(childState)) {
+          return true;
+        }
+      } else {
+        if (childState.__value !== childState.__newValue) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  // Helper method to recursively check custom variable unsaved changes
+  checkCustomVariableUnsaved(customState: CustomVarState): boolean {
+    const value = customState.__value;
+
+    if (!value) {
+      return false;
+    }
+
+    for (const key of Object.keys(value)) {
+      const childState = value[key];
+
+      if (childState.__type === 'custom') {
+        if (this.checkCustomVariableUnsaved(childState)) {
+          return true;
+        }
+      } else {
+        if (childState.__value !== childState.__newValue) {
           return true;
         }
       }
@@ -242,16 +293,23 @@ class CustomVariable extends Component<Props, State> {
               <div className="flex items-center">
                 <span
                   style={
-                    this.hasBaselineModifications()
+                    this.hasUnsavedChanges() || this.hasBaselineModifications()
                       ? {
                           display: 'inline-block',
                           textAlign: 'center',
                           width: '1ch',
                           userSelect: 'auto',
                           opacity: 1.0,
-                          color: '#fbbf24',
-                          fontWeight: 'bold',
-                          marginRight: '4px',
+                          color:
+                            !this.hasUnsavedChanges() &&
+                            this.hasBaselineModifications()
+                              ? '#fbbf24'
+                              : undefined,
+                          fontWeight:
+                            !this.hasUnsavedChanges() &&
+                            this.hasBaselineModifications()
+                              ? 'bold'
+                              : undefined,
                         }
                       : {
                           display: 'inline-block',
@@ -262,12 +320,18 @@ class CustomVariable extends Component<Props, State> {
                         }
                   }
                   title={
-                    this.hasBaselineModifications()
-                      ? 'Contains variables modified from deployed baseline'
+                    this.hasUnsavedChanges()
+                      ? 'Contains unsaved changes'
+                      : this.hasBaselineModifications()
+                      ? 'Contains variables changed from last deployed value'
                       : ''
                   }
                 >
-                  •
+                  {this.hasUnsavedChanges()
+                    ? '*'
+                    : this.hasBaselineModifications()
+                    ? '•'
+                    : ' '}
                 </span>
                 <h3 className="select-none pr-1 text-lg">{name}</h3>
               </div>

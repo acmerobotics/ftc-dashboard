@@ -50,12 +50,17 @@ const TextInput = <T,>({
     }
   }, [value, validate, inputValue]);
 
-
   const handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
     const { inputType } = evt.nativeEvent as InputEvent;
     // Firefox uses insertReplacementText for the arrows while Chrome uses undefined.
-    const fromArrows = showArrows && (inputType === "insertReplacementText" || inputType === undefined);
-    setInputValue(fromArrows ? Number(evt.target.value).toFixed(countDecimalPlaces(inputValue)) : evt.target.value);
+    const fromArrows =
+      showArrows &&
+      (inputType === 'insertReplacementText' || inputType === undefined);
+    setInputValue(
+      fromArrows
+        ? Number(evt.target.value).toFixed(countDecimalPlaces(inputValue))
+        : evt.target.value,
+    );
     onChange(validate(evt.target.value));
   };
 
@@ -64,7 +69,8 @@ const TextInput = <T,>({
   };
 
   const decimalPlaces = countDecimalPlaces(inputValue);
-  const step = decimalPlaces == 0 ? "1.0" : `0.${'0'.repeat(decimalPlaces - 1)}1`;
+  const step =
+    decimalPlaces == 0 ? '1.0' : `0.${'0'.repeat(decimalPlaces - 1)}1`;
 
   return (
     <input

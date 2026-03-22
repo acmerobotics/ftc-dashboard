@@ -195,7 +195,8 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
     const ungroupedOpModes: string[] = [];
 
     opModeInfoList.forEach((opModeInfo) => {
-      if (opModeInfo.group !== '' && opModeInfo.group !== '$$$$$$$') { // '$$$$$$$' is from OpModeMeta.DefaultGroup
+      if (opModeInfo.group !== '' && opModeInfo.group !== '$$$$$$$') {
+        // '$$$$$$$' is from OpModeMeta.DefaultGroup
         // Has a valid group
         if (!groupedOpModes[opModeInfo.group]) {
           groupedOpModes[opModeInfo.group] = [];

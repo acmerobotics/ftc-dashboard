@@ -261,8 +261,12 @@ class BasicVariable extends React.Component<Props> {
                       width: '1ch',
                       userSelect: 'auto',
                       opacity: 1.0,
-                      color: modifiedFromBaseline ? '#fbbf24' : undefined,
-                      fontWeight: modifiedFromBaseline ? 'bold' : undefined,
+                      color:
+                        !modified && modifiedFromBaseline
+                          ? '#fbbf24'
+                          : undefined,
+                      fontWeight:
+                        !modified && modifiedFromBaseline ? 'bold' : undefined,
                     }
                   : {
                       display: 'inline-block',
@@ -273,14 +277,14 @@ class BasicVariable extends React.Component<Props> {
                     }
               }
               title={
-                modifiedFromBaseline
-                  ? 'Modified from deployed baseline'
-                  : modified
+                modified
                   ? 'Unsaved changes'
+                  : modifiedFromBaseline
+                  ? 'Changed from last deployed value'
                   : ''
               }
             >
-              {modifiedFromBaseline ? '•' : modified ? '*' : ' '}
+              {modified ? '*' : modifiedFromBaseline ? '•' : ' '}
             </span>
             {name}
           </label>
