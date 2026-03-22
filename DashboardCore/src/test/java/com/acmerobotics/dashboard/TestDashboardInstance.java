@@ -13,6 +13,7 @@ import com.acmerobotics.dashboard.testopmode.TestOpModeManager;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoWSD;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -69,9 +70,24 @@ public class TestDashboardInstance {
                 .collect(Collectors.toList());
             
             send(new ReceiveOpModeList(opModeInfoList));
+
+
+            List<HardwareConfig> hardwareConfigs = new ArrayList<>();
+            List<String> configNames = hardwareConfigManager.getTestHardwareConfigs();
+            List<String> configXmls = hardwareConfigManager.getActiveConfigXml();
+            List<Boolean> readOnlyFlags = hardwareConfigManager.getIsReadOnly();
+
+            for (int i = 0; i < configNames.size(); i++) {
+                hardwareConfigs.add(new HardwareConfig(
+                        configNames.get(i),
+                        configXmls.get(i),
+                        readOnlyFlags.get(i)
+                ));
+            }
+
             send(new ReceiveHardwareConfigList(
-                hardwareConfigManager.getTestHardwareConfigs(),
-                hardwareConfigManager.getActiveHardwareConfig()
+                    hardwareConfigs,
+                    hardwareConfigManager.getActiveHardwareConfig()
             ));
         }
 
@@ -126,8 +142,22 @@ public class TestDashboardInstance {
 
                     // In the testing instance we must resend this data manually or things will get out of sync.
                     // In a live environment the restart will cause this data to be resent automatically.
+                    List<HardwareConfig> hardwareConfigs = new ArrayList<>();
+                    List<String> configNames = hardwareConfigManager.getTestHardwareConfigs();
+                    List<String> configXmls = hardwareConfigManager.getActiveConfigXml();
+                    List<Boolean> readOnlyFlags = hardwareConfigManager.getIsReadOnly();
+
+                    // Combine the parallel lists into POJOs
+                    for (int i = 0; i < configNames.size(); i++) {
+                        hardwareConfigs.add(new HardwareConfig(
+                                configNames.get(i),
+                                configXmls.get(i),
+                                readOnlyFlags.get(i)
+                        ));
+                    }
+
                     send(new ReceiveHardwareConfigList(
-                            hardwareConfigManager.getTestHardwareConfigs(),
+                            hardwareConfigs,
                             hardwareConfigManager.getActiveHardwareConfig()
                     ));
                     break;

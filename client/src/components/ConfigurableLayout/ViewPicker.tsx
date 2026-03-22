@@ -134,7 +134,7 @@ const listContent = [
   {
     title: 'Hardware Config View',
     view: ConfigurableView.HARDWARE_CONFIG_VIEW,
-    icon: <SettingsIcon className="h-5 w-5 text-white" />,
+    icon: <SettingsIcon className="h-6 w-6 text-white" />,
     customStyles: 'focus:ring-teal-600',
     iconBg: 'bg-teal-500',
   },

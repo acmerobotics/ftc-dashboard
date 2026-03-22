@@ -23,7 +23,7 @@ import RecorderView from '@/components/views/RecorderView/RecorderView';
 import CameraView from '@/components/views/CameraView';
 import OpModeView from '@/components/views/OpModeView';
 import LoggingView from '@/components/views/LoggingView/LoggingView';
-import HardwareConfigView from '@/components/views/HardwareConfigView';
+import HardwareConfigView from '@/components/views/HardwareConfigView/HardwareConfigView';
 import ErrorView from '@/components/views/ErrorView/ErrorView';
 
 import RadialFab from './RadialFab/RadialFab';
