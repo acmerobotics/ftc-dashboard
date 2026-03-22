@@ -602,7 +602,13 @@ export default function ConfigurableLayout() {
         isOpen={!isLayoutLocked}
         isShowing={!(isFabIdle && isLayoutLocked)}
         onClick={clickFAB}
-        icon={!isLayoutLocked ? <LockIcon className="h-8 w-8" /> : <CreateIcon className="h-7 w-7" />}
+        icon={
+          !isLayoutLocked ? (
+            <LockIcon className="h-8 w-8" />
+          ) : (
+            <CreateIcon className="h-7 w-7" />
+          )
+        }
         className={`${
           !isLayoutLocked
             ? `bg-gray-500 shadow-md shadow-gray-900/30 hover:shadow-lg hover:shadow-gray-900/50 focus:ring-4 focus:ring-gray-600`
