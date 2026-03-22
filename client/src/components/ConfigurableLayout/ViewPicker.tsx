@@ -145,6 +145,13 @@ const listContent = [
     customStyles: 'focus:ring-red-600',
     iconBg: 'bg-red-500',
   },
+  {
+    title: 'Limelight View',
+    view: ConfigurableView.LIMELIGHT_VIEW,
+    icon: <CameraIcon className="h-5 w-5 text-white" />,
+    customStyles: 'focus:ring-lime-600',
+    iconBg: 'bg-lime-500',
+  },
 ];
 
 const ViewPicker = (props: ViewPickerProps) => {
