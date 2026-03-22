@@ -5,6 +5,7 @@ import { KeyboardMapping } from '@/store/types/keyboardMapping';
 import { GamepadButton } from './GamepadButton';
 import { GamepadStick } from './GamepadStick';
 import { GamepadSlider } from './GamepadSlider';
+import { createButtonToggleHandler, resetGamepad } from './hooks/useGamepadState';
 
 interface GamepadControlsProps {
   gamepadNum: 1 | 2;
@@ -13,9 +14,7 @@ interface GamepadControlsProps {
   keyboardTarget: 1 | 2;
   formatKeyName: (keyCode: string) => string;
   keyboardMapping: KeyboardMapping;
-  createButtonToggleHandler: (gamepadNum: 1 | 2, buttonKey: keyof GamepadState) => () => void;
   updateGamepadState: (gamepadNum: 1 | 2, newState: Partial<GamepadState>) => void;
-  resetGamepad: (gamepadNum: 1 | 2) => void;
   anyHardwareConnected: boolean;
   keyboardEnabled: boolean;
 }
@@ -27,9 +26,7 @@ export const GamepadControls: React.FC<GamepadControlsProps> = ({
   keyboardTarget,
   formatKeyName,
   keyboardMapping,
-  createButtonToggleHandler,
   updateGamepadState,
-  resetGamepad,
   anyHardwareConnected,
   keyboardEnabled,
 }) => {
@@ -85,7 +82,7 @@ export const GamepadControls: React.FC<GamepadControlsProps> = ({
         </div>
         <button
           className="px-2.5 py-1 text-xs rounded-md bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors font-medium"
-          onClick={() => resetGamepad(gamepadNum)}
+          onClick={() => resetGamepad(gamepadNum, updateGamepadState)}
         >
           Reset
         </button>
@@ -102,7 +99,7 @@ export const GamepadControls: React.FC<GamepadControlsProps> = ({
               keyBinding={showKeyBindings ? formatKeyName(keyboardMapping.left_bumper || '') : ''}
               onPress={createButtonPressHandler('left_bumper')}
               onRelease={createButtonReleaseHandler('left_bumper')}
-              onToggle={createButtonToggleHandler(gamepadNum, 'left_bumper')}
+              onToggle={createButtonToggleHandler(gamepadState, gamepadNum, 'left_bumper', updateGamepadState)}
             />
             <GamepadSlider
               label="LT"
@@ -118,7 +115,7 @@ export const GamepadControls: React.FC<GamepadControlsProps> = ({
               keyBinding={showKeyBindings ? formatKeyName(keyboardMapping.right_bumper || '') : ''}
               onPress={createButtonPressHandler('right_bumper')}
               onRelease={createButtonReleaseHandler('right_bumper')}
-              onToggle={createButtonToggleHandler(gamepadNum, 'right_bumper')}
+              onToggle={createButtonToggleHandler(gamepadState, gamepadNum, 'right_bumper', updateGamepadState)}
             />
             <GamepadSlider
               label="RT"
@@ -147,7 +144,7 @@ export const GamepadControls: React.FC<GamepadControlsProps> = ({
               rightLabel="Right"
               isPressed={gamepadState.left_stick_button}
               buttonKeyBinding={showKeyBindings ? formatKeyName(keyboardMapping.left_stick_button || '') : ''}
-              onStickButtonClick={createButtonToggleHandler(gamepadNum, 'left_stick_button')}
+              onStickButtonClick={createButtonToggleHandler(gamepadState, gamepadNum, 'left_stick_button', updateGamepadState)}
               onStickButtonPress={createButtonPressHandler('left_stick_button')}
               onStickButtonRelease={createButtonReleaseHandler('left_stick_button')}
               onStickMove={handleStickMove('left_stick_x', 'left_stick_y')}
@@ -163,7 +160,7 @@ export const GamepadControls: React.FC<GamepadControlsProps> = ({
                 keyBinding={showKeyBindings ? formatKeyName(keyboardMapping.dpad_up || '') : ''}
                 onPress={createButtonPressHandler('dpad_up')}
                 onRelease={createButtonReleaseHandler('dpad_up')}
-                onToggle={createButtonToggleHandler(gamepadNum, 'dpad_up')}
+                onToggle={createButtonToggleHandler(gamepadState, gamepadNum, 'dpad_up', updateGamepadState)}
               />
               <div />
               <GamepadButton
@@ -172,7 +169,7 @@ export const GamepadControls: React.FC<GamepadControlsProps> = ({
                 keyBinding={showKeyBindings ? formatKeyName(keyboardMapping.dpad_left || '') : ''}
                 onPress={createButtonPressHandler('dpad_left')}
                 onRelease={createButtonReleaseHandler('dpad_left')}
-                onToggle={createButtonToggleHandler(gamepadNum, 'dpad_left')}
+                onToggle={createButtonToggleHandler(gamepadState, gamepadNum, 'dpad_left', updateGamepadState)}
               />
               <div />
               <GamepadButton
@@ -181,7 +178,7 @@ export const GamepadControls: React.FC<GamepadControlsProps> = ({
                 keyBinding={showKeyBindings ? formatKeyName(keyboardMapping.dpad_right || '') : ''}
                 onPress={createButtonPressHandler('dpad_right')}
                 onRelease={createButtonReleaseHandler('dpad_right')}
-                onToggle={createButtonToggleHandler(gamepadNum, 'dpad_right')}
+                onToggle={createButtonToggleHandler(gamepadState, gamepadNum, 'dpad_right', updateGamepadState)}
               />
               <div />
               <GamepadButton
@@ -190,7 +187,7 @@ export const GamepadControls: React.FC<GamepadControlsProps> = ({
                 keyBinding={showKeyBindings ? formatKeyName(keyboardMapping.dpad_down || '') : ''}
                 onPress={createButtonPressHandler('dpad_down')}
                 onRelease={createButtonReleaseHandler('dpad_down')}
-                onToggle={createButtonToggleHandler(gamepadNum, 'dpad_down')}
+                onToggle={createButtonToggleHandler(gamepadState, gamepadNum, 'dpad_down', updateGamepadState)}
               />
               <div />
             </div>
@@ -204,7 +201,7 @@ export const GamepadControls: React.FC<GamepadControlsProps> = ({
               keyBinding={showKeyBindings ? formatKeyName(keyboardMapping.back || '') : ''}
               onPress={createButtonPressHandler('back')}
               onRelease={createButtonReleaseHandler('back')}
-              onToggle={createButtonToggleHandler(gamepadNum, 'back')}
+              onToggle={createButtonToggleHandler(gamepadState, gamepadNum, 'back', updateGamepadState)}
               className="rounded-full"
             />
             <GamepadButton
@@ -213,7 +210,7 @@ export const GamepadControls: React.FC<GamepadControlsProps> = ({
               keyBinding={showKeyBindings ? formatKeyName(keyboardMapping.guide || '') : ''}
               onPress={createButtonPressHandler('guide')}
               onRelease={createButtonReleaseHandler('guide')}
-              onToggle={createButtonToggleHandler(gamepadNum, 'guide')}
+              onToggle={createButtonToggleHandler(gamepadState, gamepadNum, 'guide', updateGamepadState)}
               className="rounded-full"
             />
             <GamepadButton
@@ -222,7 +219,7 @@ export const GamepadControls: React.FC<GamepadControlsProps> = ({
               keyBinding={showKeyBindings ? formatKeyName(keyboardMapping.start || '') : ''}
               onPress={createButtonPressHandler('start')}
               onRelease={createButtonReleaseHandler('start')}
-              onToggle={createButtonToggleHandler(gamepadNum, 'start')}
+              onToggle={createButtonToggleHandler(gamepadState, gamepadNum, 'start', updateGamepadState)}
               className="rounded-full"
             />
           </div>
@@ -238,7 +235,7 @@ export const GamepadControls: React.FC<GamepadControlsProps> = ({
                 keyBinding={showKeyBindings ? formatKeyName(keyboardMapping.y || '') : ''}
                 onPress={createButtonPressHandler('y')}
                 onRelease={createButtonReleaseHandler('y')}
-                onToggle={createButtonToggleHandler(gamepadNum, 'y')}
+                onToggle={createButtonToggleHandler(gamepadState, gamepadNum, 'y', updateGamepadState)}
               />
               <div />
               <GamepadButton
@@ -247,7 +244,7 @@ export const GamepadControls: React.FC<GamepadControlsProps> = ({
                 keyBinding={showKeyBindings ? formatKeyName(keyboardMapping.x || '') : ''}
                 onPress={createButtonPressHandler('x')}
                 onRelease={createButtonReleaseHandler('x')}
-                onToggle={createButtonToggleHandler(gamepadNum, 'x')}
+                onToggle={createButtonToggleHandler(gamepadState, gamepadNum, 'x', updateGamepadState)}
               />
               <div />
               <GamepadButton
@@ -256,7 +253,7 @@ export const GamepadControls: React.FC<GamepadControlsProps> = ({
                 keyBinding={showKeyBindings ? formatKeyName(keyboardMapping.b || '') : ''}
                 onPress={createButtonPressHandler('b')}
                 onRelease={createButtonReleaseHandler('b')}
-                onToggle={createButtonToggleHandler(gamepadNum, 'b')}
+                onToggle={createButtonToggleHandler(gamepadState, gamepadNum, 'b', updateGamepadState)}
               />
               <div />
               <GamepadButton
@@ -265,7 +262,7 @@ export const GamepadControls: React.FC<GamepadControlsProps> = ({
                 keyBinding={showKeyBindings ? formatKeyName(keyboardMapping.a || '') : ''}
                 onPress={createButtonPressHandler('a')}
                 onRelease={createButtonReleaseHandler('a')}
-                onToggle={createButtonToggleHandler(gamepadNum, 'a')}
+                onToggle={createButtonToggleHandler(gamepadState, gamepadNum, 'a', updateGamepadState)}
               />
               <div />
             </div>
@@ -284,7 +281,7 @@ export const GamepadControls: React.FC<GamepadControlsProps> = ({
               rightLabel="Right"
               isPressed={gamepadState.right_stick_button}
               buttonKeyBinding={showKeyBindings ? formatKeyName(keyboardMapping.right_stick_button || '') : ''}
-              onStickButtonClick={createButtonToggleHandler(gamepadNum, 'right_stick_button')}
+              onStickButtonClick={createButtonToggleHandler(gamepadState, gamepadNum, 'right_stick_button', updateGamepadState)}
               onStickButtonPress={createButtonPressHandler('right_stick_button')}
               onStickButtonRelease={createButtonReleaseHandler('right_stick_button')}
               onStickMove={handleStickMove('right_stick_x', 'right_stick_y')}

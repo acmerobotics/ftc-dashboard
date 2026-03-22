@@ -22,6 +22,7 @@ type ViewPickerProps = {
   right: string;
 
   onClick: (item: ConfigurableView) => void;
+  disabledViews?: Set<ConfigurableView>;
 };
 
 const Container = (props: PropsWithChildren<ViewPickerProps>) => (
@@ -165,7 +166,7 @@ const ViewPicker = (props: ViewPickerProps) => {
           index={index}
           customStyles={item.customStyles}
           onClick={() => props.onClick(item.view)}
-          disabled={!props.isOpen}
+          disabled={!props.isOpen || props.disabledViews?.has(item.view)}
         >
           <>
             <div className={`flex-center mr-3  h-8 w-8 rounded ${item.iconBg}`}>

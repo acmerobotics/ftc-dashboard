@@ -43,8 +43,6 @@ const GamepadView: React.FC<GamepadViewProps> = ({
     gamepad1State,
     gamepad2State,
     updateGamepadState,
-    createButtonToggleHandler,
-    resetGamepad,
   } = useGamepadState();
 
   // Disable all virtual controls if any hardware gamepad is connected
@@ -192,9 +190,7 @@ const GamepadView: React.FC<GamepadViewProps> = ({
                 keyboardTarget={keyboardTarget}
                 formatKeyName={formatKeyName}
                 keyboardMapping={keyboardMappingState.mapping}
-                createButtonToggleHandler={createButtonToggleHandler}
                 updateGamepadState={updateGamepadState}
-                resetGamepad={resetGamepad}
                 anyHardwareConnected={anyHardwareConnected}
                 keyboardEnabled={keyboardMappingState.enabled}
               />
@@ -210,9 +206,7 @@ const GamepadView: React.FC<GamepadViewProps> = ({
                 keyboardTarget={keyboardTarget}
                 formatKeyName={formatKeyName}
                 keyboardMapping={keyboardMappingState.mapping}
-                createButtonToggleHandler={createButtonToggleHandler}
                 updateGamepadState={updateGamepadState}
-                resetGamepad={resetGamepad}
                 anyHardwareConnected={anyHardwareConnected}
                 keyboardEnabled={keyboardMappingState.enabled}
               />
@@ -230,9 +224,7 @@ const GamepadView: React.FC<GamepadViewProps> = ({
             keyboardTarget={selectedGamepad as 1 | 2}
             formatKeyName={formatKeyName}
             keyboardMapping={keyboardMappingState.mapping}
-            createButtonToggleHandler={createButtonToggleHandler}
             updateGamepadState={updateGamepadState}
-            resetGamepad={resetGamepad}
             anyHardwareConnected={anyHardwareConnected}
             keyboardEnabled={keyboardMappingState.enabled}
           />

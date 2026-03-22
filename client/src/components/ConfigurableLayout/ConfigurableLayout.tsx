@@ -433,7 +433,13 @@ export default function ConfigurableLayout() {
     );
   }, [gridItems]);
 
+  // Views that should only appear once in the layout
+  const singletonViews = new Set([ConfigurableView.GAMEPAD_VIEW]);
+
+  const existingViews = new Set(gridItems.map((e) => e.view));
+
   const addItem = (item: ConfigurableView) => {
+    if (singletonViews.has(item) && existingViews.has(item)) return;
     const ITEM_WIDTH = 4;
     const ITEM_HEIGHT = 4;
 
@@ -658,6 +664,7 @@ export default function ConfigurableLayout() {
         bottom="13em"
         right="1.5em"
         onClick={addItem}
+        disabledViews={new Set([...singletonViews].filter((v) => existingViews.has(v)))}
       />
     </Container>
   );
