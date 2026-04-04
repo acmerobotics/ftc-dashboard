@@ -26,6 +26,7 @@ import LoggingView from '@/components/views/LoggingView/LoggingView';
 import HardwareConfigView from '@/components/views/HardwareConfigView/HardwareConfigView';
 import GamepadView from '@/components/views/GamepadView';
 import ErrorView from '@/components/views/ErrorView/ErrorView';
+import LimelightView from '@/components/views/LimelightView';
 
 import RadialFab from './RadialFab/RadialFab';
 import RadialFabChild from './RadialFab/RadialFabChild';
@@ -76,6 +77,7 @@ const VIEW_MAP: { [key in ConfigurableView]: ReactElement } = {
   [ConfigurableView.HARDWARE_CONFIG_VIEW]: <HardwareConfigView />,
   [ConfigurableView.GAMEPAD_VIEW]: <GamepadView />,
   [ConfigurableView.ERROR_VIEW]: <ErrorView />,
+  [ConfigurableView.LIMELIGHT_VIEW]: <LimelightView />,
 };
 
 const LOCAL_STORAGE_LAYOUT_KEY = 'configurableLayoutStorage';
@@ -610,7 +612,13 @@ export default function ConfigurableLayout() {
         isOpen={!isLayoutLocked}
         isShowing={!(isFabIdle && isLayoutLocked)}
         onClick={clickFAB}
-        icon={!isLayoutLocked ? <LockIcon className="h-8 w-8" /> : <CreateIcon className="h-7 w-7" />}
+        icon={
+          !isLayoutLocked ? (
+            <LockIcon className="h-8 w-8" />
+          ) : (
+            <CreateIcon className="h-7 w-7" />
+          )
+        }
         className={`${
           !isLayoutLocked
             ? `bg-gray-500 shadow-md shadow-gray-900/30 hover:shadow-lg hover:shadow-gray-900/50 focus:ring-4 focus:ring-gray-600`

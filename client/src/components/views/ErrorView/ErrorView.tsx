@@ -29,8 +29,8 @@ const ErrorView = ({
   const logcatErrors = useSelector((state: RootState) => state.logcat.errors);
 
   // Filter errors to only show OpModeManager tag
-  const opModeManagerErrors = logcatErrors.filter(error => 
-    error.tag === 'OpModeManager'
+  const opModeManagerErrors = logcatErrors.filter(
+    (error) => error.tag === 'OpModeManager',
   );
 
   useEffect(() => {
@@ -73,46 +73,47 @@ const ErrorView = ({
 
   const formatStackTrace = (message: string): string => {
     const lines = message.split('\n');
-    return lines.map((line, index) => {
-      // Main exception line (first line) - no indentation
-      if (index === 0) {
+    return lines
+      .map((line, index) => {
+        // Main exception line (first line) - no indentation
+        if (index === 0) {
+          return line;
+        }
+
+        // Stack trace "at" lines - add indentation if not already present
+        if (line.match(/^\s*at\s+/)) {
+          return line.startsWith('    ') || line.startsWith('\t')
+            ? line
+            : `    ${line.trim()}`;
+        }
+
+        // "Caused by:" lines - add small indentation
+        if (line.match(/^\s*Caused by:/)) {
+          return line.startsWith('  ') ? line : `  ${line.trim()}`;
+        }
+
+        // "Suppressed:" lines - add small indentation
+        if (line.match(/^\s*Suppressed:/)) {
+          return line.startsWith('  ') ? line : `  ${line.trim()}`;
+        }
+
+        // "... N more" lines - add indentation
+        if (line.match(/^\s*\.\.\.\s*\d+\s*more/)) {
+          return line.startsWith('    ') || line.startsWith('\t')
+            ? line
+            : `    ${line.trim()}`;
+        }
+
+        // Lines that are already indented or other continuation lines
         return line;
-      }
-      
-      // Stack trace "at" lines - add indentation if not already present
-      if (line.match(/^\s*at\s+/)) {
-        return line.startsWith('    ') || line.startsWith('\t') ? line : `    ${line.trim()}`;
-      }
-      
-      // "Caused by:" lines - add small indentation
-      if (line.match(/^\s*Caused by:/)) {
-        return line.startsWith('  ') ? line : `  ${line.trim()}`;
-      }
-      
-      // "Suppressed:" lines - add small indentation
-      if (line.match(/^\s*Suppressed:/)) {
-        return line.startsWith('  ') ? line : `  ${line.trim()}`;
-      }
-      
-      // "... N more" lines - add indentation
-      if (line.match(/^\s*\.\.\.\s*\d+\s*more/)) {
-        return line.startsWith('    ') || line.startsWith('\t') ? line : `    ${line.trim()}`;
-      }
-      
-      // Lines that are already indented or other continuation lines
-      return line;
-    }).join('\n');
+      })
+      .join('\n');
   };
 
   return (
-    <BaseView
-      className="flex flex-col overflow-hidden"
-      isUnlocked={isUnlocked}
-    >
+    <BaseView className="flex flex-col overflow-hidden" isUnlocked={isUnlocked}>
       <div className="flex">
-        <BaseViewHeading isDraggable={isDraggable}>
-          Error View
-        </BaseViewHeading>
+        <BaseViewHeading isDraggable={isDraggable}>Error View</BaseViewHeading>
         <BaseViewIcons>
           <BaseViewIconButton
             title="Clear All Errors"
@@ -123,8 +124,8 @@ const ErrorView = ({
         </BaseViewIcons>
       </div>
       <BaseViewBody>
-        <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between px-3 py-2 border-b dark:border-gray-600">
+        <div className="flex h-full flex-col">
+          <div className="flex items-center justify-between border-b px-3 py-2 dark:border-gray-600">
             <span className="text-sm font-medium">
               {opModeManagerErrors.length} error(s) found
             </span>
@@ -144,7 +145,7 @@ const ErrorView = ({
             style={{ minHeight: 0 }}
           >
             {opModeManagerErrors.length === 0 ? (
-              <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
+              <div className="flex h-full items-center justify-center text-gray-500 dark:text-gray-400">
                 <div className="text-center">
                   <p>This view monitors Logcat for OpModeManager errors</p>
                 </div>
@@ -153,37 +154,54 @@ const ErrorView = ({
               <div className="space-y-1">
                 {opModeManagerErrors.map((error, index) => {
                   const isMultiLineError = error.message.includes('\n');
-                  
+
                   return (
                     <div
                       key={`${error.timestamp}-${index}`}
-                      className="border-b border-gray-200 dark:border-gray-700 pb-3 mb-3 last:border-b-0 last:mb-0"
+                      className="mb-3 border-b border-gray-200 pb-3 last:mb-0 last:border-b-0 dark:border-gray-700"
                     >
-                      <div className="flex items-center space-x-2 mb-2">
-                        <span className="text-gray-500 dark:text-gray-400 text-xs font-mono">
+                      <div className="mb-2 flex items-center space-x-2">
+                        <span className="font-mono text-xs text-gray-500 dark:text-gray-400">
                           [{formatTimestamp(error.timestamp)}]
                         </span>
-                        <span className={`font-medium text-xs px-2 py-1 rounded ${getLevelColor(error.level)} ${
-                          error.level === 'ERROR' ? 'bg-red-100 dark:bg-red-900/20' :
-                          error.level === 'WARN' ? 'bg-yellow-100 dark:bg-yellow-900/20' :
-                          error.level === 'INFO' ? 'bg-blue-100 dark:bg-blue-900/20' :
-                          error.level === 'DEBUG' ? 'bg-green-100 dark:bg-green-900/20' :
-                          'bg-gray-100 dark:bg-gray-900/20'
-                        }`}>
+                        <span
+                          className={`rounded px-2 py-1 text-xs font-medium ${getLevelColor(
+                            error.level,
+                          )} ${
+                            error.level === 'ERROR'
+                              ? 'bg-red-100 dark:bg-red-900/20'
+                              : error.level === 'WARN'
+                              ? 'bg-yellow-100 dark:bg-yellow-900/20'
+                              : error.level === 'INFO'
+                              ? 'bg-blue-100 dark:bg-blue-900/20'
+                              : error.level === 'DEBUG'
+                              ? 'bg-green-100 dark:bg-green-900/20'
+                              : 'bg-gray-100 dark:bg-gray-900/20'
+                          }`}
+                        >
                           {error.level}
                         </span>
-                        <span className="text-xs text-gray-600 dark:text-gray-300 font-mono">
+                        <span className="font-mono text-xs text-gray-600 dark:text-gray-300">
                           {error.tag}
                         </span>
                       </div>
-                      <div className={`pl-4 text-gray-800 dark:text-gray-200 ${isMultiLineError ? 'bg-gray-50 dark:bg-gray-800 rounded p-3' : ''}`}>
-                        <pre 
-                          className="whitespace-pre font-mono text-xs leading-relaxed overflow-x-auto"
-                          style={{ 
-                            tabSize: 4,
-                            whiteSpace: 'pre',
-                            fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas, "Liberation Mono", "Courier New", monospace'
-                          } as React.CSSProperties}
+                      <div
+                        className={`pl-4 text-gray-800 dark:text-gray-200 ${
+                          isMultiLineError
+                            ? 'rounded bg-gray-50 p-3 dark:bg-gray-800'
+                            : ''
+                        }`}
+                      >
+                        <pre
+                          className="overflow-x-auto whitespace-pre font-mono text-xs leading-relaxed"
+                          style={
+                            {
+                              tabSize: 4,
+                              whiteSpace: 'pre',
+                              fontFamily:
+                                'ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+                            } as React.CSSProperties
+                          }
                         >
                           {formatStackTrace(error.message)}
                         </pre>
