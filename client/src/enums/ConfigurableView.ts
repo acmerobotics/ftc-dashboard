@@ -9,6 +9,7 @@ export enum ConfigurableView {
   OPMODE_VIEW,
   LOGGING_VIEW,
   HARDWARE_CONFIG_VIEW,
+  GAMEPAD_VIEW,
   ERROR_VIEW,
   LIMELIGHT_VIEW,
 }

@@ -11,6 +11,7 @@ import { ReactComponent as SubjectIcon } from '@/assets/icons/subject.svg';
 import { ReactComponent as WidgetIcon } from '@/assets/icons/widgets.svg';
 import { ReactComponent as ListIcon } from '@/assets/icons/list.svg';
 import { ReactComponent as HardwareIcon } from '@/assets/icons/hardware.svg';
+import { ReactComponent as GamepadIcon } from '@/assets/icons/gamepad.svg';
 import { ReactComponent as DeleteSweepIcon } from '@/assets/icons/delete_sweep.svg';
 import { ReactComponent as ExclamationIcon } from '@/assets/icons/exclamation.svg';
 
@@ -21,6 +22,7 @@ type ViewPickerProps = {
   right: string;
 
   onClick: (item: ConfigurableView) => void;
+  disabledViews?: Set<ConfigurableView>;
 };
 
 const Container = (props: PropsWithChildren<ViewPickerProps>) => (
@@ -139,6 +141,13 @@ const listContent = [
     iconBg: 'bg-teal-500',
   },
   {
+    title: 'Gamepad View',
+    view: ConfigurableView.GAMEPAD_VIEW,
+    icon: <GamepadIcon className="h-6 w-6 text-white" />,
+    customStyles: 'focus:ring-cyan-600',
+    iconBg: 'bg-cyan-500',
+  },
+  {
     title: 'Error View',
     view: ConfigurableView.ERROR_VIEW,
     icon: <ExclamationIcon className="h-5 w-5 text-white" />,
@@ -164,7 +173,7 @@ const ViewPicker = (props: ViewPickerProps) => {
           index={index}
           customStyles={item.customStyles}
           onClick={() => props.onClick(item.view)}
-          disabled={!props.isOpen}
+          disabled={!props.isOpen || props.disabledViews?.has(item.view)}
         >
           <>
             <div className={`flex-center mr-3  h-8 w-8 rounded ${item.iconBg}`}>

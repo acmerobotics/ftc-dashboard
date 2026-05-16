@@ -49,7 +49,7 @@ export const sendGamepadState =
     if (
       !isEqual(lastGamepad1, gamepad1) ||
       !isEqual(lastGamepad2, gamepad2) ||
-      timestamp - lastGamepadTimestamp < MAX_GAMEPAD_MS
+      timestamp - lastGamepadTimestamp >= MAX_GAMEPAD_MS
     ) {
       dispatch(receiveGamepadState(gamepad1, gamepad2));
 

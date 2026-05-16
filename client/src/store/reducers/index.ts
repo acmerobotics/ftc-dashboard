@@ -10,6 +10,7 @@ import cameraReducer from './camera';
 import settingsReducer from './settings';
 import gamepadReducer from './gamepad';
 import hardwareConfigReducer from './hardwareconfig';
+import keyboardMappingReducer from './keyboardMapping';
 import logcatReducer from './logcat';
 import { createDispatchHook } from 'react-redux';
 
@@ -23,6 +24,7 @@ const rootReducer = combineReducers({
   settings: settingsReducer,
   gamepad: gamepadReducer,
   hardwareConfig: hardwareConfigReducer,
+  keyboardMapping: keyboardMappingReducer,
   logcat: logcatReducer,
 });
 

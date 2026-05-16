@@ -24,6 +24,7 @@ import CameraView from '@/components/views/CameraView';
 import OpModeView from '@/components/views/OpModeView';
 import LoggingView from '@/components/views/LoggingView/LoggingView';
 import HardwareConfigView from '@/components/views/HardwareConfigView/HardwareConfigView';
+import GamepadView from '@/components/views/GamepadView';
 import ErrorView from '@/components/views/ErrorView/ErrorView';
 import LimelightView from '@/components/views/LimelightView';
 
@@ -74,6 +75,7 @@ const VIEW_MAP: { [key in ConfigurableView]: ReactElement } = {
   [ConfigurableView.OPMODE_VIEW]: <OpModeView />,
   [ConfigurableView.LOGGING_VIEW]: <LoggingView />,
   [ConfigurableView.HARDWARE_CONFIG_VIEW]: <HardwareConfigView />,
+  [ConfigurableView.GAMEPAD_VIEW]: <GamepadView />,
   [ConfigurableView.ERROR_VIEW]: <ErrorView />,
   [ConfigurableView.LIMELIGHT_VIEW]: <LimelightView />,
 };
@@ -433,7 +435,13 @@ export default function ConfigurableLayout() {
     );
   }, [gridItems]);
 
+  // Views that should only appear once in the layout
+  const singletonViews = new Set([ConfigurableView.GAMEPAD_VIEW]);
+
+  const existingViews = new Set(gridItems.map((e) => e.view));
+
   const addItem = (item: ConfigurableView) => {
+    if (singletonViews.has(item) && existingViews.has(item)) return;
     const ITEM_WIDTH = 4;
     const ITEM_HEIGHT = 4;
 
@@ -664,6 +672,7 @@ export default function ConfigurableLayout() {
         bottom="13em"
         right="1.5em"
         onClick={addItem}
+        disabledViews={new Set([...singletonViews].filter((v) => existingViews.has(v)))}
       />
     </Container>
   );
