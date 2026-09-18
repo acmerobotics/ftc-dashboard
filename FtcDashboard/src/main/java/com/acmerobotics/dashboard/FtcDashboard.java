@@ -240,6 +240,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
             new Mutex<>(new TreeMap<>());
 
     private final LimelightProxyManager limelightProxyManager = new LimelightProxyManager();
+    private static boolean limelightProxyEnabled = true;
 
     private static class OpModeAndStatus {
         public OpMode opMode;
@@ -968,6 +969,11 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 try {
                     Class<?> configClass = Class.forName(className, false, classLoader);
 
+                    DashboardSettings settings = configClass.getAnnotation(DashboardSettings.class);
+                    if (settings != null && !settings.limelightProxy()) {
+                        limelightProxyEnabled = false;
+                    }
+
                     if (!configClass.isAnnotationPresent(Config.class)
                             || configClass.isAnnotationPresent(Disabled.class)) {
                         continue;
@@ -1302,7 +1308,9 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         logcatMonitorRunnable = new LogcatMonitorRunnable();
         logcatMonitorExecutor.submit(logcatMonitorRunnable);
 
-        limelightProxyManager.start();
+        if (limelightProxyEnabled) {
+            limelightProxyManager.start();
+        }
 
         core.enabled = true;
 
