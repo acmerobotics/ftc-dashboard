@@ -14,6 +14,7 @@ import BaseView, {
 import { ReactComponent as SaveIcon } from '@/assets/icons/save.svg';
 import { ReactComponent as RefreshIcon } from '@/assets/icons/refresh.svg';
 import { ReactComponent as FilterIcon } from '@/assets/icons/filter.svg';
+import { ReactComponent as ClearPinsIcon } from '@/assets/icons/delete_sweep.svg';
 
 import { RootState, useAppDispatch } from '@/store/reducers';
 import { HARDWARE_CATEGORY } from '@/store/reducers/config';
@@ -72,6 +73,32 @@ function validAndModified(state: ConfigVarState): ConfigVar | null {
   }
 }
 
+const PINNED_STORAGE_KEY = 'pinnedConfigOpModes';
+// The storage event only reaches other tabs, so instances sharing this document
+// are notified directly.
+const PINNED_CHANGE_EVENT = 'pinnedConfigOpModesChange';
+
+function loadPinned(): string[] {
+  try {
+    const stored = JSON.parse(localStorage.getItem(PINNED_STORAGE_KEY) ?? '[]');
+    return Array.isArray(stored)
+      ? stored.filter((k) => typeof k === 'string')
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+function savePinned(keys: string[]): boolean {
+  try {
+    localStorage.setItem(PINNED_STORAGE_KEY, JSON.stringify(keys));
+  } catch {
+    return false;
+  }
+  window.dispatchEvent(new Event(PINNED_CHANGE_EVENT));
+  return true;
+}
+
 type ConfigViewProps = BaseViewProps & BaseViewHeadingProps;
 
 const ConfigView = ({
@@ -100,6 +127,45 @@ const ConfigView = ({
 
   // State for filtering only baseline-modified variables
   const [showOnlyModified, setShowOnlyModified] = useState(false);
+
+  // Pinned op mode categories, persisted per user across sessions
+  const [pinnedKeys, setPinnedKeys] = useState<string[]>(loadPinned);
+
+  useEffect(() => {
+    const syncPinned = () => setPinnedKeys(loadPinned());
+    const onStorage = (evt: StorageEvent) => {
+      if (evt.key === null || evt.key === PINNED_STORAGE_KEY) {
+        syncPinned();
+      }
+    };
+
+    window.addEventListener('storage', onStorage);
+    window.addEventListener(PINNED_CHANGE_EVENT, syncPinned);
+
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener(PINNED_CHANGE_EVENT, syncPinned);
+    };
+  }, []);
+
+  const togglePin = (key: string) => {
+    const toggled = (keys: string[]) =>
+      keys.includes(key) ? keys.filter((k) => k !== key) : [...keys, key];
+
+    const next = toggled(loadPinned());
+    if (savePinned(next)) {
+      setPinnedKeys(next);
+    } else {
+      // A write that failed leaves storage stale, so the in-memory list is the
+      // only one that reflects this session.
+      setPinnedKeys(toggled);
+    }
+  };
+
+  const clearAllPins = () => {
+    savePinned([]);
+    setPinnedKeys([]);
+  };
 
   // Helper function to check if a configuration variable has baseline modifications
   const hasBaselineModifications = (
@@ -161,7 +227,15 @@ const ConfigView = ({
     });
   }
 
-  sortedKeys.sort();
+  // Pinned categories first (alphabetical among themselves), then the rest
+  sortedKeys.sort((a, b) => {
+    const aPinned = pinnedKeys.includes(a);
+    const bPinned = pinnedKeys.includes(b);
+    if (aPinned !== bPinned) {
+      return aPinned ? -1 : 1;
+    }
+    return a.localeCompare(b);
+  });
 
   return (
     <BaseView isUnlocked={isUnlocked}>
@@ -170,6 +244,17 @@ const ConfigView = ({
           Configuration
         </BaseViewHeading>
         <BaseViewIcons>
+          <BaseViewIconButton
+            title="Clear all pinned op modes"
+            onClick={clearAllPins}
+            disabled={pinnedKeys.length === 0}
+            style={{
+              opacity: pinnedKeys.length === 0 ? 0.4 : undefined,
+              cursor: pinnedKeys.length === 0 ? 'default' : undefined,
+            }}
+          >
+            <ClearPinsIcon className="h-6 w-6" />
+          </BaseViewIconButton>
           <BaseViewIconButton
             title={
               showOnlyModified
@@ -229,6 +314,8 @@ const ConfigView = ({
                     : null
                 }
                 showOnlyModified={showOnlyModified}
+                pinned={pinnedKeys.includes(key)}
+                onTogglePin={() => togglePin(key)}
                 onChange={(newState) =>
                   dispatch({
                     type: 'UPDATE_CONFIG',

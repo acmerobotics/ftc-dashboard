@@ -12,6 +12,8 @@ import {
 } from '@/store/types/config';
 
 import { ReactComponent as CopySVG } from '@/assets/icons/copy.svg';
+import { ReactComponent as StarIcon } from '@/assets/icons/star.svg';
+import { ReactComponent as StarOutlineIcon } from '@/assets/icons/star_outline.svg';
 import { BaseViewIconButton } from '@/components/views/BaseView';
 
 // Static map to track expansion states across component instances
@@ -23,6 +25,10 @@ interface Props {
   state: CustomVarState;
   baseline?: ConfigVar | null;
   showOnlyModified?: boolean;
+  // Pinning is only offered on top-level (op mode) categories; nested
+  // custom variables don't receive onTogglePin and render no star.
+  pinned?: boolean;
+  onTogglePin?: () => void;
   onChange: (state: CustomVarState) => void;
   onSave: (variable: CustomVar) => void;
 }
@@ -289,6 +295,31 @@ class CustomVariable extends Component<Props, State> {
             >
               <ExpandedMoreIcon className="h-6 w-6" />
             </div>
+            {this.props.onTogglePin && (
+              <button
+                title={
+                  this.props.pinned
+                    ? 'Unpin from top of list'
+                    : 'Pin to top of list'
+                }
+                className={clsx(
+                  'ml-1 transition-colors',
+                  this.props.pinned
+                    ? 'text-yellow-500 hover:text-yellow-600'
+                    : 'text-gray-400 hover:text-yellow-500 dark:text-slate-500 dark:hover:text-yellow-400',
+                )}
+                onClick={(evt) => {
+                  evt.stopPropagation();
+                  this.props.onTogglePin?.();
+                }}
+              >
+                {this.props.pinned ? (
+                  <StarIcon className="h-5 w-5" />
+                ) : (
+                  <StarOutlineIcon className="h-5 w-5" />
+                )}
+              </button>
+            )}
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <span
