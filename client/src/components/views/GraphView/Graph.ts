@@ -12,6 +12,10 @@ type Options = {
   fontSize: number;
   textColor: string;
   maxTicks: number;
+  crosshairColor: string;
+  // color the hover dots are outlined with; should match the view background
+  backgroundColor: string;
+  hoverDotRadius: number;
 };
 
 import twColors from 'tailwindcss/colors';
@@ -36,6 +40,9 @@ export const DEFAULT_OPTIONS: Options = {
   fontSize: 14,
   textColor: 'rgb(50, 50, 50)',
   maxTicks: 7,
+  crosshairColor: 'rgb(120, 120, 120)',
+  backgroundColor: 'rgb(255, 255, 255)',
+  hoverDotRadius: 3.5,
 };
 
 function niceNum(range: number, round: boolean) {
@@ -143,6 +150,52 @@ type Sample = {
   value: number;
 };
 
+// index of the sample in ts (sorted ascending) whose time is closest to t
+function nearestIndex(ts: number[], t: number) {
+  let lo = 0;
+  let hi = ts.length - 1;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (ts[mid] < t) {
+      lo = mid + 1;
+    } else {
+      hi = mid;
+    }
+  }
+
+  if (lo > 0 && Math.abs(ts[lo - 1] - t) <= Math.abs(ts[lo] - t)) return lo - 1;
+  return lo;
+}
+
+// format a sample for display in the hover overlay
+export function formatValue(value: number) {
+  if (!Number.isFinite(value)) return `${value}`;
+
+  const mag = Math.abs(value);
+  if (mag === 0) return '0';
+  if (mag < 1e-3 || mag >= 1e6) return value.toExponential(2);
+
+  return `${parseFloat(value.toPrecision(6))}`;
+}
+
+type HoverEntry = {
+  name: string;
+  color: string;
+  value: number;
+  // position of the sample, in CSS pixels relative to the canvas
+  x: number;
+  y: number;
+};
+
+export type HoverInfo = {
+  // cursor position, in CSS pixels relative to the canvas
+  cursorX: number;
+  cursorY: number;
+  // name of the series whose line is closest to the cursor
+  nearestName: string;
+  entries: HoverEntry[];
+};
+
 // align coordinate to the nearest pixel, offset by a half pixel
 // this helps with drawing thin lines; e.g., if a line of width 1px
 // is drawn on an integer coordinate, it will be 2px wide
@@ -213,6 +266,11 @@ export default class Graph {
   beginGraphNowMs = Number.NaN; // in telemetry time
   beginRenderTimeMs = Number.NaN; // in browser time
 
+  // cursor position in CSS pixels relative to the canvas, null when not hovering
+  cursor: { x: number; y: number } | null = null;
+  // result of the last hit test; recomputed on every render
+  hover: HoverInfo | null = null;
+
   scaling: Scaling;
 
   constructor(canvas: HTMLCanvasElement, options: Options) {
@@ -241,6 +299,17 @@ export default class Graph {
 
     this.beginGraphNowMs = Number.NaN; // in telemetry time
     this.beginRenderTimeMs = Number.NaN; // in browser time
+
+    this.hover = null;
+  }
+
+  // x and y are in CSS pixels relative to the canvas; pass null to clear
+  setCursor(cursor: { x: number; y: number } | null) {
+    this.cursor = cursor;
+  }
+
+  getHover() {
+    return this.hover;
   }
 
   add(time: number, samples: Sample[][]) {
@@ -305,6 +374,8 @@ export default class Graph {
 
     // eslint-disable-next-line
     this.canvas.width = this.canvas.width; // clears the canvas
+
+    this.hover = null;
 
     if (isNaN(this.beginGraphNowMs)) return false;
 
@@ -417,6 +488,148 @@ export default class Graph {
       axis,
       graphNowMs,
     );
+
+    this.hover = this.hitTest(
+      x + axisWidth + 2 * o.padding,
+      y + o.padding,
+      graphWidth,
+      graphHeight,
+      axis,
+      graphNowMs,
+    );
+
+    if (this.hover !== null) {
+      this.renderHover(
+        x + axisWidth + 2 * o.padding,
+        y + o.padding,
+        graphWidth,
+        graphHeight,
+        this.hover,
+      );
+    }
+  }
+
+  // finds the sample of each series closest in time to the cursor
+  hitTest(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    axis: Axis,
+    graphNowMs: number,
+  ): HoverInfo | null {
+    const o = this.options;
+
+    const cursor = this.cursor;
+    if (cursor === null) return null;
+
+    if (
+      cursor.x < x ||
+      cursor.x > x + width ||
+      cursor.y < y ||
+      cursor.y > y + height
+    ) {
+      return null;
+    }
+
+    // map the cursor back onto the time axis
+    const timeMs =
+      graphNowMs - o.windowMs + scale(cursor.x - x, 0, width, 0, o.windowMs);
+
+    // don't report a value for a series that has no sample near the cursor
+    // (e.g., one that stopped reporting partway through the window)
+    const minDeltaMs = o.windowMs / 25;
+
+    const entries: HoverEntry[] = [];
+    let nearestName = '';
+    let nearestDist = Number.MAX_VALUE;
+
+    for (const name of Object.keys(this.data)) {
+      const { ts, vs, color } = this.data[name];
+
+      if (ts.length === 0) continue;
+
+      const i = nearestIndex(ts, timeMs);
+
+      // a slowly updating series is never sampled near most of the cursor
+      // positions, so the tolerance also follows its own spacing
+      const prevDt = i > 0 ? ts[i] - ts[i - 1] : 0;
+      const nextDt = i + 1 < ts.length ? ts[i + 1] - ts[i] : 0;
+      const dt = (timeMs < ts[i] ? prevDt : nextDt) || prevDt || nextDt;
+
+      if (Math.abs(ts[i] - timeMs) > Math.max(minDeltaMs, 1.5 * dt)) continue;
+
+      const sampleY = y + scale(vs[i], axis.min, axis.max, height, 0);
+
+      entries.push({
+        name,
+        color,
+        value: vs[i],
+        x: x + scale(ts[i] - graphNowMs + o.windowMs, 0, o.windowMs, 0, width),
+        y: sampleY,
+      });
+
+      const dist = Math.abs(sampleY - cursor.y);
+      if (dist < nearestDist) {
+        nearestDist = dist;
+        nearestName = name;
+      }
+    }
+
+    if (entries.length === 0) return null;
+
+    // order the entries the way they're stacked on screen
+    entries.sort((a, b) => b.value - a.value);
+
+    return {
+      cursorX: cursor.x,
+      cursorY: cursor.y,
+      nearestName,
+      entries,
+    };
+  }
+
+  renderHover(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    hover: HoverInfo,
+  ) {
+    const o = this.options;
+
+    this.ctx.save();
+    this.ctx.beginPath();
+    this.ctx.rect(x, y, width, height);
+    this.ctx.clip();
+
+    // vertical crosshair through the cursor
+    this.ctx.strokeStyle = o.crosshairColor;
+    this.ctx.lineWidth = o.gridLineWidth / devicePixelRatio;
+    this.ctx.setLineDash([4, 4]);
+    this.ctx.beginPath();
+    fineMoveTo(this.ctx, this.scaling, hover.cursorX, y);
+    fineLineTo(this.ctx, this.scaling, hover.cursorX, y + height);
+    this.ctx.stroke();
+    this.ctx.setLineDash([]);
+
+    // mark the sample of each series at the hovered time
+    this.ctx.lineWidth = 1.5;
+    this.ctx.strokeStyle = o.backgroundColor;
+    for (const entry of hover.entries) {
+      const radius =
+        entry.name === hover.nearestName
+          ? o.hoverDotRadius + 1.5
+          : o.hoverDotRadius;
+
+      this.ctx.beginPath();
+      this.ctx.arc(entry.x, entry.y, radius, 0, 2 * Math.PI);
+      this.ctx.fillStyle = entry.color;
+      this.ctx.fill();
+      this.ctx.stroke();
+    }
+
+    this.ctx.restore();
   }
 
   renderAxisLabels(x: number, y: number, height: number, ticks: string[]) {

@@ -129,10 +129,15 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
 
   handleDocumentKeydown(evt: KeyboardEvent) {
     if (evt.code === 'Space' || evt.key === 'k') {
+      const userPaused = !this.state.userPaused;
+
       this.setState({
         ...this.state,
-        userPaused: !this.state.userPaused,
-        pausedTime: Date.now(),
+        userPaused,
+        pausedTime:
+          userPaused && !this.state.opmodePaused
+            ? Date.now()
+            : this.state.pausedTime,
       });
     }
   }
@@ -328,6 +333,13 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
                     textColor: isDarkMode
                       ? colors.slate[100]
                       : colors.gray[900],
+                    crosshairColor: isDarkMode
+                      ? colors.slate[300]
+                      : colors.gray[500],
+                    // matches the BaseView background (bg-white / dark:bg-slate-900)
+                    backgroundColor: isDarkMode
+                      ? colors.slate[900]
+                      : 'rgb(255, 255, 255)',
                   }}
                   paused={this.state.userPaused || this.state.opmodePaused}
                   pausedTime={this.state.pausedTime}
