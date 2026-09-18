@@ -286,6 +286,14 @@ public class TestDashboardInstance {
         currentPacket.put(x, o);
     }
 
+    public void addLine(String line) {
+        if (currentPacket == null) {
+            currentPacket = new TelemetryPacket();
+        }
+
+        currentPacket.addLine(line);
+    }
+
     public void update() {
         if (currentPacket != null) {
             core.sendTelemetryPacket(currentPacket);
