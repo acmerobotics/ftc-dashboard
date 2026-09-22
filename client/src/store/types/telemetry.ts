@@ -74,6 +74,8 @@ export type TelemetryItem = {
     ops: DrawOp[];
   };
   log: string[];
+  // labels for the packet's instant in time; absent on packets from older apps
+  markers?: string[];
   timestamp: number;
 };
 

@@ -128,6 +128,16 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
   }
 
   handleDocumentKeydown(evt: KeyboardEvent) {
+    // this listener is native and sits below the React root, so a synthetic
+    // stopPropagation() from a field inside the view lands too late to help
+    const target = evt.target;
+    if (
+      target instanceof HTMLInputElement ||
+      target instanceof HTMLTextAreaElement
+    ) {
+      return;
+    }
+
     if (evt.code === 'Space' || evt.key === 'k') {
       this.setState({
         ...this.state,
@@ -218,6 +228,14 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
         }),
     ]);
 
+    // markers sent from robot code share their packet's timestamp
+    const markers = this.props.telemetry.flatMap((packet) =>
+      (packet.markers ?? []).map((label) => ({
+        t: packet.timestamp,
+        label,
+      })),
+    );
+
     return (
       <BaseView
         className="flex flex-col overflow-auto"
@@ -271,6 +289,10 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
                 <p className="my-2 text-center">
                   Press the upper-right button to graph selected keys over time
                 </p>
+                <p className="my-2 text-center text-sm opacity-75">
+                  Click the graph to add a marker, type a label and press Enter;
+                  click a marker to remove it
+                </p>
                 <h3 className="mt-6 font-medium">Telemetry to graph:</h3>
                 <div className="ml-3">
                   <MultipleCheckbox
@@ -318,6 +340,7 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
               {({ isDarkMode }) => (
                 <GraphCanvas
                   data={graphData}
+                  markers={markers}
                   options={{
                     windowMs: this.state.windowMs.valid
                       ? this.state.windowMs.value
@@ -328,6 +351,9 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
                     textColor: isDarkMode
                       ? colors.slate[100]
                       : colors.gray[900],
+                    markerColor: isDarkMode
+                      ? colors.slate[300]
+                      : colors.gray[600],
                   }}
                   paused={this.state.userPaused || this.state.opmodePaused}
                   pausedTime={this.state.pausedTime}

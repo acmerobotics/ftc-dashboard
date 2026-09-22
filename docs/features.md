@@ -26,6 +26,16 @@ packet.fieldOverlay()
 
 Check out [this page](fieldview) for more information on Field View drawing.
 
+Packets can also label their instant in time with `addMarker()`. Markers appear as labeled vertical lines in the Graph View, which makes it easy to line up events in the code with the data around them.
+
+```java
+if (intake.justStarted()) {
+    packet.addMarker("intake on");
+}
+```
+
+Markers can be placed from the client as well: click the plot to add a marker, type a label, and press Enter. Escape discards the marker instead, and clicking a marker removes it. Markers are anchored to a moment in telemetry time, so they scroll along with the data and disappear once they leave the graph window.
+
 Use `FtcDashboard#sendTelemetryPacket()` to dispatch complete packets.
 
 ```java

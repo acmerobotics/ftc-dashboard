@@ -12,6 +12,8 @@ type Options = {
   fontSize: number;
   textColor: string;
   maxTicks: number;
+  markerColor: string;
+  markerLineWidth: number; // device pixels
 };
 
 import twColors from 'tailwindcss/colors';
@@ -36,6 +38,8 @@ export const DEFAULT_OPTIONS: Options = {
   fontSize: 14,
   textColor: 'rgb(50, 50, 50)',
   maxTicks: 7,
+  markerColor: 'rgb(90, 90, 90)',
+  markerLineWidth: 1, // device pixels
 };
 
 function niceNum(range: number, round: boolean) {
@@ -143,6 +147,19 @@ type Sample = {
   value: number;
 };
 
+// a labeled instant in telemetry time
+export type Marker = {
+  t: number;
+  label: string;
+};
+
+type Rect = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
 // align coordinate to the nearest pixel, offset by a half pixel
 // this helps with drawing thin lines; e.g., if a line of width 1px
 // is drawn on an integer coordinate, it will be 2px wide
@@ -209,9 +226,14 @@ export default class Graph {
   options: Options;
 
   data: { [key: string]: { ts: number[]; vs: number[]; color: string } };
+  markers: Marker[];
 
   beginGraphNowMs = Number.NaN; // in telemetry time
   beginRenderTimeMs = Number.NaN; // in browser time
+
+  // updated on each render to support hit testing against the drawn plot
+  graphNowMs = Number.NaN; // in telemetry time
+  plotRect: Rect = { x: 0, y: 0, width: 0, height: 0 }; // CSS pixels
 
   scaling: Scaling;
 
@@ -227,6 +249,7 @@ export default class Graph {
     Object.assign(this.options, options || {});
 
     this.data = {};
+    this.markers = [];
 
     this.scaling = {
       scalingX: 1,
@@ -238,13 +261,20 @@ export default class Graph {
 
   reset() {
     this.data = {};
+    this.markers = [];
 
     this.beginGraphNowMs = Number.NaN; // in telemetry time
     this.beginRenderTimeMs = Number.NaN; // in browser time
   }
 
-  add(time: number, samples: Sample[][]) {
+  add(time: number, samples: Sample[][], markers: Marker[] = []) {
     const o = this.options;
+
+    for (const { t, label } of markers) {
+      if (isNaN(t)) continue;
+
+      this.markers.push({ t, label });
+    }
 
     for (const sample of samples) {
       const t = sample.reduce(
@@ -283,6 +313,85 @@ export default class Graph {
     }
   }
 
+  addMarker(t: number, label: string): Marker | null {
+    if (isNaN(t)) return null;
+
+    const marker = { t, label };
+    this.markers.push(marker);
+
+    return marker;
+  }
+
+  removeMarker(marker: Marker) {
+    const index = this.markers.indexOf(marker);
+    if (index === -1) return;
+
+    this.markers.splice(index, 1);
+  }
+
+  // where a marker is drawn, in CSS pixels relative to the canvas
+  markerXCoord(marker: Marker) {
+    const { x, width } = this.plotRect;
+    return (
+      x +
+      scale(
+        marker.t - this.graphNowMs + this.options.windowMs,
+        0,
+        this.options.windowMs,
+        0,
+        width,
+      )
+    );
+  }
+
+  // the marker drawn closest to x, or null if none is within tolerance
+  // (both in CSS pixels relative to the canvas)
+  markerAt(x: number, tolerance: number): Marker | null {
+    if (this.plotRect.width === 0 || isNaN(this.graphNowMs)) return null;
+
+    const { x: plotX, width } = this.plotRect;
+
+    let closest: Marker | null = null;
+    let closestDist = tolerance;
+    for (const marker of this.markers) {
+      const markerX = this.markerXCoord(marker);
+      // markers outside the plot are not drawn, so they cannot be hit
+      if (markerX < plotX || markerX > plotX + width) continue;
+
+      const dist = Math.abs(markerX - x);
+      if (dist > closestDist) continue;
+
+      closest = marker;
+      closestDist = dist;
+    }
+
+    return closest;
+  }
+
+  // converts an x coordinate in CSS pixels (relative to the canvas) to telemetry time
+  timeAtX(x: number) {
+    const o = this.options;
+    const { x: plotX, width } = this.plotRect;
+
+    if (width === 0) return Number.NaN;
+
+    return (
+      this.graphNowMs - o.windowMs + scale(x - plotX, 0, width, 0, o.windowMs)
+    );
+  }
+
+  // both coordinates are in CSS pixels relative to the canvas
+  isInPlot(x: number, y: number) {
+    const r = this.plotRect;
+    return (
+      r.width > 0 &&
+      x >= r.x &&
+      x <= r.x + r.width &&
+      y >= r.y &&
+      y <= r.y + r.height
+    );
+  }
+
   getYAxisScaling() {
     const [min, max] = Object.keys(this.data).reduce(
       (acc, k) =>
@@ -309,6 +418,7 @@ export default class Graph {
     if (isNaN(this.beginGraphNowMs)) return false;
 
     const graphNowMs = this.beginGraphNowMs + (time - this.beginRenderTimeMs);
+    this.graphNowMs = graphNowMs;
 
     // prune old samples
     for (const k of Object.keys(this.data)) {
@@ -318,6 +428,11 @@ export default class Graph {
         vs.shift();
       }
     }
+
+    // prune markers that have scrolled off the graph
+    this.markers = this.markers.filter(
+      ({ t }) => t + o.windowMs + 250 >= graphNowMs,
+    );
 
     let allEmpty = true;
     for (const { ts } of Object.values(this.data)) {
@@ -399,10 +514,19 @@ export default class Graph {
     );
 
     const graphWidth = width - axisWidth - 3 * o.padding;
+    const graphX = x + axisWidth + 2 * o.padding;
+    const graphY = y + o.padding;
+
+    this.plotRect = {
+      x: graphX,
+      y: graphY,
+      width: graphWidth,
+      height: graphHeight,
+    };
 
     this.renderGridLines(
-      x + axisWidth + 2 * o.padding,
-      y + o.padding,
+      graphX,
+      graphY,
       graphWidth,
       graphHeight,
       5,
@@ -410,13 +534,71 @@ export default class Graph {
     );
 
     this.renderGraphLines(
-      x + axisWidth + 2 * o.padding,
-      y + o.padding,
+      graphX,
+      graphY,
       graphWidth,
       graphHeight,
       axis,
       graphNowMs,
     );
+
+    this.renderMarkers(graphX, graphY, graphWidth, graphHeight, graphNowMs);
+  }
+
+  renderMarkers(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    graphNowMs: number,
+  ) {
+    const o = this.options;
+
+    if (this.markers.length === 0) return;
+
+    this.ctx.save();
+    this.ctx.translate(x, y);
+    // the path survives the save() above, so it has to be cleared before
+    // clipping; otherwise the leftover data line is folded into the clip
+    // region and its winding punches curve-shaped holes in the markers
+    this.ctx.beginPath();
+    this.ctx.rect(0, 0, width, height);
+    this.ctx.clip();
+
+    this.ctx.strokeStyle = o.markerColor;
+    this.ctx.fillStyle = o.markerColor;
+    this.ctx.lineWidth = o.markerLineWidth / devicePixelRatio;
+    this.ctx.setLineDash([4, 4]);
+    this.ctx.textAlign = 'left';
+
+    for (const { t, label } of this.markers) {
+      const markerX = scale(
+        t - graphNowMs + o.windowMs,
+        0,
+        o.windowMs,
+        0,
+        width,
+      );
+
+      if (markerX < 0 || markerX > width) continue;
+
+      this.ctx.beginPath();
+      fineMoveTo(this.ctx, this.scaling, markerX, 0);
+      fineLineTo(this.ctx, this.scaling, markerX, height);
+      this.ctx.stroke();
+
+      if (label === '') continue;
+
+      // labels read bottom-to-top alongside their line to stay legible on
+      // narrow graphs
+      this.ctx.save();
+      this.ctx.translate(markerX, height - o.keySpacing);
+      this.ctx.rotate(-Math.PI / 2);
+      this.ctx.fillText(label, o.keySpacing, o.fontSize * 0.75);
+      this.ctx.restore();
+    }
+
+    this.ctx.restore();
   }
 
   renderAxisLabels(x: number, y: number, height: number, ticks: string[]) {
