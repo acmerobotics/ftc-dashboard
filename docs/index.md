@@ -31,6 +31,8 @@ layout: default
 
 * [Camera](features#camera)
 
+* [Color View](features#color-view)
+
 [Competition Use](competition)
 
 [Samples](https://github.com/acmerobotics/ftc-dashboard/tree/master/TeamCode/src/main/java/org/firstinspires/ftc/teamcode)

@@ -171,3 +171,29 @@ int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("c
 OpenCvWebcam camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
 FtcDashboard.getInstance().startCameraStream(camera, 0);
 ```
+
+## Color View
+
+The Color view compares what an I2C color sensor reads against a color you
+expect, with no robot code of its own: run the **Hardware** op mode with a
+color sensor in your configuration. A picker appears when more than one sensor
+is published.
+
+Enter the expected color as a hex code, `rgb(r, g, b)`, a bare `r, g, b` triple,
+or one of the built-in presets. The tolerance beside it is the largest
+[CIEDE2000](https://en.wikipedia.org/wiki/Color_difference#CIEDE2000)
+difference (ΔE) counted as a match: under 1 is imperceptible, over 10 is
+clearly different.
+
+The gear icon picks how the raw counts map into 0-255:
+
+- **Auto** scales to the brightest channel. Ignoring brightness is the
+  steadiest way to tell game elements apart, so this is the default, but white,
+  grey and black all normalize to the same color.
+- **8-bit** takes the raw counts as 0-255.
+- **Alpha** divides them by the sensor's alpha reading. Like Auto, it cannot
+  tell white, grey and black apart.
+- **Manual** divides them by a value you choose.
+
+The expected color, tolerance, sensor, mode and Manual divisor are saved in the
+browser.

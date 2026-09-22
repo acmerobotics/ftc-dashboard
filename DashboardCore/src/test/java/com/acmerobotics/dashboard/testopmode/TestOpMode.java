@@ -44,5 +44,5 @@ public abstract class TestOpMode {
 
     void start() {}
 
-    void stop() {}
+    protected void stop() {}
 }

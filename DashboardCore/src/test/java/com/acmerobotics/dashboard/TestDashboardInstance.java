@@ -1,6 +1,7 @@
 package com.acmerobotics.dashboard;
 
 import com.acmerobotics.dashboard.config.ValueProvider;
+import com.acmerobotics.dashboard.config.variable.CustomVariable;
 import com.acmerobotics.dashboard.message.Message;
 import com.acmerobotics.dashboard.message.redux.InitOpMode;
 import com.acmerobotics.dashboard.message.redux.ReceiveHardwareConfigList;
@@ -18,6 +19,8 @@ import java.util.stream.Collectors;
 
 public class TestDashboardInstance {
     private static TestDashboardInstance instance = new TestDashboardInstance();
+
+    static final String HARDWARE_CATEGORY = "__hardware__";
 
     static final String DEFAULT_OP_MODE_NAME = "$Stop$Robot$";
     TestOpModeManager opModeManager = new TestOpModeManager();
@@ -38,17 +41,25 @@ public class TestDashboardInstance {
     private class DashWebSocket extends NanoWSD.WebSocket implements SendFun {
         final SocketHandler sh = core.newSocket(this);
 
+        private volatile boolean closed;
+
         public DashWebSocket(NanoHTTPD.IHTTPSession handshakeRequest) {
             super(handshakeRequest);
         }
 
         @Override
         public void send(Message message) {
+            if (closed) {
+                return;
+            }
             try {
                 String messageStr = DashboardCore.GSON.toJson(message);
                 send(messageStr);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                // sendAll holds the socket-list lock, so a dead client is only
+                // marked here and removed by onClose.
+                closed = true;
+                System.err.println("dropping client: " + e.getMessage());
             }
         }
 
@@ -84,6 +95,7 @@ public class TestDashboardInstance {
         @Override
         protected void onClose(
                 NanoWSD.WebSocketFrame.CloseCode code, String reason, boolean initiatedByRemote) {
+            closed = true;
             sh.onClose();
 
             opModeManager.clearSendFun();
@@ -276,6 +288,23 @@ public class TestDashboardInstance {
             opModeManager.loop();
             Thread.yield();
         }
+    }
+
+    /**
+     * Mirrors {@code FtcDashboard.withHardwareRoot} so test op modes can publish fake hardware into
+     * the category the Hardware and Color views read from.
+     */
+    public void withHardwareRoot(CustomVariableConsumer function) {
+        core.withConfigRoot(
+                root -> {
+                    CustomVariable hardwareVar =
+                            (CustomVariable) root.getVariable(HARDWARE_CATEGORY);
+                    if (hardwareVar == null) {
+                        hardwareVar = new CustomVariable();
+                        root.putVariable(HARDWARE_CATEGORY, hardwareVar);
+                    }
+                    function.accept(hardwareVar);
+                });
     }
 
     public void addData(String x, Object o) {

@@ -13,6 +13,7 @@ import { ReactComponent as ListIcon } from '@/assets/icons/list.svg';
 import { ReactComponent as HardwareIcon } from '@/assets/icons/hardware.svg';
 import { ReactComponent as GamepadIcon } from '@/assets/icons/gamepad.svg';
 import { ReactComponent as ExclamationIcon } from '@/assets/icons/exclamation.svg';
+import { ReactComponent as ColorLensIcon } from '@/assets/icons/color_lens.svg';
 
 type ViewPickerProps = {
   isOpen: boolean;
@@ -159,6 +160,13 @@ const listContent = [
     icon: <CameraIcon className="h-5 w-5 text-white" />,
     customStyles: 'focus:ring-lime-600',
     iconBg: 'bg-lime-500',
+  },
+  {
+    title: 'Color View',
+    view: ConfigurableView.COLOR_VIEW,
+    icon: <ColorLensIcon className="h-6 w-6 text-white" />,
+    customStyles: 'focus:ring-rose-600',
+    iconBg: 'bg-rose-500',
   },
 ];
 
