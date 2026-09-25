@@ -8,6 +8,7 @@ import storageMiddleware from './middleware/storageMiddleware';
 import rootReducer from './reducers';
 import {
   GET_ROBOT_STATUS,
+  RECEIVE_LOGCAT_LINES,
   RECEIVE_PING_TIME,
   RECEIVE_ROBOT_STATUS,
   RECEIVE_TELEMETRY,
@@ -18,6 +19,7 @@ const HIDDEN_ACTIONS = [
   RECEIVE_TELEMETRY,
   RECEIVE_ROBOT_STATUS,
   GET_ROBOT_STATUS,
+  RECEIVE_LOGCAT_LINES,
 ];
 
 const configureStore = () => {

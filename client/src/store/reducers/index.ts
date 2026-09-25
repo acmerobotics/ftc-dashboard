@@ -12,6 +12,7 @@ import gamepadReducer from './gamepad';
 import hardwareConfigReducer from './hardwareconfig';
 import keyboardMappingReducer from './keyboardMapping';
 import logcatReducer from './logcat';
+import logRecorderReducer from './logRecorder';
 import { createDispatchHook } from 'react-redux';
 
 const rootReducer = combineReducers({
@@ -26,6 +27,7 @@ const rootReducer = combineReducers({
   hardwareConfig: hardwareConfigReducer,
   keyboardMapping: keyboardMappingReducer,
   logcat: logcatReducer,
+  logRecorder: logRecorderReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

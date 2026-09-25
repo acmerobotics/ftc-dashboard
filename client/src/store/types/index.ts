@@ -93,12 +93,21 @@ export type {
   ReceiveHardwareConfigListAction,
 } from './hardwareconfig';
 
-export { RECEIVE_LOGCAT_ERRORS, CLEAR_LOGCAT_ERRORS } from './logcat';
+export {
+  RECEIVE_LOGCAT_ERRORS,
+  CLEAR_LOGCAT_ERRORS,
+  START_LOGCAT_CAPTURE,
+  STOP_LOGCAT_CAPTURE,
+  RECEIVE_LOGCAT_LINES,
+} from './logcat';
 export type {
   LogcatError,
   LogcatState,
   ReceiveLogcatErrorsAction,
   ClearLogcatErrorsAction,
+  StartLogcatCaptureAction,
+  StopLogcatCaptureAction,
+  ReceiveLogcatLinesAction,
 } from './logcat';
 
 export { SET_REPLAY_OVERLAY } from './replay';

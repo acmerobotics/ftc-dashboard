@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import LayoutPreset, { LayoutPresetType } from '@/enums/LayoutPreset';
 import { saveLayoutPreset, getLayoutPreset } from '@/store/actions/settings';
+import { getMaxLogEntries } from '@/store/actions/logRecorder';
 import { RootState } from '@/store/reducers';
 
 import { BaseViewIconButton } from '@/components/views/BaseView';
@@ -27,6 +28,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     dispatch(getLayoutPreset());
+    dispatch(getMaxLogEntries());
 
     startSocketWatcher(dispatch);
   }, [dispatch]);

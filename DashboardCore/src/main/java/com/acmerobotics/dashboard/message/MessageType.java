@@ -11,12 +11,15 @@ import com.acmerobotics.dashboard.message.redux.ReceiveGamepadState;
 import com.acmerobotics.dashboard.message.redux.ReceiveHardwareConfigList;
 import com.acmerobotics.dashboard.message.redux.ReceiveImage;
 import com.acmerobotics.dashboard.message.redux.ReceiveLogcatErrors;
+import com.acmerobotics.dashboard.message.redux.ReceiveLogcatLines;
 import com.acmerobotics.dashboard.message.redux.ReceiveOpModeList;
 import com.acmerobotics.dashboard.message.redux.ReceiveRobotStatus;
 import com.acmerobotics.dashboard.message.redux.ReceiveTelemetry;
 import com.acmerobotics.dashboard.message.redux.SaveConfig;
 import com.acmerobotics.dashboard.message.redux.SetHardwareConfig;
+import com.acmerobotics.dashboard.message.redux.StartLogcatCapture;
 import com.acmerobotics.dashboard.message.redux.StartOpMode;
+import com.acmerobotics.dashboard.message.redux.StopLogcatCapture;
 import com.acmerobotics.dashboard.message.redux.StopOpMode;
 import com.acmerobotics.dashboard.message.redux.WriteHardwareConfig;
 
@@ -55,7 +58,12 @@ public enum MessageType {
     DELETE_HARDWARE_CONFIG(DeleteHardwareConfig.class),
 
     /* logcat errors */
-    RECEIVE_LOGCAT_ERRORS(ReceiveLogcatErrors.class);
+    RECEIVE_LOGCAT_ERRORS(ReceiveLogcatErrors.class),
+
+    /* full logcat capture */
+    START_LOGCAT_CAPTURE(StartLogcatCapture.class),
+    STOP_LOGCAT_CAPTURE(StopLogcatCapture.class),
+    RECEIVE_LOGCAT_LINES(ReceiveLogcatLines.class);
 
     final Class<? extends Message> msgClass;
 
