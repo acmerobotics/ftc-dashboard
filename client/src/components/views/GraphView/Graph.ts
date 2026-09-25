@@ -3,6 +3,11 @@ import { cloneDeep } from 'lodash';
 type Options = {
   windowMs: number;
   colors: string[];
+  // Layer order; the first is drawn in front and heads the key. Unlisted names
+  // keep arrival order, after the listed ones.
+  seriesOrder: string[];
+  // per-series color overrides; series without one fall back to `colors`
+  seriesColors: { [name: string]: string };
   lineWidth: number;
   padding: number;
   keySpacing: number;
@@ -14,19 +19,14 @@ type Options = {
   maxTicks: number;
 };
 
-import twColors from 'tailwindcss/colors';
+import { DEFAULT_SERIES_COLORS } from './colors';
 
 // all dimensions in this file are *CSS* pixels unless otherwise stated
 export const DEFAULT_OPTIONS: Options = {
   windowMs: 5000,
-  colors: [
-    twColors['blue']['600'],
-    twColors['red']['600'],
-    twColors['green']['600'],
-    twColors['purple']['600'],
-    twColors['orange']['600'],
-    twColors['pink']['600'],
-  ],
+  colors: [...DEFAULT_SERIES_COLORS],
+  seriesOrder: [],
+  seriesColors: {},
   lineWidth: 2,
   padding: 15,
   keySpacing: 4,
@@ -208,7 +208,7 @@ export default class Graph {
   ctx: CanvasRenderingContext2D;
   options: Options;
 
-  data: { [key: string]: { ts: number[]; vs: number[]; color: string } };
+  data: { [key: string]: { ts: number[]; vs: number[] } };
 
   beginGraphNowMs = Number.NaN; // in telemetry time
   beginRenderTimeMs = Number.NaN; // in browser time
@@ -237,15 +237,46 @@ export default class Graph {
   }
 
   reset() {
-    this.data = {};
+    // no prototype, so a series named '__proto__' is stored like any other
+    this.data = Object.create(null);
 
     this.beginGraphNowMs = Number.NaN; // in telemetry time
     this.beginRenderTimeMs = Number.NaN; // in browser time
   }
 
-  add(time: number, samples: Sample[][]) {
+  // The first name is the topmost layer.
+  orderedNames() {
+    const { seriesOrder } = this.options;
+
+    const names = Object.keys(this.data);
+    if (seriesOrder.length === 0) return names;
+
+    const rank = (name: string) => {
+      const i = seriesOrder.indexOf(name);
+      return i === -1 ? seriesOrder.length : i;
+    };
+
+    // the insertion index keeps unlisted series in a stable relative order
+    return names
+      .map((name, i) => ({ name, i }))
+      .sort((a, b) => rank(a.name) - rank(b.name) || a.i - b.i)
+      .map(({ name }) => name);
+  }
+
+  colorFor(name: string) {
     const o = this.options;
 
+    if (Object.prototype.hasOwnProperty.call(o.seriesColors, name))
+      return o.seriesColors[name];
+
+    const orderIndex = o.seriesOrder.indexOf(name);
+    const index =
+      orderIndex === -1 ? Object.keys(this.data).indexOf(name) : orderIndex;
+
+    return o.colors[Math.max(index, 0) % o.colors.length];
+  }
+
+  add(time: number, samples: Sample[][]) {
     for (const sample of samples) {
       const t = sample.reduce(
         (acc, { name, value }) => (name === 'time' ? value : acc),
@@ -263,7 +294,6 @@ export default class Graph {
           this.data[name] = {
             ts: [],
             vs: [],
-            color: o.colors[Object.keys(this.data).length % o.colors.length],
           };
         }
 
@@ -352,13 +382,13 @@ export default class Graph {
 
     this.ctx.save();
 
-    const names = Object.keys(this.data);
+    const names = this.orderedNames();
     const numSets = names.length;
     const height = numSets * o.fontSize + (numSets - 1) * o.keySpacing;
     for (let i = 0; i < numSets; i++) {
       const lineY = y + i * (o.fontSize + o.keySpacing) + o.fontSize / 2;
       const name = names[i];
-      const { color } = this.data[name];
+      const color = this.colorFor(name);
       const lineWidth =
         this.ctx.measureText(name).width + o.keyLineLength + o.keySpacing;
       const lineX = x + (width - lineWidth) / 2;
@@ -499,32 +529,33 @@ export default class Graph {
 
     // draw data lines
     // scaling is used instead of transform because of the non-uniform stretching warps the plot line
+    // drawn back to front so that the head of the layer order ends up on top
     this.ctx.beginPath();
-    Object.keys(this.data).forEach((k, i) => {
-      const { ts, vs } = this.data[k];
+    this.orderedNames()
+      .reverse()
+      .forEach((k) => {
+        const { ts, vs } = this.data[k];
 
-      if (ts.length === 0) return;
+        if (ts.length === 0) return;
 
-      const color = o.colors[i % o.colors.length];
-
-      this.ctx.beginPath();
-      this.ctx.strokeStyle = color;
-      fineMoveTo(
-        this.ctx,
-        this.scaling,
-        scale(ts[0] - graphNowMs + o.windowMs, 0, o.windowMs, 0, width),
-        scale(vs[0], axis.min, axis.max, height, 0),
-      );
-      for (let j = 1; j < ts.length; j++) {
-        fineLineTo(
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = this.colorFor(k);
+        fineMoveTo(
           this.ctx,
           this.scaling,
-          scale(ts[j] - graphNowMs + o.windowMs, 0, o.windowMs, 0, width),
-          scale(vs[j], axis.min, axis.max, height, 0),
+          scale(ts[0] - graphNowMs + o.windowMs, 0, o.windowMs, 0, width),
+          scale(vs[0], axis.min, axis.max, height, 0),
         );
-      }
-      this.ctx.stroke();
-    });
+        for (let j = 1; j < ts.length; j++) {
+          fineLineTo(
+            this.ctx,
+            this.scaling,
+            scale(ts[j] - graphNowMs + o.windowMs, 0, o.windowMs, 0, width),
+            scale(vs[j], axis.min, axis.max, height, 0),
+          );
+        }
+        this.ctx.stroke();
+      });
 
     this.ctx.restore();
   }
