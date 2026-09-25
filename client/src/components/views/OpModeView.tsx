@@ -2,6 +2,7 @@ import { Component, ChangeEvent, createRef, MutableRefObject } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
 import { RootState } from '@/store/reducers';
+import ReplayBadge from '@/components/views/ReplayBadge';
 import { initOpMode, startOpMode, stopOpMode } from '@/store/actions/opmode';
 import OpModeStatus from '@/enums/OpModeStatus';
 import BaseView, {
@@ -23,9 +24,12 @@ type OpModeViewState = {
   shouldShowGamepadUnsupportedTooltip: boolean;
 };
 
-const mapStateToProps = ({ status, gamepad }: RootState) => ({
+const mapStateToProps = ({ status, gamepad, playback }: RootState) => ({
   ...status,
   ...gamepad,
+  // This view renders live robot status while the rest of the dashboard may be
+  // showing a recording, so starting a run from beside a replay is disabled.
+  isReplaying: playback.mode === 'playback',
 });
 
 const mapDispatchToProps = {
@@ -46,12 +50,14 @@ const ActionButton = ({
   ...props
 }: JSX.IntrinsicElements['button']) => (
   <button
-    className={`ml-2 rounded-md border py-1 px-3 shadow-md ${className}`}
+    className={`ml-2 rounded-md border py-1 px-3 shadow-md disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
     {...props}
   >
     {children}
   </button>
 );
+
+const REPLAY_DISABLED_TITLE = 'Close the recording you are reviewing first';
 
 class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
   gamepadUnsupportedTooltipRef: MutableRefObject<HTMLDivElement | null>;
@@ -124,6 +130,8 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
           dark:hover:border-blue-400/80 dark:focus:bg-blue-700
         `}
         onClick={() => this.props.initOpMode(this.state.selectedOpMode)}
+        disabled={this.props.isReplaying}
+        title={this.props.isReplaying ? REPLAY_DISABLED_TITLE : undefined}
       >
         Init
       </ActionButton>
@@ -139,6 +147,8 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
           dark:hover:border-green-300/80 dark:focus:bg-green-600
         `}
         onClick={() => this.props.startOpMode()}
+        disabled={this.props.isReplaying}
+        title={this.props.isReplaying ? REPLAY_DISABLED_TITLE : undefined}
       >
         Start
       </ActionButton>
@@ -150,10 +160,15 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
       <ActionButton
         className={`
           border-red-200 bg-red-100 transition-colors
-          dark:border-transparent dark:bg-red-500 dark:text-red-50 dark:highlight-white/30
-          dark:hover:border-red-300/80 dark:focus:bg-red-600
+          dark:border-transparent dark:bg-red-600 dark:text-white dark:highlight-white/30
+          dark:hover:border-red-300/80 dark:focus:bg-red-700
         `}
         onClick={() => this.props.stopOpMode()}
+        // red-600 and white: red-500 with red-50 is 3.44:1 in dark mode, and
+        // neither half fixes it alone (3.76 and 4.41). Light mode is untouched.
+        //
+        // Never disabled, unlike Init and Start. This panel shows the LIVE
+        // robot, which can be driving while someone reviews an earlier run.
       >
         Stop
       </ActionButton>
@@ -271,6 +286,7 @@ class OpModeView extends Component<OpModeViewProps, OpModeViewState> {
         <div className="flex">
           <BaseViewHeading isDraggable={this.props.isDraggable}>
             Op Mode
+            {this.props.isReplaying && <ReplayBadge source="live" />}
           </BaseViewHeading>
           <div
             onPointerEnter={this.gamepadIconsHover.bind(this)}

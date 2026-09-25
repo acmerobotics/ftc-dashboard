@@ -250,13 +250,19 @@ export default class Field {
           }
 
           this.ctx.rotate(op.theta);
-          this.ctx.drawImage(
-            image,
-            -op.pivotX,
-            -op.pivotY,
-            op.width,
-            op.height,
-          );
+          // drawImage throws on an image whose load failed, from inside
+          // FieldView's update, so one 404 blanks the whole dashboard and the
+          // cached Image stays broken for the page's life. An op mode names
+          // its own paths, so this is not only an imported-file concern.
+          if (image.complete && image.naturalWidth > 0) {
+            this.ctx.drawImage(
+              image,
+              -op.pivotX,
+              -op.pivotY,
+              op.width,
+              op.height,
+            );
+          }
 
           this.ctx.restore();
           break;

@@ -11,6 +11,7 @@ import BaseView, {
 } from '@/components/views/BaseView';
 import MultipleCheckbox from './MultipleCheckbox';
 import GraphCanvas from './GraphCanvas';
+import ReplayBadge from '@/components/views/ReplayBadge';
 import TextInput from '@/components/views/ConfigView/inputs/TextInput';
 
 import { ReactComponent as ChartIcon } from '@/assets/icons/chart.svg';
@@ -38,6 +39,14 @@ type GraphViewState = {
 const mapStateToProps = (state: RootState) => ({
   telemetry: state.telemetry,
   status: state.status,
+  // Individual fields rather than the whole slice: state.playback gets a new
+  // identity on every cursor tick, which would re-render the graph at 10 Hz on
+  // top of the telemetry-driven renders.
+  playbackMode: state.playback.mode,
+  isReplaying: state.playback.isPlaying,
+  foldToken: state.playback.foldToken,
+  // Recorded values for the frame currently overlaid, in 'alongside' mode.
+  replayData: state.replay.data,
 });
 
 const connector = connect(mapStateToProps);
@@ -48,6 +57,15 @@ type GraphViewProps = ConnectedProps<typeof connector> &
 
 class GraphView extends Component<GraphViewProps, GraphViewState> {
   containerRef: React.RefObject<HTMLDivElement>;
+
+  /** GraphCanvas adds once per batch, deciding by deep-comparing this array, so
+   *  rebuilding it on every replay tick would re-add the same live samples. */
+  private memo: {
+    telemetry: GraphViewProps['telemetry'];
+    selectedKeys: string[];
+    mode: string;
+    rows: { name: string; value: number; recorded?: boolean }[][];
+  } | null = null;
 
   constructor(props: GraphViewProps) {
     super(props);
@@ -138,6 +156,12 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
   }
 
   noOpmodeRunning(props: GraphViewProps) {
+    // While a recording drives the view, the robot's status is irrelevant and
+    // often absent: opModeInfoList is empty whenever the dashboard is
+    // disconnected, which is just the offline pit-review case, and reading it
+    // here would keep the graph paused for the whole replay.
+    if (props.playbackMode === 'playback') return !props.isReplaying;
+
     return (
       props.status.opModeInfoList?.length === 0 ||
       props.status.activeOpMode === STOP_OP_MODE_TAG ||
@@ -196,6 +220,55 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
     });
   }
 
+  /** Rows for GraphCanvas, rebuilt only when the live batch changes. */
+  buildRows() {
+    const m = this.memo;
+    if (
+      m &&
+      m.telemetry === this.props.telemetry &&
+      m.mode === this.props.playbackMode &&
+      m.selectedKeys.length === this.state.selectedKeys.length &&
+      m.selectedKeys.every((k, i) => k === this.state.selectedKeys[i])
+    ) {
+      return m.rows;
+    }
+
+    const history = this.props.telemetry.filter((packet) => !packet.seed);
+    const rows = history.map((packet, i, all) => {
+      const row = [
+        { name: 'time', value: packet.timestamp },
+        ...Object.keys(packet.data)
+          .filter((key) => this.state.selectedKeys.includes(key))
+          .map((key) => ({ name: key, value: parseFloat(packet.data[key]) })),
+      ];
+
+      // Recorded values as their own dashed series, stamped with this packet's
+      // timestamp rather than the recording's so both traces share one clock.
+      // Last packet of the batch only, or the recorded trace repeats.
+      if (this.props.playbackMode === 'ghost' && i === all.length - 1) {
+        for (const key of this.state.selectedKeys) {
+          const raw = this.props.replayData[key];
+          if (raw === undefined) continue;
+
+          const value = parseFloat(raw);
+          if (isNaN(value)) continue;
+
+          row.push({ name: key, value, recorded: true } as typeof row[number]);
+        }
+      }
+
+      return row;
+    });
+
+    this.memo = {
+      telemetry: this.props.telemetry,
+      selectedKeys: [...this.state.selectedKeys],
+      mode: this.props.playbackMode,
+      rows,
+    };
+    return rows;
+  }
+
   render() {
     const showNoNumeric =
       !this.state.graphing && this.state.availableKeys.length === 0;
@@ -203,20 +276,7 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
       this.state.graphing && this.state.selectedKeys.length === 0;
     const showText = showNoNumeric || showEmpty;
 
-    const graphData = this.props.telemetry.map((packet) => [
-      {
-        name: 'time',
-        value: packet.timestamp,
-      },
-      ...Object.keys(packet.data)
-        .filter((key) => this.state.selectedKeys.includes(key))
-        .map((key) => {
-          return {
-            name: key,
-            value: parseFloat(packet.data[key]),
-          };
-        }),
-    ]);
+    const graphData = this.buildRows();
 
     return (
       <BaseView
@@ -228,6 +288,12 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
         <div className="flex">
           <BaseViewHeading isDraggable={this.props.isDraggable}>
             Graph
+            {this.props.playbackMode === 'playback' && (
+              <ReplayBadge source="replacing" />
+            )}
+            {this.props.playbackMode === 'ghost' && (
+              <ReplayBadge source="alongside" />
+            )}
           </BaseViewHeading>
           <BaseViewIcons>
             {this.state.graphing && this.state.selectedKeys.length !== 0 && (
@@ -274,6 +340,10 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
                 <h3 className="mt-6 font-medium">Telemetry to graph:</h3>
                 <div className="ml-3">
                   <MultipleCheckbox
+                    // Copies `selected` into state in its constructor with
+                    // no derived-state hook, so remounting is the only way to
+                    // re-seed it when a recording loads or seeks backwards.
+                    key={this.props.foldToken}
                     arr={this.state.availableKeys}
                     onChange={(selectedKeys: string[]) =>
                       this.setState({ selectedKeys })
@@ -330,7 +400,11 @@ class GraphView extends Component<GraphViewProps, GraphViewState> {
                       : colors.gray[900],
                   }}
                   paused={this.state.userPaused || this.state.opmodePaused}
+                  userPaused={this.state.userPaused}
                   pausedTime={this.state.pausedTime}
+                  resetToken={this.props.foldToken}
+                  showRecorded={this.props.playbackMode === 'ghost'}
+                  replayDriven={this.props.playbackMode === 'playback'}
                 />
               )}
             </ThemeConsumer>

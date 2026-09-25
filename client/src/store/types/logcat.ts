@@ -3,7 +3,20 @@ export const CLEAR_LOGCAT_ERRORS = 'CLEAR_LOGCAT_ERRORS';
 
 export interface LogcatError {
   timestamp: number;
-  level: 'ERROR' | 'WARN' | 'INFO' | 'DEBUG' | 'VERBOSE';
+  /** FtcDashboard sends logcat's letter: E, W, I, D, V, or F and A if fatal. */
+  level:
+    | 'ERROR'
+    | 'WARN'
+    | 'INFO'
+    | 'DEBUG'
+    | 'VERBOSE'
+    | 'E'
+    | 'W'
+    | 'I'
+    | 'D'
+    | 'V'
+    | 'F'
+    | 'A';
   tag: string;
   message: string;
 }

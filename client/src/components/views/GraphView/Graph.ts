@@ -38,6 +38,11 @@ export const DEFAULT_OPTIONS: Options = {
   maxTicks: 7,
 };
 
+export const RECORDED_SUFFIX = '(rec)';
+/** Recorded series are told apart by the dash alone: on the dark theme, alpha
+ *  pulls a line toward the background and off its live twin's colour. */
+const DASH_PATTERN = [5, 4];
+
 function niceNum(range: number, round: boolean) {
   const exponent = Math.floor(Math.log10(range));
   const fraction = range / Math.pow(10, exponent);
@@ -141,6 +146,7 @@ function scale(
 type Sample = {
   name: string;
   value: number;
+  recorded?: boolean;
 };
 
 // align coordinate to the nearest pixel, offset by a half pixel
@@ -208,7 +214,17 @@ export default class Graph {
   ctx: CanvasRenderingContext2D;
   options: Options;
 
-  data: { [key: string]: { ts: number[]; vs: number[]; color: string } };
+  data: {
+    [key: string]: {
+      ts: number[];
+      vs: number[];
+      color: string;
+      dashed: boolean;
+    };
+  };
+
+  /** Colour per telemetry key, so twins match whichever arrives first. */
+  colorByName: { [name: string]: string };
 
   beginGraphNowMs = Number.NaN; // in telemetry time
   beginRenderTimeMs = Number.NaN; // in browser time
@@ -227,6 +243,7 @@ export default class Graph {
     Object.assign(this.options, options || {});
 
     this.data = {};
+    this.colorByName = {};
 
     this.scaling = {
       scalingX: 1,
@@ -238,13 +255,36 @@ export default class Graph {
 
   reset() {
     this.data = {};
+    this.colorByName = {};
 
     this.beginGraphNowMs = Number.NaN; // in telemetry time
     this.beginRenderTimeMs = Number.NaN; // in browser time
+
+    // Dropping samples does not clear pixels: render() is the only repaint
+    // and it is gated on not being paused, so the curves would stay frozen.
+    // eslint-disable-next-line no-self-assign
+    this.canvas.width = this.canvas.width;
+  }
+
+  /** Moves every sample `ms` later. */
+  shift(ms: number) {
+    for (const { ts } of Object.values(this.data)) {
+      for (let i = 0; i < ts.length; i++) ts[i] += ms;
+    }
+  }
+
+  /** Recorded series must leave the key and the y-axis range, and reset() would
+   *  take the live plot down with them. */
+  dropRecorded() {
+    for (const key of Object.keys(this.data)) {
+      if (this.data[key].dashed) delete this.data[key];
+    }
+    // colorByName left alone so re-opening the overlay reuses the same colour.
   }
 
   add(time: number, samples: Sample[][]) {
     const o = this.options;
+    let plotted = false;
 
     for (const sample of samples) {
       const t = sample.reduce(
@@ -253,27 +293,42 @@ export default class Graph {
       );
 
       for (const series of sample) {
-        const { name, value } = series;
+        const { name, value, recorded } = series;
 
         if (name === 'time') continue;
 
-        if (isNaN(value)) continue;
+        // Not isNaN: Java stringifies 1.0/0.0 as "Infinity", and one such value
+        // gives getYAxisScaling a NaN range that blanks every plotted series.
+        if (!Number.isFinite(value)) continue;
 
-        if (!Object.prototype.hasOwnProperty.call(this.data, name)) {
-          this.data[name] = {
+        const key = recorded ? `${name} ${RECORDED_SUFFIX}` : name;
+
+        if (!Object.prototype.hasOwnProperty.call(this.data, key)) {
+          // Keyed on `name`, not `key`, so a series and its recorded twin read
+          // as one quantity measured twice however they arrive.
+          if (!Object.prototype.hasOwnProperty.call(this.colorByName, name)) {
+            this.colorByName[name] =
+              o.colors[Object.keys(this.colorByName).length % o.colors.length];
+          }
+          this.data[key] = {
             ts: [],
             vs: [],
-            color: o.colors[Object.keys(this.data).length % o.colors.length],
+            color: this.colorByName[name],
+            dashed: recorded === true,
           };
         }
 
-        const { ts, vs } = this.data[name];
+        const { ts, vs } = this.data[key];
         ts.push(t);
         vs.push(value);
+        plotted = true;
       }
     }
 
-    if (isNaN(this.beginGraphNowMs) && samples.length > 0) {
+    // `plotted`, not `samples.length`: a batch can carry a time row and no
+    // series, and a synthetic one's timestamp of 0 would anchor the plot clock
+    // and push every later sample off screen.
+    if (isNaN(this.beginGraphNowMs) && plotted) {
       const maxT = samples[samples.length - 1].reduce(
         (acc, { name, value }) => (name === 'time' ? value : acc),
         Number.NaN,
@@ -358,16 +413,18 @@ export default class Graph {
     for (let i = 0; i < numSets; i++) {
       const lineY = y + i * (o.fontSize + o.keySpacing) + o.fontSize / 2;
       const name = names[i];
-      const { color } = this.data[name];
+      const { color, dashed } = this.data[name];
       const lineWidth =
         this.ctx.measureText(name).width + o.keyLineLength + o.keySpacing;
       const lineX = x + (width - lineWidth) / 2;
 
       this.ctx.strokeStyle = color;
+      this.ctx.setLineDash(dashed ? DASH_PATTERN : []);
       this.ctx.beginPath();
       fineMoveTo(this.ctx, this.scaling, lineX, lineY);
       fineLineTo(this.ctx, this.scaling, lineX + o.keyLineLength, lineY);
       this.ctx.stroke();
+      this.ctx.setLineDash([]);
 
       this.ctx.fillStyle = o.textColor;
       this.ctx.fillText(name, lineX + o.keyLineLength + o.keySpacing, lineY);
@@ -500,15 +557,16 @@ export default class Graph {
     // draw data lines
     // scaling is used instead of transform because of the non-uniform stretching warps the plot line
     this.ctx.beginPath();
-    Object.keys(this.data).forEach((k, i) => {
-      const { ts, vs } = this.data[k];
+    Object.keys(this.data).forEach((k) => {
+      const { ts, vs, color, dashed } = this.data[k];
 
       if (ts.length === 0) return;
 
-      const color = o.colors[i % o.colors.length];
-
+      // The stored colour, not one from the loop index, which diverges
+      // as soon as a series is added out of order.
       this.ctx.beginPath();
       this.ctx.strokeStyle = color;
+      this.ctx.setLineDash(dashed ? DASH_PATTERN : []);
       fineMoveTo(
         this.ctx,
         this.scaling,
@@ -524,6 +582,7 @@ export default class Graph {
         );
       }
       this.ctx.stroke();
+      this.ctx.setLineDash([]);
     });
 
     this.ctx.restore();

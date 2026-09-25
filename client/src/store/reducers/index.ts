@@ -1,6 +1,7 @@
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
 import { Action, combineReducers } from 'redux';
 
+import playbackReducer from './playback';
 import replayReducer from './replay';
 import telemetryReducer from './telemetry';
 import socketReducer from './socket';
@@ -15,6 +16,7 @@ import logcatReducer from './logcat';
 import { createDispatchHook } from 'react-redux';
 
 const rootReducer = combineReducers({
+  playback: playbackReducer,
   replay: replayReducer,
   telemetry: telemetryReducer,
   socket: socketReducer,

@@ -8,6 +8,7 @@ import {
   forwardRef,
 } from 'react';
 import RGL, { WidthProvider, Layout } from 'react-grid-layout';
+import { useSelector } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 
 import 'react-grid-layout/css/styles.css';
@@ -45,6 +46,7 @@ import { ReactComponent as CreateIcon } from '@/assets/icons/create.svg';
 
 import { colors } from '@/hooks/useTheme';
 import { useTheme } from '@/hooks/useTheme';
+import { RootState } from '@/store/reducers';
 
 function maxArray(a: number[], b: number[]) {
   if (a.length !== b.length) {
@@ -97,23 +99,36 @@ const Container = forwardRef<
     isLayoutLocked: boolean;
     bgGridSize: number;
     isDarkMode: boolean;
+    isReplaying: boolean;
   }
 >((props, ref) => (
-  <div
-    ref={ref}
-    className="relative overflow-x-hidden overflow-y-scroll bg-gray-100 dark:bg-slate-800"
-    style={{
-      height: 'calc(100vh - 52px)',
-      backgroundImage: !props.isLayoutLocked
-        ? `radial-gradient(${
-            props.isDarkMode ? colors.slate['600'] : colors.gray['400']
-          } calc((0.5rem + ${GRID_DOT_PADDING}px) - 17px), transparent 0)`
-        : '',
-      backgroundSize: `${props.bgGridSize}px  ${props.bgGridSize}px`,
-      backgroundPosition: `calc(0.5rem + ${GRID_DOT_PADDING}px) calc(0.5rem + ${GRID_DOT_PADDING}px - 5px)`,
-    }}
-  >
-    {props.children}
+  // Sized by flex rather than a hardcoded height, so it gets exactly what the
+  // header leaves. min-h-0 is what lets a flex child actually scroll.
+  <div className="relative min-h-0 flex-1">
+    <div
+      ref={ref}
+      className="relative h-full overflow-x-hidden overflow-y-scroll bg-gray-100 dark:bg-slate-800"
+      style={{
+        backgroundImage: !props.isLayoutLocked
+          ? `radial-gradient(${
+              props.isDarkMode ? colors.slate['600'] : colors.gray['400']
+            } calc((0.5rem + ${GRID_DOT_PADDING}px) - 17px), transparent 0)`
+          : '',
+        backgroundSize: `${props.bgGridSize}px  ${props.bgGridSize}px`,
+        backgroundPosition: `calc(0.5rem + ${GRID_DOT_PADDING}px) calc(0.5rem + ${GRID_DOT_PADDING}px - 5px)`,
+      }}
+    >
+      {props.children}
+    </div>
+    {/* Frames the grid while any view is showing recorded data.
+     * A sibling of the scroller, not a ring on it: an inset box-shadow paints
+     * beneath the grid items, which sit flush to the edges and hide it. */}
+    {props.isReplaying && (
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-40 border-4 border-amber-500/60"
+      />
+    )}
   </div>
 ));
 Container.displayName = 'Container';
@@ -309,6 +324,9 @@ export default function ConfigurableLayout() {
   const gridWrapperRef = useRef<HTMLDivElement>(null);
 
   const theme = useTheme();
+  const isReplaying = useSelector(
+    (state: RootState) => state.playback.mode === 'playback',
+  );
 
   const [isLayoutLocked, setIsLayoutLocked] = useState(true);
   const [isInDeleteMode, setIsInDeleteMode] = useState(false);
@@ -542,6 +560,7 @@ export default function ConfigurableLayout() {
       isLayoutLocked={isLayoutLocked}
       bgGridSize={gridBgSize}
       isDarkMode={theme.isDarkMode}
+      isReplaying={isReplaying}
     >
       {gridItems.length === 0 && (
         <div

@@ -63,12 +63,15 @@ input {
   @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-opacity-30;
 }
 
+/* Split by theme because no single shade clears AA on both grounds: red-500 is
+   3.76:1 on white and 4.74:1 on the dark panel, red-600 the other way round.
+   Same for yellow, where 500 on white is 1.92:1 -- effectively unreadable. */
 .error {
-  @apply font-bold text-red-500;
+  @apply font-bold text-red-600 dark:text-red-500;
 }
 
 .warning {
-  @apply font-bold text-yellow-500;
+  @apply font-bold text-yellow-700 dark:text-yellow-500;
 }
 
 .grab-handle {
