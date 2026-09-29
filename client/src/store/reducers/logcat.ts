@@ -11,6 +11,16 @@ const initialState: LogcatState = {
   errors: [],
 };
 
+const LEVEL_NAMES = new Map<string, LogcatError['level']>([
+  ['V', 'VERBOSE'],
+  ['D', 'DEBUG'],
+  ['I', 'INFO'],
+  ['W', 'WARN'],
+  ['E', 'ERROR'],
+  ['F', 'ERROR'],
+  ['A', 'ERROR'],
+]);
+
 // Helper function to group stack traces together
 const groupStackTraces = (errors: LogcatError[]): LogcatError[] => {
   const grouped: LogcatError[] = [];
@@ -82,7 +92,11 @@ const logcatReducer = (
 ): LogcatState => {
   switch (action.type) {
     case RECEIVE_LOGCAT_ERRORS: {
-      const combinedErrors = [...state.errors, ...action.errors];
+      const receivedErrors = action.errors.map((error) => ({
+        ...error,
+        level: LEVEL_NAMES.get(error.level) ?? error.level,
+      }));
+      const combinedErrors = [...state.errors, ...receivedErrors];
       const groupedErrors = groupStackTraces(combinedErrors);
 
       return {

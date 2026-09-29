@@ -176,6 +176,8 @@ const ErrorView = ({
                               ? 'bg-blue-100 dark:bg-blue-900/20'
                               : error.level === 'DEBUG'
                               ? 'bg-green-100 dark:bg-green-900/20'
+                              : error.level === 'VERBOSE'
+                              ? 'bg-purple-100 dark:bg-purple-900/20'
                               : 'bg-gray-100 dark:bg-gray-900/20'
                           }`}
                         >
