@@ -38,17 +38,25 @@ public class TestDashboardInstance {
     private class DashWebSocket extends NanoWSD.WebSocket implements SendFun {
         final SocketHandler sh = core.newSocket(this);
 
+        private volatile boolean closed;
+
         public DashWebSocket(NanoHTTPD.IHTTPSession handshakeRequest) {
             super(handshakeRequest);
         }
 
         @Override
         public void send(Message message) {
+            if (closed) {
+                return;
+            }
             try {
                 String messageStr = DashboardCore.GSON.toJson(message);
                 send(messageStr);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                // sendAll holds the socket-list lock, so a dead client is only
+                // marked here and removed by onClose.
+                closed = true;
+                System.err.println("dropping client: " + e.getMessage());
             }
         }
 
@@ -84,6 +92,7 @@ public class TestDashboardInstance {
         @Override
         protected void onClose(
                 NanoWSD.WebSocketFrame.CloseCode code, String reason, boolean initiatedByRemote) {
+            closed = true;
             sh.onClose();
 
             opModeManager.clearSendFun();

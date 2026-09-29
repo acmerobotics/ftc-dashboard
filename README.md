@@ -76,6 +76,7 @@ To test without an FTC app, run the mock server located at `DashboardCore/src/te
 - Mock server is a simple Java server hosting mock FTC op modes
 - A test sample op mode can be found at [`TestSineWaveOpMode.java`](https://github.com/acmerobotics/ftc-dashboard/blob/master/DashboardCore/src/test/java/com/acmerobotics/dashboard/TestSineWaveOpMode.java)
 - Test op modes are registered in [`TestOpModeManager.java`](https://github.com/acmerobotics/ftc-dashboard/blob/8ac8b29257dede5f4a13c440fe6756efc270cbb8/DashboardCore/src/test/java/com/acmerobotics/dashboard/testopmode/TestOpModeManager.java#L10)
+- `TestLoopTimerOpMode` feeds the Loop Time view a simulated four-stage loop that periodically spikes
 
 # Basic Architecture
 

@@ -13,6 +13,7 @@ import { ReactComponent as ListIcon } from '@/assets/icons/list.svg';
 import { ReactComponent as HardwareIcon } from '@/assets/icons/hardware.svg';
 import { ReactComponent as GamepadIcon } from '@/assets/icons/gamepad.svg';
 import { ReactComponent as ExclamationIcon } from '@/assets/icons/exclamation.svg';
+import { ReactComponent as TimerIcon } from '@/assets/icons/timer.svg';
 
 type ViewPickerProps = {
   isOpen: boolean;
@@ -160,6 +161,13 @@ const listContent = [
     customStyles: 'focus:ring-lime-600',
     iconBg: 'bg-lime-500',
   },
+  {
+    title: 'Loop Time View',
+    view: ConfigurableView.LOOP_TIME_VIEW,
+    icon: <TimerIcon className="h-6 w-6 text-white" />,
+    customStyles: 'focus:ring-amber-600',
+    iconBg: 'bg-amber-500',
+  },
 ];
 
 const ViewPicker = (props: ViewPickerProps) => {
@@ -168,7 +176,7 @@ const ViewPicker = (props: ViewPickerProps) => {
       {listContent.map((item, index) => (
         <CardButton
           key={item.title}
-          {...props}
+          isOpen={props.isOpen}
           index={index}
           customStyles={item.customStyles}
           onClick={() => props.onClick(item.view)}

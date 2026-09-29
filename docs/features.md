@@ -171,3 +171,39 @@ int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("c
 OpenCvWebcam camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
 FtcDashboard.getInstance().startCameraStream(camera, 0);
 ```
+
+## Loop Time View
+
+The Loop Time view charts where an op mode's loop spends its time. It reads plain numeric telemetry, so any timing you already report works, and [`LoopTimer`](https://github.com/acmerobotics/ftc-dashboard/blob/master/DashboardCore/src/main/java/com/acmerobotics/dashboard/telemetry/LoopTimer.java) does the bookkeeping for you.
+
+```java
+private final LoopTimer timer = new LoopTimer();
+private long lastReport;
+
+@Override
+public void loop() {
+    timer.startLoop();
+    timer.beginSegment("sensors");
+    readSensors();
+    timer.beginSegment("vision");
+    processVision();
+    timer.endLoop();
+
+    // Loops run far faster than telemetry is sent, so report on a timer.
+    long now = System.currentTimeMillis();
+    if (now - lastReport >= 50) {
+        TelemetryPacket packet = new TelemetryPacket(false);
+        timer.addTo(packet);
+        FtcDashboard.getInstance().sendTelemetryPacket(packet);
+        lastReport = now;
+    }
+}
+```
+
+`addTo` writes one key per segment (`loop/sensors`, `loop/vision`, ...) plus `loop/total` and `loop/worst`, all in milliseconds. Each value is the mean over every loop since the last `addTo`, while `loop/worst` is the longest single loop in that span; `total` and `worst` are reserved segment names. A segment can also be scoped with `try (LoopTimer.Segment s = timer.segment("vision"))`. [`LoopTimeDemoOpMode`](https://github.com/acmerobotics/ftc-dashboard/blob/master/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/LoopTimeDemoOpMode.java) runs this against a synthetic loop.
+
+In the dashboard, add a Loop Time view and open its gear icon:
+
+- **Auto-add matching** makes a segment of every unused key containing the filter text, claiming a `.../total` key as the loop total and a `.../worst` key as the worst loop.
+- **Budget (ms)** draws a target line on the history chart and turns the loop readout red above it.
+- Setups are saved as named **profiles** in this browser; **Share** shows the active one as JSON so you can move it to another machine.
