@@ -39,12 +39,30 @@ export {
   SAVE_LAYOUT_PRESET,
   RECEIVE_LAYOUT_PRESET,
   GET_LAYOUT_PRESET,
+  GET_SAVED_LAYOUTS,
+  RECEIVE_SAVED_LAYOUTS,
+  SAVE_LAYOUT,
+  DELETE_SAVED_LAYOUT,
+  LOAD_SAVED_LAYOUT,
+  RECEIVE_LAYOUT_TO_LOAD,
+  LAYOUT_LOADED,
+  SET_SAVED_LAYOUT_EDITED,
 } from './settings';
 export type {
   SettingState,
+  SettingsAction,
+  SavedLayout,
   SaveLayoutPresetAction,
   ReceiveLayoutPresetAction,
   GetLayoutPresetAction,
+  GetSavedLayoutsAction,
+  ReceiveSavedLayoutsAction,
+  SaveLayoutAction,
+  DeleteSavedLayoutAction,
+  LoadSavedLayoutAction,
+  ReceiveLayoutToLoadAction,
+  LayoutLoadedAction,
+  SetSavedLayoutEditedAction,
 } from './settings';
 
 export {

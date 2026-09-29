@@ -27,6 +27,8 @@ layout: default
 
 * [Configuration Variables](features#configuration-variables)
 
+* [Custom Layouts](features#custom-layouts)
+
 * [Op Mode Controls](features#op-mode-controls)
 
 * [Camera](features#camera)

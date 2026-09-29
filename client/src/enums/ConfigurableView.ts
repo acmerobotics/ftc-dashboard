@@ -1,3 +1,4 @@
+// Layout codes name views by these members, so renaming one breaks them.
 export enum ConfigurableView {
   FIELD_VIEW,
   GRAPH_VIEW,

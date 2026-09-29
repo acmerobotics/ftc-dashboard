@@ -156,6 +156,22 @@ object RobotConstants {
 }
 ```
 
+## Custom Layouts
+
+The "Custom" layout preset lets you arrange any set of views on a grid. Press the pencil button in the bottom right to unlock the layout, then use the buttons around it to add views, delete views, clear the layout, or share it.
+
+To share a custom layout, choose "Share or Save Layout" and copy the code or link. Another dashboard user can paste either one into the "Import a layout" box, or open the link directly. A link only works when the other user's dashboard has the same address (for example, both on Control Hubs at `192.168.43.1:8080/dash`), so send the code when in doubt.
+
+A code carries only the position and size of each view, not settings inside a view such as graph colors. Sizes are fixed grid rows, so a layout made on a tall screen may run below the fold on a shorter one.
+
+To keep more than one custom layout, open "Share or Save Layout", give the layout a name and press Save. Saving under a name that is already taken replaces that entry. Saved layouts appear in the layout list at the top of the page. Picking one loads it, and the list marks it as edited once you change it. Picking it again after visiting another preset brings back your edits, while Load in the dialog discards them. Picking "Custom" detaches from it. Load and Delete for each saved layout are in the same dialog. They are stored in this browser only.
+
+Layout codes are plain text and can be edited by hand. Each entry is `<view>:<x>,<y>,<width>,<height>` on a 12-column grid.
+
+```
+v1;field:0,0,4,9;graph:4,0,4,9;config:8,0,4,7;telemetry:8,7,4,2
+```
+
 ## Op Mode Controls
 
 Op mode controls replicate limited DS functionality. Some gamepads are supported for testing in a pinch. Plug them in and press Start-A/B as usual to activate. Dashboard gamepads will have higher latency and less robustness than DS ones and should be used accordingly. Safety mechanisms attempt to stop the robot if gamepads spontaneously disconnect, but there are no guarantees.

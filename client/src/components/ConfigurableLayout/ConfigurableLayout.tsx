@@ -1,5 +1,6 @@
 import {
   ReactElement,
+  useCallback,
   useState,
   useEffect,
   useRef,
@@ -8,6 +9,7 @@ import {
   forwardRef,
 } from 'react';
 import RGL, { WidthProvider, Layout } from 'react-grid-layout';
+import { useDispatch, useSelector } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 
 import 'react-grid-layout/css/styles.css';
@@ -31,6 +33,23 @@ import LimelightView from '@/components/views/LimelightView';
 import RadialFab from './RadialFab/RadialFab';
 import RadialFabChild from './RadialFab/RadialFabChild';
 import ViewPicker from './ViewPicker';
+import ShareLayoutModal from './ShareLayoutModal';
+import {
+  deleteSavedLayout,
+  getLayoutPreset,
+  layoutLoaded,
+  loadSavedLayout,
+  saveLayout,
+  saveLayoutPreset,
+  setSavedLayoutEdited,
+} from '@/store/actions/settings';
+import {
+  clearLayoutCodeFromUrl,
+  decodeLayout,
+  encodeLayout,
+  readLayoutCodeFromUrl,
+  SharedGridItem,
+} from './layoutCode';
 
 import useMouseIdleListener from '@/hooks/useMouseIdleListener';
 import useUndoHistory from '@/hooks/useUndoHistory';
@@ -42,9 +61,12 @@ import { ReactComponent as LockIcon } from '@/assets/icons/lock.svg';
 import { ReactComponent as RemoveCircleIcon } from '@/assets/icons/remove_circle.svg';
 import { ReactComponent as RemoveCircleOutlineIcon } from '@/assets/icons/remove_circle_outline.svg';
 import { ReactComponent as CreateIcon } from '@/assets/icons/create.svg';
+import { ReactComponent as ShareIcon } from '@/assets/icons/share.svg';
 
 import { colors } from '@/hooks/useTheme';
 import { useTheme } from '@/hooks/useTheme';
+import { RootState } from '@/store/reducers';
+import { ACTIVE_SAVED_LAYOUT_KEY } from '@/store/middleware/storageMiddleware';
 
 function maxArray(a: number[], b: number[]) {
   if (a.length !== b.length) {
@@ -87,6 +109,11 @@ const GRID_ROW_HEIGHT = 60;
 const GRID_MARGIN = 10;
 const GRID_ITEM_MIN_WIDTH = 3;
 const GRID_DOT_PADDING = 10;
+
+// Views that should only appear once in the layout
+const SINGLETON_VIEWS = new Set([ConfigurableView.GAMEPAD_VIEW]);
+
+const GRID_LIMITS = { cols: GRID_COL, minW: GRID_ITEM_MIN_WIDTH };
 
 const ReactGridLayout = WidthProvider(RGL);
 
@@ -133,6 +160,15 @@ type GridItemLayout = {
   isDraggable: boolean;
   isResizable: boolean;
 };
+
+const toSharedItems = (items: GridItem[]): SharedGridItem[] =>
+  items.map((item) => ({
+    view: item.view,
+    x: item.layout.x,
+    y: item.layout.y,
+    w: item.layout.w,
+    h: item.layout.h,
+  }));
 
 const HEIGHT_BREAKPOINTS = {
   MEDIUM: 730,
@@ -311,8 +347,23 @@ export default function ConfigurableLayout() {
   const theme = useTheme();
 
   const [isLayoutLocked, setIsLayoutLocked] = useState(true);
+  const [isGridReady, setIsGridReady] = useState(false);
   const [isInDeleteMode, setIsInDeleteMode] = useState(false);
   const [isShowingViewPicker, setIsShowingViewPicker] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [sharedImportText, setSharedImportText] = useState('');
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const dispatch = useDispatch();
+  const savedLayouts = useSelector(
+    (state: RootState) => state.settings.savedLayouts,
+  );
+  const activeSavedLayout = useSelector(
+    (state: RootState) => state.settings.activeSavedLayout,
+  );
+  const layoutToLoad = useSelector(
+    (state: RootState) => state.settings.layoutToLoad,
+  );
 
   const [gridBgSize, setGridBgSize] = useState(40);
 
@@ -321,10 +372,18 @@ export default function ConfigurableLayout() {
     {
       initialize: initializeGrid,
       append: setGrid,
-      undo: undoGrid,
-      redo: redoGrid,
+      undo: undoHistory,
+      redo: redoHistory,
     },
   ] = useUndoHistory<GridItem[]>([]);
+
+  // Undo in the share dialog's text fields must not change the grid behind it.
+  const undoGrid = useCallback(() => {
+    if (!isShareModalOpen) undoHistory();
+  }, [isShareModalOpen, undoHistory]);
+  const redoGrid = useCallback(() => {
+    if (!isShareModalOpen) redoHistory();
+  }, [isShareModalOpen, redoHistory]);
 
   const isFabIdle = useMouseIdleListener({
     bottom: '0',
@@ -398,6 +457,7 @@ export default function ConfigurableLayout() {
     });
 
     initializeGrid(newGridItems);
+    setIsGridReady(true);
   }, [initializeGrid]);
 
   useEffect(() => {
@@ -435,13 +495,53 @@ export default function ConfigurableLayout() {
     );
   }, [gridItems]);
 
-  // Views that should only appear once in the layout
-  const singletonViews = new Set([ConfigurableView.GAMEPAD_VIEW]);
+  const activeSavedLayoutId = activeSavedLayout?.id ?? null;
+
+  // A reload pairs the stored grid with the stored saved layout id, so both
+  // come from the tab that last changed either one.
+  useEffect(() => {
+    if (!isGridReady) return;
+    try {
+      window.localStorage.setItem(
+        LOCAL_STORAGE_LAYOUT_KEY,
+        JSON.stringify(gridItems),
+      );
+      if (activeSavedLayoutId === null) {
+        window.localStorage.removeItem(ACTIVE_SAVED_LAYOUT_KEY);
+      } else {
+        window.localStorage.setItem(
+          ACTIVE_SAVED_LAYOUT_KEY,
+          activeSavedLayoutId,
+        );
+      }
+    } catch {
+      // Storage is full. A grid with no saved layout id reloads as Custom.
+      window.localStorage.removeItem(ACTIVE_SAVED_LAYOUT_KEY);
+    }
+  }, [gridItems, activeSavedLayoutId, isGridReady]);
+
+  // A layout link opens the share modal with its code ready to apply. The
+  // hash stays until the user acts, so an early unmount does not lose it.
+  useEffect(() => {
+    const importFromUrl = () => {
+      const code = readLayoutCodeFromUrl();
+      if (code === null) return;
+      setSharedImportText(code);
+      setIsShareModalOpen(true);
+    };
+
+    importFromUrl();
+    window.addEventListener('hashchange', importFromUrl);
+
+    return () => {
+      window.removeEventListener('hashchange', importFromUrl);
+    };
+  }, []);
 
   const existingViews = new Set(gridItems.map((e) => e.view));
 
   const addItem = (item: ConfigurableView) => {
-    if (singletonViews.has(item) && existingViews.has(item)) return;
+    if (SINGLETON_VIEWS.has(item) && existingViews.has(item)) return;
     const ITEM_WIDTH = 4;
     const ITEM_HEIGHT = 4;
 
@@ -492,6 +592,102 @@ export default function ConfigurableLayout() {
     setGrid(gridItems.filter((e) => e.id !== id));
   };
 
+  const closeShareModal = () => {
+    setIsShareModalOpen(false);
+    clearLayoutCodeFromUrl();
+  };
+
+  // A link shows the custom layout without saving that choice, so closing
+  // its dialog without applying anything goes back to the saved preset.
+  const dismissShareModal = () => {
+    closeShareModal();
+    if (sharedImportText !== '') dispatch(getLayoutPreset());
+  };
+
+  // Replaces the grid with a decoded code. Returns an error message, or null.
+  const applyLayoutCode = useCallback(
+    (text: string) => {
+      const result = decodeLayout(text, GRID_LIMITS);
+      if (!result.ok) return result.error;
+
+      const seenSingletons = new Set<ConfigurableView>();
+      const newGrid: GridItem[] = [];
+      for (const item of result.items) {
+        if (SINGLETON_VIEWS.has(item.view)) {
+          if (seenSingletons.has(item.view)) continue;
+          seenSingletons.add(item.view);
+        }
+        newGrid.push({
+          id: uuidv4(),
+          view: item.view,
+          layout: {
+            x: item.x,
+            y: item.y,
+            w: item.w,
+            h: item.h,
+            minW: GRID_ITEM_MIN_WIDTH,
+            isDraggable: !isLayoutLocked,
+            isResizable: !isLayoutLocked,
+          },
+        });
+      }
+
+      setGrid(newGrid);
+      return null;
+    },
+    [isLayoutLocked, setGrid],
+  );
+
+  const importLayout = (text: string) => {
+    const error = applyLayoutCode(text);
+    if (error !== null) return error;
+    closeShareModal();
+    dispatch(saveLayoutPreset('CONFIGURABLE'));
+    return null;
+  };
+
+  // A saved layout picked from the header list arrives here. One that no
+  // longer decodes is left unselected rather than shown as loaded.
+  useEffect(() => {
+    if (layoutToLoad === null) return;
+    const error = applyLayoutCode(layoutToLoad.code);
+    dispatch(layoutLoaded());
+    setLoadError(
+      error === null ? null : `Could not load "${layoutToLoad.name}". ${error}`,
+    );
+    if (error !== null) dispatch(saveLayoutPreset('CONFIGURABLE'));
+  }, [layoutToLoad, applyLayoutCode, dispatch]);
+
+  const shareCode = encodeLayout(toSharedItems(gridItems));
+
+  // The header shows which saved layout is loaded, and whether it has changed.
+  useEffect(() => {
+    if (!isGridReady || layoutToLoad !== null || activeSavedLayout === null) {
+      return;
+    }
+    const saved = savedLayouts.find((l) => l.id === activeSavedLayout.id);
+    if (saved === undefined) return;
+    const edited = shareCode !== saved.code;
+    if (edited !== activeSavedLayout.edited) {
+      dispatch(setSavedLayoutEdited(edited));
+    }
+  }, [
+    shareCode,
+    isGridReady,
+    layoutToLoad,
+    activeSavedLayout,
+    savedLayouts,
+    dispatch,
+  ]);
+
+  const shareCheck = decodeLayout(shareCode, GRID_LIMITS);
+  const exportError =
+    gridItems.length === 0
+      ? 'Add a view before sharing.'
+      : shareCheck.ok
+      ? null
+      : `This layout cannot be shared: ${shareCheck.error}`;
+
   const clickFAB = () => {
     const toBeLocked = !isLayoutLocked;
 
@@ -510,6 +706,7 @@ export default function ConfigurableLayout() {
     if (toBeLocked) {
       setIsShowingViewPicker(false);
       setIsInDeleteMode(false);
+      closeShareModal();
     }
   };
 
@@ -543,6 +740,20 @@ export default function ConfigurableLayout() {
       bgGridSize={gridBgSize}
       isDarkMode={theme.isDarkMode}
     >
+      {loadError !== null && (
+        <div
+          role="alert"
+          className="flex items-center justify-between gap-3 bg-red-100 px-3 py-2 text-sm text-red-800 dark:bg-red-900 dark:text-red-100"
+        >
+          <span>{loadError}</span>
+          <button
+            className="shrink-0 rounded border border-current px-2 py-0.5 text-xs"
+            onClick={() => setLoadError(null)}
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
       {gridItems.length === 0 && (
         <div
           className={`mt-16 p-12 text-center transition-colors ${
@@ -627,8 +838,8 @@ export default function ConfigurableLayout() {
       >
         <RadialFabChild
           className="h-12 w-12 border border-green-600 bg-green-500 shadow-md shadow-green-500/30 hover:shadow-lg hover:shadow-green-500/50 focus:ring focus:ring-green-600"
-          angle={(-80 * Math.PI) / 180}
-          openMargin="5em"
+          angle={(-60 * Math.PI) / 180}
+          openMargin="5.5em"
           fineAdjustIconX="2%"
           fineAdjustIconY="2%"
           toolTipText="Add Item"
@@ -642,8 +853,8 @@ export default function ConfigurableLayout() {
               ? 'border-yellow-600 bg-orange-500 focus:ring-amber-300'
               : 'border-amber-600 bg-amber-500 focus:ring-orange-300'
           }`}
-          angle={(-135 * Math.PI) / 180}
-          openMargin="5em"
+          angle={(-100 * Math.PI) / 180}
+          openMargin="5.5em"
           fineAdjustIconX="0"
           fineAdjustIconY="0"
           toolTipText="Delete Item"
@@ -657,14 +868,28 @@ export default function ConfigurableLayout() {
         </RadialFabChild>
         <RadialFabChild
           className="h-12 w-12 border border-indigo-600 bg-indigo-500 shadow-md shadow-indigo-500/30 hover:shadow-lg hover:shadow-indigo-500/50 focus:ring focus:ring-indigo-300"
-          angle={(170 * Math.PI) / 180}
-          openMargin="5em"
+          angle={(-140 * Math.PI) / 180}
+          openMargin="5.5em"
           fineAdjustIconX="8%"
           fineAdjustIconY="-2%"
           toolTipText="Clear Layout"
           onClick={() => setGrid([])}
         >
           <DeleteSweepIcon className="h-5 w-5 text-white" />
+        </RadialFabChild>
+        <RadialFabChild
+          className="h-12 w-12 border border-sky-600 bg-sky-500 shadow-md shadow-sky-500/30 hover:shadow-lg hover:shadow-sky-500/50 focus:ring focus:ring-sky-300"
+          angle={Math.PI}
+          openMargin="5.5em"
+          fineAdjustIconX="-4%"
+          fineAdjustIconY="0"
+          toolTipText="Share or Save Layout"
+          onClick={() => {
+            setSharedImportText('');
+            setIsShareModalOpen(true);
+          }}
+        >
+          <ShareIcon className="h-5 w-5 text-white" />
         </RadialFabChild>
       </RadialFab>
       <ViewPicker
@@ -673,8 +898,33 @@ export default function ConfigurableLayout() {
         right="1.5em"
         onClick={addItem}
         disabledViews={
-          new Set([...singletonViews].filter((v) => existingViews.has(v)))
+          new Set([...SINGLETON_VIEWS].filter((v) => existingViews.has(v)))
         }
+      />
+      <ShareLayoutModal
+        isOpen={isShareModalOpen}
+        onClose={dismissShareModal}
+        code={shareCode}
+        exportError={exportError}
+        initialImportText={sharedImportText}
+        onImport={importLayout}
+        savedLayouts={savedLayouts}
+        activeLayoutName={
+          savedLayouts.find((l) => l.id === activeSavedLayout?.id)?.name ?? null
+        }
+        onSave={(name) => {
+          try {
+            dispatch(saveLayout(name, shareCode));
+            return null;
+          } catch {
+            return 'Could not save. The browser storage may be full.';
+          }
+        }}
+        onLoad={(id) => {
+          dispatch(loadSavedLayout(id, true));
+          closeShareModal();
+        }}
+        onDelete={(id) => dispatch(deleteSavedLayout(id))}
       />
     </Container>
   );
