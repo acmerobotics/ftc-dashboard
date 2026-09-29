@@ -40,7 +40,8 @@ public class ReflectionConfig {
                 return new BasicVariable<>(
                         type,
                         new ArrayProvider<Boolean>(
-                                field, parent, Arrays.copyOf(indices, indices.length)));
+                                field, parent, Arrays.copyOf(indices, indices.length)),
+                        fieldClass);
             case CUSTOM:
                 try {
                     Object value = null;
@@ -100,7 +101,8 @@ public class ReflectionConfig {
             case DOUBLE:
             case STRING:
             case ENUM:
-                return new BasicVariable<>(type, new FieldProvider<Boolean>(field, parent));
+                return new BasicVariable<>(
+                        type, new FieldProvider<Boolean>(field, parent), fieldClass);
             case CUSTOM:
                 try {
                     Object value = field.get(parent);

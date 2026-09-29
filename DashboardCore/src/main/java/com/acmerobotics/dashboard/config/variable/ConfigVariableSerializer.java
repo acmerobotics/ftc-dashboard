@@ -27,6 +27,15 @@ public class ConfigVariableSerializer implements JsonSerializer<ConfigVariable<?
             return obj;
         }
 
+        if (value instanceof EnumName) {
+            EnumName enumName = (EnumName) value;
+            obj.add(ConfigVariable.VALUE_KEY, new JsonPrimitive(enumName.name()));
+            if (enumName.className() != null) {
+                obj.add(ConfigVariable.ENUM_CLASS_KEY, new JsonPrimitive(enumName.className()));
+            }
+            return obj;
+        }
+
         if (configVariable.getType() == VariableType.DOUBLE && !Double.isFinite((double) value)) {
             obj.add(ConfigVariable.VALUE_KEY, new JsonPrimitive(String.valueOf(value)));
         } else {
@@ -34,13 +43,15 @@ public class ConfigVariableSerializer implements JsonSerializer<ConfigVariable<?
         }
 
         if (configVariable.getType() == VariableType.ENUM) {
-            obj.add(ConfigVariable.ENUM_CLASS_KEY, new JsonPrimitive(value.getClass().getName()));
+            // A constant with a body has an anonymous subclass of the enum as its class.
+            Class<?> enumClass = ((Enum<?>) value).getDeclaringClass();
+            obj.add(ConfigVariable.ENUM_CLASS_KEY, new JsonPrimitive(enumClass.getName()));
             JsonArray values = new JsonArray();
-            for (Object o : value.getClass().getEnumConstants()) {
+            for (Object o : enumClass.getEnumConstants()) {
                 try {
                     Enum<?> e = (Enum<?>) o;
                     String enumName = e.name();
-                    Field f = value.getClass().getField(enumName);
+                    Field f = enumClass.getField(enumName);
                     if (f.isAnnotationPresent(Deprecated.class)) {
                         continue;
                     }

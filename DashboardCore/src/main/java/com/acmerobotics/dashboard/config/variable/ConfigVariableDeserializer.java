@@ -59,17 +59,15 @@ public class ConfigVariableDeserializer implements JsonDeserializer<ConfigVariab
                     return new BasicVariable<>(varType, new ConstantProvider<>(null));
                 }
 
-                try {
-                    Class<?> enumClass =
-                            Class.forName(obj.get(ConfigVariable.ENUM_CLASS_KEY).getAsString());
-                    return new BasicVariable<>(
-                            varType,
-                            new ConstantProvider<>(
-                                    jsonDeserializationContext.deserialize(
-                                            obj.get(ConfigVariable.VALUE_KEY), enumClass)));
-                } catch (ClassNotFoundException e) {
-                    throw new RuntimeException();
-                }
+                JsonElement classEl = obj.get(ConfigVariable.ENUM_CLASS_KEY);
+                return new BasicVariable<>(
+                        varType,
+                        new ConstantProvider<>(
+                                new EnumName(
+                                        valueEl.getAsString(),
+                                        classEl == null || classEl.isJsonNull()
+                                                ? null
+                                                : classEl.getAsString())));
             case CUSTOM:
                 if (valueEl.isJsonNull()) {
                     return new CustomVariable(null);
