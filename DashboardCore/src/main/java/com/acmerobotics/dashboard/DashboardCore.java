@@ -26,7 +26,7 @@ public class DashboardCore {
     /*
      * Telemetry packets are batched for transmission and sent at this interval.
      */
-    private static final int DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL = 100; // ms
+    public static final int DEFAULT_TELEMETRY_TRANSMISSION_INTERVAL = 100; // ms
 
     public boolean enabled;
 
@@ -182,9 +182,9 @@ public class DashboardCore {
 
     /**
      * Queues a telemetry packet to be sent to all clients. Packets are sent in batches of
-     * approximate period {@link #getTelemetryTransmissionInterval()}. Clients display the most
-     * recent value received for each key, and the data is cleared upon op mode init or a call to
-     * {@link #clearTelemetry()}.
+     * approximate period {@link #getTelemetryTransmissionInterval()}. The Telemetry view rebuilds
+     * its display from each batch, keeps it through a batch that only draws on the field, and is
+     * cleared by {@link #clearTelemetry()}.
      *
      * @param telemetryPacket packet to send
      */

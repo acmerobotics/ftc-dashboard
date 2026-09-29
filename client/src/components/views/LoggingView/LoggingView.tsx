@@ -36,6 +36,7 @@ export type TelemetryStoreItem = {
   timestamp: number;
   data: unknown[];
   log: string[];
+  lines: string[];
 };
 
 enum TelemetryStoreCommand {
@@ -49,6 +50,7 @@ type TelemetryStoreState = {
   keys: string[];
   raw: unknown[];
   keysShowing: boolean[];
+  lastLogged: number;
 };
 
 type TelemetryStoreAction =
@@ -59,6 +61,40 @@ type TelemetryStoreAction =
       payload: { index: number; value: boolean };
     };
 
+const emptyStore = (): TelemetryStoreState => ({
+  store: [],
+  keys: [],
+  raw: [],
+  keysShowing: [],
+  lastLogged: 0,
+});
+
+// A numbered log is resent whole, so only entries numbered past `lastLogged` are new. Null for
+// a log that is not numbered, which holds just the entries added with its packet.
+const newLogEntries = (
+  log: string[],
+  logRange: TelemetryItem['logRange'],
+  lastLogged: number,
+) => {
+  if (!Array.isArray(logRange) || logRange.length !== 2) return null;
+
+  const [first, last] = logRange;
+  if (
+    !Number.isInteger(first) ||
+    !Number.isInteger(last) ||
+    Math.abs(last - first) + 1 !== log.length
+  )
+    return null;
+
+  const step = first <= last ? 1 : -1;
+  return {
+    log: log.filter((_, i) => first + i * step > lastLogged),
+    lastLogged: Math.max(lastLogged, first, last),
+  };
+};
+
+const csvQuote = (text: string) => `"${text.replaceAll('"', '""')}"`;
+
 const telemetryStoreReducer = (
   state: TelemetryStoreState,
   action: TelemetryStoreAction,
@@ -68,12 +104,17 @@ const telemetryStoreReducer = (
       return action.payload;
     }
     case TelemetryStoreCommand.APPEND: {
-      const { store, keys, raw, keysShowing } = state;
-      const { timestamp, data, log } = action.payload;
+      const { store, keys, raw, keysShowing, lastLogged } = state;
+      const { timestamp, data, log, items, logRange } = action.payload;
+
+      const numbered = newLogEntries(log, logRange, lastLogged);
 
       const newTelemetryStoreItem: TelemetryStoreItem = {
         timestamp,
-        log,
+        log: numbered?.log ?? log,
+        lines: (items ?? [])
+          .filter((item) => item?.caption === null)
+          .map((item) => item.value),
         data: new Array(keys.length).fill(null),
       };
 
@@ -97,6 +138,7 @@ const telemetryStoreReducer = (
         keys,
         raw,
         keysShowing,
+        lastLogged: numbered?.lastLogged ?? lastLogged,
       };
     }
     case TelemetryStoreCommand.SET_KEY_SHOWING: {
@@ -152,12 +194,8 @@ const LoggingView = ({
 
   const [telemetryStore, dispatchTelemetryStore] = useReducer(
     telemetryStoreReducer,
-    {
-      store: [],
-      keys: [],
-      raw: [],
-      keysShowing: [],
-    },
+    undefined,
+    emptyStore,
   );
 
   const [isRecording, setIsRecording] = useState(false);
@@ -235,7 +273,7 @@ const LoggingView = ({
   const clearPastTelemetry = () => {
     dispatchTelemetryStore({
       type: TelemetryStoreCommand.SET,
-      payload: { store: [], keys: [], raw: [], keysShowing: [] },
+      payload: emptyStore(),
     });
   };
 
@@ -260,14 +298,24 @@ const LoggingView = ({
     const storeCopy = [...telemetryStore.store];
     storeCopy.sort((a, b) => a.timestamp - b.timestamp);
 
-    const firstRow = ['time', ...telemetryStore.keys, 'logs'];
+    // Only when some row has one, so a recording without bare lines keeps its columns.
+    const hasLines = storeCopy.some((e) => e.lines.length > 0);
+
+    const firstRow = [
+      'time',
+      ...telemetryStore.keys,
+      ...(hasLines ? ['lines'] : []),
+      'logs',
+    ];
     const body = storeCopy
       .map(
         (e) =>
           `${DateToHHMMSS(new Date(e.timestamp))},${[
             ...e.data,
             ...new Array(telemetryStore.keys.length - e.data.length),
-          ].join(',')},"${e.log.join('\n')}"`,
+          ].join(',')},${
+            hasLines ? `${csvQuote(e.lines.join('\n'))},` : ''
+          }"${e.log.join('\n')}"`,
       )
       .join('\r\n');
     const csv = `${firstRow}\r\n${body}`;

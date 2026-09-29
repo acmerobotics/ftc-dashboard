@@ -62,6 +62,14 @@ export type DrawOp =
   | Polyline
   | Spline;
 
+export type TelemetryDisplayFormat = 'CLASSIC' | 'MONOSPACE' | 'HTML';
+
+/** A null caption is a bare line from `addLine()`, rendered without a caption. */
+export type TelemetryEntry = {
+  caption: string | null;
+  value: string;
+};
+
 export type TelemetryItem = {
   data: {
     [key: string]: string;
@@ -75,6 +83,14 @@ export type TelemetryItem = {
   };
   log: string[];
   timestamp: number;
+
+  // Absent on packets from older robots. `items` is the ordered display list; `data` the keyed view.
+  items?: TelemetryEntry[];
+  displayFormat?: TelemetryDisplayFormat;
+  captionValueSeparator?: string;
+  telemetryFrame?: boolean;
+  // Numbers a log resent whole in every packet, consecutively from the first entry to the last.
+  logRange?: [number, number] | null;
 };
 
 export type ReceiveTelemetryAction = {

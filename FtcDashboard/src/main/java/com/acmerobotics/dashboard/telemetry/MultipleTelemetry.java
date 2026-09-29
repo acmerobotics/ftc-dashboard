@@ -66,11 +66,20 @@ public class MultipleTelemetry implements Telemetry {
         return new MultipleItem(items);
     }
 
+    // A delegate knows only its own item, which a MultipleItem holds at that delegate's index.
     @Override
     public boolean removeItem(Item item) {
         boolean retVal = true;
-        for (Telemetry telemetry : telemetryList) {
-            boolean temp = telemetry.removeItem(item);
+        for (int i = 0; i < telemetryList.size(); i++) {
+            Item own = item;
+            if (item instanceof MultipleItem) {
+                List<Item> items = ((MultipleItem) item).items;
+                if (i >= items.size()) {
+                    break;
+                }
+                own = items.get(i);
+            }
+            boolean temp = telemetryList.get(i).removeItem(own);
             retVal = retVal && temp;
         }
         return retVal;
@@ -90,23 +99,15 @@ public class MultipleTelemetry implements Telemetry {
         }
     }
 
+    // One delegate only, or the action runs once per delegate per loop.
     @Override
     public Object addAction(Runnable runnable) {
-        for (Telemetry telemetry : telemetryList) {
-            telemetry.addAction(runnable);
-        }
-        // note: this behavior is correct given the current default Telemetry implementation
-        return runnable;
+        return telemetryList.get(0).addAction(runnable);
     }
 
     @Override
     public boolean removeAction(Object o) {
-        boolean retVal = true;
-        for (Telemetry telemetry : telemetryList) {
-            boolean temp = telemetry.removeAction(o);
-            retVal = retVal && temp;
-        }
-        return retVal;
+        return telemetryList.get(0).removeAction(o);
     }
 
     @Override
@@ -154,8 +155,16 @@ public class MultipleTelemetry implements Telemetry {
     @Override
     public boolean removeLine(Line line) {
         boolean retVal = true;
-        for (Telemetry telemetry : telemetryList) {
-            boolean temp = telemetry.removeLine(line);
+        for (int i = 0; i < telemetryList.size(); i++) {
+            Line own = line;
+            if (line instanceof MultipleLine) {
+                List<Line> lines = ((MultipleLine) line).lines;
+                if (i >= lines.size()) {
+                    break;
+                }
+                own = lines.get(i);
+            }
+            boolean temp = telemetryList.get(i).removeLine(own);
             retVal = retVal && temp;
         }
         return retVal;
@@ -206,6 +215,14 @@ public class MultipleTelemetry implements Telemetry {
     public void setCaptionValueSeparator(String s) {
         for (Telemetry telemetry : telemetryList) {
             telemetry.setCaptionValueSeparator(s);
+        }
+    }
+
+    // The interface default is a no-op that reaches neither delegate.
+    @Override
+    public void setNumDecimalPlaces(int minDecimalPlaces, int maxDecimalPlaces) {
+        for (Telemetry telemetry : telemetryList) {
+            telemetry.setNumDecimalPlaces(minDecimalPlaces, maxDecimalPlaces);
         }
     }
 
@@ -286,36 +303,41 @@ public class MultipleTelemetry implements Telemetry {
             return this.items.get(0).isRetained();
         }
 
+        // Return the item, not `this`, or a chained addData() inserts relative to the wrong one.
         @Override
         public Item addData(String s, String s1, Object... objects) {
+            List<Item> added = new ArrayList<>();
             for (Item item : items) {
-                item.addData(s, s1, objects);
+                added.add(item.addData(s, s1, objects));
             }
-            return this;
+            return new MultipleItem(added);
         }
 
         @Override
         public Item addData(String s, Object o) {
+            List<Item> added = new ArrayList<>();
             for (Item item : items) {
-                item.addData(s, o);
+                added.add(item.addData(s, o));
             }
-            return this;
+            return new MultipleItem(added);
         }
 
         @Override
         public <T> Item addData(String s, Func<T> func) {
+            List<Item> added = new ArrayList<>();
             for (Item item : items) {
-                item.addData(s, func);
+                added.add(item.addData(s, func));
             }
-            return this;
+            return new MultipleItem(added);
         }
 
         @Override
         public <T> Item addData(String s, String s1, Func<T> func) {
+            List<Item> added = new ArrayList<>();
             for (Item item : items) {
-                item.addData(s, s1, func);
+                added.add(item.addData(s, s1, func));
             }
-            return this;
+            return new MultipleItem(added);
         }
     }
 

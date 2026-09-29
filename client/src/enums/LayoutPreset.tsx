@@ -9,7 +9,7 @@ import CameraView from '@/components/views/CameraView';
 import GraphView from '@/components/views/GraphView/GraphView';
 import ConfigView from '@/components/views/ConfigView/ConfigView';
 import HardwareConfigView from '@/components/views/HardwareConfigView/HardwareConfigView';
-import TelemetryView from '@/components/views/TelemetryView';
+import TelemetryView from '@/components/views/TelemetryView/TelemetryView';
 import FieldView from '@/components/views/FieldView/FieldView';
 import HardwareView from '@/components/views/HardwareView';
 

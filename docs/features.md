@@ -16,6 +16,57 @@ packet.put("x", 3.7);
 packet.put("status", "alive");
 ```
 
+### Ordering
+
+Telemetry is displayed in the order it was added, matching the Driver Station.
+
+```java
+packet.put("x", 3.7);
+packet.addLine("--- drive ---");
+packet.put("status", "alive");
+```
+
+```
+x: 3.7
+--- drive ---
+status: alive
+```
+
+Unlike the SDK's `addData()`, `put()` overwrites a key already present, keeping its position.
+`addLogEntry()` appends to the packet's log, shown below all items; entries added with
+`telemetry.log().add(...)` persist across updates, nine at a time. The display is rebuilt from each
+transmission, so telemetry that stops being sent stops being shown.
+
+### Display format
+
+Packets render a subset of HTML.
+
+```java
+packet.setDisplayFormat(TelemetryPacket.DisplayFormat.HTML); // the default
+packet.put("status", "<font color='green'><b>alive</b></font>");
+```
+
+The `Telemetry` interface below defaults to `DisplayFormat.CLASSIC`, matching the Driver Station:
+markup is displayed verbatim, so `<b>` and `a < b` both show up as written. The setting carries
+over to later packets until the next op mode.
+
+```java
+telemetry.setDisplayFormat(Telemetry.DisplayFormat.HTML);
+```
+
+`DisplayFormat.MONOSPACE` keeps text verbatim in a monospace font. The format belongs to the packet
+rather than the view, so each line renders in the format its sender chose; the Telemetry View's
+menu overrides it for every line, and the override is not remembered across reloads.
+
+Supported tags, as on the Driver Station: `b`, `strong`, `i`, `em`, `cite`, `dfn`, `u`, `s`,
+`strike`, `del`, `sup`, `sub`, `big`, `small`, `tt`, `br`, `p`, `div`, `blockquote`, `ul`, `li`,
+`h1`-`h6`, `font` (`color` and `face`), `span` and `a`, whose text is styled as a link but never
+navigable. A `style` attribute is read on `p`, `span` and `li` (`color`, `background-color`,
+`text-decoration: line-through`) and for `text-align` on any block element. Color names resolve to
+the values Android uses, so `green` matches the Driver Station. Any other tag is dropped and its
+text kept, except tags that can run code or load resources, such as `script`, `iframe` and `img`,
+which are discarded with their content. Event handler attributes are always discarded.
+
 The accessor `fieldOverlay()` returns a `Canvas` that records a sequence of drawing operations that show up in the Field View.
 
 ```java
@@ -33,7 +84,7 @@ FtcDashboard dashboard = FtcDashboard.getInstance();
 dashboard.sendTelemetryPacket(packet);
 ```
 
-For convenience, the dashboard offers a restricted implementation of `Telemetry`.
+For convenience, the dashboard offers an implementation of `Telemetry`.
 
 ```java
 FtcDashboard dashboard = FtcDashboard.getInstance();
@@ -43,7 +94,12 @@ dashboardTelemetry.addData("x", 3.7);
 dashboardTelemetry.update();
 ```
 
-Each call to `update()` sends a packet with the data since the last call. Be careful: this indirection can mask the presence of multiple `sendTelemetryPacket()` calls in a single loop iteration.
+It follows the SDK's semantics: the `Item` returned by `addData()` stays addressable, `Func` values
+are re-evaluated on every update, retained items survive a `clear()`, `setAutoClear(false)`
+accumulates telemetry across updates, and `Double` and `Float` values are rounded when added, as
+the Driver Station rounds them (`setNumDecimalPlaces()` adjusts this). Only `speak()` does nothing.
+
+Each call to `update()` composes a packet from the telemetry currently set and sends it. Be careful: this indirection can mask the presence of multiple `sendTelemetryPacket()` calls in a single loop iteration.
 
 A common idiom combines DS and dashboard telemetry together.
 

@@ -82,3 +82,50 @@ input {
 select {
   background-position: right 0.15rem center;
 }
+
+/*
+ * Telemetry rendered in HTML mode leans on the browser's default styling for the tags the Driver
+ * Station's Html.fromHtml gives a span to. Tailwind's preflight strips all of that, so a heading
+ * would come out the same size as body text and a list would lose its bullets. These rules restore
+ * just what the Driver Station renders, scoped so nothing else in the app is affected.
+ */
+.telemetry-html :is(h1, h2, h3, h4, h5, h6) {
+  font-weight: bold;
+}
+.telemetry-html h1 {
+  font-size: 1.5em;
+}
+.telemetry-html h2 {
+  font-size: 1.3em;
+}
+.telemetry-html h3 {
+  font-size: 1.15em;
+}
+.telemetry-html :is(h4, h5, h6) {
+  font-size: 1em;
+}
+
+/* The Driver Station emits two newlines around a block element, i.e. one blank line. */
+.telemetry-html :is(p, div, blockquote, ul, h1, h2, h3, h4, h5, h6) {
+  margin-block: 1em;
+}
+
+.telemetry-html ul {
+  list-style: disc outside;
+  padding-inline-start: 1.5em;
+}
+.telemetry-html li {
+  display: list-item;
+}
+
+.telemetry-html blockquote {
+  padding-inline-start: 1em;
+}
+
+.telemetry-html .telemetry-link {
+  color: #2563eb;
+  text-decoration: underline;
+}
+.dark .telemetry-html .telemetry-link {
+  color: #60a5fa;
+}
