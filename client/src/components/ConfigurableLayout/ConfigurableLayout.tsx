@@ -402,22 +402,35 @@ export default function ConfigurableLayout() {
 
   useEffect(() => {
     const keyDownListener = (e: KeyboardEvent) => {
-      if (!isLayoutLocked) {
-        if (navigator.platform.indexOf('Mac') > -1) {
-          if (e.metaKey && e.key === 'z') {
-            if (e.shiftKey) {
-              redoGrid();
-            } else {
-              undoGrid();
-            }
-          } else {
-            if (e.ctrlKey && e.key === 'z') {
-              undoGrid();
-            } else if (e.ctrlKey && e.key === 'y') {
-              redoGrid();
-            }
-          }
+      if (isLayoutLocked) return;
+
+      const target = e.target;
+      if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement ||
+        (target instanceof HTMLElement && target.isContentEditable)
+      ) {
+        return;
+      }
+
+      const isMac = navigator.platform.indexOf('Mac') > -1;
+      if (!(isMac ? e.metaKey : e.ctrlKey)) return;
+
+      // Shift can make the key report 'Z'. Non-Latin layouts report their own
+      // letter, so those fall back to the physical key.
+      const key =
+        e.key.length === 1 && e.key.charCodeAt(0) > 127
+          ? e.code.replace('Key', '').toLowerCase()
+          : e.key.toLowerCase();
+      if (key === 'z') {
+        if (e.shiftKey) {
+          redoGrid();
+        } else {
+          undoGrid();
         }
+      } else if (key === 'y' && !isMac) {
+        redoGrid();
       }
     };
 
