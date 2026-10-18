@@ -229,7 +229,6 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     private ExecutorService gamepadWatchdogExecutor;
     private ExecutorService logcatMonitorExecutor;
     private LogcatMonitorRunnable logcatMonitorRunnable;
-
     private long lastGamepadTimestamp;
 
     private boolean webServerAttached;
