@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
+import android.os.SystemClock;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
@@ -250,21 +251,23 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         @Override
         public void run() {
             while (!Thread.currentThread().isInterrupted()) {
-                long timestamp = System.currentTimeMillis();
-                try {
-                    if (lastGamepadTimestamp == 0) {
-                        Thread.sleep(GAMEPAD_WATCHDOG_INTERVAL);
-                    } else if ((timestamp - lastGamepadTimestamp) > GAMEPAD_WATCHDOG_INTERVAL) {
+                long sleepMs =
                         activeOpMode.with(
                                 o -> {
-                                    o.opMode.gamepad1.copy(new Gamepad());
-                                    o.opMode.gamepad2.copy(new Gamepad());
+                                    if (lastGamepadTimestamp == 0) {
+                                        return (long) GAMEPAD_WATCHDOG_INTERVAL;
+                                    }
+                                    long sinceLast =
+                                            SystemClock.elapsedRealtime() - lastGamepadTimestamp;
+                                    if (sinceLast <= GAMEPAD_WATCHDOG_INTERVAL) {
+                                        return GAMEPAD_WATCHDOG_INTERVAL - sinceLast;
+                                    }
+                                    OpModeGamepads.rest(o.opMode);
+                                    lastGamepadTimestamp = 0;
+                                    return (long) GAMEPAD_WATCHDOG_INTERVAL;
                                 });
-                        lastGamepadTimestamp = 0;
-                    } else {
-                        Thread.sleep(
-                                GAMEPAD_WATCHDOG_INTERVAL - (timestamp - lastGamepadTimestamp));
-                    }
+                try {
+                    Thread.sleep(sleepMs);
                 } catch (InterruptedException e) {
                     break;
                 }
@@ -1828,6 +1831,10 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     public static void copyIntoSdkGamepad(ReceiveGamepadState.Gamepad src, Gamepad dst) {
+        dst.copy(toSdkGamepad(src));
+    }
+
+    private static Gamepad toSdkGamepad(ReceiveGamepadState.Gamepad src) {
         // We need to copy from an intermediate so the SDK can handle the rising/falling edge
         // detection
         // Also, doing it like this means the SDK handles equivalencies between
@@ -1862,7 +1869,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         intermediate.right_trigger = src.right_trigger;
 
         intermediate.touchpad = src.touchpad;
-        dst.copy(intermediate);
+        return intermediate;
     }
 
     private void updateGamepads(
@@ -1874,14 +1881,13 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                         return;
                     }
 
-                    if (o.opMode.gamepad1.getGamepadId() != Gamepad.ID_UNASSOCIATED
-                            || o.opMode.gamepad2.getGamepadId() != Gamepad.ID_UNASSOCIATED) {
+                    if (!OpModeGamepads.unassociated(o.opMode)) {
                         return;
                     }
 
-                    copyIntoSdkGamepad(gamepad1, o.opMode.gamepad1);
-                    copyIntoSdkGamepad(gamepad2, o.opMode.gamepad2);
-                    lastGamepadTimestamp = System.currentTimeMillis();
+                    OpModeGamepads.deliver(
+                            o.opMode, toSdkGamepad(gamepad1), toSdkGamepad(gamepad2));
+                    lastGamepadTimestamp = SystemClock.elapsedRealtime();
                 });
     }
 
@@ -1958,6 +1964,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 o -> {
                     o.opMode = opMode;
                     o.status = RobotStatus.OpModeStatus.STOPPED;
+                    OpModeGamepads.rest(opMode);
                 });
 
         // this callback is sometimes called from the UI thread
